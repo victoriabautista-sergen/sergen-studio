@@ -3,7 +3,7 @@ import ModuleLayout from "@/shared/components/ModuleLayout";
 import ModulePlaceholder from "@/shared/components/ModulePlaceholder";
 
 const ReportStudioPage = () => (
-  <ModuleLayout title="Report Studio">
+  <ModuleLayout title="Report Studio" icon={FileText}>
     <ModulePlaceholder
       name="Report Studio"
       description="Análisis de facturas de electricidad vs contratos, comparación de costos energéticos, análisis de demanda y generación de reportes PDF."

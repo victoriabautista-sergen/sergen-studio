@@ -1,4 +1,4 @@
-import { TrendingUp, FileText, Calculator, Activity, Bot } from "lucide-react";
+import { Zap, Receipt, Bot, Shield } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
 export interface ModuleDefinition {
@@ -8,47 +8,47 @@ export interface ModuleDefinition {
   icon: LucideIcon;
   basePath: string;
   color: string;
+  submodules?: string[];
 }
 
+/**
+ * Registry of the 4 main user-facing modules.
+ * Internally each may contain submodules for scalability.
+ */
 export const moduleRegistry: ModuleDefinition[] = [
   {
-    id: "energy-prediction",
-    name: "Predicción de Precios",
-    description: "Pronóstico de precios de energía e indicadores de riesgo",
-    icon: TrendingUp,
-    basePath: "/modules/energy-prediction",
+    id: "energy-intelligence",
+    name: "Energy Intelligence",
+    description: "Predicción de precios de energía y monitoreo de consumo en tiempo real",
+    icon: Zap,
+    basePath: "/modules/energy-intelligence",
     color: "bg-sergen-orange/10 text-primary",
+    submodules: ["prediction", "monitoring"],
   },
   {
-    id: "report-studio",
-    name: "Report Studio",
-    description: "Análisis de facturas y generación de reportes técnicos",
-    icon: FileText,
-    basePath: "/modules/report-studio",
+    id: "billing-optimization",
+    name: "Billing Optimization",
+    description: "Análisis de facturación, simulación de costos y reportes técnicos",
+    icon: Receipt,
+    basePath: "/modules/billing-optimization",
     color: "bg-sergen-info/10 text-sergen-info",
+    submodules: ["report_studio", "billing_simulation"],
   },
   {
-    id: "billing-simulation",
-    name: "Simulación de Facturación",
-    description: "Simula facturación eléctrica y asigna costos por línea",
-    icon: Calculator,
-    basePath: "/modules/billing-simulation",
-    color: "bg-sergen-success/10 text-sergen-success",
-  },
-  {
-    id: "energy-monitoring",
-    name: "Monitoreo Energético",
-    description: "Visualización de consumo energético en tiempo real",
-    icon: Activity,
-    basePath: "/modules/energy-monitoring",
-    color: "bg-sergen-warning/10 text-sergen-warning",
-  },
-  {
-    id: "induvex-ai",
-    name: "Induvex AI Assistant",
-    description: "Asistente de ingeniería con IA para plantas industriales",
+    id: "induvex",
+    name: "Induvex – Engineering Assistant",
+    description: "Asistente de IA para ingeniería industrial y soporte técnico de planta",
     icon: Bot,
-    basePath: "/modules/induvex-ai",
+    basePath: "/modules/induvex",
     color: "bg-purple-100 text-purple-600",
+  },
+  {
+    id: "admin-panel",
+    name: "SERGEN Admin Panel",
+    description: "Gestión de usuarios, clientes, roles y configuración de la plataforma",
+    icon: Shield,
+    basePath: "/modules/admin",
+    color: "bg-sergen-dark/10 text-sergen-dark",
+    submodules: ["clients", "users", "settings"],
   },
 ];
