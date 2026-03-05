@@ -9,7 +9,7 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import sergenLogo from "@/assets/sergen-logo.png";
 
-const Auth = () => {
+const AuthPage = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
@@ -167,4 +167,4 @@ const Auth = () => {
   );
 };
 
-export default Auth;
+export default AuthPage;

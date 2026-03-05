@@ -8,7 +8,7 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import sergenLogo from "@/assets/sergen-logo.png";
 
-const ResetPassword = () => {
+const ResetPasswordPage = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [password, setPassword] = useState("");
@@ -52,4 +52,4 @@ const ResetPassword = () => {
   );
 };
 
-export default ResetPassword;
+export default ResetPasswordPage;
