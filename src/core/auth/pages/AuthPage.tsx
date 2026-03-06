@@ -10,11 +10,6 @@ import sergenLogo from "@/assets/sergen-logo.png";
 import { SubscriptionPlansModal } from "@/components/subscription/SubscriptionPlansModal";
 import type { AppRole } from "@/core/auth/context/AuthContext";
 
-const redirectByRole = (role: AppRole): string => {
-  if (role === "super_admin" || role === "technical_user") return "/modules/admin";
-  if (role === "admin") return "/admin-empresa";
-  return "/dashboard";
-};
 
 const AuthPage = () => {
   const navigate = useNavigate();
@@ -108,7 +103,7 @@ const AuthPage = () => {
         }
       }
 
-      navigate(redirectByRole(role), { replace: true });
+      navigate("/dashboard", { replace: true });
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : "Error desconocido";
       toast({ title: "Error de inicio de sesión", description: message, variant: "destructive" });
