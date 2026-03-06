@@ -238,44 +238,6 @@ export type Database = {
         }
         Relationships: []
       }
-      subscriptions: {
-        Row: {
-          id: string
-          client_id: string
-          plan: string
-          status: string
-          start_date: string
-          end_date: string | null
-          created_at: string
-        }
-        Insert: {
-          id?: string
-          client_id: string
-          plan: string
-          status?: string
-          start_date: string
-          end_date?: string | null
-          created_at?: string
-        }
-        Update: {
-          id?: string
-          client_id?: string
-          plan?: string
-          status?: string
-          start_date?: string
-          end_date?: string | null
-          created_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "subscriptions_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "clients"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       plan_inquiries: {
         Row: {
           company_name: string
@@ -430,6 +392,44 @@ export type Database = {
           },
         ]
       }
+      subscriptions: {
+        Row: {
+          client_id: string
+          created_at: string
+          end_date: string | null
+          id: string
+          plan: string
+          start_date: string
+          status: string
+        }
+        Insert: {
+          client_id: string
+          created_at?: string
+          end_date?: string | null
+          id?: string
+          plan: string
+          start_date: string
+          status?: string
+        }
+        Update: {
+          client_id?: string
+          created_at?: string
+          end_date?: string | null
+          id?: string
+          plan?: string
+          start_date?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "subscriptions_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_modules: {
         Row: {
           created_at: string
@@ -485,6 +485,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_my_client_ids: { Args: never; Returns: string[] }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
