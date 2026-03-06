@@ -1,5 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   AlertDialog,
@@ -33,6 +32,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import ModuleLayout from "@/shared/components/ModuleLayout";
+import PrivateRoute from "@/core/auth/components/PrivateRoute";
 import { Inbox, Loader2, MoreHorizontal, Shield } from "lucide-react";
 
 type InquiryStatus = "pending" | "contacted" | "rejected";
@@ -86,50 +86,17 @@ const planBadgeClass = (plan: "basic" | "advanced") =>
 
 const planLabel = (plan: "basic" | "advanced") => (plan === "basic" ? "Básico" : "Avanzado");
 
-const AdminPanelPage = () => {
-  const navigate = useNavigate();
+const AdminPanelContent = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  const [checkingAccess, setCheckingAccess] = useState(true);
-  const [isSuperadmin, setIsSuperadmin] = useState(false);
   const [statusFilter, setStatusFilter] = useState<"all" | InquiryStatus>("all");
   const [rejectingInquiryId, setRejectingInquiryId] = useState<string | null>(null);
   const [notesInquiry, setNotesInquiry] = useState<PlanInquiry | null>(null);
   const [notesDraft, setNotesDraft] = useState("");
 
-  useEffect(() => {
-    const validateAccess = async () => {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-
-      if (!user) {
-        navigate("/dashboard", { replace: true });
-        return;
-      }
-
-      const { data: profile, error } = await supabase
-        .from("profiles")
-        .select("role")
-        .eq("id", user.id)
-        .maybeSingle();
-
-      if (error || profile?.role !== "superadmin") {
-        navigate("/dashboard", { replace: true });
-        return;
-      }
-
-      setIsSuperadmin(true);
-      setCheckingAccess(false);
-    };
-
-    validateAccess();
-  }, [navigate]);
-
   const { data: inquiries = [], isLoading: inquiriesLoading } = useQuery({
     queryKey: ["plan-inquiries"],
-    enabled: isSuperadmin,
     refetchInterval: 60_000,
     queryFn: async () => {
       const { data, error } = await supabase
@@ -138,7 +105,6 @@ const AdminPanelPage = () => {
         .order("created_at", { ascending: false });
 
       if (error) throw error;
-
       return (data ?? []) as PlanInquiry[];
     },
   });
@@ -186,16 +152,6 @@ const AdminPanelPage = () => {
     }),
     [inquiries],
   );
-
-  if (checkingAccess) {
-    return (
-      <ModuleLayout title="SERGEN Admin Panel" icon={Shield}>
-        <div className="flex min-h-[40vh] items-center justify-center">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
-        </div>
-      </ModuleLayout>
-    );
-  }
 
   return (
     <ModuleLayout title="SERGEN Admin Panel" icon={Shield}>
@@ -392,5 +348,11 @@ const AdminPanelPage = () => {
     </ModuleLayout>
   );
 };
+
+const AdminPanelPage = () => (
+  <PrivateRoute allowedRoles={["super_admin", "technical_user"]}>
+    <AdminPanelContent />
+  </PrivateRoute>
+);
 
 export default AdminPanelPage;

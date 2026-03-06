@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -8,9 +8,17 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import sergenLogo from "@/assets/sergen-logo.png";
 import { SubscriptionPlansModal } from "@/components/subscription/SubscriptionPlansModal";
+import type { AppRole } from "@/core/auth/context/AuthContext";
+
+const redirectByRole = (role: AppRole): string => {
+  if (role === "super_admin" || role === "technical_user") return "/modules/admin";
+  if (role === "admin") return "/admin-empresa";
+  return "/dashboard";
+};
 
 const AuthPage = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState("");
@@ -19,15 +27,91 @@ const AuthPage = () => {
   const [showRecovery, setShowRecovery] = useState(false);
   const [recoveryEmail, setRecoveryEmail] = useState("");
 
+  // Show feedback when redirected here with a reason
+  useEffect(() => {
+    const reason = searchParams.get("reason");
+    if (reason === "inactive") {
+      toast({
+        title: "Cuenta desactivada",
+        description: "Tu cuenta está desactivada. Contacta a tu administrador.",
+        variant: "destructive",
+      });
+    } else if (reason === "subscription") {
+      toast({
+        title: "Suscripción inactiva",
+        description: "Tu empresa no tiene una suscripción activa.",
+        variant: "destructive",
+      });
+    }
+  }, [searchParams, toast]);
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     try {
-      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
       if (error) throw error;
-      navigate("/dashboard");
-    } catch (error: any) {
-      toast({ title: "Error de inicio de sesión", description: error.message, variant: "destructive" });
+
+      const userId = data.user.id;
+
+      // Check profile is active
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("is_active")
+        .eq("user_id", userId)
+        .maybeSingle();
+
+      if (profile && !profile.is_active) {
+        await supabase.auth.signOut();
+        toast({
+          title: "Cuenta desactivada",
+          description: "Tu cuenta está desactivada. Contacta a tu administrador.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Get role — user_roles is the single source of truth
+      const { data: roleRow } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", userId)
+        .maybeSingle();
+
+      const role = (roleRow?.role ?? "client_user") as AppRole;
+
+      // Verify active subscription for company users
+      if (role === "admin" || role === "client_user") {
+        const { data: clientUser } = await supabase
+          .from("client_users")
+          .select("client_id")
+          .eq("user_id", userId)
+          .maybeSingle();
+
+        if (clientUser) {
+          const { data: subscription } = await supabase
+            .from("subscriptions")
+            .select("id")
+            .eq("client_id", clientUser.client_id)
+            .eq("status", "active")
+            .maybeSingle();
+
+          if (!subscription) {
+            await supabase.auth.signOut();
+            toast({
+              title: "Suscripción inactiva",
+              description: "Tu empresa no tiene una suscripción activa. Contacta a SERGEN.",
+              variant: "destructive",
+            });
+            return;
+          }
+        }
+      }
+
+      navigate(redirectByRole(role), { replace: true });
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : "Error desconocido";
+      toast({ title: "Error de inicio de sesión", description: message, variant: "destructive" });
     } finally {
       setLoading(false);
     }
@@ -43,8 +127,9 @@ const AuthPage = () => {
       if (error) throw error;
       toast({ title: "Correo enviado", description: "Revisa tu correo para restablecer tu contraseña." });
       setShowRecovery(false);
-    } catch (error: any) {
-      toast({ title: "Error", description: error.message, variant: "destructive" });
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : "Error desconocido";
+      toast({ title: "Error", description: message, variant: "destructive" });
     } finally {
       setLoading(false);
     }
