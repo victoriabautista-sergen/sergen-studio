@@ -1,11 +1,11 @@
 import { useState } from "react";
 import { Zap } from "lucide-react";
 import ModuleLayout from "@/shared/components/ModuleLayout";
-import { RiskManagement } from "../components/risk-management/RiskManagement";
-import { PowerCharts } from "../components/forecast/PowerCharts";
-import { HistoricalPowerMaximum } from "../components/historicalPower/HistoricalPowerMaximum";
+import { RiskManagement } from "../../components/risk-management/RiskManagement";
+import { PowerCharts } from "../../components/forecast/PowerCharts";
+import { HistoricalPowerMaximum } from "../../components/historicalPower/HistoricalPowerMaximum";
 
-const ControlDemandaPage = () => {
+const MonitoringPage = () => {
   const [date, setDate] = useState<Date | undefined>(new Date());
 
   return (
@@ -29,4 +29,4 @@ const ControlDemandaPage = () => {
   );
 };
 
-export default ControlDemandaPage;
+export default MonitoringPage;
