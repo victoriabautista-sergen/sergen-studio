@@ -1,8 +1,7 @@
-import { Zap } from "lucide-react";
+import { Zap, BarChart2, TrendingUp, Activity } from "lucide-react";
 import ModuleLayout from "@/shared/components/ModuleLayout";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { TrendingUp, Activity } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 const EnergyIntelligencePage = () => {
@@ -10,20 +9,20 @@ const EnergyIntelligencePage = () => {
 
   const submodules = [
     {
+      id: "monitoring",
+      name: "Control de Demanda",
+      description: "Panel completo de gestión de riesgo, calendario de modulación y potencia máxima histórica",
+      icon: BarChart2,
+      path: "/modules/energy-intelligence/monitoring",
+      color: "bg-sergen-warning/10 text-sergen-warning",
+    },
+    {
       id: "prediction",
-      name: "Predicción de Precios",
-      description: "Pronóstico de precios de energía, indicadores de riesgo y análisis de mercado con IA",
+      name: "Pronóstico COES",
+      description: "Pronóstico de demanda del sistema eléctrico peruano con datos de reprogramación y demanda real",
       icon: TrendingUp,
       path: "/modules/energy-intelligence/prediction",
       color: "bg-sergen-orange/10 text-primary",
-    },
-    {
-      id: "monitoring",
-      name: "Monitoreo Energético",
-      description: "Visualización de consumo en tiempo real, tendencias y alertas inteligentes",
-      icon: Activity,
-      path: "/modules/energy-intelligence/monitoring",
-      color: "bg-sergen-warning/10 text-sergen-warning",
     },
   ];
 
@@ -33,7 +32,7 @@ const EnergyIntelligencePage = () => {
         <div className="text-center mb-8">
           <h2 className="text-2xl font-heading font-bold">Energy Intelligence</h2>
           <p className="text-muted-foreground mt-2">
-            Herramientas de predicción y monitoreo para la gestión energética industrial
+            Herramientas de control de demanda, pronóstico y monitoreo para la gestión energética industrial
           </p>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
