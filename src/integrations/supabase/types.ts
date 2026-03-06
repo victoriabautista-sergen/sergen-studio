@@ -238,6 +238,45 @@ export type Database = {
         }
         Relationships: []
       }
+      plan_inquiries: {
+        Row: {
+          company_name: string
+          created_at: string
+          email: string
+          full_name: string
+          id: string
+          notes: string | null
+          phone: string | null
+          plan_selected: string
+          position: string | null
+          status: string
+        }
+        Insert: {
+          company_name: string
+          created_at?: string
+          email: string
+          full_name: string
+          id?: string
+          notes?: string | null
+          phone?: string | null
+          plan_selected: string
+          position?: string | null
+          status?: string
+        }
+        Update: {
+          company_name?: string
+          created_at?: string
+          email?: string
+          full_name?: string
+          id?: string
+          notes?: string | null
+          phone?: string | null
+          plan_selected?: string
+          position?: string | null
+          status?: string
+        }
+        Relationships: []
+      }
       predictions: {
         Row: {
           ai_explanation: string | null
@@ -283,6 +322,8 @@ export type Database = {
           email: string | null
           full_name: string | null
           id: string
+          is_active: boolean
+          role: string
           updated_at: string
           user_id: string
         }
@@ -292,6 +333,8 @@ export type Database = {
           email?: string | null
           full_name?: string | null
           id?: string
+          is_active?: boolean
+          role?: string
           updated_at?: string
           user_id: string
         }
@@ -301,6 +344,8 @@ export type Database = {
           email?: string | null
           full_name?: string | null
           id?: string
+          is_active?: boolean
+          role?: string
           updated_at?: string
           user_id?: string
         }
