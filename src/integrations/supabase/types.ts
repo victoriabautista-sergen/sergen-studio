@@ -111,6 +111,81 @@ export type Database = {
         }
         Relationships: []
       }
+      coes_forecast: {
+        Row: {
+          created_at: string | null
+          ejecutado: number | null
+          fecha: string
+          id: string
+          pronostico: number | null
+          rango_inferior: number | null
+          rango_superior: number | null
+          reprogramado: number | null
+        }
+        Insert: {
+          created_at?: string | null
+          ejecutado?: number | null
+          fecha: string
+          id?: string
+          pronostico?: number | null
+          rango_inferior?: number | null
+          rango_superior?: number | null
+          reprogramado?: number | null
+        }
+        Update: {
+          created_at?: string | null
+          ejecutado?: number | null
+          fecha?: string
+          id?: string
+          pronostico?: number | null
+          rango_inferior?: number | null
+          rango_superior?: number | null
+          reprogramado?: number | null
+        }
+        Relationships: []
+      }
+      coes_historical: {
+        Row: {
+          created_at: string | null
+          ejecutado: number
+          fecha: string
+          id: string
+        }
+        Insert: {
+          created_at?: string | null
+          ejecutado: number
+          fecha: string
+          id?: string
+        }
+        Update: {
+          created_at?: string | null
+          ejecutado?: number
+          fecha?: string
+          id?: string
+        }
+        Relationships: []
+      }
+      forecast_settings: {
+        Row: {
+          id: string
+          last_update: string | null
+          modulation_time: string | null
+          risk_level: string | null
+        }
+        Insert: {
+          id?: string
+          last_update?: string | null
+          modulation_time?: string | null
+          risk_level?: string | null
+        }
+        Update: {
+          id?: string
+          last_update?: string | null
+          modulation_time?: string | null
+          risk_level?: string | null
+        }
+        Relationships: []
+      }
       invoices: {
         Row: {
           client_id: string
@@ -207,6 +282,27 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      modulation_days: {
+        Row: {
+          created_at: string | null
+          date: string
+          id: string
+          is_modulated: boolean | null
+        }
+        Insert: {
+          created_at?: string | null
+          date: string
+          id?: string
+          is_modulated?: boolean | null
+        }
+        Update: {
+          created_at?: string | null
+          date?: string
+          id?: string
+          is_modulated?: boolean | null
+        }
+        Relationships: []
       }
       modules: {
         Row: {
