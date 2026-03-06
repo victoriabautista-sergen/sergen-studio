@@ -47,7 +47,7 @@ export const moduleRegistry: ModuleDefinition[] = [
     name: "SERGEN Admin Panel",
     description: "Gestión de usuarios, clientes, roles y configuración de la plataforma",
     icon: Shield,
-    basePath: "/modules/admin",
+    basePath: "/admin-panel",
     color: "bg-sergen-dark/10 text-sergen-dark",
     submodules: ["clients", "users", "settings"],
   },
