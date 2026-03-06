@@ -69,6 +69,7 @@ export default {
           success: "hsl(var(--sergen-success))",
           warning: "hsl(var(--sergen-warning))",
           info: "hsl(var(--sergen-info))",
+          premium: "hsl(var(--sergen-premium))",
         },
       },
       borderRadius: {
