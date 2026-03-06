@@ -13,10 +13,15 @@ const DashboardContent = () => {
   const { session, logout, role, enabledModuleSlugs } = useAuthContext();
 
   const visibleModules = useMemo(() => {
-    // Exclude the admin-panel card from the general dashboard
+    if (role === "super_admin" || role === "technical_user") {
+      // Show all modules including the admin panel
+      return moduleRegistry;
+    }
+
+    // Exclude admin-panel card for admin and client_user
     const appModules = moduleRegistry.filter((m) => m.id !== "admin-panel");
 
-    if (role === "super_admin" || role === "technical_user" || role === "admin") {
+    if (role === "admin") {
       return appModules;
     }
 
