@@ -57,7 +57,7 @@ const AuthPage = () => {
         <div
           className="h-full bg-cover bg-center bg-no-repeat"
           style={{
-            backgroundImage: 'url("/lovable-uploads/4e259b4d-ce76-41c2-8634-2c0f28d6505b.png")',
+            backgroundImage: 'url("/4e259b4d-ce76-41c2-8634-2c0f28d6505b.png")',
             backgroundSize: "cover",
           }}
         />
@@ -75,10 +75,7 @@ const AuthPage = () => {
               <h1 className="text-2xl font-bold text-center mb-2">Iniciar Sesión</h1>
               <div className="mb-6 text-center">
                 <span className="text-gray-600 text-sm">¿No tienes cuenta? </span>
-                <button
-                  onClick={() => setShowPlans(true)}
-                  className="text-primary hover:underline font-medium text-sm"
-                >
+                <button onClick={() => setShowPlans(true)} className="text-primary hover:underline font-medium text-sm">
                   Regístrate ahora
                 </button>
               </div>
@@ -143,12 +140,7 @@ const AuthPage = () => {
                 <Button type="submit" className="w-full" disabled={loading}>
                   {loading ? "Enviando..." : "Enviar instrucciones"}
                 </Button>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  className="w-full"
-                  onClick={() => setShowRecovery(false)}
-                >
+                <Button type="button" variant="ghost" className="w-full" onClick={() => setShowRecovery(false)}>
                   Volver al inicio de sesión
                 </Button>
               </form>
