@@ -16,9 +16,6 @@ const AuthPage = () => {
 
   const [loginEmail, setLoginEmail] = useState("");
   const [loginPassword, setLoginPassword] = useState("");
-  const [registerEmail, setRegisterEmail] = useState("");
-  const [registerPassword, setRegisterPassword] = useState("");
-  const [registerName, setRegisterName] = useState("");
   const [recoveryEmail, setRecoveryEmail] = useState("");
   const [showRecovery, setShowRecovery] = useState(false);
 
@@ -34,27 +31,6 @@ const AuthPage = () => {
       navigate("/dashboard");
     } catch (error: any) {
       toast({ title: "Error de inicio de sesión", description: error.message, variant: "destructive" });
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleRegister = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    try {
-      const { error } = await supabase.auth.signUp({
-        email: registerEmail,
-        password: registerPassword,
-        options: {
-          data: { full_name: registerName },
-          emailRedirectTo: window.location.origin,
-        },
-      });
-      if (error) throw error;
-      toast({ title: "Registro exitoso", description: "Revisa tu correo para confirmar tu cuenta." });
-    } catch (error: any) {
-      toast({ title: "Error de registro", description: error.message, variant: "destructive" });
     } finally {
       setLoading(false);
     }
@@ -116,9 +92,8 @@ const AuthPage = () => {
         <Card>
           <CardContent className="pt-6">
             <Tabs defaultValue="login">
-              <TabsList className="grid w-full grid-cols-2 mb-6">
+              <TabsList className="grid w-full grid-cols-1 mb-6">
                 <TabsTrigger value="login">Iniciar sesión</TabsTrigger>
-                <TabsTrigger value="register">Registrarse</TabsTrigger>
               </TabsList>
 
               <TabsContent value="login">
@@ -139,26 +114,7 @@ const AuthPage = () => {
                   </button>
                 </form>
               </TabsContent>
-
-              <TabsContent value="register">
-                <form onSubmit={handleRegister} className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="register-name">Nombre completo</Label>
-                    <Input id="register-name" placeholder="Juan Pérez" value={registerName} onChange={(e) => setRegisterName(e.target.value)} required />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="register-email">Correo electrónico</Label>
-                    <Input id="register-email" type="email" placeholder="correo@empresa.com" value={registerEmail} onChange={(e) => setRegisterEmail(e.target.value)} required />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="register-password">Contraseña</Label>
-                    <Input id="register-password" type="password" value={registerPassword} onChange={(e) => setRegisterPassword(e.target.value)} required minLength={6} />
-                  </div>
-                  <Button type="submit" className="w-full" variant="sergen" disabled={loading}>
-                    {loading ? "Registrando..." : "Crear cuenta"}
-                  </Button>
-                </form>
-              </TabsContent>
+              
             </Tabs>
           </CardContent>
         </Card>
