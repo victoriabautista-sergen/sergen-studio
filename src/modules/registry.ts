@@ -21,9 +21,9 @@ export const moduleRegistry: ModuleDefinition[] = [
     name: "Energy Intelligence",
     description: "Predicción de precios de energía y monitoreo de consumo en tiempo real",
     icon: Zap,
-    basePath: "/modules/energy-intelligence",
+    basePath: "/energy-intelligence/control",
     color: "bg-sergen-orange/10 text-primary",
-    submodules: ["prediction", "monitoring"],
+    submodules: ["control", "forecast", "historico", "reportes", "configuracion"],
   },
   {
     id: "billing-optimization",
