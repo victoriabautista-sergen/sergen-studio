@@ -111,6 +111,81 @@ export type Database = {
         }
         Relationships: []
       }
+      coes_forecast: {
+        Row: {
+          created_at: string | null
+          ejecutado: number | null
+          fecha: string
+          id: string
+          pronostico: number | null
+          rango_inferior: number | null
+          rango_superior: number | null
+          reprogramado: number | null
+        }
+        Insert: {
+          created_at?: string | null
+          ejecutado?: number | null
+          fecha: string
+          id?: string
+          pronostico?: number | null
+          rango_inferior?: number | null
+          rango_superior?: number | null
+          reprogramado?: number | null
+        }
+        Update: {
+          created_at?: string | null
+          ejecutado?: number | null
+          fecha?: string
+          id?: string
+          pronostico?: number | null
+          rango_inferior?: number | null
+          rango_superior?: number | null
+          reprogramado?: number | null
+        }
+        Relationships: []
+      }
+      coes_historical: {
+        Row: {
+          created_at: string | null
+          ejecutado: number
+          fecha: string
+          id: string
+        }
+        Insert: {
+          created_at?: string | null
+          ejecutado: number
+          fecha: string
+          id?: string
+        }
+        Update: {
+          created_at?: string | null
+          ejecutado?: number
+          fecha?: string
+          id?: string
+        }
+        Relationships: []
+      }
+      forecast_settings: {
+        Row: {
+          id: string
+          last_update: string | null
+          modulation_time: string | null
+          risk_level: string | null
+        }
+        Insert: {
+          id?: string
+          last_update?: string | null
+          modulation_time?: string | null
+          risk_level?: string | null
+        }
+        Update: {
+          id?: string
+          last_update?: string | null
+          modulation_time?: string | null
+          risk_level?: string | null
+        }
+        Relationships: []
+      }
       invoices: {
         Row: {
           client_id: string
@@ -208,6 +283,27 @@ export type Database = {
           },
         ]
       }
+      modulation_days: {
+        Row: {
+          created_at: string | null
+          date: string
+          id: string
+          is_modulated: boolean | null
+        }
+        Insert: {
+          created_at?: string | null
+          date: string
+          id?: string
+          is_modulated?: boolean | null
+        }
+        Update: {
+          created_at?: string | null
+          date?: string
+          id?: string
+          is_modulated?: boolean | null
+        }
+        Relationships: []
+      }
       modules: {
         Row: {
           created_at: string
@@ -237,44 +333,6 @@ export type Database = {
           slug?: string
         }
         Relationships: []
-      }
-      subscriptions: {
-        Row: {
-          id: string
-          client_id: string
-          plan: string
-          status: string
-          start_date: string
-          end_date: string | null
-          created_at: string
-        }
-        Insert: {
-          id?: string
-          client_id: string
-          plan: string
-          status?: string
-          start_date: string
-          end_date?: string | null
-          created_at?: string
-        }
-        Update: {
-          id?: string
-          client_id?: string
-          plan?: string
-          status?: string
-          start_date?: string
-          end_date?: string | null
-          created_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "subscriptions_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "clients"
-            referencedColumns: ["id"]
-          },
-        ]
       }
       plan_inquiries: {
         Row: {
@@ -430,6 +488,44 @@ export type Database = {
           },
         ]
       }
+      subscriptions: {
+        Row: {
+          client_id: string
+          created_at: string
+          end_date: string | null
+          id: string
+          plan: string
+          start_date: string
+          status: string
+        }
+        Insert: {
+          client_id: string
+          created_at?: string
+          end_date?: string | null
+          id?: string
+          plan: string
+          start_date: string
+          status?: string
+        }
+        Update: {
+          client_id?: string
+          created_at?: string
+          end_date?: string | null
+          id?: string
+          plan?: string
+          start_date?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "subscriptions_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_modules: {
         Row: {
           created_at: string
@@ -485,6 +581,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_my_client_ids: { Args: never; Returns: string[] }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]

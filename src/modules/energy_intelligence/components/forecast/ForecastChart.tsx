@@ -1,5 +1,5 @@
 import { LineChart, Line, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer, ReferenceArea } from 'recharts';
-import type { CoesData } from '../../types';
+import { CoesData } from '../../types/forecast';
 
 interface ForecastChartProps {
   data: CoesData[];
