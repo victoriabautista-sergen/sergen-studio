@@ -16,12 +16,12 @@ export const useForecastData = () => {
       const startDate = startOfDay(twoDaysAgo).toISOString();
       const endDate = endOfDay(today).toISOString();
 
-      const { data: forecastData, error } = await supabase
-        .from('coes_forecast')
-        .select('fecha, reprogramado, pronostico, rango_inferior, rango_superior, ejecutado')
-        .gte('fecha', startDate)
-        .lte('fecha', endDate)
-        .order('fecha', { ascending: true });
+      const { data: rows, error } = await supabase
+        .from('coes_demand_data')
+        .select('date, executed_power, daily_forecast, weekly_forecast')
+        .gte('date', startDate)
+        .lte('date', endDate)
+        .order('date', { ascending: true });
 
       if (error) {
         console.error('Error al obtener datos:', error);
@@ -29,12 +29,12 @@ export const useForecastData = () => {
         throw error;
       }
 
-      if (!forecastData || forecastData.length === 0) {
+      if (!rows || rows.length === 0) {
         setData([]);
         return;
       }
 
-      setData(forecastData as unknown as CoesData[]);
+      setData(rows as unknown as CoesData[]);
     } catch (error) {
       console.error('Error fetching forecast data:', error);
     } finally {

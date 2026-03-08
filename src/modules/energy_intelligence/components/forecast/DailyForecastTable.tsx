@@ -14,22 +14,18 @@ export const DailyForecastTable = ({ data }: DailyForecastTableProps) => {
         <TableHeader>
           <TableRow>
             <TableHead>Hora (UTC)</TableHead>
-            <TableHead>Reprogramado (MW)</TableHead>
-            <TableHead>Pronóstico (MW)</TableHead>
-            <TableHead>Límite Inferior (MW)</TableHead>
-            <TableHead>Límite Superior (MW)</TableHead>
-            <TableHead>Ejecutado (MW)</TableHead>
+            <TableHead>Prog. Diaria (MW)</TableHead>
+            <TableHead>Prog. Semanal (MW)</TableHead>
+            <TableHead>Demanda Real (MW)</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {data.map((row, index) => (
             <TableRow key={index}>
-              <TableCell>{formatTime(row.fecha)}</TableCell>
-              <TableCell>{row.reprogramado ?? '-'}</TableCell>
-              <TableCell>{row.pronostico ?? '-'}</TableCell>
-              <TableCell>{row.rango_inferior ?? '-'}</TableCell>
-              <TableCell>{row.rango_superior ?? '-'}</TableCell>
-              <TableCell>{row.ejecutado ?? '-'}</TableCell>
+              <TableCell>{formatTime(row.date)}</TableCell>
+              <TableCell>{row.daily_forecast ?? '-'}</TableCell>
+              <TableCell>{row.weekly_forecast ?? '-'}</TableCell>
+              <TableCell>{row.executed_power ?? '-'}</TableCell>
             </TableRow>
           ))}
         </TableBody>
