@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { startOfDay, endOfDay, subDays } from 'date-fns';
-import type { CoesData } from '../types/forecast';
+import type { CoesData } from '../types';
 
 export const useForecastData = () => {
   const [loading, setLoading] = useState(false);
@@ -16,12 +16,12 @@ export const useForecastData = () => {
       const startDate = startOfDay(twoDaysAgo).toISOString();
       const endDate = endOfDay(today).toISOString();
 
-      const { data: rows, error } = await supabase
-        .from('coes_demand_data')
-        .select('date, executed_power, daily_forecast, weekly_forecast')
-        .gte('date', startDate)
-        .lte('date', endDate)
-        .order('date', { ascending: true });
+      const { data: forecastData, error } = await supabase
+        .from('coes_forecast')
+        .select('fecha, reprogramado, pronostico, rango_inferior, rango_superior, ejecutado')
+        .gte('fecha', startDate)
+        .lte('fecha', endDate)
+        .order('fecha', { ascending: true });
 
       if (error) {
         console.error('Error al obtener datos:', error);
@@ -29,7 +29,7 @@ export const useForecastData = () => {
         throw error;
       }
 
-      setData((rows as unknown as CoesData[]) || []);
+      setData(forecastData || []);
     } catch (error) {
       console.error('Error fetching forecast data:', error);
     } finally {

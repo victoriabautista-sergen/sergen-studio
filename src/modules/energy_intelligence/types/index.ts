@@ -1,8 +1,10 @@
 export interface CoesData {
-  date: string;
-  executed_power: number | null;
-  daily_forecast: number | null;
-  weekly_forecast: number | null;
+  fecha: string;
+  reprogramado: number | null;
+  pronostico: number | null;
+  rango_inferior: number | null;
+  rango_superior: number | null;
+  ejecutado: number | null;
 }
 
 export interface EnergyData {

@@ -10,7 +10,7 @@ export const ForecastDisplay = ({ data, isLoading }: ForecastDisplayProps) => {
   if (isLoading) {
     return (
       <div className="flex justify-center items-center h-64">
-        <p className="text-muted-foreground">Cargando datos...</p>
+        <p className="text-gray-500">Cargando datos...</p>
       </div>
     );
   }
@@ -18,7 +18,7 @@ export const ForecastDisplay = ({ data, isLoading }: ForecastDisplayProps) => {
   if (data.length === 0) {
     return (
       <div className="flex justify-center items-center h-64">
-        <p className="text-muted-foreground">No hay datos disponibles para los últimos días</p>
+        <p className="text-gray-500">No hay datos disponibles para los últimos días</p>
       </div>
     );
   }

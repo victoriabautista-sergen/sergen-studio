@@ -1,1 +1,0 @@
-ALTER TABLE public.coes_forecast ADD CONSTRAINT coes_forecast_fecha_unique UNIQUE (fecha);

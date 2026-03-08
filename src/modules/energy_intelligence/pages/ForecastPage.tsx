@@ -25,11 +25,11 @@ const ForecastPage = () => {
       const endOfToday = endOfDay(today).toISOString();
 
       const { data: forecastData, error } = await supabase
-        .from('coes_demand_data')
-        .select('date, executed_power, daily_forecast, weekly_forecast')
-        .gte('date', startOfToday)
-        .lte('date', endOfToday)
-        .order('date', { ascending: true });
+        .from('coes_forecast')
+        .select('fecha, reprogramado, pronostico, rango_inferior, rango_superior, ejecutado')
+        .gte('fecha', startOfToday)
+        .lte('fecha', endOfToday)
+        .order('fecha', { ascending: true });
 
       if (error) throw error;
 
@@ -39,7 +39,7 @@ const ForecastPage = () => {
         return;
       }
 
-      setData(forecastData as unknown as CoesData[]);
+      setData(forecastData);
     } catch (error) {
       console.error('Error fetching forecast data:', error);
       toast.error('Error al cargar los datos del pronóstico');
@@ -51,14 +51,14 @@ const ForecastPage = () => {
   const refreshData = async () => {
     try {
       setLoading(true);
-      const response = await supabase.functions.invoke('get-coes-data');
+      const response = await supabase.functions.invoke('get-coes-forecast');
 
-      if (response.error) {
+      if (!response.data?.success) {
         throw new Error('Error actualizando datos del COES');
       }
 
       await fetchData();
-      toast.success('Datos actualizados correctamente');
+      toast.success(`Datos actualizados correctamente (${response.data.count} registros)`);
     } catch (error) {
       console.error('Error refreshing data:', error);
       toast.error('Error al actualizar los datos');
@@ -96,16 +96,16 @@ const ForecastPage = () => {
           <div className="grid grid-cols-1 gap-6">
             {data.length > 0 ? (
               <>
-                <div className="bg-card p-4 rounded-lg shadow h-[500px]">
+                <div className="bg-white p-4 rounded-lg shadow h-[500px]">
                   <ForecastChart data={data} />
                 </div>
-                <div className="bg-card p-4 rounded-lg shadow overflow-x-auto">
+                <div className="bg-white p-4 rounded-lg shadow overflow-x-auto">
                   <ForecastTable data={data} />
                 </div>
               </>
             ) : (
               <div className="text-center py-8">
-                <p className="text-muted-foreground">
+                <p className="text-gray-500">
                   No hay datos disponibles para hoy. Haz clic en "Actualizar" para cargar los datos.
                 </p>
               </div>

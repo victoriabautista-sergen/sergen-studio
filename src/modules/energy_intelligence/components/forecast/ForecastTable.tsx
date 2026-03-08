@@ -8,35 +8,59 @@ interface ForecastTableProps {
 export const ForecastTable = ({ data }: ForecastTableProps) => {
   const formatNumber = (value: number | null | undefined): string => {
     if (value === null || value === undefined || value === 0) return '-';
-    return `${value}`;
+    return value.toLocaleString();
   };
 
   const formatDate = (isoString: string): string => {
-    const d = new Date(isoString);
-    const dia = d.getUTCDate().toString().padStart(2, '0');
-    const mes = (d.getUTCMonth() + 1).toString().padStart(2, '0');
-    return `${dia}/${mes}/${d.getUTCFullYear()} ${d.getUTCHours().toString().padStart(2, '0')}:${d.getUTCMinutes().toString().padStart(2, '0')}`;
+    const fecha = new Date(isoString);
+    const dia = fecha.getUTCDate().toString().padStart(2, '0');
+    const mes = (fecha.getUTCMonth() + 1).toString().padStart(2, '0');
+    const año = fecha.getUTCFullYear();
+    const hora = fecha.getUTCHours().toString().padStart(2, '0');
+    const minutos = fecha.getUTCMinutes().toString().padStart(2, '0');
+    return `${dia}/${mes}/${año} ${hora}:${minutos} (UTC)`;
   };
 
-  const sortedData = [...data].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+  const isNullOrZero = (v: any) => v === null || v === undefined || v === 0;
+
+  const sortedData = [...data].sort(
+    (a, b) => new Date(a.fecha).getTime() - new Date(b.fecha).getTime()
+  );
+
+  let lastRealDemandIndex = -1;
+  for (let i = 0; i < sortedData.length; i++) {
+    if (!isNullOrZero(sortedData[i].ejecutado)) lastRealDemandIndex = i;
+  }
+
+  const processed = sortedData.map((item, index) => ({
+    ...item,
+    pronostico: index > lastRealDemandIndex && !isNullOrZero(item.pronostico) ? item.pronostico : null,
+    rango_inferior: index > lastRealDemandIndex && !isNullOrZero(item.rango_inferior) ? item.rango_inferior : null,
+    rango_superior: index > lastRealDemandIndex && !isNullOrZero(item.rango_superior) ? item.rango_superior : null,
+    ejecutado: isNullOrZero(item.ejecutado) ? null : item.ejecutado,
+  }));
 
   return (
     <Table>
       <TableHeader>
         <TableRow>
-          <TableHead>Fecha</TableHead>
-          <TableHead>Prog. Diaria (MW)</TableHead>
-          <TableHead>Prog. Semanal (MW)</TableHead>
+          <TableHead>Fecha (UTC)</TableHead>
+          <TableHead>Reprogramación (MW)</TableHead>
+          <TableHead>Pronóstico Diario (MW)</TableHead>
+          <TableHead>Rango Inferior (MW)</TableHead>
+          <TableHead>Rango Superior (MW)</TableHead>
           <TableHead>Demanda Real (MW)</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
-        {sortedData.map((item, index) => (
+        {processed.map((item, index) => (
           <TableRow key={index}>
-            <TableCell>{formatDate(item.date)}</TableCell>
-            <TableCell>{formatNumber(item.daily_forecast)}</TableCell>
-            <TableCell>{formatNumber(item.weekly_forecast)}</TableCell>
-            <TableCell>{formatNumber(item.executed_power)}</TableCell>
+            <TableCell>{formatDate(item.fecha)}</TableCell>
+            <TableCell>{formatNumber(item.reprogramado)}</TableCell>
+            <TableCell>{formatNumber(item.pronostico)}</TableCell>
+            <TableCell>{formatNumber(item.rango_inferior)}</TableCell>
+            <TableCell>{formatNumber(item.rango_superior)}</TableCell>
+            <TableCell>{formatNumber(item.ejecutado)}</TableCell>
           </TableRow>
         ))}
       </TableBody>

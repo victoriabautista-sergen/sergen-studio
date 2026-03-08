@@ -1,5 +1,5 @@
 
-import { read, utils } from 'https://cdn.sheetjs.com/xlsx-0.20.3/package/xlsx.mjs';
+import * as XLSX from 'npm:xlsx@0.18.5'
 import { parseExcelDate } from './dateUtils.ts'
 import { parseNumber } from './numberUtils.ts'
 
@@ -44,7 +44,7 @@ function findColumnIndexes(headerRow: any[]): ColumnIndexes {
 }
 
 export async function processExcelData(arrayBuffer: ArrayBuffer): Promise<ProcessedData[]> {
-  const workbook = read(new Uint8Array(arrayBuffer), { 
+  const workbook = XLSX.read(new Uint8Array(arrayBuffer), { 
     type: 'array',
     cellDates: true,
     dateNF: 'yyyy-mm-dd HH:mm:ss'
@@ -52,7 +52,7 @@ export async function processExcelData(arrayBuffer: ArrayBuffer): Promise<Proces
   
   const worksheet = workbook.Sheets[workbook.SheetNames[0]];
   
-  const rawData = utils.sheet_to_json(worksheet, { 
+  const rawData = XLSX.utils.sheet_to_json(worksheet, { 
     header: 1,
     raw: true,
     dateNF: 'yyyy-mm-dd HH:mm:ss'
