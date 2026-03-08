@@ -13,19 +13,18 @@ export const useMaxPower = (date: Date | undefined) => {
         const formattedDate = format(date, 'yyyy-MM-dd');
 
         const { data, error } = await supabase
-          .from('coes_forecast')
-          .select('fecha, reprogramado')
-          .filter('fecha', 'gte', `${formattedDate}T18:00:00`)
-          .filter('fecha', 'lt', `${formattedDate}T24:00:00`);
+          .from('coes_demand_data')
+          .select('date, executed_power, daily_forecast')
+          .filter('date', 'gte', `${formattedDate}T18:00:00`)
+          .filter('date', 'lt', `${formattedDate}T24:00:00`);
 
         if (error) return;
 
         if (data && data.length > 0) {
           let maxValue = 0;
-          data.forEach(record => {
-            if (record.reprogramado && record.reprogramado > maxValue) {
-              maxValue = record.reprogramado;
-            }
+          (data as any[]).forEach(record => {
+            const val = record.executed_power ?? record.daily_forecast ?? 0;
+            if (val > maxValue) maxValue = val;
           });
           if (maxValue > 0) setMaxPower(Number(maxValue.toFixed(2)));
         }
