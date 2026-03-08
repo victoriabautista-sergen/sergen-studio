@@ -29,7 +29,7 @@ export const DailyForecastChart = ({ data }: DailyForecastChartProps) => {
           <Legend />
           <Line type="monotone" dataKey="daily_forecast" name="Prog. Diaria" stroke="#F97316" strokeWidth={2} dot={false} isAnimationActive={false} connectNulls />
           <Line type="monotone" dataKey="weekly_forecast" name="Prog. Semanal" stroke="#90C418" strokeWidth={2} dot={false} isAnimationActive={false} connectNulls />
-          <Line type="monotone" dataKey="executed_power" name="Demanda Real" stroke="#0036A2" strokeWidth={2.5} dot={false} activeDot={{ r: 5 }} isAnimationActive={false} connectNulls />
+          <Line type="monotone" dataKey="executed_power" name="Demanda Real" stroke="#0036A2" strokeWidth={2.5} dot={false} activeDot={{ r: 5 }} isAnimationActive={false} connectNulls={false} />
         </LineChart>
       </ResponsiveContainer>
     </div>

@@ -52,7 +52,7 @@ export const ForecastChart = ({ data }: ForecastChartProps) => {
         )}
         <Line type="monotone" dataKey="Prog. Diaria" stroke="#f39200" strokeWidth={2} dot={false} connectNulls />
         <Line type="monotone" dataKey="Prog. Semanal" stroke="#90C418" strokeWidth={2} dot={false} connectNulls />
-        <Line type="monotone" dataKey="Demanda Real" stroke="#156082" strokeWidth={2} dot={false} connectNulls />
+        <Line type="monotone" dataKey="Demanda Real" stroke="#156082" strokeWidth={2} dot={false} connectNulls={false} />
       </LineChart>
     </ResponsiveContainer>
   );
