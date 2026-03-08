@@ -1,28 +1,12 @@
 import { LineChart, Line, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer, ReferenceArea } from 'recharts';
 import { CoesData } from '../../types/forecast';
+import { formatTimePeru, formatFullDatePeru, getPeruHour } from '../../utils/timezoneUtils';
 
 interface ForecastChartProps {
   data: CoesData[];
 }
 
 export const ForecastChart = ({ data }: ForecastChartProps) => {
-  const formatTime = (isoString: string): string => {
-    const fecha = new Date(isoString);
-    const hora = fecha.getUTCHours().toString().padStart(2, '0');
-    const minutos = fecha.getUTCMinutes().toString().padStart(2, '0');
-    return `${hora}:${minutos}`;
-  };
-
-  const formatFullDate = (isoString: string): string => {
-    const fecha = new Date(isoString);
-    const dia = fecha.getUTCDate().toString().padStart(2, '0');
-    const mes = (fecha.getUTCMonth() + 1).toString().padStart(2, '0');
-    const año = fecha.getUTCFullYear();
-    const hora = fecha.getUTCHours().toString().padStart(2, '0');
-    const minutos = fecha.getUTCMinutes().toString().padStart(2, '0');
-    return `${dia}/${mes}/${año} ${hora}:${minutos} (UTC)`;
-  };
-
   const isNullOrZero = (value: any): boolean =>
     value === null || value === undefined || value === 0;
 
@@ -30,17 +14,14 @@ export const ForecastChart = ({ data }: ForecastChartProps) => {
     (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
   );
 
-  const chartData = sortedData.map((item) => {
-    const hora = new Date(item.date).getUTCHours();
-    return {
-      time: formatTime(item.date),
-      'Prog. Diaria': isNullOrZero(item.daily_forecast) ? null : item.daily_forecast,
-      'Prog. Semanal': isNullOrZero(item.weekly_forecast) ? null : item.weekly_forecast,
-      'Demanda Real': isNullOrZero(item.executed_power) ? null : item.executed_power,
-      hora,
-      fecha_completa: formatFullDate(item.date),
-    };
-  });
+  const chartData = sortedData.map((item) => ({
+    time: formatTimePeru(item.date),
+    'Prog. Diaria': isNullOrZero(item.daily_forecast) ? null : item.daily_forecast,
+    'Prog. Semanal': isNullOrZero(item.weekly_forecast) ? null : item.weekly_forecast,
+    'Demanda Real': isNullOrZero(item.executed_power) ? null : item.executed_power,
+    hora: getPeruHour(item.date),
+    fecha_completa: formatFullDatePeru(item.date),
+  }));
 
   return (
     <ResponsiveContainer width="100%" height={450}>
