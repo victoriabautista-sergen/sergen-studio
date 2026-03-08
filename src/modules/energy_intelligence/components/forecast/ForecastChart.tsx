@@ -27,26 +27,18 @@ export const ForecastChart = ({ data }: ForecastChartProps) => {
     value === null || value === undefined || value === 0;
 
   const sortedData = [...data].sort(
-    (a, b) => new Date(a.fecha).getTime() - new Date(b.fecha).getTime()
+    (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
   );
 
-  let lastRealDemandIndex = -1;
-  for (let i = 0; i < sortedData.length; i++) {
-    if (!isNullOrZero(sortedData[i].ejecutado)) lastRealDemandIndex = i;
-  }
-
-  const chartData = sortedData.map((item, index) => {
-    const hora = new Date(item.fecha).getUTCHours();
-    const showForecast = index > lastRealDemandIndex;
+  const chartData = sortedData.map((item) => {
+    const hora = new Date(item.date).getUTCHours();
     return {
-      time: formatTime(item.fecha),
-      Reprogramación: isNullOrZero(item.reprogramado) ? null : item.reprogramado,
-      'Pronóstico Diario': showForecast && !isNullOrZero(item.pronostico) ? item.pronostico : null,
-      'Rango Inferior': showForecast && !isNullOrZero(item.rango_inferior) ? item.rango_inferior : null,
-      'Rango Superior': showForecast && !isNullOrZero(item.rango_superior) ? item.rango_superior : null,
-      'Demanda Real': isNullOrZero(item.ejecutado) ? null : item.ejecutado,
+      time: formatTime(item.date),
+      'Prog. Diaria': isNullOrZero(item.daily_forecast) ? null : item.daily_forecast,
+      'Prog. Semanal': isNullOrZero(item.weekly_forecast) ? null : item.weekly_forecast,
+      'Demanda Real': isNullOrZero(item.executed_power) ? null : item.executed_power,
       hora,
-      fecha_completa: formatFullDate(item.fecha),
+      fecha_completa: formatFullDate(item.date),
     };
   });
 
@@ -54,7 +46,7 @@ export const ForecastChart = ({ data }: ForecastChartProps) => {
     <ResponsiveContainer width="100%" height={450}>
       <LineChart data={chartData} margin={{ top: 5, right: 30, left: 50, bottom: 35 }}>
         <XAxis dataKey="time" interval={2} angle={-45} textAnchor="end" height={60} />
-        <YAxis domain={[5500, 8500]} tickFormatter={v => v.toLocaleString()} />
+        <YAxis domain={['auto', 'auto']} tickFormatter={v => v.toLocaleString()} />
         <Tooltip
           formatter={(value: any, name: string) =>
             value ? [`${value.toLocaleString()} MW`, name] : ['No disponible', name]
@@ -75,10 +67,8 @@ export const ForecastChart = ({ data }: ForecastChartProps) => {
             />
           ) : null
         )}
-        <Line type="monotone" dataKey="Reprogramación" stroke="#C00000" strokeWidth={2} dot={false} connectNulls />
-        <Line type="monotone" dataKey="Pronóstico Diario" stroke="#f39200" strokeWidth={2} dot={false} connectNulls />
-        <Line type="monotone" dataKey="Rango Inferior" stroke="#90C418" strokeWidth={1} strokeDasharray="5 5" dot={false} connectNulls />
-        <Line type="monotone" dataKey="Rango Superior" stroke="#90C418" strokeWidth={1} strokeDasharray="5 5" dot={false} connectNulls />
+        <Line type="monotone" dataKey="Prog. Diaria" stroke="#f39200" strokeWidth={2} dot={false} connectNulls />
+        <Line type="monotone" dataKey="Prog. Semanal" stroke="#90C418" strokeWidth={2} dot={false} connectNulls />
         <Line type="monotone" dataKey="Demanda Real" stroke="#156082" strokeWidth={2} dot={false} connectNulls />
       </LineChart>
     </ResponsiveContainer>
