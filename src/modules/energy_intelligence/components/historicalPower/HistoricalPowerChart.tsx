@@ -1,22 +1,17 @@
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
-import { ChartData } from './types';
+import { ChartData } from './useHistoricalPowerData';
 
 interface HistoricalPowerChartProps {
   chartData: ChartData[];
 }
 
 export const HistoricalPowerChart = ({ chartData }: HistoricalPowerChartProps) => {
-  const formatTooltip = (value: number) => {
-    return [`${value.toFixed(2)} MW`, 'Potencia Máxima'];
-  };
+  const formatTooltip = (value: number) => [`${value.toFixed(2)} MW`, 'Potencia Máxima'];
 
   const formatTooltipLabel = (_label: string, payload: any[]) => {
     if (payload && payload.length > 0) {
       const data = payload[0].payload as ChartData;
-      const fullDate = new Date(data.fullDate);
-      const hours = fullDate.getUTCHours().toString().padStart(2, '0');
-      const minutes = fullDate.getUTCMinutes().toString().padStart(2, '0');
-      return `Fecha: ${_label} | Hora: ${hours}:${minutes}`;
+      return `Fecha: ${data.fullDate}`;
     }
     return `Fecha: ${_label}`;
   };
@@ -40,7 +35,9 @@ export const HistoricalPowerChart = ({ chartData }: HistoricalPowerChartProps) =
           fontSize={10}
           tickMargin={10}
         />
-        <YAxis domain={[4000, 'auto']} />
+        <YAxis
+          tickFormatter={(v: number) => `${v} MW`}
+        />
         <Tooltip formatter={formatTooltip} labelFormatter={formatTooltipLabel} />
         <Bar dataKey="value" name="Potencia Máxima">
           {chartData.map((entry, index) => (
