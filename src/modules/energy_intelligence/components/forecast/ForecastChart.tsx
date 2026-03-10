@@ -1,3 +1,4 @@
+import React, { forwardRef } from 'react';
 import { LineChart, Line, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer, ReferenceArea } from 'recharts';
 import { CoesData } from '../../types/forecast';
 
@@ -5,7 +6,7 @@ interface ForecastChartProps {
   data: CoesData[];
 }
 
-export const ForecastChart = ({ data }: ForecastChartProps) => {
+export const ForecastChart = forwardRef<HTMLDivElement, ForecastChartProps>(({ data }, ref) => {
   const formatTime = (isoString: string): string => {
     const fecha = new Date(isoString);
     const hora = fecha.getUTCHours().toString().padStart(2, '0');
