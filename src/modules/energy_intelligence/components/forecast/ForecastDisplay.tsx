@@ -1,3 +1,4 @@
+import React, { forwardRef } from 'react';
 import { CoesData } from "../../types/forecast";
 import { ForecastChart } from "./ForecastChart";
 
@@ -6,22 +7,30 @@ interface ForecastDisplayProps {
   isLoading: boolean;
 }
 
-export const ForecastDisplay = ({ data, isLoading }: ForecastDisplayProps) => {
-  if (isLoading) {
+export const ForecastDisplay = forwardRef<HTMLDivElement, ForecastDisplayProps>(
+  ({ data, isLoading }, ref) => {
+    if (isLoading) {
+      return (
+        <div ref={ref} className="flex justify-center items-center h-64">
+          <p className="text-muted-foreground">Cargando datos...</p>
+        </div>
+      );
+    }
+
+    if (data.length === 0) {
+      return (
+        <div ref={ref} className="flex justify-center items-center h-64">
+          <p className="text-muted-foreground">No hay datos disponibles para los últimos días</p>
+        </div>
+      );
+    }
+
     return (
-      <div className="flex justify-center items-center h-64">
-        <p className="text-muted-foreground">Cargando datos...</p>
+      <div ref={ref}>
+        <ForecastChart data={data} />
       </div>
     );
   }
+);
 
-  if (data.length === 0) {
-    return (
-      <div className="flex justify-center items-center h-64">
-        <p className="text-muted-foreground">No hay datos disponibles para los últimos días</p>
-      </div>
-    );
-  }
-
-  return <ForecastChart data={data} />;
-};
+ForecastDisplay.displayName = 'ForecastDisplay';
