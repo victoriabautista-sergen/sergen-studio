@@ -52,36 +52,40 @@ export const ForecastChart = forwardRef<HTMLDivElement, ForecastChartProps>(({ d
   });
 
   return (
-    <ResponsiveContainer width="100%" height={450}>
-      <LineChart data={chartData} margin={{ top: 5, right: 30, left: 50, bottom: 35 }}>
-        <XAxis dataKey="time" interval={2} angle={-45} textAnchor="end" height={60} />
-        <YAxis domain={[5500, 8500]} tickFormatter={v => v.toLocaleString()} />
-        <Tooltip
-          formatter={(value: any, name: string) =>
-            value ? [`${value.toLocaleString()} MW`, name] : ['No disponible', name]
-          }
-          labelFormatter={(_label, payload) =>
-            payload?.[0] ? payload[0].payload.fecha_completa : _label
-          }
-        />
-        <Legend verticalAlign="bottom" height={36} />
-        {chartData.map((entry, index) =>
-          entry.hora >= 18 && entry.hora < 23 && index < chartData.length - 1 ? (
-            <ReferenceArea
-              key={`area-${index}`}
-              x1={entry.time}
-              x2={chartData[index + 1].time}
-              fill="#E8E8E8"
-              fillOpacity={0.8}
-            />
-          ) : null
-        )}
-        <Line type="monotone" dataKey="Reprogramación" stroke="#C00000" strokeWidth={2} dot={false} connectNulls />
-        <Line type="monotone" dataKey="Pronóstico Diario" stroke="#f39200" strokeWidth={2} dot={false} connectNulls />
-        <Line type="monotone" dataKey="Rango Inferior" stroke="#90C418" strokeWidth={1} strokeDasharray="5 5" dot={false} connectNulls />
-        <Line type="monotone" dataKey="Rango Superior" stroke="#90C418" strokeWidth={1} strokeDasharray="5 5" dot={false} connectNulls />
-        <Line type="monotone" dataKey="Demanda Real" stroke="#156082" strokeWidth={2} dot={false} connectNulls />
-      </LineChart>
-    </ResponsiveContainer>
+    <div ref={ref}>
+      <ResponsiveContainer width="100%" height={450}>
+        <LineChart data={chartData} margin={{ top: 5, right: 30, left: 50, bottom: 35 }}>
+          <XAxis dataKey="time" interval={2} angle={-45} textAnchor="end" height={60} />
+          <YAxis domain={[5500, 8500]} tickFormatter={v => v.toLocaleString()} />
+          <Tooltip
+            formatter={(value: any, name: string) =>
+              value ? [`${value.toLocaleString()} MW`, name] : ['No disponible', name]
+            }
+            labelFormatter={(_label, payload) =>
+              payload?.[0] ? payload[0].payload.fecha_completa : _label
+            }
+          />
+          <Legend verticalAlign="bottom" height={36} />
+          {chartData.map((entry, index) =>
+            entry.hora >= 18 && entry.hora < 23 && index < chartData.length - 1 ? (
+              <ReferenceArea
+                key={`area-${index}`}
+                x1={entry.time}
+                x2={chartData[index + 1].time}
+                fill="#E8E8E8"
+                fillOpacity={0.8}
+              />
+            ) : null
+          )}
+          <Line type="monotone" dataKey="Reprogramación" stroke="#C00000" strokeWidth={2} dot={false} connectNulls />
+          <Line type="monotone" dataKey="Pronóstico Diario" stroke="#f39200" strokeWidth={2} dot={false} connectNulls />
+          <Line type="monotone" dataKey="Rango Inferior" stroke="#90C418" strokeWidth={1} strokeDasharray="5 5" dot={false} connectNulls />
+          <Line type="monotone" dataKey="Rango Superior" stroke="#90C418" strokeWidth={1} strokeDasharray="5 5" dot={false} connectNulls />
+          <Line type="monotone" dataKey="Demanda Real" stroke="#156082" strokeWidth={2} dot={false} connectNulls />
+        </LineChart>
+      </ResponsiveContainer>
+    </div>
   );
-};
+});
+
+ForecastChart.displayName = 'ForecastChart';
