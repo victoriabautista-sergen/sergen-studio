@@ -31,8 +31,8 @@ export const HistoricalPowerMaximum = () => {
   return (
     <Card className="w-full">
       <CardHeader className="pb-2">
-        <CardTitle>Potencia Máxima – {getMonthLabel(view)}</CardTitle>
-        <div className="flex justify-end pt-1">
+        <CardTitle className="flex items-center justify-between">
+          <span>Potencia Máxima – {getMonthLabel(view)}</span>
           <Button
             variant="outline"
             size="sm"
@@ -40,7 +40,7 @@ export const HistoricalPowerMaximum = () => {
           >
             {view === "current" ? "Ver mes anterior" : "Volver al mes actual"}
           </Button>
-        </div>
+        </CardTitle>
       </CardHeader>
       <CardContent>
         {isLoading ? (
