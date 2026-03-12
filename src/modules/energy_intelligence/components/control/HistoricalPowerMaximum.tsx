@@ -29,7 +29,7 @@ export const HistoricalPowerMaximum = () => {
   })();
 
   return (
-    <Card className="w-full">
+    <Card className="w-full h-full flex flex-col">
       <CardHeader className="pb-2">
         <CardTitle className="flex items-center justify-between">
           <span>Potencia Máxima – {getMonthLabel(view)}</span>
@@ -42,7 +42,7 @@ export const HistoricalPowerMaximum = () => {
           </Button>
         </CardTitle>
       </CardHeader>
-      <CardContent>
+      <CardContent className="flex-1 flex flex-col">
         {isLoading ? (
           <div className="flex items-center justify-center h-64">
             <Loader2 className="h-8 w-8 animate-spin mr-2" />

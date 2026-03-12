@@ -29,8 +29,8 @@ export const HistoricalPowerChart = forwardRef<HTMLDivElement, HistoricalPowerCh
     };
 
     return (
-      <div ref={ref}>
-        <ResponsiveContainer width="100%" height={390}>
+      <div ref={ref} className="flex-1 min-h-[390px]">
+        <ResponsiveContainer width="100%" height="100%">
           <BarChart data={chartData} margin={{ top: 5, right: 20, bottom: 20, left: 20 }}>
             <XAxis
               dataKey="date"
