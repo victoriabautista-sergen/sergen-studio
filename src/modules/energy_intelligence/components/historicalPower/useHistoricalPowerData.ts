@@ -30,7 +30,7 @@ export const useHistoricalPowerData = () => {
       }
 
       const converted: PowerDataPoint[] = (rows as any[]).map((item) => ({
-        fecha: item.fecha,
+        fecha: item.fecha.split("T")[0],
         ejecutado: Number(item.potencia_maxima),
       }));
 
