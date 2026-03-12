@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Link } from "react-router-dom";
-import { Building2, Loader2, Plus } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { Building2, ExternalLink, Loader2, Pencil, Plus } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -21,11 +21,7 @@ type CompanyRow = {
   id: string;
   company_name: string;
   ruc: string | null;
-  industry: string | null;
-  subscription_plan: string | null;
   subscription_status: string | null;
-  user_count: number;
-  module_count: number;
 };
 
 const StatusBadge = ({ status }: { status: string | null }) => {
@@ -41,47 +37,39 @@ const BREADCRUMBS = [{ label: "Empresas" }];
 const EmpresasPage = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const [dialogOpen, setDialogOpen] = useState(false);
+  const navigate = useNavigate();
+
+  // Create dialog
+  const [createOpen, setCreateOpen] = useState(false);
   const [name, setName] = useState("");
   const [ruc, setRuc] = useState("");
   const [industry, setIndustry] = useState("");
 
+  // Edit dialog
+  const [editOpen, setEditOpen] = useState(false);
+  const [editId, setEditId] = useState("");
+  const [editName, setEditName] = useState("");
+  const [editRuc, setEditRuc] = useState("");
+
   const { data: companies = [], isLoading } = useQuery({
     queryKey: ["admin-empresas"],
     queryFn: async () => {
-      const [{ data: clients, error }, { data: subs }, { data: clientUsers }, { data: compModules }] =
-        await Promise.all([
-          supabase.from("clients").select("id, company_name, ruc, industry").order("company_name"),
-          supabase.from("subscriptions").select("client_id, status, plan").order("created_at", { ascending: false }),
-          supabase.from("client_users").select("client_id"),
-          supabase.from("company_modules").select("company_id").eq("enabled", true),
-        ]);
+      const [{ data: clients, error }, { data: subs }] = await Promise.all([
+        supabase.from("clients").select("id, company_name, ruc").order("company_name"),
+        supabase.from("subscriptions").select("client_id, status").order("created_at", { ascending: false }),
+      ]);
       if (error) throw error;
 
-      const subByClient = new Map<string, { status: string; plan: string }>();
+      const subByClient = new Map<string, string>();
       for (const s of subs ?? []) {
-        if (!subByClient.has(s.client_id)) subByClient.set(s.client_id, { status: s.status, plan: s.plan });
-      }
-
-      const countByClient = new Map<string, number>();
-      for (const cu of clientUsers ?? []) {
-        countByClient.set(cu.client_id, (countByClient.get(cu.client_id) ?? 0) + 1);
-      }
-
-      const moduleCountByClient = new Map<string, number>();
-      for (const cm of compModules ?? []) {
-        moduleCountByClient.set(cm.company_id, (moduleCountByClient.get(cm.company_id) ?? 0) + 1);
+        if (!subByClient.has(s.client_id)) subByClient.set(s.client_id, s.status);
       }
 
       return (clients ?? []).map((c): CompanyRow => ({
         id: c.id,
         company_name: c.company_name,
         ruc: c.ruc,
-        industry: c.industry,
-        subscription_plan: subByClient.get(c.id)?.plan ?? null,
-        subscription_status: subByClient.get(c.id)?.status ?? null,
-        user_count: countByClient.get(c.id) ?? 0,
-        module_count: moduleCountByClient.get(c.id) ?? 0,
+        subscription_status: subByClient.get(c.id) ?? null,
       }));
     },
   });
@@ -96,11 +84,34 @@ const EmpresasPage = () => {
     onSuccess: () => {
       toast({ title: "Empresa creada correctamente." });
       queryClient.invalidateQueries({ queryKey: ["admin-empresas"] });
-      setDialogOpen(false);
+      setCreateOpen(false);
       setName(""); setRuc(""); setIndustry("");
     },
     onError: () => toast({ title: "Error al crear empresa.", variant: "destructive" }),
   });
+
+  const editMutation = useMutation({
+    mutationFn: async () => {
+      const { error } = await supabase.from("clients").update({
+        company_name: editName.trim(),
+        ruc: editRuc.trim() || null,
+      }).eq("id", editId);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast({ title: "Empresa actualizada." });
+      queryClient.invalidateQueries({ queryKey: ["admin-empresas"] });
+      setEditOpen(false);
+    },
+    onError: () => toast({ title: "Error al actualizar.", variant: "destructive" }),
+  });
+
+  const openEdit = (c: CompanyRow) => {
+    setEditId(c.id);
+    setEditName(c.company_name);
+    setEditRuc(c.ruc ?? "");
+    setEditOpen(true);
+  };
 
   return (
     <AdminShell breadcrumbs={BREADCRUMBS}>
@@ -112,9 +123,9 @@ const EmpresasPage = () => {
               Centro de administración de empresas clientes.
             </p>
           </div>
-          <Button onClick={() => setDialogOpen(true)}>
+          <Button onClick={() => setCreateOpen(true)}>
             <Plus className="h-4 w-4 mr-2" />
-            Nueva empresa
+            Crear empresa
           </Button>
         </div>
 
@@ -135,25 +146,28 @@ const EmpresasPage = () => {
                   <TableRow>
                     <TableHead>Empresa</TableHead>
                     <TableHead>RUC</TableHead>
-                    <TableHead>Plan</TableHead>
-                    <TableHead>Usuarios</TableHead>
-                    <TableHead>Módulos</TableHead>
                     <TableHead>Estado</TableHead>
+                    <TableHead className="text-right">Acciones</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {companies.map((c) => (
-                    <TableRow key={c.id} className="cursor-pointer hover:bg-muted/50">
-                      <TableCell>
-                        <Link to={`/admin-panel/empresas/${c.id}`} className="font-medium hover:underline">
-                          {c.company_name}
-                        </Link>
-                      </TableCell>
+                    <TableRow key={c.id}>
+                      <TableCell className="font-medium">{c.company_name}</TableCell>
                       <TableCell className="text-muted-foreground">{c.ruc ?? "—"}</TableCell>
-                      <TableCell className="capitalize">{c.subscription_plan ?? "—"}</TableCell>
-                      <TableCell>{c.user_count}</TableCell>
-                      <TableCell>{c.module_count}</TableCell>
                       <TableCell><StatusBadge status={c.subscription_status} /></TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex items-center justify-end gap-2">
+                          <Button variant="outline" size="sm" onClick={() => openEdit(c)}>
+                            <Pencil className="h-4 w-4 mr-1" />
+                            Editar
+                          </Button>
+                          <Button size="sm" onClick={() => navigate(`/admin-panel/empresas/${c.id}`)}>
+                            <ExternalLink className="h-4 w-4 mr-1" />
+                            Abrir
+                          </Button>
+                        </div>
+                      </TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
@@ -163,9 +177,10 @@ const EmpresasPage = () => {
         </Card>
       </div>
 
-      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+      {/* Create dialog */}
+      <Dialog open={createOpen} onOpenChange={setCreateOpen}>
         <DialogContent className="max-w-md">
-          <DialogHeader><DialogTitle>Nueva empresa</DialogTitle></DialogHeader>
+          <DialogHeader><DialogTitle>Crear empresa</DialogTitle></DialogHeader>
           <div className="space-y-4">
             <div className="space-y-2">
               <Label>Nombre de la empresa *</Label>
@@ -181,9 +196,32 @@ const EmpresasPage = () => {
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setDialogOpen(false)}>Cancelar</Button>
+            <Button variant="outline" onClick={() => setCreateOpen(false)}>Cancelar</Button>
             <Button onClick={() => createMutation.mutate()} disabled={createMutation.isPending || !name.trim()}>
               {createMutation.isPending ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" />Creando...</> : "Crear empresa"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit dialog */}
+      <Dialog open={editOpen} onOpenChange={setEditOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader><DialogTitle>Editar empresa</DialogTitle></DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label>Nombre *</Label>
+              <Input value={editName} onChange={(e) => setEditName(e.target.value)} />
+            </div>
+            <div className="space-y-2">
+              <Label>RUC</Label>
+              <Input value={editRuc} onChange={(e) => setEditRuc(e.target.value)} placeholder="20123456789" />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setEditOpen(false)}>Cancelar</Button>
+            <Button onClick={() => editMutation.mutate()} disabled={editMutation.isPending || !editName.trim()}>
+              {editMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : "Guardar"}
             </Button>
           </DialogFooter>
         </DialogContent>
