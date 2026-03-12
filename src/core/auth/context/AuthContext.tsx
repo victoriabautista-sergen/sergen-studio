@@ -74,24 +74,41 @@ async function resolveUserData(user: User): Promise<Omit<AuthState, "session" | 
     subscriptionActive = subRow !== null;
   }
 
-  // 5. Enabled module slugs (only needed for client_user)
+  // 5. Enabled module slugs (only needed for client_user/admin)
+  // A module is visible only if: global is_active AND company_modules.enabled AND user_modules.enabled
   let enabledModuleSlugs: string[] = [];
-  if (role === "client_user") {
-    const { data: userModuleRows } = await supabase
-      .from("user_modules")
+  if ((role === "client_user" || role === "admin") && clientIds.length > 0) {
+    // Get company-enabled module IDs
+    const { data: companyModuleRows } = await supabase
+      .from("company_modules")
       .select("module_id")
-      .eq("user_id", user.id)
+      .in("company_id", clientIds)
       .eq("enabled", true);
 
-    const moduleIds = (userModuleRows ?? []).map((r) => r.module_id);
+    const companyModuleIds = (companyModuleRows ?? []).map((r) => r.module_id);
 
-    if (moduleIds.length > 0) {
-      const { data: moduleRows } = await supabase
-        .from("modules")
-        .select("slug")
-        .in("id", moduleIds)
-        .eq("is_active", true);
-      enabledModuleSlugs = (moduleRows ?? []).map((r) => r.slug);
+    if (companyModuleIds.length > 0) {
+      // Get user-enabled module IDs (intersection with company modules)
+      const { data: userModuleRows } = await supabase
+        .from("user_modules")
+        .select("module_id")
+        .eq("user_id", user.id)
+        .eq("enabled", true)
+        .in("module_id", companyModuleIds);
+
+      const userModuleIds = (userModuleRows ?? []).map((r) => r.module_id);
+
+      // For admin role, they see all company modules; for client_user, only their assigned ones
+      const effectiveModuleIds = role === "admin" ? companyModuleIds : userModuleIds;
+
+      if (effectiveModuleIds.length > 0) {
+        const { data: moduleRows } = await supabase
+          .from("modules")
+          .select("slug")
+          .in("id", effectiveModuleIds)
+          .eq("is_active", true);
+        enabledModuleSlugs = (moduleRows ?? []).map((r) => r.slug);
+      }
     }
   }
 
