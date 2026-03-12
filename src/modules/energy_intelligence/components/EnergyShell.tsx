@@ -41,8 +41,8 @@ const EnergyShell = ({ children }: EnergyShellProps) => {
         {/* Body: sidebar + content */}
         <div className="flex flex-1 overflow-hidden">
           {/* Sidebar */}
-          <aside className="w-64 shrink-0 border-r bg-card flex flex-col">
-            <nav className="flex flex-col gap-1 p-4 pt-6">
+          <aside className="w-72 shrink-0 border-r bg-card flex flex-col">
+            <nav className="flex flex-col gap-1.5 px-5 py-6">
               {navLinks.map(link => {
                 const Icon = link.icon;
                 const isActive =
@@ -53,7 +53,7 @@ const EnergyShell = ({ children }: EnergyShellProps) => {
                     key={link.href}
                     to={link.href}
                     className={cn(
-                      'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors',
+                      'flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-colors',
                       isActive
                         ? 'bg-primary/10 text-primary'
                         : 'text-muted-foreground hover:bg-muted hover:text-foreground'
@@ -69,7 +69,7 @@ const EnergyShell = ({ children }: EnergyShellProps) => {
 
           {/* Main content */}
           <main className="flex-1 overflow-auto">
-            <div className="container py-8">{children}</div>
+            <div className="px-8 py-8 max-w-[1400px]">{children}</div>
           </main>
         </div>
       </div>
