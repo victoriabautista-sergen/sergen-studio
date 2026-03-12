@@ -2,7 +2,6 @@ import { Link, useLocation } from 'react-router-dom';
 import { ArrowLeft, BarChart2, TrendingUp, History, FileText, Settings, Zap } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import PrivateRoute from '@/core/auth/components/PrivateRoute';
-import sergenLogo from '@/assets/sergen-logo.png';
 import { cn } from '@/lib/utils';
 
 interface EnergyShellProps {
