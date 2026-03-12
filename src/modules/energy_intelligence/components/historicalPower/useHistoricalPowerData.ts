@@ -9,10 +9,12 @@ export interface PowerDataPoint {
   ejecutado: number;
 }
 
+const MONTH_NAMES = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
+
 const getMonthRange = (mode: ViewMode): { from: string; to: string } => {
   const now = new Date();
   const year = now.getFullYear();
-  const month = now.getMonth(); // 0-indexed
+  const month = now.getMonth();
 
   if (mode === "current") {
     const from = `${year}-${String(month + 1).padStart(2, "0")}-01`;
@@ -25,6 +27,17 @@ const getMonthRange = (mode: ViewMode): { from: string; to: string } => {
     const to = `${prevYear}-${String(prevMonth + 1).padStart(2, "0")}-${String(lastDay).padStart(2, "0")}`;
     return { from, to };
   }
+};
+
+export const getMonthLabel = (mode: ViewMode): string => {
+  const now = new Date();
+  let month = now.getMonth();
+  let year = now.getFullYear();
+  if (mode === "previous") {
+    month = month === 0 ? 11 : month - 1;
+    year = month === 11 && now.getMonth() === 0 ? year - 1 : year;
+  }
+  return `${MONTH_NAMES[month]} ${year}`;
 };
 
 export const useHistoricalPowerData = (viewMode: ViewMode = "current") => {
