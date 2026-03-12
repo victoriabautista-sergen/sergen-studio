@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
-import { ArrowLeft, BarChart2, TrendingUp, History, FileText, Settings, Zap } from 'lucide-react';
+import { ArrowLeft, BarChart2, FileText, Zap } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import PrivateRoute from '@/core/auth/components/PrivateRoute';
 import { cn } from '@/lib/utils';
@@ -10,10 +10,7 @@ interface EnergyShellProps {
 
 const navLinks = [
   { label: 'Control', href: '/energy-intelligence/control', icon: BarChart2 },
-  { label: 'Pronósticos', href: '/energy-intelligence/forecast', icon: TrendingUp },
-  { label: 'Histórico', href: '/energy-intelligence/historico', icon: History },
   { label: 'Reportes', href: '/energy-intelligence/reportes', icon: FileText },
-  { label: 'Configuración', href: '/energy-intelligence/configuracion', icon: Settings },
 ];
 
 const EnergyShell = ({ children }: EnergyShellProps) => {
