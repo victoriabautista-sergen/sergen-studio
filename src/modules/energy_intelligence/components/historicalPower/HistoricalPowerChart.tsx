@@ -1,21 +1,21 @@
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
-import type { PowerDataPoint } from './useHistoricalPowerData';
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from "recharts";
+import type { PowerDataPoint } from "./useHistoricalPowerData";
 
 interface HistoricalPowerChartProps {
   data: PowerDataPoint[];
 }
 
 export const HistoricalPowerChart = ({ data }: HistoricalPowerChartProps) => {
-  const maxValue = data.length > 0 ? Math.max(...data.map(d => d.ejecutado)) : 0;
+  const maxValue = data.length > 0 ? Math.max(...data.map((d) => d.ejecutado)) : 0;
 
   const formatDate = (fecha: string) => {
     const d = new Date(fecha);
-    const dd = String(d.getUTCDate()).padStart(2, '0');
-    const mm = String(d.getUTCMonth() + 1).padStart(2, '0');
+    const dd = String(d.getUTCDate()).padStart(2, "0");
+    const mm = String(d.getUTCMonth() + 1).padStart(2, "0");
     return `${dd}/${mm}`;
   };
 
-  const chartData = data.map(item => ({
+  const chartData = data.map((item) => ({
     date: formatDate(item.fecha),
     value: item.ejecutado,
     fullDate: item.fecha,
@@ -28,7 +28,7 @@ export const HistoricalPowerChart = ({ data }: HistoricalPowerChartProps) => {
     return Math.ceil(chartData.length / 30);
   };
 
-  const formatTooltip = (value: number) => [`${value.toFixed(2)} MW`, 'Potencia Máxima'];
+  const formatTooltip = (value: number) => [`${value.toFixed(2)} MW`, "Potencia Máxima"];
 
   const formatTooltipLabel = (_label: string, payload: any[]) => {
     if (payload && payload.length > 0) {
@@ -49,14 +49,11 @@ export const HistoricalPowerChart = ({ data }: HistoricalPowerChartProps) => {
           fontSize={10}
           tickMargin={10}
         />
-        <YAxis tickFormatter={(v: number) => `${v} MW`} />
+        <YAxis domain={[5000, "dataMax"]} tickFormatter={(v: number) => `${v} MW`} />
         <Tooltip formatter={formatTooltip} labelFormatter={formatTooltipLabel} />
         <Bar dataKey="value" name="Potencia Máxima">
           {chartData.map((entry, index) => (
-            <Cell
-              key={`cell-${index}`}
-              fill={entry.value === maxValue ? '#8B0000' : '#1f77b4'}
-            />
+            <Cell key={`cell-${index}`} fill={entry.value === maxValue ? "#8B0000" : "#1f77b4"} />
           ))}
         </Bar>
       </BarChart>
