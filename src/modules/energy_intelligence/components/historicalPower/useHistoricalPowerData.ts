@@ -2,12 +2,32 @@ import { useState, useEffect, useCallback } from "react";
 import { toast } from "sonner";
 import { externalSupabase } from "@/integrations/externalSupabase/client";
 
+export type ViewMode = "current" | "previous";
+
 export interface PowerDataPoint {
   fecha: string;
   ejecutado: number;
 }
 
-export const useHistoricalPowerData = () => {
+const getMonthRange = (mode: ViewMode): { from: string; to: string } => {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = now.getMonth(); // 0-indexed
+
+  if (mode === "current") {
+    const from = `${year}-${String(month + 1).padStart(2, "0")}-01`;
+    return { from, to: "2099-12-31" };
+  } else {
+    const prevMonth = month === 0 ? 11 : month - 1;
+    const prevYear = month === 0 ? year - 1 : year;
+    const from = `${prevYear}-${String(prevMonth + 1).padStart(2, "0")}-01`;
+    const lastDay = new Date(prevYear, prevMonth + 1, 0).getDate();
+    const to = `${prevYear}-${String(prevMonth + 1).padStart(2, "0")}-${String(lastDay).padStart(2, "0")}`;
+    return { from, to };
+  }
+};
+
+export const useHistoricalPowerData = (viewMode: ViewMode = "current") => {
   const [data, setData] = useState<PowerDataPoint[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -17,9 +37,13 @@ export const useHistoricalPowerData = () => {
     setError(null);
 
     try {
+      const { from, to } = getMonthRange(viewMode);
+
       const { data: rows, error: dbError } = await externalSupabase
         .from("potencia_hora_punta" as any)
         .select("fecha, potencia_maxima")
+        .gte("fecha", from)
+        .lte("fecha", to)
         .order("fecha", { ascending: true });
 
       if (dbError) throw new Error(dbError.message);
@@ -42,7 +66,7 @@ export const useHistoricalPowerData = () => {
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [viewMode]);
 
   useEffect(() => {
     fetchData();

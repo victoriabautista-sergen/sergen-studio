@@ -1,16 +1,21 @@
+import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { useHistoricalPowerData } from "./useHistoricalPowerData";
+import { useHistoricalPowerData, type ViewMode } from "./useHistoricalPowerData";
 import { HistoricalPowerChart } from "./HistoricalPowerChart";
 import { Loader2, AlertCircle, RefreshCw } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 export const HistoricalPowerMaximum = () => {
-  const { data, isLoading, error, refetch } = useHistoricalPowerData();
+  const [view, setView] = useState<ViewMode>("current");
+  const { data, isLoading, error, refetch } = useHistoricalPowerData(view);
+
+  const periodLabel = view === "current" ? "Mes Actual" : "Mes Anterior";
 
   return (
     <Card className="w-full">
       <CardHeader className="pb-2">
         <CardTitle className="flex justify-between items-center">
-          <span>Potencia Máxima en Hora Punta (18:00 – 23:00)</span>
+          <span>Potencia Máxima en Hora Punta – {periodLabel}</span>
           <button
             onClick={refetch}
             className="p-1 hover:bg-muted rounded-full transition-colors"
@@ -19,6 +24,15 @@ export const HistoricalPowerMaximum = () => {
             <RefreshCw className="h-4 w-4" />
           </button>
         </CardTitle>
+        <div className="flex justify-end pt-1">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setView(view === "current" ? "previous" : "current")}
+          >
+            {view === "current" ? "Ver mes anterior" : "Volver a mes actual"}
+          </Button>
+        </div>
       </CardHeader>
       <CardContent>
         {isLoading ? (
@@ -41,9 +55,7 @@ export const HistoricalPowerMaximum = () => {
           </div>
         ) : data.length === 0 ? (
           <div className="flex items-center justify-center h-64 flex-col">
-            <p className="text-muted-foreground">
-              No hay datos disponibles
-            </p>
+            <p className="text-muted-foreground">No hay datos disponibles</p>
             <button
               className="mt-4 px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90"
               onClick={refetch}
