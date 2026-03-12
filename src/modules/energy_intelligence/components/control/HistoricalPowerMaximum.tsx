@@ -4,7 +4,6 @@ import { Loader2, AlertCircle, RefreshCw } from 'lucide-react';
 import { useHistoricalPowerData } from '../historicalPower/useHistoricalPowerData';
 import { HistoricalPowerChart } from './HistoricalPowerChart';
 import type { ChartData } from '../../types';
-import { format } from 'date-fns';
 
 export const HistoricalPowerMaximum = () => {
   const { data, isLoading, error, refetch } = useHistoricalPowerData();
@@ -15,7 +14,7 @@ export const HistoricalPowerMaximum = () => {
     const maxVal = sorted[0]?.ejecutado;
     const secondVal = sorted[1]?.ejecutado;
     return data.map((item) => ({
-      date: format(new Date(item.fecha), 'dd/MM'),
+      date: (() => { const [, month, day] = item.fecha.split("T")[0].split("-"); return `${day}/${month}`; })(),
       value: item.ejecutado,
       fullDate: item.fecha,
       color:
