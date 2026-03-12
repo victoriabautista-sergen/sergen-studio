@@ -2,7 +2,6 @@ import { Link, useLocation } from 'react-router-dom';
 import { ArrowLeft, BarChart2, TrendingUp, History, FileText, Settings, Zap } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import PrivateRoute from '@/core/auth/components/PrivateRoute';
-import sergenLogo from '@/assets/sergen-logo.png';
 import { cn } from '@/lib/utils';
 
 interface EnergyShellProps {
@@ -25,16 +24,14 @@ const EnergyShell = ({ children }: EnergyShellProps) => {
       <div className="min-h-screen bg-background flex flex-col">
         {/* Header */}
         <header className="border-b bg-card shrink-0 z-10">
-          <div className="container flex items-center h-16 gap-4">
+          <div className="flex items-center h-14 px-6 gap-3">
             <Button variant="ghost" size="icon" asChild>
               <Link to="/dashboard">
                 <ArrowLeft className="h-5 w-5" />
               </Link>
             </Button>
-            <img src={sergenLogo} alt="SERGEN" className="h-7" />
-            <span className="text-muted-foreground">/</span>
-            <Zap className="h-5 w-5 text-muted-foreground" />
-            <span className="font-heading font-semibold">Energy Intelligence</span>
+            <Zap className="h-5 w-5 text-primary" />
+            <span className="font-heading font-semibold text-lg tracking-tight">Energy Intelligence</span>
           </div>
         </header>
 
@@ -53,7 +50,7 @@ const EnergyShell = ({ children }: EnergyShellProps) => {
                     key={link.href}
                     to={link.href}
                     className={cn(
-                      'flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-colors',
+                      'flex items-center gap-3 px-4 py-2.5 rounded-lg text-base font-medium transition-colors',
                       isActive
                         ? 'bg-primary/10 text-primary'
                         : 'text-muted-foreground hover:bg-muted hover:text-foreground'
