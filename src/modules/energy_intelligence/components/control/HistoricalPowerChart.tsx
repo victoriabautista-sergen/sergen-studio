@@ -41,7 +41,7 @@ export const HistoricalPowerChart = forwardRef<HTMLDivElement, HistoricalPowerCh
               fontSize={10}
               tickMargin={10}
             />
-            <YAxis domain={[4000, 'auto']} />
+            <YAxis type="number" domain={[5000, 8000]} allowDataOverflow={true} tickFormatter={(v: number) => `${v} MW`} />
             <Tooltip formatter={formatTooltip} labelFormatter={formatTooltipLabel} />
             <Bar dataKey="value" name="Potencia Máxima">
               {chartData.map((entry, index) => (
