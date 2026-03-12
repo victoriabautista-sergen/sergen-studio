@@ -7,7 +7,6 @@ import AdminShell from "../components/AdminShell";
 import EmpresaInfoTab from "../components/empresa/EmpresaInfoTab";
 import EmpresaUsuariosTab from "../components/empresa/EmpresaUsuariosTab";
 import EmpresaModulosTab from "../components/empresa/EmpresaModulosTab";
-import EmpresaReportesTab from "../components/empresa/EmpresaReportesTab";
 import EmpresaSuscripcionTab from "../components/empresa/EmpresaSuscripcionTab";
 
 const EmpresaDetailPage = () => {
