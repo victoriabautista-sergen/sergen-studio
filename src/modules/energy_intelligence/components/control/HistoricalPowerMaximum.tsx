@@ -1,3 +1,4 @@
+import React, { forwardRef } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Loader2, AlertCircle, RefreshCw } from 'lucide-react';
 import { useHistoricalPowerData } from '../historicalPower/useHistoricalPowerData';

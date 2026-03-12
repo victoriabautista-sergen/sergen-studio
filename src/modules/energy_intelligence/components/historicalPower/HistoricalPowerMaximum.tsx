@@ -10,7 +10,7 @@ export const HistoricalPowerMaximum = () => {
     <Card className="w-full">
       <CardHeader className="pb-2">
         <CardTitle className="flex justify-between items-center">
-          <span>Potencia Máxima (18:00 - 23:00)</span>
+          <span>Potencia Máxima en Hora Punta (18:00 – 23:00)</span>
           <button
             onClick={refetch}
             className="p-1 hover:bg-muted rounded-full transition-colors"
@@ -42,7 +42,7 @@ export const HistoricalPowerMaximum = () => {
         ) : data.length === 0 ? (
           <div className="flex items-center justify-center h-64 flex-col">
             <p className="text-muted-foreground">
-              No hay datos disponibles en el rango horario de 18:00 a 23:00
+              No hay datos disponibles
             </p>
             <button
               className="mt-4 px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90"

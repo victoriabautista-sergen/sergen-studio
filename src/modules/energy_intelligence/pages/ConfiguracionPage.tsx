@@ -1,5 +1,4 @@
-import { useState, useEffect } from 'react';
-import { supabase } from '@/integrations/supabase/client';
+import { useState } from 'react';
 import { toast } from 'sonner';
 import EnergyShell from '../components/EnergyShell';
 import { UploadEnergyData } from '../components/energy/UploadEnergyData';
@@ -12,42 +11,14 @@ const ConfiguracionPage = () => {
   const [selectedDate, setSelectedDate] = useState<string>('');
 
   const fetchEnergyData = async () => {
-    try {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
-        toast.error('No hay sesión activa');
-        return;
-      }
-
-      const { data, error } = await supabase
-        .from('energy_data')
-        .select('*')
-        .eq('user_id', session.user.id)
-        .order('date', { ascending: false })
-        .order('time', { ascending: true });
-
-      if (error) {
-        toast.error('Error al cargar datos de energía');
-        return;
-      }
-
-      setEnergyData(data || []);
-      if (data && data.length > 0) setSelectedDate(data[0].date);
-    } catch (error) {
-      console.error('Error:', error);
-      toast.error('Error al cargar datos');
-    }
+    toast.info('Función de carga de datos pendiente de configuración');
   };
-
-  useEffect(() => {
-    fetchEnergyData();
-  }, []);
 
   return (
     <EnergyShell>
       <div className="mb-6">
-        <h1 className="text-3xl font-bold text-gray-800">Configuración</h1>
-        <p className="text-gray-500 mt-1">Gestión de datos de energía del cliente</p>
+        <h1 className="text-3xl font-bold">Configuración</h1>
+        <p className="text-muted-foreground mt-1">Gestión de datos de energía del cliente</p>
       </div>
 
       <div className="space-y-6">
