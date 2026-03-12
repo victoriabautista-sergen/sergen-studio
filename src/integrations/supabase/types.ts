@@ -89,6 +89,7 @@ export type Database = {
           energy_supply_info: Json | null
           id: string
           industry: string | null
+          ruc: string | null
           updated_at: string
         }
         Insert: {
@@ -98,6 +99,7 @@ export type Database = {
           energy_supply_info?: Json | null
           id?: string
           industry?: string | null
+          ruc?: string | null
           updated_at?: string
         }
         Update: {
@@ -107,6 +109,7 @@ export type Database = {
           energy_supply_info?: Json | null
           id?: string
           industry?: string | null
+          ruc?: string | null
           updated_at?: string
         }
         Relationships: []
@@ -191,6 +194,48 @@ export type Database = {
           id?: string
         }
         Relationships: []
+      }
+      company_modules: {
+        Row: {
+          assigned_at: string
+          assigned_by: string | null
+          company_id: string
+          enabled: boolean
+          id: string
+          module_id: string
+        }
+        Insert: {
+          assigned_at?: string
+          assigned_by?: string | null
+          company_id: string
+          enabled?: boolean
+          id?: string
+          module_id: string
+        }
+        Update: {
+          assigned_at?: string
+          assigned_by?: string | null
+          company_id?: string
+          enabled?: boolean
+          id?: string
+          module_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "company_modules_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "company_modules_module_id_fkey"
+            columns: ["module_id"]
+            isOneToOne: false
+            referencedRelation: "modules"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       documents: {
         Row: {
