@@ -1,54 +1,54 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { toast } from "sonner";
-import { ChartData } from "./types";
-import { fetchPowerData } from "./services/fetchPowerData";
-import { processMaximumData } from "./utils/processMaximumData";
+import { externalSupabase } from "@/integrations/externalSupabase/client";
+
+export interface PowerDataPoint {
+  fecha: string;
+  ejecutado: number;
+}
 
 export const useHistoricalPowerData = () => {
-  const [chartData, setChartData] = useState<ChartData[]>([]);
+  const [data, setData] = useState<PowerDataPoint[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [sessionFetched, setSessionFetched] = useState(false);
+
+  const fetchData = useCallback(async () => {
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const { data: rows, error: dbError } = await externalSupabase
+        .from("potencia_hora_punta" as any)
+        .select("fecha, potencia_maxima")
+        .order("fecha", { ascending: true });
+
+      if (dbError) throw new Error(dbError.message);
+
+      if (!rows || rows.length === 0) {
+        setError("No se encontraron datos de potencia en hora punta");
+        return;
+      }
+
+      const converted: PowerDataPoint[] = (rows as any[]).map((item) => ({
+        fecha: item.fecha,
+        ejecutado: Number(item.potencia_maxima),
+      }));
+
+      setData(converted);
+    } catch (err: any) {
+      console.error("Error fetching potencia_hora_punta:", err);
+      setError(`Error: ${err.message}`);
+      toast.error("Error al cargar datos de potencia en hora punta");
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
 
   useEffect(() => {
-    const fetchMaxPowerData = async () => {
-      setIsLoading(true);
-      setError(null);
-
-      try {
-        if (!sessionFetched) {
-          setSessionFetched(true);
-          await new Promise(resolve => setTimeout(resolve, 500));
-        }
-
-        const powerData = await fetchPowerData();
-
-        if (!powerData || powerData.length === 0) {
-          setError("No se encontraron datos de potencia para el período seleccionado");
-          return;
-        }
-
-        const processedData = processMaximumData(powerData);
-
-        if (processedData.length === 0) {
-          setError("No se pudieron procesar los datos de potencia máxima");
-          return;
-        }
-
-        setChartData(processedData);
-      } catch (err: any) {
-        console.error('Error processing power data:', err);
-        setError(`Error: ${err.message}`);
-        toast.error("Error al cargar datos históricos de potencia");
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchMaxPowerData();
-    const interval = setInterval(fetchMaxPowerData, 15 * 60 * 1000);
+    fetchData();
+    const interval = setInterval(fetchData, 5 * 60 * 1000);
     return () => clearInterval(interval);
-  }, [sessionFetched]);
+  }, [fetchData]);
 
-  return { chartData, isLoading, error };
+  return { data, isLoading, error, refetch: fetchData };
 };

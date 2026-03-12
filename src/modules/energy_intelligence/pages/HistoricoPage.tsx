@@ -1,5 +1,4 @@
 import EnergyShell from '../components/EnergyShell';
-import { HistoricalTab } from '../components/forecast/HistoricalTab';
 
 const HistoricoPage = () => (
   <EnergyShell>
@@ -7,7 +6,11 @@ const HistoricoPage = () => (
       <h1 className="text-3xl font-bold text-gray-800">Histórico COES</h1>
       <p className="text-gray-500 mt-1">Datos históricos de demanda del sistema eléctrico</p>
     </div>
-    <HistoricalTab />
+    <div className="text-center py-16">
+      <p className="text-gray-500">
+        Los datos históricos son gestionados por el scraper externo y se visualizan en el dashboard de Potencia Máxima.
+      </p>
+    </div>
   </EnergyShell>
 );
 

@@ -4,11 +4,7 @@ import { HistoricalPowerChart } from "./HistoricalPowerChart";
 import { Loader2, AlertCircle, RefreshCw } from "lucide-react";
 
 export const HistoricalPowerMaximum = () => {
-  const { chartData, isLoading, error } = useHistoricalPowerData();
-
-  const handleRetry = () => {
-    window.location.reload();
-  };
+  const { data, isLoading, error, refetch } = useHistoricalPowerData();
 
   return (
     <Card className="w-full">
@@ -16,7 +12,7 @@ export const HistoricalPowerMaximum = () => {
         <CardTitle className="flex justify-between items-center">
           <span>Potencia Máxima (18:00 - 23:00)</span>
           <button
-            onClick={handleRetry}
+            onClick={refetch}
             className="p-1 hover:bg-muted rounded-full transition-colors"
             title="Actualizar datos"
           >
@@ -38,25 +34,25 @@ export const HistoricalPowerMaximum = () => {
             </div>
             <button
               className="mt-4 px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90"
-              onClick={handleRetry}
+              onClick={refetch}
             >
               Reintentar
             </button>
           </div>
-        ) : chartData.length === 0 ? (
+        ) : data.length === 0 ? (
           <div className="flex items-center justify-center h-64 flex-col">
             <p className="text-muted-foreground">
               No hay datos disponibles en el rango horario de 18:00 a 23:00
             </p>
             <button
               className="mt-4 px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90"
-              onClick={handleRetry}
+              onClick={refetch}
             >
               Reintentar
             </button>
           </div>
         ) : (
-          <HistoricalPowerChart chartData={chartData} />
+          <HistoricalPowerChart data={data} />
         )}
       </CardContent>
     </Card>

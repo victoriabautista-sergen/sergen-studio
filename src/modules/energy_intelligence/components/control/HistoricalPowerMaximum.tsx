@@ -1,12 +1,30 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Loader2, AlertCircle, RefreshCw } from 'lucide-react';
-import { useHistoricalPowerData } from '../../hooks/useHistoricalPowerData';
+import { useHistoricalPowerData } from '../historicalPower/useHistoricalPowerData';
 import { HistoricalPowerChart } from './HistoricalPowerChart';
+import type { ChartData } from '../../types';
+import { format } from 'date-fns';
 
 export const HistoricalPowerMaximum = () => {
-  const { chartData, isLoading, error } = useHistoricalPowerData();
+  const { data, isLoading, error, refetch } = useHistoricalPowerData();
 
-  const handleRetry = () => window.location.reload();
+  const chartData: ChartData[] = (() => {
+    if (data.length === 0) return [];
+    const sorted = [...data].sort((a, b) => b.ejecutado - a.ejecutado);
+    const maxVal = sorted[0]?.ejecutado;
+    const secondVal = sorted[1]?.ejecutado;
+    return data.map((item) => ({
+      date: format(new Date(item.fecha), 'dd/MM'),
+      value: item.ejecutado,
+      fullDate: item.fecha,
+      color:
+        item.ejecutado === maxVal
+          ? '#D9001B'
+          : item.ejecutado === secondVal
+          ? '#F97316'
+          : '#156082',
+    }));
+  })();
 
   return (
     <Card className="w-full">
@@ -14,7 +32,7 @@ export const HistoricalPowerMaximum = () => {
         <CardTitle className="flex justify-between items-center">
           <span>Potencia Máxima (18:00 - 23:00)</span>
           <button
-            onClick={handleRetry}
+            onClick={refetch}
             className="p-1 hover:bg-gray-100 rounded-full transition-colors"
             title="Actualizar datos"
           >
@@ -36,7 +54,7 @@ export const HistoricalPowerMaximum = () => {
             </div>
             <button
               className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
-              onClick={handleRetry}
+              onClick={refetch}
             >
               Reintentar
             </button>
@@ -48,7 +66,7 @@ export const HistoricalPowerMaximum = () => {
             </p>
             <button
               className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
-              onClick={handleRetry}
+              onClick={refetch}
             >
               Reintentar
             </button>

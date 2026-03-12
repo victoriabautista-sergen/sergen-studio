@@ -13,14 +13,6 @@ CREATE TABLE IF NOT EXISTS public.coes_forecast (
   created_at timestamptz DEFAULT now()
 );
 
--- COES Historical data (potencia máxima histórica)
-CREATE TABLE IF NOT EXISTS public.coes_historical (
-  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  fecha timestamptz NOT NULL,
-  ejecutado numeric NOT NULL,
-  created_at timestamptz DEFAULT now()
-);
-
 -- Forecast settings (configuración de riesgo y modulación)
 CREATE TABLE IF NOT EXISTS public.forecast_settings (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -39,13 +31,11 @@ CREATE TABLE IF NOT EXISTS public.modulation_days (
 
 -- Enable RLS
 ALTER TABLE public.coes_forecast ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.coes_historical ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.forecast_settings ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.modulation_days ENABLE ROW LEVEL SECURITY;
 
 -- RLS: authenticated users can read all energy data
 CREATE POLICY "Authenticated users can read coes_forecast" ON public.coes_forecast FOR SELECT TO authenticated USING (true);
-CREATE POLICY "Authenticated users can read coes_historical" ON public.coes_historical FOR SELECT TO authenticated USING (true);
 CREATE POLICY "Authenticated users can read forecast_settings" ON public.forecast_settings FOR SELECT TO authenticated USING (true);
 CREATE POLICY "Authenticated users can read modulation_days" ON public.modulation_days FOR SELECT TO authenticated USING (true);
 
