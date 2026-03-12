@@ -65,10 +65,10 @@ const ControlPage = () => {
 
   return (
     <EnergyShell>
-      <div className="mb-4">
-        <h1 className="text-3xl font-bold text-gray-800 mb-2">Control de Demanda</h1>
+      <div className="mb-6">
+        <h1 className="text-3xl font-bold text-foreground">Control de Demanda</h1>
         {settingsLastUpdate && (
-          <p className="text-sm text-gray-600">
+          <p className="text-sm text-muted-foreground mt-1">
             Última actualización: {format(settingsLastUpdate, 'dd/MM/yyyy HH:mm')}
           </p>
         )}
@@ -77,16 +77,16 @@ const ControlPage = () => {
       {loading ? (
         <div className="flex justify-center items-center h-64">
           <div className="flex flex-col items-center">
-            <div className="w-12 h-12 border-4 border-t-primary border-gray-200 rounded-full animate-spin mb-4" />
-            <p className="text-lg text-gray-600">Cargando datos...</p>
+            <div className="w-12 h-12 border-4 border-t-primary border-muted rounded-full animate-spin mb-4" />
+            <p className="text-lg text-muted-foreground">Cargando datos...</p>
           </div>
         </div>
       ) : (
         <div className="grid grid-cols-12 gap-6">
-          <div className="col-span-12 lg:col-span-4 space-y-4">
+          <div className="col-span-12 lg:col-span-4 flex flex-col gap-6">
             <RiskManagement date={date} setDate={setDate} />
           </div>
-          <div className="col-span-12 lg:col-span-8 space-y-4">
+          <div className="col-span-12 lg:col-span-8 flex flex-col gap-6">
             <PowerCharts />
             <HistoricalPowerMaximum />
           </div>
