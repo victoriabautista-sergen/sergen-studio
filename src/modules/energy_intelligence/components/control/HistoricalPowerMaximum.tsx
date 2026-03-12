@@ -29,7 +29,7 @@ export const HistoricalPowerMaximum = () => {
   })();
 
   return (
-    <Card className="w-full">
+    <Card className="w-full h-full flex flex-col">
       <CardHeader className="pb-2">
         <CardTitle className="flex items-center justify-between">
           <span>Potencia Máxima – {getMonthLabel(view)}</span>
