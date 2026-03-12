@@ -1,19 +1,13 @@
 import { Link } from "react-router-dom";
-import { BarChart3, Building2, Inbox, Settings, Users } from "lucide-react";
+import { Building2, Inbox, Settings, Users } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import AdminShell from "../components/AdminShell";
 
 const NAV_CARDS = [
   {
-    href: "/admin-panel/resumen",
-    title: "Resumen",
-    description: "Métricas generales de la plataforma",
-    icon: BarChart3,
-  },
-  {
     href: "/admin-panel/empresas",
     title: "Empresas",
-    description: "Gestionar empresas clientes y sus suscripciones",
+    description: "Centro de administración de empresas, módulos y usuarios",
     icon: Building2,
   },
   {
@@ -25,7 +19,7 @@ const NAV_CARDS = [
   {
     href: "/admin-panel/configuracion",
     title: "Configuración",
-    description: "Módulos y ajustes globales de la plataforma",
+    description: "Módulos globales y ajustes de la plataforma",
     icon: Settings,
   },
   {
@@ -45,7 +39,7 @@ const AdminPanelHomePage = () => (
           Gestión completa de la plataforma SERGEN.
         </p>
       </div>
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-2">
         {NAV_CARDS.map(({ href, title, description, icon: Icon }) => (
           <Link key={href} to={href} className="group">
             <Card className="h-full transition-all group-hover:border-primary/50 group-hover:shadow-sm">
