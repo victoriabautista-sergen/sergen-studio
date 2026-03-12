@@ -4,7 +4,6 @@ import { Loader2, AlertCircle, RefreshCw } from 'lucide-react';
 import { useHistoricalPowerData } from '../historicalPower/useHistoricalPowerData';
 import { HistoricalPowerChart } from './HistoricalPowerChart';
 import type { ChartData } from '../../types';
-import { format } from 'date-fns';
 
 export const HistoricalPowerMaximum = () => {
   const { data, isLoading, error, refetch } = useHistoricalPowerData();
