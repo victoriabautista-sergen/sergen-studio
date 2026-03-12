@@ -41,9 +41,6 @@ export const HistoricalPowerMaximum = () => {
             {view === "current" ? "Ver mes anterior" : "Volver al mes actual"}
           </Button>
         </CardTitle>
-            {view === "current" ? "Ver mes anterior" : "Volver al mes actual"}
-          </Button>
-        </div>
       </CardHeader>
       <CardContent>
         {isLoading ? (
