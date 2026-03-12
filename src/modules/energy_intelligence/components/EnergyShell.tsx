@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
-import { ArrowLeft, BarChart2, TrendingUp, History, FileText, Settings, Zap } from 'lucide-react';
+import { ArrowLeft, BarChart2, FileText, Zap } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import PrivateRoute from '@/core/auth/components/PrivateRoute';
 import { cn } from '@/lib/utils';
