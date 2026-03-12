@@ -17,7 +17,7 @@ export const RiskManagementCard = ({
   riskLevel,
   modulatedDays,
 }: RiskManagementCardProps) => (
-  <Card className="w-full max-w-[385px] mx-auto">
+  <Card className="w-full">
     <CardHeader className="pb-2">
       <CardTitle className="text-center">Gestión de riesgo</CardTitle>
     </CardHeader>
