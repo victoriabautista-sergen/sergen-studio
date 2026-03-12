@@ -75,9 +75,6 @@ const EmpresaDetailPage = () => {
           <TabsContent value="modulos" className="mt-6">
             <EmpresaModulosTab companyId={company.id} />
           </TabsContent>
-          <TabsContent value="reportes" className="mt-6">
-            <EmpresaReportesTab companyId={company.id} />
-          </TabsContent>
           <TabsContent value="suscripcion" className="mt-6">
             <EmpresaSuscripcionTab companyId={company.id} />
           </TabsContent>
