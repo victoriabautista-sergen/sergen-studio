@@ -60,11 +60,10 @@ const EmpresaDetailPage = () => {
         </div>
 
         <Tabs defaultValue="info" className="w-full">
-          <TabsList className="grid w-full grid-cols-5">
+          <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="info">Información</TabsTrigger>
             <TabsTrigger value="usuarios">Usuarios</TabsTrigger>
             <TabsTrigger value="modulos">Módulos</TabsTrigger>
-            <TabsTrigger value="reportes">Reportes</TabsTrigger>
             <TabsTrigger value="suscripcion">Suscripción</TabsTrigger>
           </TabsList>
           <TabsContent value="info" className="mt-6">
