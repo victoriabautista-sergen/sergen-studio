@@ -10,10 +10,7 @@ interface EnergyShellProps {
 
 const navLinks = [
   { label: 'Control', href: '/energy-intelligence/control', icon: BarChart2 },
-  { label: 'Pronósticos', href: '/energy-intelligence/forecast', icon: TrendingUp },
-  { label: 'Histórico', href: '/energy-intelligence/historico', icon: History },
   { label: 'Reportes', href: '/energy-intelligence/reportes', icon: FileText },
-  { label: 'Configuración', href: '/energy-intelligence/configuracion', icon: Settings },
 ];
 
 const EnergyShell = ({ children }: EnergyShellProps) => {
