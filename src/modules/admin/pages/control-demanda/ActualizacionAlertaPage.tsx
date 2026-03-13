@@ -347,7 +347,7 @@ const ActualizacionAlertaPage = () => {
             </CardHeader>
             <CardContent>
               {/* Email preview matching reference */}
-              <div className="rounded-lg border overflow-hidden bg-white text-foreground">
+              <div id="preview-alerta" className="rounded-lg border overflow-hidden bg-white text-foreground">
                 {/* Header */}
                 <div className="flex flex-col items-center pt-10 pb-6 px-6">
                   <div className="h-16 w-16 rounded-full border-4 border-blue-400 flex items-center justify-center mb-4">
