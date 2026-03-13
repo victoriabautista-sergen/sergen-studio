@@ -8,6 +8,7 @@ import SolicitudesPage from "./pages/SolicitudesPage";
 import CompanyAdminPage from "./pages/CompanyAdminPage";
 import ModulosPage from "./pages/ModulosPage";
 import ModuloDetailPage from "./pages/ModuloDetailPage";
+import ControlDemandaConfigPage from "./pages/ControlDemandaConfigPage";
 
 export const adminRoutes: RouteObject[] = [
   { path: "/admin-panel", element: <AdminPanelHomePage /> },
@@ -17,6 +18,7 @@ export const adminRoutes: RouteObject[] = [
   { path: "/admin-panel/configuracion", element: <ConfiguracionPage /> },
   { path: "/admin-panel/solicitudes", element: <SolicitudesPage /> },
   { path: "/admin-panel/modulos", element: <ModulosPage /> },
+  { path: "/admin-panel/modulos/energy-intelligence", element: <ControlDemandaConfigPage /> },
   { path: "/admin-panel/modulos/:slug", element: <ModuloDetailPage /> },
   { path: "/admin-empresa", element: <CompanyAdminPage /> },
 ];
