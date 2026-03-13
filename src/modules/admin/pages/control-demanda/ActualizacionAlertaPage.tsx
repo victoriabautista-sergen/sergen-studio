@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -6,7 +6,8 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
-import { Mail, MessageSquare, Save, CheckCircle2, Loader2 } from "lucide-react";
+import { Mail, MessageSquare, Save, CheckCircle2, Loader2, X, Plus } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import AdminShell from "../../components/AdminShell";
@@ -40,7 +41,8 @@ const ActualizacionAlertaPage = () => {
     const lastDay = endOfMonth(new Date());
     return `Activo hasta el ${format(lastDay, "d 'de' MMMM", { locale: es })}.`;
   });
-  const [recipientEmail, setRecipientEmail] = useState("");
+  const [recipients, setRecipients] = useState<{ id: string; email: string }[]>([]);
+  const [newEmail, setNewEmail] = useState("");
   const [saving, setSaving] = useState(false);
   const [sendingEmail, setSendingEmail] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -96,6 +98,39 @@ const ActualizacionAlertaPage = () => {
     fetchSettings();
   }, []);
 
+  // Fetch saved recipients
+  const fetchRecipients = useCallback(async () => {
+    const { data, error } = await supabase
+      .from("alert_recipients")
+      .select("id, email")
+      .order("created_at", { ascending: true });
+    if (!error && data) setRecipients(data);
+  }, []);
+
+  useEffect(() => { fetchRecipients(); }, [fetchRecipients]);
+
+  const isValidEmail = (email: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+
+  const handleAddRecipient = async () => {
+    const email = newEmail.trim().toLowerCase();
+    if (!email) return;
+    if (!isValidEmail(email)) { toast.error("Formato de correo inválido"); return; }
+    if (recipients.some(r => r.email === email)) { toast.error("Este correo ya está en la lista"); return; }
+
+    const { data: session } = await supabase.auth.getSession();
+    const { error } = await supabase.from("alert_recipients").insert({ email, added_by: session.session?.user.id });
+    if (error) { toast.error("Error al agregar correo"); console.error(error); return; }
+    setNewEmail("");
+    fetchRecipients();
+    toast.success("Correo agregado");
+  };
+
+  const handleRemoveRecipient = async (id: string) => {
+    const { error } = await supabase.from("alert_recipients").delete().eq("id", id);
+    if (error) { toast.error("Error al eliminar correo"); return; }
+    setRecipients(prev => prev.filter(r => r.id !== id));
+  };
+
   const handleSave = async () => {
     setSaving(true);
     try {
@@ -133,18 +168,19 @@ const ActualizacionAlertaPage = () => {
   };
 
   const handleSendEmail = async () => {
-    if (!recipientEmail.trim()) {
-      toast.error("Ingresa un correo electrónico de destino");
+    if (recipients.length === 0) {
+      toast.error("Agrega al menos un correo de destino");
       return;
     }
 
     setSendingEmail(true);
     try {
       const todayFormatted = format(new Date(), "d 'de' MMMM 'del' yyyy", { locale: es });
+      const emails = recipients.map(r => r.email);
 
       const { data, error } = await supabase.functions.invoke("send-alert-notification", {
         body: {
-          to: recipientEmail.trim(),
+          to: emails,
           riskLevel,
           timeRange,
           demandaEstimada,
@@ -155,7 +191,7 @@ const ActualizacionAlertaPage = () => {
       });
 
       if (error) throw error;
-      toast.success("Correo enviado correctamente");
+      toast.success(`Correo enviado a ${emails.length} destinatario(s)`);
     } catch (err: any) {
       console.error(err);
       toast.error(err.message || "Error al enviar el correo");
@@ -264,15 +300,39 @@ const ActualizacionAlertaPage = () => {
 
               <Separator />
 
-              <div className="space-y-2">
-                <Label htmlFor="email">Correo de destino</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  value={recipientEmail}
-                  onChange={(e) => setRecipientEmail(e.target.value)}
-                  placeholder="usuario@empresa.com"
-                />
+              <div className="space-y-3">
+                <Label>Correos de destino</Label>
+                <div className="flex gap-2">
+                  <Input
+                    type="email"
+                    value={newEmail}
+                    onChange={(e) => setNewEmail(e.target.value)}
+                    placeholder="usuario@empresa.com"
+                    onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), handleAddRecipient())}
+                  />
+                  <Button type="button" size="sm" variant="outline" onClick={handleAddRecipient}>
+                    <Plus className="h-4 w-4" />
+                  </Button>
+                </div>
+                {recipients.length > 0 && (
+                  <div className="flex flex-wrap gap-2">
+                    {recipients.map((r) => (
+                      <Badge key={r.id} variant="secondary" className="gap-1 pl-3 pr-1 py-1.5 text-xs">
+                        {r.email}
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveRecipient(r.id)}
+                          className="ml-1 rounded-full p-0.5 hover:bg-muted-foreground/20 transition-colors"
+                        >
+                          <X className="h-3 w-3" />
+                        </button>
+                      </Badge>
+                    ))}
+                  </div>
+                )}
+                {recipients.length === 0 && (
+                  <p className="text-xs text-muted-foreground">No hay correos guardados.</p>
+                )}
               </div>
 
               <Button onClick={handleSave} disabled={saving} className="w-full">
