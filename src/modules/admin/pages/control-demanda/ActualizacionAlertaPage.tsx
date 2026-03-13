@@ -331,7 +331,7 @@ const ActualizacionAlertaPage = () => {
               <Separator />
 
               <div className="space-y-3">
-                <Label>Correos de destino</Label>
+                <Label className="text-base font-semibold">Correos de destino</Label>
                 <div className="flex gap-2">
                   <Input
                     type="email"
