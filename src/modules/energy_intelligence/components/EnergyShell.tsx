@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
-import { ArrowLeft, BarChart2, FileText, Zap } from 'lucide-react';
+import { ArrowLeft, BarChart2, FileText } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import PrivateRoute from '@/core/auth/components/PrivateRoute';
 import { cn } from '@/lib/utils';
@@ -27,8 +27,7 @@ const EnergyShell = ({ children }: EnergyShellProps) => {
                 <ArrowLeft className="h-5 w-5" />
               </Link>
             </Button>
-            <Zap className="h-5 w-5 text-primary" />
-            <span className="font-heading font-semibold text-lg tracking-tight">Energy Intelligence</span>
+            <span className="font-heading font-semibold text-lg tracking-tight">Control de Demanda</span>
           </div>
         </header>
 

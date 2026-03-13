@@ -27,10 +27,10 @@ const EnergyIntelligencePage = () => {
   ];
 
   return (
-    <ModuleLayout title="Energy Intelligence" icon={Zap}>
+    <ModuleLayout title="Control de Demanda">
       <div className="max-w-3xl mx-auto">
         <div className="text-center mb-8">
-          <h2 className="text-2xl font-heading font-bold">Energy Intelligence</h2>
+          <h2 className="text-2xl font-heading font-bold">Control de Demanda</h2>
           <p className="text-muted-foreground mt-2">
             Herramientas de control de demanda, pronóstico y monitoreo para la gestión energética industrial
           </p>
