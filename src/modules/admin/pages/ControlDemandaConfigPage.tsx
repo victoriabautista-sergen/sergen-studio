@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { CalendarDays, Settings, Bell, Cpu } from "lucide-react";
+import { CalendarDays, Settings, Bell, Cpu, AlertTriangle } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import AdminShell from "../components/AdminShell";
 
