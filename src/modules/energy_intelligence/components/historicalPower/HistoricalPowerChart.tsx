@@ -54,25 +54,27 @@ export const HistoricalPowerChart = ({ data, showTime = true }: HistoricalPowerC
   };
 
   return (
-    <ResponsiveContainer width="100%" height="100%">
-      <BarChart data={chartData} margin={{ top: 10, right: 20, bottom: 25, left: 60 }}>
-        <XAxis
-          dataKey="date"
-          angle={-45}
-          textAnchor="end"
-          height={50}
-          interval={calculateInterval()}
-          fontSize={10}
-          tickMargin={10}
-        />
-        <YAxis type="number" domain={[6500, 8000]} width={65} allowDataOverflow={true} fontSize={9} tickFormatter={(v: number) => `${v} MW`} />
-        <Tooltip formatter={formatTooltip} labelFormatter={formatTooltipLabel} />
-        <Bar dataKey="value" name="Potencia Máxima">
-          {chartData.map((entry, index) => (
-            <Cell key={`cell-${index}`} fill={entry.color} />
-          ))}
-        </Bar>
-      </BarChart>
-    </ResponsiveContainer>
+    <div className="w-full" style={{ minHeight: 420 }}>
+      <ResponsiveContainer width="100%" height={420}>
+        <BarChart data={chartData} margin={{ top: 10, right: 20, bottom: 30, left: 20 }}>
+          <XAxis
+            dataKey="date"
+            angle={-45}
+            textAnchor="end"
+            height={55}
+            interval={calculateInterval()}
+            fontSize={11}
+            tickMargin={10}
+          />
+          <YAxis type="number" domain={[6500, 8000]} width={70} allowDataOverflow={true} fontSize={11} tickFormatter={(v: number) => `${v} MW`} />
+          <Tooltip formatter={formatTooltip} labelFormatter={formatTooltipLabel} />
+          <Bar dataKey="value" name="Potencia Máxima" barSize={18}>
+            {chartData.map((entry, index) => (
+              <Cell key={`cell-${index}`} fill={entry.color} />
+            ))}
+          </Bar>
+        </BarChart>
+      </ResponsiveContainer>
+    </div>
   );
 };
