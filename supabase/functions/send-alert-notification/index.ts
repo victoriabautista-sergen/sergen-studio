@@ -151,7 +151,7 @@ Deno.serve(async (req) => {
       },
       body: JSON.stringify({
         from: "SERGEN <alertas@sergen-studio.lovable.app>",
-        to: [to],
+        to: recipients,
         subject: `Pronóstico de potencia máxima - ${fecha}`,
         html,
       }),
