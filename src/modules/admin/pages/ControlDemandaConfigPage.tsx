@@ -13,6 +13,14 @@ const SUB_MODULES = [
     available: true,
   },
   {
+    key: "alerta",
+    label: "Actualización de Alerta",
+    description: "Actualizar rango horario y riesgo de coincidencia. Enviar notificaciones.",
+    icon: AlertTriangle,
+    href: "/admin-panel/modulos/energy-intelligence/alerta",
+    available: true,
+  },
+  {
     key: "parametros",
     label: "Parámetros de control",
     description: "Definir umbrales y parámetros de demanda.",
