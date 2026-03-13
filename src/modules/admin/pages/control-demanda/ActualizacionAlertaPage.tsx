@@ -15,6 +15,7 @@ import { ForecastChart } from "@/modules/energy_intelligence/components/forecast
 import { useForecastData } from "@/modules/energy_intelligence/hooks/useForecastData";
 import { format, endOfMonth } from "date-fns";
 import { es } from "date-fns/locale";
+import html2canvas from "html2canvas";
 
 const RISK_OPTIONS = [
   { value: "BAJO", label: "Bajo", color: "bg-green-500" },
