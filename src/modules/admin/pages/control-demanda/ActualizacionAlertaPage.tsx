@@ -55,19 +55,19 @@ const ActualizacionAlertaPage = () => {
   // Auto-fill demanda estimada from latest COES data
   useEffect(() => {
     if (forecastData.length > 0 && !demandaEstimada) {
-      // Filter to peak hours (18:00 - 23:00) and find max reprogramado
+      // Filter to peak hours (18:00 - 23:00) and find max rango_superior
       const peakHourData = forecastData.filter(d => {
         const timePart = d.fecha?.split(' ')[1] || d.fecha;
         const hour = parseInt(timePart?.split(':')[0] || '0', 10);
         return hour >= 18 && hour < 23;
       });
       const source = peakHourData.length > 0 ? peakHourData : forecastData;
-      const maxReprogramado = source.reduce((max, d) => {
-        const val = d.reprogramado ?? 0;
+      const maxValue = source.reduce((max, d) => {
+        const val = d.rango_superior ?? 0;
         return val > max ? val : max;
       }, 0);
-      if (maxReprogramado > 0) {
-        setDemandaEstimada(maxReprogramado.toFixed(2));
+      if (maxValue > 0) {
+        setDemandaEstimada(maxValue.toFixed(2));
       }
     }
   }, [forecastData]);
