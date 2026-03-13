@@ -3,7 +3,6 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { LogOut } from "lucide-react";
-import { LogOut } from "lucide-react";
 import { useAuthContext } from "@/core/auth/context/AuthContext";
 import PrivateRoute from "@/core/auth/components/PrivateRoute";
 import { moduleRegistry } from "@/modules/registry";
