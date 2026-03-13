@@ -141,10 +141,10 @@ export const ForecastChart = forwardRef<HTMLDivElement, ForecastChartProps>(({ d
     const { viewBox } = props;
     const x = viewBox?.x ?? 0;
     const y = viewBox?.y ?? 0;
-    // Position label to the left or right depending on chart position
+    // Place below the peak point to avoid covering the chart lines
     const chartMidIndex = chartData.length / 2;
     const offsetX = peakPoint.index > chartMidIndex ? -230 : 10;
-    const offsetY = -10;
+    const offsetY = 20;
 
     return (
       <foreignObject x={x + offsetX} y={y + offsetY} width={240} height={120}>
