@@ -10,15 +10,11 @@ export const HistoricalPowerChart = forwardRef<HTMLDivElement, HistoricalPowerCh
   ({ chartData }, ref) => {
     const formatTooltip = (value: number) => [`${value.toFixed(2)} MW`, 'Potencia Máxima'];
 
-    const formatTooltipLabel = (label: string, payload: any[]) => {
+    const formatTooltipLabel = (_label: string, payload: any[]) => {
       if (payload && payload.length > 0) {
-        const data = payload[0].payload as ChartData;
-        const fullDate = new Date(data.fullDate);
-        const hours = fullDate.getUTCHours().toString().padStart(2, '0');
-        const minutes = fullDate.getUTCMinutes().toString().padStart(2, '0');
-        return `Fecha: ${label} | Hora: ${hours}:${minutes}`;
+        return `Fecha: ${payload[0].payload.date}`;
       }
-      return `Fecha: ${label}`;
+      return _label;
     };
 
     const calculateInterval = () => {
