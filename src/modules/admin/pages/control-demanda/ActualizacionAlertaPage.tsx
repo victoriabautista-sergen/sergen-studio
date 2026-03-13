@@ -98,6 +98,39 @@ const ActualizacionAlertaPage = () => {
     fetchSettings();
   }, []);
 
+  // Fetch saved recipients
+  const fetchRecipients = useCallback(async () => {
+    const { data, error } = await supabase
+      .from("alert_recipients")
+      .select("id, email")
+      .order("created_at", { ascending: true });
+    if (!error && data) setRecipients(data);
+  }, []);
+
+  useEffect(() => { fetchRecipients(); }, [fetchRecipients]);
+
+  const isValidEmail = (email: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+
+  const handleAddRecipient = async () => {
+    const email = newEmail.trim().toLowerCase();
+    if (!email) return;
+    if (!isValidEmail(email)) { toast.error("Formato de correo inválido"); return; }
+    if (recipients.some(r => r.email === email)) { toast.error("Este correo ya está en la lista"); return; }
+
+    const { data: session } = await supabase.auth.getSession();
+    const { error } = await supabase.from("alert_recipients").insert({ email, added_by: session.session?.user.id });
+    if (error) { toast.error("Error al agregar correo"); console.error(error); return; }
+    setNewEmail("");
+    fetchRecipients();
+    toast.success("Correo agregado");
+  };
+
+  const handleRemoveRecipient = async (id: string) => {
+    const { error } = await supabase.from("alert_recipients").delete().eq("id", id);
+    if (error) { toast.error("Error al eliminar correo"); return; }
+    setRecipients(prev => prev.filter(r => r.id !== id));
+  };
+
   const handleSave = async () => {
     setSaving(true);
     try {
