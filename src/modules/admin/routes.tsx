@@ -6,6 +6,8 @@ import UsuariosSergenPage from "./pages/UsuariosSergenPage";
 import ConfiguracionPage from "./pages/ConfiguracionPage";
 import SolicitudesPage from "./pages/SolicitudesPage";
 import CompanyAdminPage from "./pages/CompanyAdminPage";
+import ModulosPage from "./pages/ModulosPage";
+import ModuloDetailPage from "./pages/ModuloDetailPage";
 
 export const adminRoutes: RouteObject[] = [
   { path: "/admin-panel", element: <AdminPanelHomePage /> },
@@ -14,5 +16,7 @@ export const adminRoutes: RouteObject[] = [
   { path: "/admin-panel/usuarios-sergen", element: <UsuariosSergenPage /> },
   { path: "/admin-panel/configuracion", element: <ConfiguracionPage /> },
   { path: "/admin-panel/solicitudes", element: <SolicitudesPage /> },
+  { path: "/admin-panel/modulos", element: <ModulosPage /> },
+  { path: "/admin-panel/modulos/:slug", element: <ModuloDetailPage /> },
   { path: "/admin-empresa", element: <CompanyAdminPage /> },
 ];
