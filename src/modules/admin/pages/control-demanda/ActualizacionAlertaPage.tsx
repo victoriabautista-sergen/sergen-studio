@@ -52,13 +52,11 @@ const ActualizacionAlertaPage = () => {
     { label: "Actualización de Alerta" },
   ];
 
-  // Auto-fill demanda estimada from latest COES data
+  // Auto-fill demanda estimada: max reprogramado in peak hours (same logic as ForecastChart)
   useEffect(() => {
     if (forecastData.length > 0 && !demandaEstimada) {
-      // Filter to peak hours (18:00 - 23:00) and find max reprogramado
       const peakHourData = forecastData.filter(d => {
-        const timePart = d.fecha?.split(' ')[1] || d.fecha;
-        const hour = parseInt(timePart?.split(':')[0] || '0', 10);
+        const hour = new Date(d.fecha).getUTCHours();
         return hour >= 18 && hour < 23;
       });
       const source = peakHourData.length > 0 ? peakHourData : forecastData;
