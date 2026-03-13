@@ -15,8 +15,16 @@ function buildEmailHtml(d: {
   demandaEstimada: string;
   mensaje: string;
   estatus: string;
+  graficoBase64?: string;
 }) {
-  const isLow = d.riskLevel === "BAJO";
+  const chartSection = d.graficoBase64
+    ? `<tr>
+        <td style="padding:0 24px 16px;">
+          <p style="margin:0 0 8px;font-size:13px;font-weight:700;color:#374151;">Pronóstico de Demanda</p>
+          <img src="${d.graficoBase64}" alt="Gráfico de pronóstico" style="width:100%;max-width:552px;height:auto;border-radius:8px;border:1px solid #e5e7eb;" />
+        </td>
+      </tr>`
+    : "";
 
   return `<!DOCTYPE html>
 <html lang="es">
@@ -65,6 +73,9 @@ function buildEmailHtml(d: {
 
   <!-- Divider -->
   <tr><td style="padding:0 24px;"><hr style="border:none;border-top:1px solid #e5e7eb;margin:0;"></td></tr>
+
+  <!-- Chart -->
+  ${chartSection}
 
   <!-- Data Table -->
   <tr>

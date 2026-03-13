@@ -15,6 +15,7 @@ import { ForecastChart } from "@/modules/energy_intelligence/components/forecast
 import { useForecastData } from "@/modules/energy_intelligence/hooks/useForecastData";
 import { format, endOfMonth } from "date-fns";
 import { es } from "date-fns/locale";
+import html2canvas from "html2canvas";
 
 const RISK_OPTIONS = [
   { value: "BAJO", label: "Bajo", color: "bg-green-500" },
@@ -177,6 +178,18 @@ const ActualizacionAlertaPage = () => {
     try {
       const emails = recipients.map(r => r.email);
 
+      // Capture chart as base64 image
+      let graficoBase64 = "";
+      const grafico = document.getElementById("grafico-pronostico");
+      if (grafico) {
+        try {
+          const canvas = await html2canvas(grafico, { useCORS: true, scale: 2 });
+          graficoBase64 = canvas.toDataURL("image/png");
+        } catch (chartErr) {
+          console.warn("No se pudo capturar el gráfico:", chartErr);
+        }
+      }
+
       const { data, error } = await supabase.functions.invoke("send-email-alert", {
         body: {
           emails,
@@ -189,6 +202,7 @@ const ActualizacionAlertaPage = () => {
             demandaEstimada: demandaEstimada || "—",
             mensaje,
             estatus,
+            graficoBase64,
           },
         },
       });
@@ -369,7 +383,7 @@ const ActualizacionAlertaPage = () => {
                   <p className="text-sm font-semibold text-gray-700 mb-3 px-1">
                     Pronóstico de Demanda - {format(new Date(), "dd/MM/yyyy")}
                   </p>
-                  <div className="h-[450px]">
+                <div id="grafico-pronostico" className="h-[450px]">
                     <ForecastChart data={forecastData} onPeakValueChange={handlePeakValueChange} />
                   </div>
                 </div>
