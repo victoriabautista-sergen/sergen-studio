@@ -61,6 +61,9 @@ export const ModulationCalendarCard = ({
           onMonthChange={onMonthChange}
           className="rounded-md border"
           locale={es}
+          classNames={{
+            day_today: "",
+          }}
           components={{
             Day: ({ date: d }) => (
               <div
