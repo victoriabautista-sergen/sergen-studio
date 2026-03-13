@@ -1,17 +1,44 @@
-import { Link, useSearchParams } from "react-router-dom";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { CalendarDays } from "lucide-react";
+import { Link } from "react-router-dom";
+import { CalendarDays, Settings, Bell, Cpu } from "lucide-react";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import AdminShell from "../components/AdminShell";
-import ModulacionTab from "../components/control-demanda/ModulacionTab";
 
 const SUB_MODULES = [
-  { key: "modulacion", label: "Modulación", icon: CalendarDays },
-] as const;
+  {
+    key: "modulacion",
+    label: "Modulación",
+    description: "Configurar qué días están modulados en el calendario.",
+    icon: CalendarDays,
+    href: "/admin-panel/modulos/energy-intelligence/modulacion",
+    available: true,
+  },
+  {
+    key: "parametros",
+    label: "Parámetros de control",
+    description: "Definir umbrales y parámetros de demanda.",
+    icon: Settings,
+    href: "#",
+    available: false,
+  },
+  {
+    key: "alertas",
+    label: "Configuración de alertas",
+    description: "Gestionar reglas de alertas automáticas.",
+    icon: Bell,
+    href: "#",
+    available: false,
+  },
+  {
+    key: "reglas",
+    label: "Reglas automáticas",
+    description: "Crear reglas de modulación automática.",
+    icon: Cpu,
+    href: "#",
+    available: false,
+  },
+];
 
 const ControlDemandaConfigPage = () => {
-  const [searchParams, setSearchParams] = useSearchParams();
-  const activeTab = searchParams.get("tab") || "modulacion";
-
   const breadcrumbs = [
     { label: "Configuración de Módulos", href: "/admin-panel/modulos" },
     { label: "Control de Demanda" },
@@ -23,27 +50,47 @@ const ControlDemandaConfigPage = () => {
         <div>
           <h2 className="text-2xl font-semibold">Control de Demanda</h2>
           <p className="text-sm text-muted-foreground mt-1">
-            Configuración del módulo de Control de Demanda.
+            Selecciona un submódulo para configurar.
           </p>
         </div>
 
-        <Tabs
-          value={activeTab}
-          onValueChange={(v) => setSearchParams({ tab: v })}
-        >
-          <TabsList>
-            {SUB_MODULES.map(({ key, label, icon: Icon }) => (
-              <TabsTrigger key={key} value={key} className="gap-2">
-                <Icon className="h-4 w-4" />
-                {label}
-              </TabsTrigger>
-            ))}
-          </TabsList>
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {SUB_MODULES.map(({ key, label, description, icon: Icon, href, available }) => {
+            const content = (
+              <Card
+                key={key}
+                className={
+                  available
+                    ? "transition-shadow hover:shadow-md cursor-pointer"
+                    : "opacity-50 cursor-not-allowed"
+                }
+              >
+                <CardHeader className="flex flex-row items-center gap-4 pb-2">
+                  <div className="p-2.5 rounded-lg bg-primary/10">
+                    <Icon className="h-5 w-5 text-primary" />
+                  </div>
+                  <CardTitle className="text-base">{label}</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <CardDescription>{description}</CardDescription>
+                  {!available && (
+                    <span className="text-xs text-muted-foreground mt-2 block">Próximamente</span>
+                  )}
+                </CardContent>
+              </Card>
+            );
 
-          <TabsContent value="modulacion" className="mt-6">
-            <ModulacionTab />
-          </TabsContent>
-        </Tabs>
+            if (available) {
+              return (
+                <Link key={key} to={href} className="block">
+                  {content}
+                </Link>
+              );
+            }
+
+            return <div key={key}>{content}</div>;
+          })}
+        </div>
       </div>
     </AdminShell>
   );
