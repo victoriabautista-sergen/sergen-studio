@@ -67,7 +67,7 @@ const PeakTooltipContent = ({ point }: { point: PeakPoint }) => (
   </div>
 );
 
-export const ForecastChart = forwardRef<HTMLDivElement, ForecastChartProps>(({ data, showPeakLabel = true }, ref) => {
+export const ForecastChart = forwardRef<HTMLDivElement, ForecastChartProps>(({ data, showPeakLabel = true, onPeakValueChange }, ref) => {
   const formatTime = (isoString: string): string => {
     const fecha = new Date(isoString);
     const hora = fecha.getUTCHours().toString().padStart(2, '0');
