@@ -95,6 +95,7 @@ const ModulacionPage = () => {
             modulationData={modulationData}
             onDateSelect={handleDateSelect}
             onMonthChange={setSelectedMonth}
+            editable
           />
         </div>
       </div>

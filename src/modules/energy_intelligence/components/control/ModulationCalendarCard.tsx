@@ -1,6 +1,6 @@
 import { Calendar } from '@/components/ui/calendar';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { format, isAfter, isSameMonth } from 'date-fns';
+import { format, isAfter, isSameMonth, isSameDay } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
 import { ModulationLegend } from '../shared/ModulationLegend';
@@ -11,6 +11,7 @@ interface ModulationCalendarCardProps {
   modulationData: { date: string; is_modulated: boolean }[];
   onDateSelect: (date: Date | undefined) => void;
   onMonthChange: (date: Date) => void;
+  editable?: boolean;
 }
 
 export const ModulationCalendarCard = ({
@@ -19,6 +20,7 @@ export const ModulationCalendarCard = ({
   modulationData,
   onDateSelect,
   onMonthChange,
+  editable = false,
 }: ModulationCalendarCardProps) => {
   const isDateInFuture = (d: Date): boolean => {
     const today = new Date();
@@ -27,21 +29,21 @@ export const ModulationCalendarCard = ({
   };
 
   const getDateClassName = (d: Date): string => {
-    if (!isSameMonth(d, selectedMonth)) return 'text-white';
+    if (!isSameMonth(d, selectedMonth)) return 'text-muted-foreground/30';
 
     const dateStr = format(d, 'yyyy-MM-dd');
     const modulationDay = modulationData.find(md => md.date === dateStr);
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
-    if (isAfter(d, today)) return 'text-gray-400';
+    if (isAfter(d, today)) return 'text-muted-foreground';
     if (modulationDay?.is_modulated) return 'text-red-500 font-bold';
     return 'text-green-500';
   };
 
-  const handleDateSelect = (selectedDate: Date | undefined) => {
-    if (selectedDate && !isDateInFuture(selectedDate)) {
-      onDateSelect(selectedDate);
+  const handleDayClick = (dayDate: Date) => {
+    if (!isDateInFuture(dayDate) && isSameMonth(dayDate, selectedMonth)) {
+      onDateSelect(dayDate);
     }
   };
 
@@ -54,22 +56,34 @@ export const ModulationCalendarCard = ({
         <Calendar
           mode="single"
           selected={date}
-          onSelect={handleDateSelect}
+          onSelect={() => {}}
           month={selectedMonth}
           onMonthChange={onMonthChange}
           className="rounded-md border"
           locale={es}
           components={{
-            Day: ({ date: dayDate }: { date: Date; displayMonth: Date }) => (
-              <div
-                className={cn(
-                  'h-9 w-9 p-0 font-normal flex items-center justify-center',
-                  getDateClassName(dayDate)
-                )}
-              >
-                {dayDate.getDate()}
-              </div>
-            ),
+            Day: ({ date: dayDate }: { date: Date; displayMonth: Date }) => {
+              const isFuture = isDateInFuture(dayDate);
+              const isCurrentMonth = isSameMonth(dayDate, selectedMonth);
+              const isClickable = editable && !isFuture && isCurrentMonth;
+
+              return (
+                <button
+                  type="button"
+                  onClick={() => handleDayClick(dayDate)}
+                  disabled={!isClickable && editable}
+                  className={cn(
+                    'h-9 w-9 p-0 font-normal flex items-center justify-center rounded-md transition-colors',
+                    getDateClassName(dayDate),
+                    isClickable && 'hover:bg-accent cursor-pointer',
+                    !isClickable && editable && 'cursor-not-allowed',
+                    date && isSameDay(dayDate, date) && 'ring-2 ring-primary'
+                  )}
+                >
+                  {dayDate.getDate()}
+                </button>
+              );
+            },
           }}
         />
         <ModulationLegend />
