@@ -1,0 +1,1 @@
+UPDATE modules SET name = 'Control de Demanda' WHERE slug = 'energy-intelligence';
