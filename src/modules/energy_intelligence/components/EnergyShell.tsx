@@ -27,8 +27,7 @@ const EnergyShell = ({ children }: EnergyShellProps) => {
                 <ArrowLeft className="h-5 w-5" />
               </Link>
             </Button>
-            <Zap className="h-5 w-5 text-primary" />
-            <span className="font-heading font-semibold text-lg tracking-tight">Energy Intelligence</span>
+            <span className="font-heading font-semibold text-lg tracking-tight">Control de Demanda</span>
           </div>
         </header>
 
