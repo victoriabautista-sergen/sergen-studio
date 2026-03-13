@@ -44,7 +44,7 @@ export const HistoricalPowerMaximum = () => {
             <p className="text-muted-foreground">No hay datos disponibles</p>
           </div>
         ) : (
-          <HistoricalPowerChart chartData={chartData} />
+          <HistoricalPowerChart data={data} showTime={canSeeTime} />
         )}
       </CardContent>
     </Card>
