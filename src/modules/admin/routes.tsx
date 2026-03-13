@@ -10,6 +10,7 @@ import ModulosPage from "./pages/ModulosPage";
 import ModuloDetailPage from "./pages/ModuloDetailPage";
 import ControlDemandaConfigPage from "./pages/ControlDemandaConfigPage";
 import ModulacionPage from "./pages/control-demanda/ModulacionPage";
+import ActualizacionAlertaPage from "./pages/control-demanda/ActualizacionAlertaPage";
 
 export const adminRoutes: RouteObject[] = [
   { path: "/admin-panel", element: <AdminPanelHomePage /> },
