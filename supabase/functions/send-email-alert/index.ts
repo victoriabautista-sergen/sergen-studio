@@ -74,6 +74,9 @@ function buildEmailHtml(d: {
   <!-- Divider -->
   <tr><td style="padding:0 24px;"><hr style="border:none;border-top:1px solid #e5e7eb;margin:0;"></td></tr>
 
+  <!-- Chart -->
+  ${chartSection}
+
   <!-- Data Table -->
   <tr>
     <td style="padding:24px;">
