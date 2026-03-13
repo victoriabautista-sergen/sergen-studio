@@ -39,7 +39,7 @@ export const HistoricalPowerMaximum = () => {
               <p className="font-medium">{error}</p>
             </div>
           </div>
-        ) : chartData.length === 0 ? (
+        ) : data.length === 0 ? (
           <div className="flex items-center justify-center h-64">
             <p className="text-muted-foreground">No hay datos disponibles</p>
           </div>
