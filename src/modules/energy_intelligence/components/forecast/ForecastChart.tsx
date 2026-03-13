@@ -115,7 +115,8 @@ export const ForecastChart = forwardRef<HTMLDivElement, ForecastChartProps>(({ d
 
   // Find peak reprogramado within peak hours
   const peakPoint = useMemo<PeakPoint | null>(() => {
-    if (!showPeakLabel) return null;
+    // Always compute peak for callback, even if label is hidden
+    let maxVal = -Infinity;
     let maxVal = -Infinity;
     let maxIdx = -1;
     chartData.forEach((d, i) => {
