@@ -34,6 +34,7 @@ const ActualizacionAlertaPage = () => {
   const [timeRange, setTimeRange] = useState("18:00 - 23:00");
   const [riskLevel, setRiskLevel] = useState("MEDIO");
   const [demandaEstimada, setDemandaEstimada] = useState("");
+  const [demandaManuallyEdited, setDemandaManuallyEdited] = useState(false);
   const [mensaje, setMensaje] = useState("Solo usar equipos indispensables.");
   const [estatus, setEstatus] = useState(() => {
     const lastDay = endOfMonth(new Date());
@@ -52,23 +53,12 @@ const ActualizacionAlertaPage = () => {
     { label: "Actualización de Alerta" },
   ];
 
-  // Auto-fill demanda estimada: max reprogramado in peak hours (same logic as ForecastChart)
-  useEffect(() => {
-    if (forecastData.length > 0 && !demandaEstimada) {
-      const peakHourData = forecastData.filter(d => {
-        const hour = new Date(d.fecha).getUTCHours();
-        return hour >= 18 && hour < 23;
-      });
-      const source = peakHourData.length > 0 ? peakHourData : forecastData;
-      const maxValue = source.reduce((max, d) => {
-        const val = d.reprogramado ?? 0;
-        return val > max ? val : max;
-      }, 0);
-      if (maxValue > 0) {
-        setDemandaEstimada(maxValue.toFixed(2));
-      }
+  // Callback from ForecastChart: use exact same peak value as the chart label
+  const handlePeakValueChange = (value: number | null) => {
+    if (value != null && !demandaManuallyEdited) {
+      setDemandaEstimada(value.toFixed(2));
     }
-  }, [forecastData]);
+  };
 
   // Auto-set mensaje based on risk level
   useEffect(() => {
@@ -247,7 +237,7 @@ const ActualizacionAlertaPage = () => {
                 <Input
                   id="demanda"
                   value={demandaEstimada}
-                  onChange={(e) => setDemandaEstimada(e.target.value)}
+                  onChange={(e) => { setDemandaEstimada(e.target.value); setDemandaManuallyEdited(true); }}
                   placeholder="8173.83"
                 />
               </div>
@@ -315,7 +305,7 @@ const ActualizacionAlertaPage = () => {
                     Pronóstico de Demanda - {format(new Date(), "dd/MM/yyyy")}
                   </p>
                   <div className="h-[450px]">
-                    <ForecastChart data={forecastData} />
+                    <ForecastChart data={forecastData} onPeakValueChange={handlePeakValueChange} />
                   </div>
                 </div>
 

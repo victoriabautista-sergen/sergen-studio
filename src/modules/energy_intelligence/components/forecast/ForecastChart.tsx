@@ -1,10 +1,11 @@
-import React, { forwardRef, useMemo } from 'react';
+import React, { forwardRef, useEffect, useMemo } from 'react';
 import { LineChart, Line, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer, ReferenceArea, ReferenceDot, Label } from 'recharts';
 import { CoesData } from '../../types/forecast';
 
 interface ForecastChartProps {
   data: CoesData[];
   showPeakLabel?: boolean;
+  onPeakValueChange?: (value: number | null) => void;
 }
 
 const PEAK_START = 18;
@@ -66,7 +67,7 @@ const PeakTooltipContent = ({ point }: { point: PeakPoint }) => (
   </div>
 );
 
-export const ForecastChart = forwardRef<HTMLDivElement, ForecastChartProps>(({ data, showPeakLabel = true }, ref) => {
+export const ForecastChart = forwardRef<HTMLDivElement, ForecastChartProps>(({ data, showPeakLabel = true, onPeakValueChange }, ref) => {
   const formatTime = (isoString: string): string => {
     const fecha = new Date(isoString);
     const hora = fecha.getUTCHours().toString().padStart(2, '0');
@@ -114,7 +115,6 @@ export const ForecastChart = forwardRef<HTMLDivElement, ForecastChartProps>(({ d
 
   // Find peak reprogramado within peak hours
   const peakPoint = useMemo<PeakPoint | null>(() => {
-    if (!showPeakLabel) return null;
     let maxVal = -Infinity;
     let maxIdx = -1;
     chartData.forEach((d, i) => {
@@ -134,7 +134,12 @@ export const ForecastChart = forwardRef<HTMLDivElement, ForecastChartProps>(({ d
       rangoSuperior: d['Rango Superior'],
       fechaLabel: d.fecha_label,
     };
-  }, [chartData, showPeakLabel]);
+  }, [chartData]);
+
+  // Notify parent of peak value
+  useEffect(() => {
+    onPeakValueChange?.(peakPoint?.reprogramacion ?? null);
+  }, [peakPoint, onPeakValueChange]);
 
   const CustomPeakLabel = (props: any) => {
     if (!peakPoint) return null;
@@ -183,7 +188,7 @@ export const ForecastChart = forwardRef<HTMLDivElement, ForecastChartProps>(({ d
           <Line type="monotone" dataKey="Rango Inferior" stroke={SERIES_COLORS.rangoInferior} strokeWidth={1} strokeDasharray="5 5" dot={false} connectNulls />
           <Line type="monotone" dataKey="Rango Superior" stroke={SERIES_COLORS.rangoSuperior} strokeWidth={1} strokeDasharray="5 5" dot={false} connectNulls />
           <Line type="monotone" dataKey="Demanda Real" stroke={SERIES_COLORS.demandaReal} strokeWidth={2} dot={false} connectNulls />
-          {peakPoint && (
+          {showPeakLabel && peakPoint && (
             <ReferenceDot
               x={peakPoint.time}
               y={peakPoint.reprogramacion}
