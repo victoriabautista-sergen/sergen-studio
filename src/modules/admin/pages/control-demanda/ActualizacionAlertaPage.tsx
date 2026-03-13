@@ -176,10 +176,21 @@ const ActualizacionAlertaPage = () => {
     setSendingEmail(true);
     try {
       const emails = recipients.map(r => r.email);
-      const htmlContent = document.getElementById("preview-alerta")?.innerHTML || "";
 
       const { data, error } = await supabase.functions.invoke("send-email-alert", {
-        body: { emails, htmlContent },
+        body: {
+          emails,
+          templateData: {
+            fecha: todayFormatted,
+            riskLevel,
+            riskColor: getRiskColor(riskLevel),
+            riskLabel: RISK_OPTIONS.find(o => o.value === riskLevel)?.label || riskLevel,
+            timeRange: isLowRisk ? "Uso libre de equipos" : timeRange,
+            demandaEstimada: demandaEstimada || "—",
+            mensaje,
+            estatus,
+          },
+        },
       });
 
       if (error) throw error;
