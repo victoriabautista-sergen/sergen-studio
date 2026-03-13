@@ -2,11 +2,13 @@ import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Loader2, AlertCircle } from 'lucide-react';
 import { useHistoricalPowerData, getMonthLabel, type ViewMode } from '../historicalPower/useHistoricalPowerData';
-import { HistoricalPowerChart } from './HistoricalPowerChart';
+import { HistoricalPowerChart } from '../historicalPower/HistoricalPowerChart';
 import { Button } from '@/components/ui/button';
-import type { ChartData } from '../../types';
+import { useAuthContext } from '@/core/auth/context/AuthContext';
 
 export const HistoricalPowerMaximum = () => {
+  const { role } = useAuthContext();
+  const canSeeTime = role === "super_admin" || role === "technical_user";
   const [view, setView] = useState<ViewMode>("current");
   const { data, isLoading, error } = useHistoricalPowerData(view);
 
