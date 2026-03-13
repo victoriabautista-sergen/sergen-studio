@@ -12,26 +12,6 @@ export const HistoricalPowerMaximum = () => {
   const [view, setView] = useState<ViewMode>("current");
   const { data, isLoading, error } = useHistoricalPowerData(view);
 
-  const chartData: ChartData[] = (() => {
-    if (data.length === 0) return [];
-    const sorted = [...data].sort((a, b) => b.ejecutado - a.ejecutado);
-    const maxVal = sorted[0]?.ejecutado;
-    const secondVal = sorted[1]?.ejecutado;
-    return data.map((item) => ({
-      date: (() => { const parts = item.fecha.split("-"); return `${parts[2]}/${parts[1]}`; })(),
-      value: item.ejecutado,
-      fullDate: item.fecha,
-      hora: item.hora,
-      minuto: item.minuto,
-      color:
-        item.ejecutado === maxVal
-          ? '#D9001B'
-          : item.ejecutado === secondVal
-          ? '#F97316'
-          : '#156082',
-    }));
-  })();
-
   return (
     <Card className="w-full h-full flex flex-col">
       <CardHeader className="pb-4">
