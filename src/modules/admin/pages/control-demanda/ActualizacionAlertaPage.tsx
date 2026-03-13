@@ -365,6 +365,21 @@ const ActualizacionAlertaPage = () => {
                 )}
               </div>
 
+              <Separator />
+
+              <div className="space-y-3">
+                <Label className="text-base font-semibold">Destinatarios ocultos (BCC)</Label>
+                <Textarea
+                  value={bccEmails}
+                  onChange={(e) => setBccEmails(e.target.value)}
+                  placeholder="operaciones@empresa.com, mantenimiento@empresa.com"
+                  rows={2}
+                />
+                <p className="text-xs text-muted-foreground">
+                  Ingrese múltiples correos separados por coma. Se guardan automáticamente.
+                </p>
+              </div>
+
               <Button onClick={handleSave} disabled={saving} className="w-full">
                 <Save className="h-4 w-4 mr-2" />
                 {saving ? "Guardando..." : "Guardar cambios en Vista General"}
