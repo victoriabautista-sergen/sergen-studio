@@ -188,7 +188,7 @@ export const ForecastChart = forwardRef<HTMLDivElement, ForecastChartProps>(({ d
           <Line type="monotone" dataKey="Rango Inferior" stroke={SERIES_COLORS.rangoInferior} strokeWidth={1} strokeDasharray="5 5" dot={false} connectNulls />
           <Line type="monotone" dataKey="Rango Superior" stroke={SERIES_COLORS.rangoSuperior} strokeWidth={1} strokeDasharray="5 5" dot={false} connectNulls />
           <Line type="monotone" dataKey="Demanda Real" stroke={SERIES_COLORS.demandaReal} strokeWidth={2} dot={false} connectNulls />
-          {peakPoint && (
+          {showPeakLabel && peakPoint && (
             <ReferenceDot
               x={peakPoint.time}
               y={peakPoint.reprogramacion}

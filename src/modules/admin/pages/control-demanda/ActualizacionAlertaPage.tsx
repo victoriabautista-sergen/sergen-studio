@@ -52,23 +52,13 @@ const ActualizacionAlertaPage = () => {
     { label: "Actualización de Alerta" },
   ];
 
-  // Auto-fill demanda estimada: max reprogramado in peak hours (same logic as ForecastChart)
-  useEffect(() => {
-    if (forecastData.length > 0 && !demandaEstimada) {
-      const peakHourData = forecastData.filter(d => {
-        const hour = new Date(d.fecha).getUTCHours();
-        return hour >= 18 && hour < 23;
-      });
-      const source = peakHourData.length > 0 ? peakHourData : forecastData;
-      const maxValue = source.reduce((max, d) => {
-        const val = d.reprogramado ?? 0;
-        return val > max ? val : max;
-      }, 0);
-      if (maxValue > 0) {
-        setDemandaEstimada(maxValue.toFixed(2));
-      }
+  // Callback from ForecastChart: use exact same peak value as the chart label
+  const handlePeakValueChange = (value: number | null) => {
+    if (value != null && !demandaManuallyEdited) {
+      setDemandaEstimada(value.toFixed(2));
     }
-  }, [forecastData]);
+  };
+  const [demandaManuallyEdited, setDemandaManuallyEdited] = useState(false);
 
   // Auto-set mensaje based on risk level
   useEffect(() => {
