@@ -1,14 +1,19 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
-import { Mail, MessageSquare, Save } from "lucide-react";
+import { Mail, MessageSquare, Save, CheckCircle2, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import AdminShell from "../../components/AdminShell";
+import { ForecastChart } from "@/modules/energy_intelligence/components/forecast/ForecastChart";
+import { useForecastData } from "@/modules/energy_intelligence/hooks/useForecastData";
+import { format } from "date-fns";
+import { es } from "date-fns/locale";
 
 const RISK_OPTIONS = [
   { value: "BAJO", label: "Bajo", color: "bg-green-500" },
@@ -28,14 +33,42 @@ const getRiskColor = (level: string) => {
 const ActualizacionAlertaPage = () => {
   const [timeRange, setTimeRange] = useState("18:00 - 23:00");
   const [riskLevel, setRiskLevel] = useState("MEDIO");
+  const [demandaEstimada, setDemandaEstimada] = useState("");
+  const [mensaje, setMensaje] = useState("Solo usar equipos indispensables.");
+  const [estatus, setEstatus] = useState("Activo hasta el 31 de marzo.");
+  const [recipientEmail, setRecipientEmail] = useState("");
   const [saving, setSaving] = useState(false);
+  const [sendingEmail, setSendingEmail] = useState(false);
   const [loading, setLoading] = useState(true);
+
+  const { data: forecastData } = useForecastData();
 
   const breadcrumbs = [
     { label: "Configuración de Módulos", href: "/admin-panel/modulos" },
     { label: "Control de Demanda", href: "/admin-panel/modulos/energy-intelligence" },
     { label: "Actualización de Alerta" },
   ];
+
+  // Auto-fill demanda estimada from latest COES data
+  useEffect(() => {
+    if (forecastData.length > 0 && !demandaEstimada) {
+      const latestWithReprogramado = [...forecastData]
+        .reverse()
+        .find(d => d.reprogramado !== null && d.reprogramado !== undefined);
+      if (latestWithReprogramado?.reprogramado) {
+        setDemandaEstimada(latestWithReprogramado.reprogramado.toFixed(2));
+      }
+    }
+  }, [forecastData]);
+
+  // Auto-set mensaje based on risk level
+  useEffect(() => {
+    if (riskLevel === "BAJO") {
+      setMensaje("El día de hoy puede usar sus equipos sin rango horario de restricción.");
+    } else {
+      setMensaje("Solo usar equipos indispensables.");
+    }
+  }, [riskLevel]);
 
   useEffect(() => {
     const fetchSettings = async () => {
@@ -67,7 +100,6 @@ const ActualizacionAlertaPage = () => {
   const handleSave = async () => {
     setSaving(true);
     try {
-      // Try to get existing record
       const { data: existing } = await supabase
         .from("forecast_settings")
         .select("id")
@@ -88,10 +120,7 @@ const ActualizacionAlertaPage = () => {
       } else {
         const { error } = await supabase
           .from("forecast_settings")
-          .insert({
-            risk_level: riskLevel,
-            modulation_time: timeRange,
-          });
+          .insert({ risk_level: riskLevel, modulation_time: timeRange });
         if (error) throw error;
       }
 
@@ -104,20 +133,44 @@ const ActualizacionAlertaPage = () => {
     }
   };
 
-  const handleSendEmail = () => {
-    toast.info("Funcionalidad de envío por correo próximamente");
+  const handleSendEmail = async () => {
+    if (!recipientEmail.trim()) {
+      toast.error("Ingresa un correo electrónico de destino");
+      return;
+    }
+
+    setSendingEmail(true);
+    try {
+      const todayFormatted = format(new Date(), "d 'de' MMMM 'del' yyyy", { locale: es });
+
+      const { data, error } = await supabase.functions.invoke("send-alert-notification", {
+        body: {
+          to: recipientEmail.trim(),
+          riskLevel,
+          timeRange,
+          demandaEstimada,
+          mensaje,
+          estatus,
+          fecha: todayFormatted,
+        },
+      });
+
+      if (error) throw error;
+      toast.success("Correo enviado correctamente");
+    } catch (err: any) {
+      console.error(err);
+      toast.error(err.message || "Error al enviar el correo");
+    } finally {
+      setSendingEmail(false);
+    }
   };
 
   const handleSendWhatsApp = () => {
     toast.info("Funcionalidad de envío por WhatsApp próximamente");
   };
 
-  const today = new Date().toLocaleDateString("es-PE", {
-    weekday: "long",
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  });
+  const todayFormatted = format(new Date(), "d 'de' MMMM 'del' yyyy", { locale: es });
+  const isLowRisk = riskLevel === "BAJO";
 
   if (loading) {
     return (
@@ -135,7 +188,7 @@ const ActualizacionAlertaPage = () => {
         <div>
           <h2 className="text-2xl font-semibold">Actualización de Alerta</h2>
           <p className="text-sm text-muted-foreground mt-1">
-            Actualiza la información de alerta que se mostrará en la Vista General de Control de Demanda.
+            Actualiza la información de alerta y envía notificaciones a los usuarios.
           </p>
         </div>
 
@@ -145,20 +198,7 @@ const ActualizacionAlertaPage = () => {
             <CardHeader>
               <CardTitle className="text-lg">Configuración de Alerta</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="space-y-2">
-                <Label htmlFor="timeRange">Rango horario</Label>
-                <Input
-                  id="timeRange"
-                  value={timeRange}
-                  onChange={(e) => setTimeRange(e.target.value)}
-                  placeholder="18:00 - 23:00"
-                />
-                <p className="text-xs text-muted-foreground">
-                  Ejemplo: 18:30 pm – 20:30 pm
-                </p>
-              </div>
-
+            <CardContent className="space-y-5">
               <div className="space-y-2">
                 <Label>Riesgo de coincidencia</Label>
                 <Select value={riskLevel} onValueChange={setRiskLevel}>
@@ -178,64 +218,149 @@ const ActualizacionAlertaPage = () => {
                 </Select>
               </div>
 
+              <div className="space-y-2">
+                <Label htmlFor="timeRange">Rango horario</Label>
+                <Input
+                  id="timeRange"
+                  value={timeRange}
+                  onChange={(e) => setTimeRange(e.target.value)}
+                  placeholder="06:30 pm - 08:30 pm"
+                />
+                {isLowRisk && (
+                  <p className="text-xs text-muted-foreground">
+                    En riesgo bajo se mostrará "Uso libre de equipos" en lugar del rango horario.
+                  </p>
+                )}
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="demanda">Demanda estimada (MW)</Label>
+                <Input
+                  id="demanda"
+                  value={demandaEstimada}
+                  onChange={(e) => setDemandaEstimada(e.target.value)}
+                  placeholder="8173.83"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="mensaje">Mensaje (Recuerde)</Label>
+                <Textarea
+                  id="mensaje"
+                  value={mensaje}
+                  onChange={(e) => setMensaje(e.target.value)}
+                  rows={2}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="estatus">Estatus</Label>
+                <Input
+                  id="estatus"
+                  value={estatus}
+                  onChange={(e) => setEstatus(e.target.value)}
+                  placeholder="Activo hasta el 31 de marzo."
+                />
+              </div>
+
+              <Separator />
+
+              <div className="space-y-2">
+                <Label htmlFor="email">Correo de destino</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  value={recipientEmail}
+                  onChange={(e) => setRecipientEmail(e.target.value)}
+                  placeholder="usuario@empresa.com"
+                />
+              </div>
+
               <Button onClick={handleSave} disabled={saving} className="w-full">
                 <Save className="h-4 w-4 mr-2" />
-                {saving ? "Guardando..." : "Guardar cambios"}
+                {saving ? "Guardando..." : "Guardar cambios en Vista General"}
               </Button>
             </CardContent>
           </Card>
 
-          {/* Vista previa */}
+          {/* Vista previa del correo */}
           <Card>
             <CardHeader>
               <CardTitle className="text-lg">Vista previa del mensaje</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="rounded-lg border p-4 space-y-4 bg-muted/30">
-                <div className="text-center">
-                  <h3 className="font-semibold text-lg">Pronóstico de Demanda</h3>
-                  <p className="text-sm text-muted-foreground capitalize">{today}</p>
+            <CardContent>
+              {/* Email preview matching reference */}
+              <div className="rounded-lg border overflow-hidden bg-white text-foreground">
+                {/* Header */}
+                <div className="flex flex-col items-center pt-8 pb-4 px-6">
+                  <div className="h-16 w-16 rounded-full border-4 border-blue-400 flex items-center justify-center mb-4">
+                    <CheckCircle2 className="h-8 w-8 text-blue-500" />
+                  </div>
+                  <h3 className="text-xl font-bold text-gray-900">Pronóstico de potencia máxima</h3>
+                  <p className="text-lg font-bold text-gray-900 mt-2 capitalize">{todayFormatted}</p>
                 </div>
 
-                <Separator />
-
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium">Rango horario</span>
-                    <span
-                      className="text-sm font-semibold text-white px-3 py-1 rounded"
-                      style={{ backgroundColor: "#156082" }}
-                    >
-                      {timeRange}
-                    </span>
-                  </div>
-
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium">Riesgo de coincidencia</span>
-                    <span
-                      className="text-sm font-semibold text-white px-3 py-1 rounded"
-                      style={{ backgroundColor: getRiskColor(riskLevel) }}
-                    >
-                      {riskLevel}
-                    </span>
+                {/* Chart */}
+                <div className="px-4 pb-4">
+                  <p className="text-sm font-semibold text-gray-700 mb-1 px-2">
+                    Pronóstico de Demanda - {format(new Date(), "dd/MM/yyyy")}
+                  </p>
+                  <div className="h-[250px]">
+                    <ForecastChart data={forecastData} />
                   </div>
                 </div>
 
-                <Separator />
+                {/* Rango horario + Demanda estimada */}
+                <div className="px-6 pb-2">
+                  <div className="flex justify-between text-sm font-bold text-gray-800 border-b border-gray-300 pb-2">
+                    <span>Rango horario</span>
+                    <span>Demanda estimada</span>
+                  </div>
+                  <div className="flex justify-between text-sm py-3 border-b border-gray-300">
+                    <span className="text-gray-700">
+                      {isLowRisk ? "Uso libre de equipos" : timeRange}
+                    </span>
+                    <span className="text-gray-700">{demandaEstimada || "—"}</span>
+                  </div>
+                </div>
 
-                <p className="text-xs text-muted-foreground text-center">
-                  Esta información se mostrará en la Vista General de Control de Demanda.
-                </p>
+                {/* Recuerde + Estatus */}
+                <div className="px-6 py-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <p className="text-sm font-bold text-gray-800">Recuerde:</p>
+                      <p className="text-sm text-gray-600 mt-1">{mensaje}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm font-bold text-gray-800">Estatus:</p>
+                      <p className="text-sm text-gray-600 mt-1">{estatus}</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Footer banner */}
+                <div
+                  className="py-4 text-center text-white font-bold text-lg tracking-wider"
+                  style={{ backgroundColor: "hsl(35, 91%, 55%)" }}
+                >
+                  USUARIO ACTIVO
+                </div>
               </div>
 
-              <div className="flex gap-3">
+              {/* Send buttons */}
+              <div className="flex gap-3 mt-4">
                 <Button
                   variant="outline"
                   className="flex-1"
                   onClick={handleSendEmail}
+                  disabled={sendingEmail}
                 >
-                  <Mail className="h-4 w-4 mr-2" />
-                  Enviar correo
+                  {sendingEmail ? (
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  ) : (
+                    <Mail className="h-4 w-4 mr-2" />
+                  )}
+                  {sendingEmail ? "Enviando..." : "Enviar correo"}
                 </Button>
                 <Button
                   variant="outline"
