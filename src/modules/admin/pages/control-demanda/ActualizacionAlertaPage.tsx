@@ -292,7 +292,7 @@ const ActualizacionAlertaPage = () => {
               {/* Email preview matching reference */}
               <div className="rounded-lg border overflow-hidden bg-white text-foreground">
                 {/* Header */}
-                <div className="flex flex-col items-center pt-8 pb-4 px-6">
+                <div className="flex flex-col items-center pt-10 pb-6 px-6">
                   <div className="h-16 w-16 rounded-full border-4 border-blue-400 flex items-center justify-center mb-4">
                     <CheckCircle2 className="h-8 w-8 text-blue-500" />
                   </div>
@@ -301,46 +301,46 @@ const ActualizacionAlertaPage = () => {
                 </div>
 
                 {/* Chart */}
-                <div className="px-4 pb-4">
-                  <p className="text-sm font-semibold text-gray-700 mb-1 px-2">
+                <div className="px-5 pt-2 pb-6">
+                  <p className="text-sm font-semibold text-gray-700 mb-3 px-1">
                     Pronóstico de Demanda - {format(new Date(), "dd/MM/yyyy")}
                   </p>
-                  <div className="h-[250px]">
+                  <div className="h-[450px]">
                     <ForecastChart data={forecastData} />
                   </div>
                 </div>
 
                 {/* Rango horario + Demanda estimada */}
-                <div className="px-6 pb-2">
-                  <div className="flex justify-between text-sm font-bold text-gray-800 border-b border-gray-300 pb-2">
+                <div className="px-6 pt-4 pb-4">
+                  <div className="grid grid-cols-2 text-sm font-bold text-gray-800 border-b-2 border-gray-300 pb-3">
                     <span>Rango horario</span>
-                    <span>Demanda estimada</span>
+                    <span className="text-right">Demanda estimada</span>
                   </div>
-                  <div className="flex justify-between text-sm py-3 border-b border-gray-300">
+                  <div className="grid grid-cols-2 text-sm py-4 border-b border-gray-200">
                     <span className="text-gray-700">
                       {isLowRisk ? "Uso libre de equipos" : timeRange}
                     </span>
-                    <span className="text-gray-700">{demandaEstimada || "—"}</span>
+                    <span className="text-gray-700 text-right">{demandaEstimada || "—"}</span>
                   </div>
                 </div>
 
                 {/* Recuerde + Estatus */}
-                <div className="px-6 py-4">
-                  <div className="grid grid-cols-2 gap-4">
+                <div className="px-6 py-5">
+                  <div className="grid grid-cols-2 gap-6">
                     <div>
                       <p className="text-sm font-bold text-gray-800">Recuerde:</p>
-                      <p className="text-sm text-gray-600 mt-1">{mensaje}</p>
+                      <p className="text-sm text-gray-600 mt-2">{mensaje}</p>
                     </div>
                     <div>
                       <p className="text-sm font-bold text-gray-800">Estatus:</p>
-                      <p className="text-sm text-gray-600 mt-1">{estatus}</p>
+                      <p className="text-sm text-gray-600 mt-2">{estatus}</p>
                     </div>
                   </div>
                 </div>
 
                 {/* Footer banner */}
                 <div
-                  className="py-4 text-center text-white font-bold text-lg tracking-wider"
+                  className="mt-6 py-5 text-center text-white font-bold text-lg tracking-wider"
                   style={{ backgroundColor: "hsl(35, 91%, 55%)" }}
                 >
                   USUARIO ACTIVO
