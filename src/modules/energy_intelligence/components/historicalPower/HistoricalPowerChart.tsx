@@ -7,11 +7,19 @@ interface HistoricalPowerChartProps {
 }
 
 export const HistoricalPowerChart = ({ data, showTime = true }: HistoricalPowerChartProps) => {
-  const maxValue = data.length > 0 ? Math.max(...data.map((d) => d.ejecutado)) : 0;
+  const sorted = data.length > 0 ? [...data].sort((a, b) => b.ejecutado - a.ejecutado) : [];
+  const maxValue = sorted[0]?.ejecutado ?? 0;
+  const secondValue = sorted[1]?.ejecutado ?? 0;
 
   const formatDate = (fecha: string) => {
     const parts = fecha.split("-");
     return `${parts[2]}/${parts[1]}`;
+  };
+
+  const getColor = (value: number) => {
+    if (value === maxValue) return "#8B0000";
+    if (value === secondValue) return "#F97316";
+    return "#156082";
   };
 
   const chartData = data.map((item) => ({
@@ -19,6 +27,7 @@ export const HistoricalPowerChart = ({ data, showTime = true }: HistoricalPowerC
     value: item.ejecutado,
     hora: item.hora,
     minuto: item.minuto,
+    color: getColor(item.ejecutado),
   }));
 
   const calculateInterval = () => {
@@ -60,7 +69,7 @@ export const HistoricalPowerChart = ({ data, showTime = true }: HistoricalPowerC
         <Tooltip formatter={formatTooltip} labelFormatter={formatTooltipLabel} />
         <Bar dataKey="value" name="Potencia Máxima">
           {chartData.map((entry, index) => (
-            <Cell key={`cell-${index}`} fill={entry.value === maxValue ? "#8B0000" : "#1f77b4"} />
+            <Cell key={`cell-${index}`} fill={entry.color} />
           ))}
         </Bar>
       </BarChart>
