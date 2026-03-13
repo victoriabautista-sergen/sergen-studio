@@ -10,15 +10,11 @@ export const HistoricalPowerChart = forwardRef<HTMLDivElement, HistoricalPowerCh
   ({ chartData }, ref) => {
     const formatTooltip = (value: number) => [`${value.toFixed(2)} MW`, 'Potencia Máxima'];
 
-    const formatTooltipLabel = (label: string, payload: any[]) => {
+    const formatTooltipLabel = (_label: string, payload: any[]) => {
       if (payload && payload.length > 0) {
-        const data = payload[0].payload as ChartData;
-        const fullDate = new Date(data.fullDate);
-        const hours = fullDate.getUTCHours().toString().padStart(2, '0');
-        const minutes = fullDate.getUTCMinutes().toString().padStart(2, '0');
-        return `Fecha: ${label} | Hora: ${hours}:${minutes}`;
+        return `Fecha: ${payload[0].payload.date}`;
       }
-      return `Fecha: ${label}`;
+      return _label;
     };
 
     const calculateInterval = () => {
@@ -31,7 +27,7 @@ export const HistoricalPowerChart = forwardRef<HTMLDivElement, HistoricalPowerCh
     return (
       <div ref={ref} className="flex-1 min-h-[390px]">
         <ResponsiveContainer width="100%" height="100%">
-          <BarChart data={chartData} margin={{ top: 5, right: 20, bottom: 20, left: 20 }}>
+          <BarChart data={chartData} margin={{ top: 10, right: 20, bottom: 25, left: 60 }}>
             <XAxis
               dataKey="date"
               angle={-45}
@@ -41,7 +37,7 @@ export const HistoricalPowerChart = forwardRef<HTMLDivElement, HistoricalPowerCh
               fontSize={10}
               tickMargin={10}
             />
-            <YAxis type="number" domain={[5000, 8000]} allowDataOverflow={true} tickFormatter={(v: number) => `${v} MW`} />
+            <YAxis type="number" domain={[5000, 8000]} width={70} allowDataOverflow={true} tickFormatter={(v: number) => `${v} MW`} />
             <Tooltip formatter={formatTooltip} labelFormatter={formatTooltipLabel} />
             <Bar dataKey="value" name="Potencia Máxima">
               {chartData.map((entry, index) => (
