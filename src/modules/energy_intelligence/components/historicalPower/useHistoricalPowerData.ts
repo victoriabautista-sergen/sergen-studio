@@ -56,7 +56,7 @@ export const useHistoricalPowerData = (viewMode: ViewMode = "current") => {
 
       const { data: rows, error: dbError } = await externalSupabase
         .from("potencia_hora_punta" as any)
-        .select("fecha, potencia_maxima")
+        .select("fecha, potencia_maxima, hora, minuto")
         .gte("fecha", from)
         .lte("fecha", to)
         .order("fecha", { ascending: true });
@@ -71,6 +71,8 @@ export const useHistoricalPowerData = (viewMode: ViewMode = "current") => {
       const converted: PowerDataPoint[] = (rows as any[]).map((item) => ({
         fecha: item.fecha.split("T")[0],
         ejecutado: Number(item.potencia_maxima),
+        hora: item.hora != null ? Number(item.hora) : undefined,
+        minuto: item.minuto != null ? Number(item.minuto) : undefined,
       }));
 
       setData(converted);
