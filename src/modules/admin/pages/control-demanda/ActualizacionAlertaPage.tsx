@@ -34,6 +34,7 @@ const ActualizacionAlertaPage = () => {
   const [timeRange, setTimeRange] = useState("18:00 - 23:00");
   const [riskLevel, setRiskLevel] = useState("MEDIO");
   const [demandaEstimada, setDemandaEstimada] = useState("");
+  const [demandaManuallyEdited, setDemandaManuallyEdited] = useState(false);
   const [mensaje, setMensaje] = useState("Solo usar equipos indispensables.");
   const [estatus, setEstatus] = useState(() => {
     const lastDay = endOfMonth(new Date());
@@ -58,7 +59,6 @@ const ActualizacionAlertaPage = () => {
       setDemandaEstimada(value.toFixed(2));
     }
   };
-  const [demandaManuallyEdited, setDemandaManuallyEdited] = useState(false);
 
   // Auto-set mensaje based on risk level
   useEffect(() => {
