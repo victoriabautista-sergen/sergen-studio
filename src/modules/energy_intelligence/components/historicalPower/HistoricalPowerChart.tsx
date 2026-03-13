@@ -9,16 +9,15 @@ export const HistoricalPowerChart = ({ data }: HistoricalPowerChartProps) => {
   const maxValue = data.length > 0 ? Math.max(...data.map((d) => d.ejecutado)) : 0;
 
   const formatDate = (fecha: string) => {
-    const d = new Date(fecha);
-    const dd = String(d.getUTCDate()).padStart(2, "0");
-    const mm = String(d.getUTCMonth() + 1).padStart(2, "0");
-    return `${dd}/${mm}`;
+    const parts = fecha.split("-");
+    return `${parts[2]}/${parts[1]}`;
   };
 
   const chartData = data.map((item) => ({
     date: formatDate(item.fecha),
     value: item.ejecutado,
-    fullDate: item.fecha,
+    hora: item.hora,
+    minuto: item.minuto,
   }));
 
   const calculateInterval = () => {
@@ -32,13 +31,20 @@ export const HistoricalPowerChart = ({ data }: HistoricalPowerChartProps) => {
 
   const formatTooltipLabel = (_label: string, payload: any[]) => {
     if (payload && payload.length > 0) {
-      return `Fecha: ${payload[0].payload.date}`;
+      const entry = payload[0].payload;
+      const dateStr = `Fecha: ${entry.date}`;
+      if (entry.hora != null && entry.minuto != null) {
+        const h = String(entry.hora).padStart(2, "0");
+        const m = String(entry.minuto).padStart(2, "0");
+        return `${dateStr} | Hora: ${h}:${m}`;
+      }
+      return dateStr;
     }
     return _label;
   };
 
   return (
-    <ResponsiveContainer width="100%" height={390}>
+    <ResponsiveContainer width="100%" height="100%">
       <BarChart data={chartData} margin={{ top: 10, right: 20, bottom: 25, left: 60 }}>
         <XAxis
           dataKey="date"
