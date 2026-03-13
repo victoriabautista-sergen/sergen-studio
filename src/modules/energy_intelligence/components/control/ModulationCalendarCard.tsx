@@ -46,11 +46,11 @@ export const ModulationCalendarCard = ({
   };
 
   return (
-    <Card className="w-full flex-1 h-full">
+    <Card className="w-full h-full flex flex-col">
       <CardHeader className="pb-2">
-        <CardTitle className="text-center">Calendario</CardTitle>
+        <CardTitle>Calendario</CardTitle>
       </CardHeader>
-      <CardContent className="flex flex-col items-center">
+      <CardContent className="flex flex-col items-center flex-1">
         <Calendar
           mode="single"
           selected={date}

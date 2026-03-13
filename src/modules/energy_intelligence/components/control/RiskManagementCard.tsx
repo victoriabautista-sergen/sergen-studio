@@ -19,7 +19,7 @@ export const RiskManagementCard = ({
 }: RiskManagementCardProps) => (
   <Card className="w-full">
     <CardHeader className="pb-2">
-      <CardTitle className="text-center">Gestión de riesgo</CardTitle>
+      <CardTitle>Gestión de riesgo</CardTitle>
     </CardHeader>
     <CardContent className="space-y-4">
       <div className="space-y-4 flex flex-col items-center">
