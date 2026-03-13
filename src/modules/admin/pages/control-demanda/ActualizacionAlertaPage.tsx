@@ -41,7 +41,8 @@ const ActualizacionAlertaPage = () => {
     const lastDay = endOfMonth(new Date());
     return `Activo hasta el ${format(lastDay, "d 'de' MMMM", { locale: es })}.`;
   });
-  const [recipientEmail, setRecipientEmail] = useState("");
+  const [recipients, setRecipients] = useState<{ id: string; email: string }[]>([]);
+  const [newEmail, setNewEmail] = useState("");
   const [saving, setSaving] = useState(false);
   const [sendingEmail, setSendingEmail] = useState(false);
   const [loading, setLoading] = useState(true);
