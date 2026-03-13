@@ -89,7 +89,7 @@ const ForecastPage = () => {
           {data.length > 0 ? (
             <>
               <div className="bg-white p-4 rounded-lg shadow h-[500px]">
-                <ForecastChart data={data} />
+                <ForecastChart data={data} showPeakLabel={false} />
               </div>
               <div className="bg-white p-4 rounded-lg shadow overflow-x-auto">
                 <ForecastTable data={data} />

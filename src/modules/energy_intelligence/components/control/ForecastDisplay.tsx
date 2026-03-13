@@ -27,7 +27,7 @@ export const ForecastDisplay = forwardRef<HTMLDivElement, ForecastDisplayProps>(
 
     return (
       <div ref={ref}>
-        <ForecastChart data={data} />
+        <ForecastChart data={data} showPeakLabel={false} />
       </div>
     );
   }
