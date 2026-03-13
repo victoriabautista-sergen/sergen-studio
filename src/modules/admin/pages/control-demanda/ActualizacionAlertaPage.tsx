@@ -35,7 +35,10 @@ const ActualizacionAlertaPage = () => {
   const [riskLevel, setRiskLevel] = useState("MEDIO");
   const [demandaEstimada, setDemandaEstimada] = useState("");
   const [mensaje, setMensaje] = useState("Solo usar equipos indispensables.");
-  const [estatus, setEstatus] = useState("Activo hasta el 31 de marzo.");
+  const [estatus, setEstatus] = useState(() => {
+    const lastDay = endOfMonth(new Date());
+    return `Activo hasta el ${format(lastDay, "d 'de' MMMM", { locale: es })}.`;
+  });
   const [recipientEmail, setRecipientEmail] = useState("");
   const [saving, setSaving] = useState(false);
   const [sendingEmail, setSendingEmail] = useState(false);
