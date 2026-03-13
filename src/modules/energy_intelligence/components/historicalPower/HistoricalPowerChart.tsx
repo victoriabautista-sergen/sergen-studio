@@ -56,7 +56,7 @@ export const HistoricalPowerChart = ({ data, showTime = true }: HistoricalPowerC
   return (
     <div className="w-full" style={{ minHeight: 420 }}>
       <ResponsiveContainer width="100%" height={420}>
-        <BarChart data={chartData} margin={{ top: 10, right: 20, bottom: 30, left: 20 }}>
+        <BarChart data={chartData} margin={{ top: 10, right: 10, bottom: 30, left: 0 }}>
           <XAxis
             dataKey="date"
             angle={-45}
@@ -66,9 +66,9 @@ export const HistoricalPowerChart = ({ data, showTime = true }: HistoricalPowerC
             fontSize={11}
             tickMargin={10}
           />
-          <YAxis type="number" domain={[6500, 8000]} width={70} allowDataOverflow={true} fontSize={11} tickFormatter={(v: number) => `${v} MW`} />
+          <YAxis type="number" domain={[7000, 8500]} width={55} allowDataOverflow={true} fontSize={11} tickLine={false} tickFormatter={(v: number) => `${v}`} />
           <Tooltip formatter={formatTooltip} labelFormatter={formatTooltipLabel} />
-          <Bar dataKey="value" name="Potencia Máxima" barSize={18}>
+          <Bar dataKey="value" name="Potencia Máxima">
             {chartData.map((entry, index) => (
               <Cell key={`cell-${index}`} fill={entry.color} />
             ))}
