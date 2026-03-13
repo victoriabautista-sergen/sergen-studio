@@ -144,7 +144,7 @@ export const ForecastChart = forwardRef<HTMLDivElement, ForecastChartProps>(({ d
     // Place below the peak point to avoid covering the chart lines
     const chartMidIndex = chartData.length / 2;
     const offsetX = peakPoint.index > chartMidIndex ? -230 : 10;
-    const offsetY = 20;
+    const offsetY = 60;
 
     return (
       <foreignObject x={x + offsetX} y={y + offsetY} width={240} height={120}>
