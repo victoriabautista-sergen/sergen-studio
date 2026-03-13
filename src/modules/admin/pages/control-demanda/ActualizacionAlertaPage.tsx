@@ -185,6 +185,7 @@ const ActualizacionAlertaPage = () => {
         {
           to_email: emails,
           contenido_html,
+          email: emails,
         },
         "mBkq_wWBW-7NRC2Ed"
       );
