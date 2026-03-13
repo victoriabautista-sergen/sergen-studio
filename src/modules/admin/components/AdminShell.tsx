@@ -2,7 +2,6 @@ import { Link } from "react-router-dom";
 import { ArrowLeft, ChevronRight, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import PrivateRoute from "@/core/auth/components/PrivateRoute";
-import sergenLogo from "@/assets/sergen-logo.png";
 
 export interface BreadcrumbItem {
   label: string;
