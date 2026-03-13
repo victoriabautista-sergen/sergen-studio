@@ -237,7 +237,7 @@ const ActualizacionAlertaPage = () => {
                 <Input
                   id="demanda"
                   value={demandaEstimada}
-                  onChange={(e) => setDemandaEstimada(e.target.value)}
+                  onChange={(e) => { setDemandaEstimada(e.target.value); setDemandaManuallyEdited(true); }}
                   placeholder="8173.83"
                 />
               </div>
