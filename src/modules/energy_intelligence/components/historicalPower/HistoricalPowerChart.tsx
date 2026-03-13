@@ -6,7 +6,7 @@ interface HistoricalPowerChartProps {
   showTime?: boolean;
 }
 
-export const HistoricalPowerChart = ({ data }: HistoricalPowerChartProps) => {
+export const HistoricalPowerChart = ({ data, showTime = true }: HistoricalPowerChartProps) => {
   const maxValue = data.length > 0 ? Math.max(...data.map((d) => d.ejecutado)) : 0;
 
   const formatDate = (fecha: string) => {
