@@ -175,19 +175,15 @@ const ActualizacionAlertaPage = () => {
 
     setSendingEmail(true);
     try {
-      const emails = recipients.map(r => r.email).join(",");
-      const contenido_html = document.getElementById("preview-alerta")?.innerHTML || "";
+      const emails = recipients.map(r => r.email);
+      const htmlContent = document.getElementById("preview-alerta")?.innerHTML || "";
 
-      await emailjs.send(
-        "service_a8ahzue",
-        "template_m313hgp",
-        {
-          to_email: emails,
-          contenido_html,
-          email: emails,
-        },
-        "mBkq_wWBW-7NRC2Ed"
-      );
+      const { data, error } = await supabase.functions.invoke("send-email-alert", {
+        body: { emails, htmlContent },
+      });
+
+      if (error) throw error;
+      if (!data?.success) throw new Error("Algunos correos no se enviaron");
 
       toast.success(`Correo enviado a ${recipients.length} destinatario(s)`);
     } catch (err: any) {
