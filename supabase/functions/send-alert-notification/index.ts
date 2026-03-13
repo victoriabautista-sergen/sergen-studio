@@ -128,7 +128,9 @@ Deno.serve(async (req) => {
     const { to, riskLevel, timeRange, demandaEstimada, mensaje, estatus, fecha } =
       await req.json();
 
-    if (!to) {
+    // Support both single email string and array of emails
+    const recipients: string[] = Array.isArray(to) ? to : [to];
+    if (recipients.length === 0 || !recipients[0]) {
       throw new Error("El campo 'to' (correo de destino) es requerido.");
     }
 

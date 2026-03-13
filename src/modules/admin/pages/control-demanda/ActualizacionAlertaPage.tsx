@@ -300,15 +300,39 @@ const ActualizacionAlertaPage = () => {
 
               <Separator />
 
-              <div className="space-y-2">
-                <Label htmlFor="email">Correo de destino</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  value={recipientEmail}
-                  onChange={(e) => setRecipientEmail(e.target.value)}
-                  placeholder="usuario@empresa.com"
-                />
+              <div className="space-y-3">
+                <Label>Correos de destino</Label>
+                <div className="flex gap-2">
+                  <Input
+                    type="email"
+                    value={newEmail}
+                    onChange={(e) => setNewEmail(e.target.value)}
+                    placeholder="usuario@empresa.com"
+                    onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), handleAddRecipient())}
+                  />
+                  <Button type="button" size="sm" variant="outline" onClick={handleAddRecipient}>
+                    <Plus className="h-4 w-4" />
+                  </Button>
+                </div>
+                {recipients.length > 0 && (
+                  <div className="flex flex-wrap gap-2">
+                    {recipients.map((r) => (
+                      <Badge key={r.id} variant="secondary" className="gap-1 pl-3 pr-1 py-1.5 text-xs">
+                        {r.email}
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveRecipient(r.id)}
+                          className="ml-1 rounded-full p-0.5 hover:bg-muted-foreground/20 transition-colors"
+                        >
+                          <X className="h-3 w-3" />
+                        </button>
+                      </Badge>
+                    ))}
+                  </div>
+                )}
+                {recipients.length === 0 && (
+                  <p className="text-xs text-muted-foreground">No hay correos guardados.</p>
+                )}
               </div>
 
               <Button onClick={handleSave} disabled={saving} className="w-full">
