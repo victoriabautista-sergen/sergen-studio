@@ -336,7 +336,7 @@ const ActualizacionAlertaPage = () => {
 
                 {/* Recuerde + Estatus */}
                 <div className="px-6 py-6">
-                  <div className="grid grid-cols-[1fr_1fr] gap-16">
+                  <div className="grid grid-cols-[3fr_2fr] gap-16">
                     <div className="pr-4 border-r border-gray-200">
                       <p className="text-sm font-bold text-gray-800">Recuerde:</p>
                       <p className="text-sm text-gray-600 mt-2 leading-relaxed">{mensaje}</p>
