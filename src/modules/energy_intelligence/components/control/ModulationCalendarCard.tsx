@@ -46,7 +46,7 @@ export const ModulationCalendarCard = ({
   };
 
   return (
-    <Card className="w-full flex-1">
+    <Card className="w-full flex-1 h-full">
       <CardHeader className="pb-2">
         <CardTitle className="text-center">Calendario</CardTitle>
       </CardHeader>

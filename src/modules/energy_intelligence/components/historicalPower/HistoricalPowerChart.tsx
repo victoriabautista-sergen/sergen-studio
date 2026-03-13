@@ -39,7 +39,7 @@ export const HistoricalPowerChart = ({ data }: HistoricalPowerChartProps) => {
 
   return (
     <ResponsiveContainer width="100%" height={390}>
-      <BarChart data={chartData} margin={{ top: 5, right: 20, bottom: 20, left: 20 }}>
+      <BarChart data={chartData} margin={{ top: 10, right: 20, bottom: 25, left: 60 }}>
         <XAxis
           dataKey="date"
           angle={-45}
@@ -49,7 +49,7 @@ export const HistoricalPowerChart = ({ data }: HistoricalPowerChartProps) => {
           fontSize={10}
           tickMargin={10}
         />
-        <YAxis type="number" domain={[5000, 8000]} allowDataOverflow={true} tickFormatter={(v: number) => `${v} MW`} />
+        <YAxis type="number" domain={[5000, 8000]} width={70} allowDataOverflow={true} tickFormatter={(v: number) => `${v} MW`} />
         <Tooltip formatter={formatTooltip} labelFormatter={formatTooltipLabel} />
         <Bar dataKey="value" name="Potencia Máxima">
           {chartData.map((entry, index) => (
