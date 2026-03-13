@@ -23,8 +23,7 @@ const AdminShell = ({ children, breadcrumbs = [] }: AdminShellProps) => (
               <ArrowLeft className="h-5 w-5" />
             </Link>
           </Button>
-          <img src={sergenLogo} alt="SERGEN" className="h-7" />
-          <span className="text-muted-foreground">/</span>
+          <span className="font-heading font-bold text-foreground">SERGEN</span>
           <Shield className="h-5 w-5 text-muted-foreground" />
           <span className="font-heading font-semibold">SERGEN Admin Panel</span>
         </div>

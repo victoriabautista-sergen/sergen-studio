@@ -34,7 +34,7 @@ const DashboardContent = () => {
       <header className="border-b bg-card">
         <div className="container flex items-center justify-between h-16">
           <div className="flex items-center gap-3">
-            <img src={sergenLogo} alt="SERGEN" className="h-8" />
+            <span className="font-heading font-bold text-lg text-foreground">SERGEN</span>
           </div>
           <div className="flex items-center gap-2">
             <span className="text-sm text-muted-foreground hidden sm:inline">
