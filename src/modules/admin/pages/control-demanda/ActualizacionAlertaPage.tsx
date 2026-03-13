@@ -177,14 +177,14 @@ const ActualizacionAlertaPage = () => {
     setSendingEmail(true);
     try {
       const emails = recipients.map(r => r.email).join(",");
+      const contenido_html = document.getElementById("preview-alerta")?.innerHTML || "";
 
       await emailjs.send(
         "service_a8ahzue",
-        "template_sergen_alerta",
+        "template_m313hgp",
         {
-          potencia: demandaEstimada,
-          hora: timeRange,
           to_email: emails,
+          contenido_html,
         },
         "mBkq_wWBW-7NRC2Ed"
       );
