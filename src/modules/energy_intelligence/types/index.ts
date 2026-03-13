@@ -40,6 +40,8 @@ export interface ChartData {
   value: number;
   fullDate: string;
   color: string;
+  hora?: number;
+  minuto?: number;
 }
 
 export interface Document {

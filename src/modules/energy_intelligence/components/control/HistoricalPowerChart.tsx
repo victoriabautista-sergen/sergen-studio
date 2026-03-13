@@ -12,7 +12,14 @@ export const HistoricalPowerChart = forwardRef<HTMLDivElement, HistoricalPowerCh
 
     const formatTooltipLabel = (_label: string, payload: any[]) => {
       if (payload && payload.length > 0) {
-        return `Fecha: ${payload[0].payload.date}`;
+        const entry = payload[0].payload as ChartData;
+        const dateStr = `Fecha: ${entry.date}`;
+        if (entry.hora != null && entry.minuto != null) {
+          const h = String(entry.hora).padStart(2, '0');
+          const m = String(entry.minuto).padStart(2, '0');
+          return `${dateStr} | Hora: ${h}:${m}`;
+        }
+        return dateStr;
       }
       return _label;
     };

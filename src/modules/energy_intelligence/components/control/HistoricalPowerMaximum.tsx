@@ -16,9 +16,11 @@ export const HistoricalPowerMaximum = () => {
     const maxVal = sorted[0]?.ejecutado;
     const secondVal = sorted[1]?.ejecutado;
     return data.map((item) => ({
-      date: (() => { const [, month, day] = item.fecha.split("T")[0].split("-"); return `${day}/${month}`; })(),
+      date: (() => { const parts = item.fecha.split("-"); return `${parts[2]}/${parts[1]}`; })(),
       value: item.ejecutado,
       fullDate: item.fecha,
+      hora: item.hora,
+      minuto: item.minuto,
       color:
         item.ejecutado === maxVal
           ? '#D9001B'
