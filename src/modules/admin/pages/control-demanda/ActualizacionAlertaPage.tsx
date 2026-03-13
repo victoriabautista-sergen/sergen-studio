@@ -9,6 +9,7 @@ import { Separator } from "@/components/ui/separator";
 import { Mail, MessageSquare, Save, CheckCircle2, Loader2, X, Plus } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
+import emailjs from "@emailjs/browser";
 import { toast } from "sonner";
 import AdminShell from "../../components/AdminShell";
 import { ForecastChart } from "@/modules/energy_intelligence/components/forecast/ForecastChart";
