@@ -178,6 +178,18 @@ const ActualizacionAlertaPage = () => {
     try {
       const emails = recipients.map(r => r.email);
 
+      // Capture chart as base64 image
+      let graficoBase64 = "";
+      const grafico = document.getElementById("grafico-pronostico");
+      if (grafico) {
+        try {
+          const canvas = await html2canvas(grafico, { useCORS: true, scale: 2 });
+          graficoBase64 = canvas.toDataURL("image/png");
+        } catch (chartErr) {
+          console.warn("No se pudo capturar el gráfico:", chartErr);
+        }
+      }
+
       const { data, error } = await supabase.functions.invoke("send-email-alert", {
         body: {
           emails,
@@ -190,6 +202,7 @@ const ActualizacionAlertaPage = () => {
             demandaEstimada: demandaEstimada || "—",
             mensaje,
             estatus,
+            graficoBase64,
           },
         },
       });
