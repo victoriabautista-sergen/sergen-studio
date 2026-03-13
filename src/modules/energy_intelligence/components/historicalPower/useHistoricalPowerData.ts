@@ -7,6 +7,8 @@ export type ViewMode = "current" | "previous";
 export interface PowerDataPoint {
   fecha: string;
   ejecutado: number;
+  hora?: number;
+  minuto?: number;
 }
 
 const MONTH_NAMES = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
