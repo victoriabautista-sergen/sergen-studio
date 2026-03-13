@@ -5,6 +5,7 @@ import { CoesData } from '../../types/forecast';
 interface ForecastChartProps {
   data: CoesData[];
   showPeakLabel?: boolean;
+  onPeakValueChange?: (value: number | null) => void;
 }
 
 const PEAK_START = 18;
