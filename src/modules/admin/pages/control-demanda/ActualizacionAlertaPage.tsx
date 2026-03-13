@@ -12,7 +12,7 @@ import { toast } from "sonner";
 import AdminShell from "../../components/AdminShell";
 import { ForecastChart } from "@/modules/energy_intelligence/components/forecast/ForecastChart";
 import { useForecastData } from "@/modules/energy_intelligence/hooks/useForecastData";
-import { format } from "date-fns";
+import { format, endOfMonth } from "date-fns";
 import { es } from "date-fns/locale";
 
 const RISK_OPTIONS = [
@@ -35,7 +35,10 @@ const ActualizacionAlertaPage = () => {
   const [riskLevel, setRiskLevel] = useState("MEDIO");
   const [demandaEstimada, setDemandaEstimada] = useState("");
   const [mensaje, setMensaje] = useState("Solo usar equipos indispensables.");
-  const [estatus, setEstatus] = useState("Activo hasta el 31 de marzo.");
+  const [estatus, setEstatus] = useState(() => {
+    const lastDay = endOfMonth(new Date());
+    return `Activo hasta el ${format(lastDay, "d 'de' MMMM", { locale: es })}.`;
+  });
   const [recipientEmail, setRecipientEmail] = useState("");
   const [saving, setSaving] = useState(false);
   const [sendingEmail, setSendingEmail] = useState(false);
@@ -52,11 +55,19 @@ const ActualizacionAlertaPage = () => {
   // Auto-fill demanda estimada from latest COES data
   useEffect(() => {
     if (forecastData.length > 0 && !demandaEstimada) {
-      const latestWithReprogramado = [...forecastData]
-        .reverse()
-        .find(d => d.reprogramado !== null && d.reprogramado !== undefined);
-      if (latestWithReprogramado?.reprogramado) {
-        setDemandaEstimada(latestWithReprogramado.reprogramado.toFixed(2));
+      // Filter to peak hours (18:00 - 23:00) and find max reprogramado
+      const peakHourData = forecastData.filter(d => {
+        const timePart = d.fecha?.split(' ')[1] || d.fecha;
+        const hour = parseInt(timePart?.split(':')[0] || '0', 10);
+        return hour >= 18 && hour < 23;
+      });
+      const source = peakHourData.length > 0 ? peakHourData : forecastData;
+      const maxReprogramado = source.reduce((max, d) => {
+        const val = d.reprogramado ?? 0;
+        return val > max ? val : max;
+      }, 0);
+      if (maxReprogramado > 0) {
+        setDemandaEstimada(maxReprogramado.toFixed(2));
       }
     }
   }, [forecastData]);
@@ -326,7 +337,7 @@ const ActualizacionAlertaPage = () => {
 
                 {/* Recuerde + Estatus */}
                 <div className="px-6 py-6">
-                  <div className="grid grid-cols-[1fr_1fr] gap-16">
+                  <div className="grid grid-cols-[3fr_2fr] gap-16">
                     <div className="pr-4 border-r border-gray-200">
                       <p className="text-sm font-bold text-gray-800">Recuerde:</p>
                       <p className="text-sm text-gray-600 mt-2 leading-relaxed">{mensaje}</p>
