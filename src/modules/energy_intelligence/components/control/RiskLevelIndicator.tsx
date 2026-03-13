@@ -5,9 +5,9 @@ interface RiskLevelIndicatorProps {
 const getRiskColor = (level: string): string => {
   switch (level) {
     case 'ALTO': return '#C00000';
-    case 'MEDIO': return '#156082';
+    case 'MEDIO': return '#D4A017';
     case 'BAJO': return '#196B24';
-    default: return '#156082';
+    default: return '#D4A017';
   }
 };
 

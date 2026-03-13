@@ -10,6 +10,7 @@ import ModulosPage from "./pages/ModulosPage";
 import ModuloDetailPage from "./pages/ModuloDetailPage";
 import ControlDemandaConfigPage from "./pages/ControlDemandaConfigPage";
 import ModulacionPage from "./pages/control-demanda/ModulacionPage";
+import ActualizacionAlertaPage from "./pages/control-demanda/ActualizacionAlertaPage";
 
 export const adminRoutes: RouteObject[] = [
   { path: "/admin-panel", element: <AdminPanelHomePage /> },
@@ -21,6 +22,7 @@ export const adminRoutes: RouteObject[] = [
   { path: "/admin-panel/modulos", element: <ModulosPage /> },
   { path: "/admin-panel/modulos/energy-intelligence", element: <ControlDemandaConfigPage /> },
   { path: "/admin-panel/modulos/energy-intelligence/modulacion", element: <ModulacionPage /> },
+  { path: "/admin-panel/modulos/energy-intelligence/alerta", element: <ActualizacionAlertaPage /> },
   { path: "/admin-panel/modulos/:slug", element: <ModuloDetailPage /> },
   { path: "/admin-empresa", element: <CompanyAdminPage /> },
 ];

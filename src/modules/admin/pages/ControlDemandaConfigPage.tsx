@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { CalendarDays, Settings, Bell, Cpu } from "lucide-react";
+import { CalendarDays, Settings, Bell, Cpu, AlertTriangle } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import AdminShell from "../components/AdminShell";
 
@@ -10,6 +10,14 @@ const SUB_MODULES = [
     description: "Configurar qué días están modulados en el calendario.",
     icon: CalendarDays,
     href: "/admin-panel/modulos/energy-intelligence/modulacion",
+    available: true,
+  },
+  {
+    key: "alerta",
+    label: "Actualización de Alerta",
+    description: "Actualizar rango horario y riesgo de coincidencia. Enviar notificaciones.",
+    icon: AlertTriangle,
+    href: "/admin-panel/modulos/energy-intelligence/alerta",
     available: true,
   },
   {
