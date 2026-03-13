@@ -2,7 +2,6 @@ import { useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import sergenLogo from "@/assets/sergen-logo.png";
 import { LogOut } from "lucide-react";
 import { useAuthContext } from "@/core/auth/context/AuthContext";
 import PrivateRoute from "@/core/auth/components/PrivateRoute";
@@ -34,7 +33,7 @@ const DashboardContent = () => {
       <header className="border-b bg-card">
         <div className="container flex items-center justify-between h-16">
           <div className="flex items-center gap-3">
-            <img src={sergenLogo} alt="SERGEN" className="h-8" />
+            <span className="font-heading font-bold text-lg text-foreground">SERGEN</span>
           </div>
           <div className="flex items-center gap-2">
             <span className="text-sm text-muted-foreground hidden sm:inline">
