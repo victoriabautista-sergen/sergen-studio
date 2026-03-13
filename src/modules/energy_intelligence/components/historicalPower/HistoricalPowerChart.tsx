@@ -34,7 +34,7 @@ export const HistoricalPowerChart = ({ data }: HistoricalPowerChartProps) => {
     if (payload && payload.length > 0) {
       return `Fecha: ${payload[0].payload.date}`;
     }
-    return `Fecha: ${_label}`;
+    return _label;
   };
 
   return (
