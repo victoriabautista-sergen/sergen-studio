@@ -142,8 +142,7 @@ export const ForecastChart = forwardRef<HTMLDivElement, ForecastChartProps>(({ d
     const x = viewBox?.x ?? 0;
     const y = viewBox?.y ?? 0;
     // Place below the peak point to avoid covering the chart lines
-    const chartMidIndex = chartData.length / 2;
-    const offsetX = peakPoint.index > chartMidIndex ? -230 : 10;
+    const offsetX = -120; // center the 240px-wide box
     const offsetY = 60;
 
     return (
