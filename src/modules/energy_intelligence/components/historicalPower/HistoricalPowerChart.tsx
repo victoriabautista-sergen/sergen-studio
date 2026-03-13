@@ -3,9 +3,10 @@ import type { PowerDataPoint } from "./useHistoricalPowerData";
 
 interface HistoricalPowerChartProps {
   data: PowerDataPoint[];
+  showTime?: boolean;
 }
 
-export const HistoricalPowerChart = ({ data }: HistoricalPowerChartProps) => {
+export const HistoricalPowerChart = ({ data, showTime = true }: HistoricalPowerChartProps) => {
   const maxValue = data.length > 0 ? Math.max(...data.map((d) => d.ejecutado)) : 0;
 
   const formatDate = (fecha: string) => {
@@ -33,7 +34,7 @@ export const HistoricalPowerChart = ({ data }: HistoricalPowerChartProps) => {
     if (payload && payload.length > 0) {
       const entry = payload[0].payload;
       const dateStr = `Fecha: ${entry.date}`;
-      if (entry.hora != null && entry.minuto != null) {
+      if (showTime && entry.hora != null && entry.minuto != null) {
         const h = String(entry.hora).padStart(2, "0");
         const m = String(entry.minuto).padStart(2, "0");
         return `${dateStr} | Hora: ${h}:${m}`;

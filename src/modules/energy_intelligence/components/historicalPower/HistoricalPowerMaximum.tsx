@@ -4,8 +4,11 @@ import { useHistoricalPowerData, getMonthLabel, type ViewMode } from "./useHisto
 import { HistoricalPowerChart } from "./HistoricalPowerChart";
 import { Loader2, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useAuthContext } from "@/core/auth/context/AuthContext";
 
 export const HistoricalPowerMaximum = () => {
+  const { role } = useAuthContext();
+  const canSeeTime = role === "super_admin" || role === "technical_user";
   const [view, setView] = useState<ViewMode>("current");
   const { data, isLoading, error } = useHistoricalPowerData(view);
 
@@ -41,7 +44,7 @@ export const HistoricalPowerMaximum = () => {
             <p className="text-muted-foreground">No hay datos disponibles</p>
           </div>
         ) : (
-          <HistoricalPowerChart data={data} />
+          <HistoricalPowerChart data={data} showTime={canSeeTime} />
         )}
       </CardContent>
     </Card>

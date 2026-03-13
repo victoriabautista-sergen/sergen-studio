@@ -20,7 +20,7 @@ export const RiskManagementCard = ({
   return (
     <Card className="w-full max-w-[385px] mx-auto">
       <CardHeader className="pb-2">
-        <CardTitle className="text-center">Gestión de riesgo</CardTitle>
+        <CardTitle className="text-center w-full">Gestión de riesgo</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="space-y-4 flex flex-col items-center">

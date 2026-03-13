@@ -2,33 +2,15 @@ import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Loader2, AlertCircle } from 'lucide-react';
 import { useHistoricalPowerData, getMonthLabel, type ViewMode } from '../historicalPower/useHistoricalPowerData';
-import { HistoricalPowerChart } from './HistoricalPowerChart';
+import { HistoricalPowerChart } from '../historicalPower/HistoricalPowerChart';
 import { Button } from '@/components/ui/button';
-import type { ChartData } from '../../types';
+import { useAuthContext } from '@/core/auth/context/AuthContext';
 
 export const HistoricalPowerMaximum = () => {
+  const { role } = useAuthContext();
+  const canSeeTime = role === "super_admin" || role === "technical_user";
   const [view, setView] = useState<ViewMode>("current");
   const { data, isLoading, error } = useHistoricalPowerData(view);
-
-  const chartData: ChartData[] = (() => {
-    if (data.length === 0) return [];
-    const sorted = [...data].sort((a, b) => b.ejecutado - a.ejecutado);
-    const maxVal = sorted[0]?.ejecutado;
-    const secondVal = sorted[1]?.ejecutado;
-    return data.map((item) => ({
-      date: (() => { const parts = item.fecha.split("-"); return `${parts[2]}/${parts[1]}`; })(),
-      value: item.ejecutado,
-      fullDate: item.fecha,
-      hora: item.hora,
-      minuto: item.minuto,
-      color:
-        item.ejecutado === maxVal
-          ? '#D9001B'
-          : item.ejecutado === secondVal
-          ? '#F97316'
-          : '#156082',
-    }));
-  })();
 
   return (
     <Card className="w-full h-full flex flex-col">
@@ -57,12 +39,12 @@ export const HistoricalPowerMaximum = () => {
               <p className="font-medium">{error}</p>
             </div>
           </div>
-        ) : chartData.length === 0 ? (
+        ) : data.length === 0 ? (
           <div className="flex items-center justify-center h-64">
             <p className="text-muted-foreground">No hay datos disponibles</p>
           </div>
         ) : (
-          <HistoricalPowerChart chartData={chartData} />
+          <HistoricalPowerChart data={data} showTime={canSeeTime} />
         )}
       </CardContent>
     </Card>
