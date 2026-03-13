@@ -18,7 +18,7 @@ export interface ModuleDefinition {
 export const moduleRegistry: ModuleDefinition[] = [
   {
     id: "energy-intelligence",
-    name: "Energy Intelligence",
+    name: "Control de Demanda",
     description: "Predicción de precios de energía y monitoreo de consumo en tiempo real",
     icon: Zap,
     basePath: "/energy-intelligence/control",

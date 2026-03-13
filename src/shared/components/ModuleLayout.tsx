@@ -1,7 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
-import sergenLogo from "@/assets/sergen-logo.png";
 import type { LucideIcon } from "lucide-react";
 
 interface ModuleLayoutProps {
@@ -20,8 +19,6 @@ const ModuleLayout = ({ title, icon: Icon, children }: ModuleLayoutProps) => {
           <Button variant="ghost" size="icon" onClick={() => navigate(-1)}>
             <ArrowLeft className="h-5 w-5" />
           </Button>
-          <img src={sergenLogo} alt="SERGEN" className="h-7" />
-          <span className="text-muted-foreground">/</span>
           {Icon && <Icon className="h-5 w-5 text-muted-foreground" />}
           <h1 className="font-heading font-semibold">{title}</h1>
         </div>
