@@ -1,12 +1,72 @@
-import React, { forwardRef } from 'react';
-import { LineChart, Line, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer, ReferenceArea } from 'recharts';
+import React, { forwardRef, useMemo } from 'react';
+import { LineChart, Line, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer, ReferenceArea, ReferenceDot, Label } from 'recharts';
 import { CoesData } from '../../types/forecast';
 
 interface ForecastChartProps {
   data: CoesData[];
+  showPeakLabel?: boolean;
 }
 
-export const ForecastChart = forwardRef<HTMLDivElement, ForecastChartProps>(({ data }, ref) => {
+const PEAK_START = 18;
+const PEAK_END = 23;
+
+const SERIES_COLORS = {
+  reprogramacion: '#C00000',
+  pronostico: '#f39200',
+  rangoInferior: '#90C418',
+  rangoSuperior: '#90C418',
+  demandaReal: '#156082',
+};
+
+interface PeakPoint {
+  index: number;
+  time: string;
+  reprogramacion: number;
+  pronostico: number | null;
+  rangoInferior: number | null;
+  rangoSuperior: number | null;
+  fechaLabel: string;
+}
+
+const PeakTooltipContent = ({ point }: { point: PeakPoint }) => (
+  <div
+    style={{
+      background: 'rgba(255,255,255,0.96)',
+      border: '1px solid #d1d5db',
+      borderRadius: 6,
+      padding: '8px 12px',
+      boxShadow: '0 4px 12px rgba(0,0,0,0.12)',
+      fontSize: 12,
+      lineHeight: '18px',
+      minWidth: 220,
+      pointerEvents: 'none',
+    }}
+  >
+    <div style={{ fontWeight: 700, marginBottom: 4, color: '#374151' }}>
+      {point.fechaLabel}
+    </div>
+    <div style={{ color: SERIES_COLORS.reprogramacion }}>
+      Reprogramación : {point.reprogramacion.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} MW
+    </div>
+    {point.pronostico != null && (
+      <div style={{ color: SERIES_COLORS.pronostico }}>
+        Pronóstico Diario : {point.pronostico.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} MW
+      </div>
+    )}
+    {point.rangoInferior != null && (
+      <div style={{ color: SERIES_COLORS.rangoInferior }}>
+        Rango Inferior : {point.rangoInferior.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} MW
+      </div>
+    )}
+    {point.rangoSuperior != null && (
+      <div style={{ color: SERIES_COLORS.rangoSuperior }}>
+        Rango Superior : {point.rangoSuperior.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} MW
+      </div>
+    )}
+  </div>
+);
+
+export const ForecastChart = forwardRef<HTMLDivElement, ForecastChartProps>(({ data, showPeakLabel = true }, ref) => {
   const formatTime = (isoString: string): string => {
     const fecha = new Date(isoString);
     const hora = fecha.getUTCHours().toString().padStart(2, '0');
@@ -21,7 +81,7 @@ export const ForecastChart = forwardRef<HTMLDivElement, ForecastChartProps>(({ d
     const año = fecha.getUTCFullYear();
     const hora = fecha.getUTCHours().toString().padStart(2, '0');
     const minutos = fecha.getUTCMinutes().toString().padStart(2, '0');
-    return `${dia}/${mes}/${año} ${hora}:${minutos} (UTC)`;
+    return `${dia}/${mes}/${año} ${hora}:${minutos}`;
   };
 
   const isNullOrZero = (value: any): boolean =>
@@ -47,9 +107,51 @@ export const ForecastChart = forwardRef<HTMLDivElement, ForecastChartProps>(({ d
       'Rango Superior': showForecast && !isNullOrZero(item.rango_superior) ? item.rango_superior : null,
       'Demanda Real': isNullOrZero(item.ejecutado) ? null : item.ejecutado,
       hora,
-      fecha_completa: formatFullDate(item.fecha),
+      fecha_completa: formatFullDate(item.fecha) + ' (UTC)',
+      fecha_label: formatFullDate(item.fecha),
     };
   });
+
+  // Find peak reprogramado within peak hours
+  const peakPoint = useMemo<PeakPoint | null>(() => {
+    if (!showPeakLabel) return null;
+    let maxVal = -Infinity;
+    let maxIdx = -1;
+    chartData.forEach((d, i) => {
+      if (d.hora >= PEAK_START && d.hora < PEAK_END && d.Reprogramación != null && d.Reprogramación > maxVal) {
+        maxVal = d.Reprogramación;
+        maxIdx = i;
+      }
+    });
+    if (maxIdx === -1) return null;
+    const d = chartData[maxIdx];
+    return {
+      index: maxIdx,
+      time: d.time,
+      reprogramacion: d.Reprogramación!,
+      pronostico: d['Pronóstico Diario'],
+      rangoInferior: d['Rango Inferior'],
+      rangoSuperior: d['Rango Superior'],
+      fechaLabel: d.fecha_label,
+    };
+  }, [chartData, showPeakLabel]);
+
+  const CustomPeakLabel = (props: any) => {
+    if (!peakPoint) return null;
+    const { viewBox } = props;
+    const x = viewBox?.x ?? 0;
+    const y = viewBox?.y ?? 0;
+    // Position label to the left or right depending on chart position
+    const chartMidIndex = chartData.length / 2;
+    const offsetX = peakPoint.index > chartMidIndex ? -230 : 10;
+    const offsetY = -10;
+
+    return (
+      <foreignObject x={x + offsetX} y={y + offsetY} width={240} height={120}>
+        <PeakTooltipContent point={peakPoint} />
+      </foreignObject>
+    );
+  };
 
   return (
     <div ref={ref}>
@@ -77,11 +179,23 @@ export const ForecastChart = forwardRef<HTMLDivElement, ForecastChartProps>(({ d
               />
             ) : null
           )}
-          <Line type="monotone" dataKey="Reprogramación" stroke="#C00000" strokeWidth={2} dot={false} connectNulls />
-          <Line type="monotone" dataKey="Pronóstico Diario" stroke="#f39200" strokeWidth={2} dot={false} connectNulls />
-          <Line type="monotone" dataKey="Rango Inferior" stroke="#90C418" strokeWidth={1} strokeDasharray="5 5" dot={false} connectNulls />
-          <Line type="monotone" dataKey="Rango Superior" stroke="#90C418" strokeWidth={1} strokeDasharray="5 5" dot={false} connectNulls />
-          <Line type="monotone" dataKey="Demanda Real" stroke="#156082" strokeWidth={2} dot={false} connectNulls />
+          <Line type="monotone" dataKey="Reprogramación" stroke={SERIES_COLORS.reprogramacion} strokeWidth={2} dot={false} connectNulls />
+          <Line type="monotone" dataKey="Pronóstico Diario" stroke={SERIES_COLORS.pronostico} strokeWidth={2} dot={false} connectNulls />
+          <Line type="monotone" dataKey="Rango Inferior" stroke={SERIES_COLORS.rangoInferior} strokeWidth={1} strokeDasharray="5 5" dot={false} connectNulls />
+          <Line type="monotone" dataKey="Rango Superior" stroke={SERIES_COLORS.rangoSuperior} strokeWidth={1} strokeDasharray="5 5" dot={false} connectNulls />
+          <Line type="monotone" dataKey="Demanda Real" stroke={SERIES_COLORS.demandaReal} strokeWidth={2} dot={false} connectNulls />
+          {peakPoint && (
+            <ReferenceDot
+              x={peakPoint.time}
+              y={peakPoint.reprogramacion}
+              r={5}
+              fill={SERIES_COLORS.reprogramacion}
+              stroke="#fff"
+              strokeWidth={2}
+            >
+              <Label content={<CustomPeakLabel />} />
+            </ReferenceDot>
+          )}
         </LineChart>
       </ResponsiveContainer>
     </div>

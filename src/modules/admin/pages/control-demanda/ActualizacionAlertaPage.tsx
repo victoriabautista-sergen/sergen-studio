@@ -340,7 +340,7 @@ const ActualizacionAlertaPage = () => {
 
                 {/* Footer banner */}
                 <div
-                  className="mt-6 py-5 text-center text-white font-bold text-lg tracking-wider"
+                  className="mt-8 py-6 text-center text-white font-bold text-lg tracking-wider"
                   style={{ backgroundColor: "hsl(35, 91%, 55%)" }}
                 >
                   USUARIO ACTIVO
