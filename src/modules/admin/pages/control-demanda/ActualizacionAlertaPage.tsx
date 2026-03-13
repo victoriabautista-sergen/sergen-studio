@@ -170,32 +170,29 @@ const ActualizacionAlertaPage = () => {
 
   const handleSendEmail = async () => {
     if (recipients.length === 0) {
-      toast.error("Agrega al menos un correo de destino");
+      toast.error("Debe ingresar al menos un correo de destino");
       return;
     }
 
     setSendingEmail(true);
     try {
-      const todayFormatted = format(new Date(), "d 'de' MMMM 'del' yyyy", { locale: es });
-      const emails = recipients.map(r => r.email);
+      const emails = recipients.map(r => r.email).join(",");
 
-      const { data, error } = await supabase.functions.invoke("send-alert-notification", {
-        body: {
-          to: emails,
-          riskLevel,
-          timeRange,
-          demandaEstimada,
-          mensaje,
-          estatus,
-          fecha: todayFormatted,
+      await emailjs.send(
+        "service_a8ahzue",
+        "template_sergen_alerta",
+        {
+          potencia: demandaEstimada,
+          hora: timeRange,
+          to_email: emails,
         },
-      });
+        "mBkq_wWBW-7NRC2Ed"
+      );
 
-      if (error) throw error;
-      toast.success(`Correo enviado a ${emails.length} destinatario(s)`);
+      toast.success(`Correo enviado a ${recipients.length} destinatario(s)`);
     } catch (err: any) {
-      console.error(err);
-      toast.error(err.message || "Error al enviar el correo");
+      console.error("Error enviando correo:", err);
+      toast.error("Error al enviar el correo");
     } finally {
       setSendingEmail(false);
     }
