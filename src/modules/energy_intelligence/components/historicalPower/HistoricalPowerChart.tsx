@@ -34,7 +34,7 @@ export const HistoricalPowerChart = ({ data, showTime = true }: HistoricalPowerC
     if (payload && payload.length > 0) {
       const entry = payload[0].payload;
       const dateStr = `Fecha: ${entry.date}`;
-      if (entry.hora != null && entry.minuto != null) {
+      if (showTime && entry.hora != null && entry.minuto != null) {
         const h = String(entry.hora).padStart(2, "0");
         const m = String(entry.minuto).padStart(2, "0");
         return `${dateStr} | Hora: ${h}:${m}`;

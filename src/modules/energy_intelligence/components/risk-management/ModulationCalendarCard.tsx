@@ -50,7 +50,7 @@ export const ModulationCalendarCard = ({
   return (
     <Card className="w-full max-w-[350px] mx-auto mt-6">
       <CardHeader className="pb-2">
-        <CardTitle className="text-center">Calendario</CardTitle>
+        <CardTitle className="text-center w-full">Calendario</CardTitle>
       </CardHeader>
       <CardContent>
         <Calendar
