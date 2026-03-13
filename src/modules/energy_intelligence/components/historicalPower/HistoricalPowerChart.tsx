@@ -69,7 +69,7 @@ export const HistoricalPowerChart = ({ data, showTime = true }: HistoricalPowerC
         <Tooltip formatter={formatTooltip} labelFormatter={formatTooltipLabel} />
         <Bar dataKey="value" name="Potencia Máxima">
           {chartData.map((entry, index) => (
-            <Cell key={`cell-${index}`} fill={entry.value === maxValue ? "#8B0000" : "#1f77b4"} />
+            <Cell key={`cell-${index}`} fill={entry.color} />
           ))}
         </Bar>
       </BarChart>
