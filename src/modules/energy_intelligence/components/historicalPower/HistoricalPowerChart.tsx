@@ -3,6 +3,7 @@ import type { PowerDataPoint } from "./useHistoricalPowerData";
 
 interface HistoricalPowerChartProps {
   data: PowerDataPoint[];
+  showTime?: boolean;
 }
 
 export const HistoricalPowerChart = ({ data }: HistoricalPowerChartProps) => {
