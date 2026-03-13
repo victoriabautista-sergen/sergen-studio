@@ -12,7 +12,7 @@ import { toast } from "sonner";
 import AdminShell from "../../components/AdminShell";
 import { ForecastChart } from "@/modules/energy_intelligence/components/forecast/ForecastChart";
 import { useForecastData } from "@/modules/energy_intelligence/hooks/useForecastData";
-import { format } from "date-fns";
+import { format, endOfMonth } from "date-fns";
 import { es } from "date-fns/locale";
 
 const RISK_OPTIONS = [
