@@ -44,6 +44,9 @@ const ActualizacionAlertaPage = () => {
   });
   const [recipients, setRecipients] = useState<{ id: string; email: string }[]>([]);
   const [newEmail, setNewEmail] = useState("");
+  const [bccEmails, setBccEmails] = useState<string>(() => {
+    return localStorage.getItem("alert_bcc_emails") || "";
+  });
   const [saving, setSaving] = useState(false);
   const [sendingEmail, setSendingEmail] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -178,6 +181,13 @@ const ActualizacionAlertaPage = () => {
     try {
       const emails = recipients.map(r => r.email);
 
+      // Parse BCC emails and save to localStorage
+      const bccList = bccEmails
+        .split(",")
+        .map(e => e.trim().toLowerCase())
+        .filter(e => isValidEmail(e));
+      localStorage.setItem("alert_bcc_emails", bccEmails);
+
       // Capture chart as base64 image
       let graficoBase64 = "";
       const grafico = document.getElementById("grafico-pronostico");
@@ -193,6 +203,7 @@ const ActualizacionAlertaPage = () => {
       const { data, error } = await supabase.functions.invoke("send-email-alert", {
         body: {
           emails,
+          bccEmails: bccList,
           templateData: {
             fecha: todayFormatted,
             riskLevel,
@@ -320,7 +331,7 @@ const ActualizacionAlertaPage = () => {
               <Separator />
 
               <div className="space-y-3">
-                <Label>Correos de destino</Label>
+                <Label className="text-base font-semibold">Correos de destino</Label>
                 <div className="flex gap-2">
                   <Input
                     type="email"
@@ -352,6 +363,21 @@ const ActualizacionAlertaPage = () => {
                 {recipients.length === 0 && (
                   <p className="text-xs text-muted-foreground">No hay correos guardados.</p>
                 )}
+              </div>
+
+              <Separator />
+
+              <div className="space-y-3">
+                <Label className="text-base font-semibold">Destinatarios ocultos (BCC)</Label>
+                <Textarea
+                  value={bccEmails}
+                  onChange={(e) => setBccEmails(e.target.value)}
+                  placeholder="operaciones@empresa.com, mantenimiento@empresa.com"
+                  rows={2}
+                />
+                <p className="text-xs text-muted-foreground">
+                  Ingrese múltiples correos separados por coma. Se guardan automáticamente.
+                </p>
               </div>
 
               <Button onClick={handleSave} disabled={saving} className="w-full">

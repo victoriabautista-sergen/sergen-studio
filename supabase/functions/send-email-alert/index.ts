@@ -162,7 +162,7 @@ Deno.serve(async (req) => {
       });
     }
 
-    const { emails, templateData } = await req.json();
+    const { emails, bccEmails, templateData } = await req.json();
 
     if (!emails || !Array.isArray(emails) || emails.length === 0) {
       return new Response(JSON.stringify({ error: "No se proporcionaron correos" }), {
@@ -180,31 +180,32 @@ Deno.serve(async (req) => {
     }
 
     const htmlContent = buildEmailHtml(templateData);
-    const results = [];
 
-    for (const email of emails) {
-      const res = await fetch("https://api.brevo.com/v3/smtp/email", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "api-key": BREVO_API_KEY,
-        },
-        body: JSON.stringify({
-          sender: { name: "SERGEN", email: "info@sergen.pe" },
-          to: [{ email }],
-          subject: "⚡ Pronóstico de potencia máxima",
-          htmlContent,
-        }),
-      });
+    const emailPayload: Record<string, unknown> = {
+      sender: { name: "SERGEN", email: "info@sergen.pe" },
+      to: emails.map((email: string) => ({ email })),
+      subject: "⚡ Pronóstico de potencia máxima",
+      htmlContent,
+    };
 
-      const data = await res.json();
-      results.push({ email, status: res.status, data });
+    if (bccEmails && Array.isArray(bccEmails) && bccEmails.length > 0) {
+      emailPayload.bcc = bccEmails.map((email: string) => ({ email }));
     }
 
-    const allOk = results.every((r) => r.status >= 200 && r.status < 300);
+    const res = await fetch("https://api.brevo.com/v3/smtp/email", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "api-key": BREVO_API_KEY,
+      },
+      body: JSON.stringify(emailPayload),
+    });
 
-    return new Response(JSON.stringify({ success: allOk, results }), {
-      status: allOk ? 200 : 207,
+    const data = await res.json();
+    const success = res.status >= 200 && res.status < 300;
+
+    return new Response(JSON.stringify({ success, data }), {
+      status: success ? 200 : 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (err) {
