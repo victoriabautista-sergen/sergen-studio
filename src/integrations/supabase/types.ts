@@ -52,6 +52,27 @@ export type Database = {
           },
         ]
       }
+      alert_recipients: {
+        Row: {
+          added_by: string
+          created_at: string
+          email: string
+          id: string
+        }
+        Insert: {
+          added_by: string
+          created_at?: string
+          email: string
+          id?: string
+        }
+        Update: {
+          added_by?: string
+          created_at?: string
+          email?: string
+          id?: string
+        }
+        Relationships: []
+      }
       client_users: {
         Row: {
           client_id: string
