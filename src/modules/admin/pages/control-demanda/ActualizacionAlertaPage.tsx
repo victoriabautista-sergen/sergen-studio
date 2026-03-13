@@ -370,7 +370,7 @@ const ActualizacionAlertaPage = () => {
                   <p className="text-sm font-semibold text-gray-700 mb-3 px-1">
                     Pronóstico de Demanda - {format(new Date(), "dd/MM/yyyy")}
                   </p>
-                  <div className="h-[450px]">
+                <div id="grafico-pronostico" className="h-[450px]">
                     <ForecastChart data={forecastData} onPeakValueChange={handlePeakValueChange} />
                   </div>
                 </div>
