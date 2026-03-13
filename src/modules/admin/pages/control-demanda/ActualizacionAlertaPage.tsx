@@ -57,7 +57,8 @@ const ActualizacionAlertaPage = () => {
     if (forecastData.length > 0 && !demandaEstimada) {
       // Filter to peak hours (18:00 - 23:00) and find max reprogramado
       const peakHourData = forecastData.filter(d => {
-        const hour = parseInt(d.hora?.split(':')[0] || d.fecha?.split(' ')[1]?.split(':')[0] || '0', 10);
+        const timePart = d.fecha?.split(' ')[1] || d.fecha;
+        const hour = parseInt(timePart?.split(':')[0] || '0', 10);
         return hour >= 18 && hour < 23;
       });
       const source = peakHourData.length > 0 ? peakHourData : forecastData;
