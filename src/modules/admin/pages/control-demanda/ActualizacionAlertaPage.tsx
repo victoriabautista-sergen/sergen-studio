@@ -181,6 +181,13 @@ const ActualizacionAlertaPage = () => {
     try {
       const emails = recipients.map(r => r.email);
 
+      // Parse BCC emails and save to localStorage
+      const bccList = bccEmails
+        .split(",")
+        .map(e => e.trim().toLowerCase())
+        .filter(e => isValidEmail(e));
+      localStorage.setItem("alert_bcc_emails", bccEmails);
+
       // Capture chart as base64 image
       let graficoBase64 = "";
       const grafico = document.getElementById("grafico-pronostico");
@@ -196,6 +203,7 @@ const ActualizacionAlertaPage = () => {
       const { data, error } = await supabase.functions.invoke("send-email-alert", {
         body: {
           emails,
+          bccEmails: bccList,
           templateData: {
             fecha: todayFormatted,
             riskLevel,
