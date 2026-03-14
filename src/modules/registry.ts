@@ -1,4 +1,4 @@
-import { Zap, Receipt, Bot, Shield } from "lucide-react";
+import { Zap, Receipt, Bot, Shield, Building2 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
 export interface ModuleDefinition {
@@ -41,6 +41,15 @@ export const moduleRegistry: ModuleDefinition[] = [
     icon: Bot,
     basePath: "/modules/induvex",
     color: "bg-purple-100 text-purple-600",
+  },
+  {
+    id: "company-management",
+    name: "Gestión de Empresa",
+    description: "Administración de información, usuarios, permisos y solicitudes de tu empresa",
+    icon: Building2,
+    basePath: "/company-management",
+    color: "bg-teal-100 text-teal-600",
+    submodules: ["info", "users", "permissions", "requests"],
   },
   {
     id: "admin-panel",
