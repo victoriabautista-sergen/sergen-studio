@@ -175,7 +175,13 @@ const ActualizacionAlertaPage = () => {
       const bccList = bccEmails.split(",").map(e => e.trim().toLowerCase()).filter(e => isValidEmail(e));
       localStorage.setItem("alert_bcc_emails", bccEmails);
 
-      // Capture chart with html2canvas before generating email HTML
+      // 1. Refrescar datos del gráfico
+      await refetchForecastData();
+
+      // 2. Esperar a que el gráfico se renderice con los datos actualizados
+      await new Promise(resolve => setTimeout(resolve, 800));
+
+      // 3. Capturar el gráfico con html2canvas
       let graficoBase64 = "";
       const grafico = document.getElementById("grafico-pronostico");
       if (grafico) {
