@@ -15,7 +15,7 @@ const ModulacionPage = () => {
   const [saving, setSaving] = useState(false);
 
   const breadcrumbs = [
-    { label: "Configuración de Módulos", href: "/admin-panel/modulos" },
+    { label: "Configuración", href: "/admin-panel/configuracion" },
     { label: "Control de Demanda", href: "/admin-panel/modulos/energy-intelligence" },
     { label: "Modulación" },
   ];

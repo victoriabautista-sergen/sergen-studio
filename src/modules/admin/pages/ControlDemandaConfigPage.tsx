@@ -48,7 +48,7 @@ const SUB_MODULES = [
 
 const ControlDemandaConfigPage = () => {
   const breadcrumbs = [
-    { label: "Configuración de Módulos", href: "/admin-panel/modulos" },
+    { label: "Configuración", href: "/admin-panel/configuracion" },
     { label: "Control de Demanda" },
   ];
 

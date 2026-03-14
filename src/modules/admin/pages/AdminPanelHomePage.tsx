@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Building2, Inbox, Package, Settings, Users } from "lucide-react";
+import { Building2, Inbox, Settings, Users } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import AdminShell from "../components/AdminShell";
 
@@ -27,12 +27,6 @@ const NAV_CARDS = [
     title: "Solicitudes de Planes",
     description: "Solicitudes comerciales de nuevos clientes",
     icon: Inbox,
-  },
-  {
-    href: "/admin-panel/modulos",
-    title: "Configuración de Módulos",
-    description: "Configura cada módulo de la plataforma individualmente",
-    icon: Package,
   },
 ] as const;
 

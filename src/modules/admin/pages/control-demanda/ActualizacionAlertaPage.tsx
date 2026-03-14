@@ -58,7 +58,7 @@ const ActualizacionAlertaPage = () => {
   const [isCapturing, setIsCapturing] = useState(false);
 
   const breadcrumbs = [
-    { label: "Configuración de Módulos", href: "/admin-panel/modulos" },
+    { label: "Configuración", href: "/admin-panel/configuracion" },
     { label: "Control de Demanda", href: "/admin-panel/modulos/energy-intelligence" },
     { label: "Actualización de Alerta" },
   ];
