@@ -1,0 +1,1 @@
+INSERT INTO storage.buckets (id, name, public) VALUES ('chart-images', 'chart-images', true) ON CONFLICT (id) DO NOTHING;

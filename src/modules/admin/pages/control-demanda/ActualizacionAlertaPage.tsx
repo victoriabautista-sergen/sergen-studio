@@ -181,19 +181,29 @@ const ActualizacionAlertaPage = () => {
       // 2. Esperar a que el gráfico se renderice con los datos actualizados
       await new Promise(resolve => setTimeout(resolve, 800));
 
-      // 3. Capturar el gráfico con html2canvas
-      let graficoBase64 = "";
+      // 3. Capturar el gráfico y subir a storage como imagen
+      let graficoUrl = "";
       const grafico = document.getElementById("grafico-pronostico");
       if (grafico) {
         try {
           const canvas = await html2canvas(grafico, { useCORS: true, scale: 2 });
-          graficoBase64 = canvas.toDataURL("image/png");
+          const blob = await new Promise<Blob>((resolve) =>
+            canvas.toBlob((b) => resolve(b!), "image/png")
+          );
+          const fileName = `chart-${Date.now()}.png`;
+          const { error: uploadError } = await supabase.storage
+            .from("chart-images")
+            .upload(fileName, blob, { contentType: "image/png", upsert: true });
+          if (uploadError) throw uploadError;
+          const { data: urlData } = supabase.storage
+            .from("chart-images")
+            .getPublicUrl(fileName);
+          graficoUrl = urlData.publicUrl;
         } catch (err) {
-          console.warn("No se pudo capturar el gráfico:", err);
+          console.warn("No se pudo subir el gráfico:", err);
         }
       }
 
-      // Generate email HTML with the captured chart image
       const htmlContent = generarHTMLCorreo({
         fecha: todayFormatted,
         riskColor: getRiskColor(riskLevel),
@@ -202,7 +212,7 @@ const ActualizacionAlertaPage = () => {
         demandaEstimada: demandaEstimada || "—",
         mensaje,
         estatus,
-        graficoBase64,
+        graficoUrl,
       });
 
       const { data, error } = await supabase.functions.invoke("send-email-alert", {

@@ -1,0 +1,2 @@
+CREATE POLICY "Allow authenticated uploads to chart-images" ON storage.objects FOR INSERT TO authenticated WITH CHECK (bucket_id = 'chart-images');
+CREATE POLICY "Allow public read of chart-images" ON storage.objects FOR SELECT TO public USING (bucket_id = 'chart-images');
