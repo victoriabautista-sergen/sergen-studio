@@ -380,9 +380,9 @@ const ActualizacionAlertaPage = () => {
             </CardHeader>
             <CardContent>
               {/* Gráfico oculto para captura con html2canvas */}
-              <div className="absolute -left-[9999px] top-0">
-                <div id="grafico-pronostico" className="w-[600px] h-[400px]">
-                  <ForecastChart data={forecastData} onPeakValueChange={handlePeakValueChange} />
+              <div style={{ position: "absolute", left: "-9999px", top: 0 }}>
+                <div id="grafico-pronostico" style={{ width: 600, height: 350, background: "#fff", padding: "12px" }}>
+                  <ForecastChart data={forecastData} onPeakValueChange={handlePeakValueChange} showPeakLabel={false} />
                 </div>
               </div>
 
