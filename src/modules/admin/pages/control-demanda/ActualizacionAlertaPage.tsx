@@ -163,6 +163,20 @@ const ActualizacionAlertaPage = () => {
   const todayFormatted = format(new Date(), "d 'de' MMMM 'del' yyyy", { locale: es });
   const isLowRisk = riskLevel === "BAJO";
 
+  // Regenerar preview HTML cada vez que cambian los campos del formulario
+  useEffect(() => {
+    const html = generarHTMLCorreo({
+      fecha: todayFormatted,
+      riskColor: getRiskColor(riskLevel),
+      riskLabel: RISK_OPTIONS.find(o => o.value === riskLevel)?.label || riskLevel,
+      timeRange: isLowRisk ? "Uso libre de equipos" : timeRange,
+      demandaEstimada: demandaEstimada || "—",
+      mensaje,
+      estatus,
+    });
+    setPreviewHtml(html);
+  }, [riskLevel, timeRange, demandaEstimada, mensaje, estatus, todayFormatted, isLowRisk]);
+
   const handleSendEmail = async () => {
     if (recipients.length === 0) {
       toast.error("Debe ingresar al menos un correo de destino");
