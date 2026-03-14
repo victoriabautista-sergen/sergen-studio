@@ -1,4 +1,4 @@
-import { Zap, Receipt, Bot, Shield } from "lucide-react";
+import { Zap, Receipt, Bot, Shield, Building2 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
 export interface ModuleDefinition {
