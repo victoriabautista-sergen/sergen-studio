@@ -53,7 +53,7 @@ const ActualizacionAlertaPage = () => {
   const [loading, setLoading] = useState(true);
   
 
-  const { data: forecastData } = useForecastData();
+  const { data: forecastData, refetch: refetchForecastData } = useForecastData();
 
   const breadcrumbs = [
     { label: "Configuración de Módulos", href: "/admin-panel/modulos" },
