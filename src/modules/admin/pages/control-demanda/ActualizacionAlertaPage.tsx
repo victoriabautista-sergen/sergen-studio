@@ -233,34 +233,11 @@ const ActualizacionAlertaPage = () => {
       const bccList = bccEmails.split(",").map(e => e.trim().toLowerCase()).filter(e => isValidEmail(e));
       localStorage.setItem("alert_bcc_emails", bccEmails);
 
-      // 1. Refrescar datos del gráfico
-      await refetchForecastData();
-      await new Promise(resolve => setTimeout(resolve, 1200));
+      // 1. Capturar gráfico con datos frescos y subirlo
+      toast.info("Capturando gráfico actualizado...");
+      const graficoUrl = await captureChart();
 
-      // 2. Capturar gráfico actualizado y subir a storage
-      let graficoUrl = "";
-      const grafico = document.getElementById("grafico-pronostico");
-      if (grafico) {
-        try {
-          const canvas = await html2canvas(grafico, { useCORS: true, scale: 2, backgroundColor: "#ffffff" });
-          const blob = await new Promise<Blob>((resolve) =>
-            canvas.toBlob((b) => resolve(b!), "image/png")
-          );
-          const fileName = `chart-${Date.now()}.png`;
-          const { error: uploadError } = await supabase.storage
-            .from("chart-images")
-            .upload(fileName, blob, { contentType: "image/png", upsert: true });
-          if (uploadError) throw uploadError;
-          const { data: urlData } = supabase.storage
-            .from("chart-images")
-            .getPublicUrl(fileName);
-          graficoUrl = urlData.publicUrl;
-        } catch (err) {
-          console.warn("No se pudo subir el gráfico:", err);
-        }
-      }
-
-      // 3. Generar HTML con la URL pública de la imagen
+      // 2. Generar HTML con la misma URL pública usada en el preview
       const htmlContent = generarHTMLCorreo({
         fecha: todayFormatted,
         riskColor: getRiskColor(riskLevel),
