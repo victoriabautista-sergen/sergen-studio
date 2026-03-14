@@ -192,8 +192,7 @@ const ActualizacionAlertaPage = () => {
     graficoBase64: chartBase64,
   }), [todayFormatted, riskLevel, isLowRisk, timeRange, demandaEstimada, mensaje, estatus, chartBase64]);
 
-  // Generate the SAME HTML for preview and sending
-  const previewHtml = useMemo(() => generarHTMLCorreo(templateData), [templateData]);
+  // previewHtml no longer needed — preview uses React components directly
 
   const handleSendEmail = async () => {
     if (recipients.length === 0) {
