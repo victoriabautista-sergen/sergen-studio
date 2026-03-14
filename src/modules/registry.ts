@@ -8,6 +8,8 @@ export interface ModuleDefinition {
   icon: LucideIcon;
   basePath: string;
   color: string;
+  gradient: string;
+  category: string;
   submodules?: string[];
 }
 
