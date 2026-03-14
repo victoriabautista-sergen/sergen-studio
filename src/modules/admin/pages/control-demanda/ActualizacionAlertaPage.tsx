@@ -164,7 +164,24 @@ const ActualizacionAlertaPage = () => {
   const todayFormatted = format(new Date(), "d 'de' MMMM 'del' yyyy", { locale: es });
   const isLowRisk = riskLevel === "BAJO";
 
-  // Regenerar preview HTML cada vez que cambian los campos del formulario
+  // Auto-capturar gráfico cuando los datos cambian
+  useEffect(() => {
+    if (forecastData.length === 0) return;
+    const timer = setTimeout(async () => {
+      const grafico = document.getElementById("grafico-pronostico");
+      if (!grafico) return;
+      try {
+        const canvas = await html2canvas(grafico, { useCORS: true, scale: 2, backgroundColor: "#ffffff" });
+        const dataUrl = canvas.toDataURL("image/png");
+        setChartDataUrl(dataUrl);
+      } catch (err) {
+        console.warn("No se pudo capturar el gráfico:", err);
+      }
+    }, 1000);
+    return () => clearTimeout(timer);
+  }, [forecastData]);
+
+  // Regenerar preview HTML cada vez que cambian los campos del formulario o la imagen del gráfico
   useEffect(() => {
     const html = generarHTMLCorreo({
       fecha: todayFormatted,
@@ -174,9 +191,10 @@ const ActualizacionAlertaPage = () => {
       demandaEstimada: demandaEstimada || "—",
       mensaje,
       estatus,
+      graficoUrl: chartDataUrl || undefined,
     });
     setPreviewHtml(html);
-  }, [riskLevel, timeRange, demandaEstimada, mensaje, estatus, todayFormatted, isLowRisk]);
+  }, [riskLevel, timeRange, demandaEstimada, mensaje, estatus, todayFormatted, isLowRisk, chartDataUrl]);
 
   const handleSendEmail = async () => {
     if (recipients.length === 0) {
