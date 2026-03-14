@@ -51,7 +51,7 @@ const ActualizacionAlertaPage = () => {
   const [saving, setSaving] = useState(false);
   const [sendingEmail, setSendingEmail] = useState(false);
   const [loading, setLoading] = useState(true);
-  
+  const [previewHtml, setPreviewHtml] = useState("");
 
   const { data: forecastData, refetch: refetchForecastData } = useForecastData();
 
