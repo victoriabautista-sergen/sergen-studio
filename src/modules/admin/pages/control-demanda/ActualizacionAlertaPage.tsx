@@ -96,23 +96,6 @@ const ActualizacionAlertaPage = () => {
     fetchSettings();
   }, []);
 
-  // Capture chart as base64 whenever forecast data changes
-  useEffect(() => {
-    const captureChart = async () => {
-      // Wait for chart to render
-      await new Promise(r => setTimeout(r, 1500));
-      const grafico = document.getElementById("grafico-pronostico");
-      if (grafico) {
-        try {
-          const canvas = await html2canvas(grafico, { useCORS: true, scale: 2 });
-          setChartBase64(canvas.toDataURL("image/png"));
-        } catch (err) {
-          console.warn("No se pudo capturar el gráfico:", err);
-        }
-      }
-    };
-    if (forecastData.length > 0) captureChart();
-  }, [forecastData]);
 
   const fetchRecipients = useCallback(async () => {
     const { data, error } = await supabase
