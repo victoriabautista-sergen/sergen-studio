@@ -153,7 +153,11 @@ const ActualizacionAlertaPage = () => {
           .insert({ risk_level: riskLevel, modulation_time: timeRange });
         if (error) throw error;
       }
-      toast.success("Alerta actualizada correctamente");
+
+      // Regenerar imagen del gráfico con datos frescos
+      toast.info("Capturando gráfico actualizado...");
+      await captureChart();
+      toast.success("Alerta y gráfico actualizados correctamente");
     } catch (err: any) {
       console.error(err);
       toast.error("Error al guardar la configuración");
