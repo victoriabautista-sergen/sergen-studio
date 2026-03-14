@@ -1,11 +1,12 @@
 import { useState } from "react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Pencil, Trash2, Loader2 } from "lucide-react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { Loader2, Save, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
@@ -25,26 +26,61 @@ const EmpresaInfoTab = ({ company }: { company: Company }) => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const navigate = useNavigate();
-  const [editOpen, setEditOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
-  const [editName, setEditName] = useState("");
-  const [editRuc, setEditRuc] = useState("");
-  const [editIndustry, setEditIndustry] = useState("");
+
+  const [formName, setFormName] = useState(company.company_name);
+  const [formRuc, setFormRuc] = useState(company.ruc ?? "");
+  const [formIndustry, setFormIndustry] = useState(company.industry ?? "");
+
+  // Extra fields from contract_info / energy_supply_info JSON
+  const { data: fullCompany } = useQuery({
+    queryKey: ["admin-empresa-full", company.id],
+    queryFn: async () => {
+      const { data } = await supabase.from("clients")
+        .select("contract_info, energy_supply_info")
+        .eq("id", company.id).single();
+      return data;
+    },
+  });
+
+  const contractInfo = (fullCompany?.contract_info as any) ?? {};
+  const energyInfo = (fullCompany?.energy_supply_info as any) ?? {};
+
+  const [distribuidora, setDistribuidora] = useState(energyInfo.distribuidora ?? "");
+  const [potenciaContratada, setPotenciaContratada] = useState(energyInfo.potencia_contratada ?? "");
+
+  // Subscription for status display
+  const { data: subscription } = useQuery({
+    queryKey: ["admin-empresa-sub", company.id],
+    queryFn: async () => {
+      const { data } = await supabase.from("subscriptions")
+        .select("status").eq("client_id", company.id)
+        .order("created_at", { ascending: false }).limit(1).maybeSingle();
+      return data;
+    },
+  });
+
+  const status = subscription?.status ?? "inactive";
 
   const updateMutation = useMutation({
     mutationFn: async () => {
       const { error } = await supabase.from("clients").update({
-        company_name: editName.trim(),
-        ruc: editRuc.trim() || null,
-        industry: editIndustry.trim() || null,
+        company_name: formName.trim(),
+        ruc: formRuc.trim() || null,
+        industry: formIndustry.trim() || null,
+        energy_supply_info: {
+          ...energyInfo,
+          distribuidora: distribuidora.trim() || null,
+          potencia_contratada: potenciaContratada.trim() || null,
+        },
       }).eq("id", company.id);
       if (error) throw error;
     },
     onSuccess: () => {
-      toast({ title: "Empresa actualizada." });
+      toast({ title: "Información actualizada." });
       queryClient.invalidateQueries({ queryKey: ["admin-empresa", company.id] });
+      queryClient.invalidateQueries({ queryKey: ["admin-empresa-full", company.id] });
       queryClient.invalidateQueries({ queryKey: ["admin-empresas"] });
-      setEditOpen(false);
     },
     onError: () => toast({ title: "Error al actualizar.", variant: "destructive" }),
   });
@@ -62,66 +98,60 @@ const EmpresaInfoTab = ({ company }: { company: Company }) => {
     onError: () => toast({ title: "Error al eliminar.", variant: "destructive" }),
   });
 
+  const StatusBadge = () => {
+    if (status === "active") return <Badge className="bg-green-500/20 text-green-700 border-green-500/30">Activa</Badge>;
+    if (status === "suspended") return <Badge className="bg-destructive/15 text-destructive border-destructive/30">Suspendida</Badge>;
+    return <Badge variant="secondary">Inactiva</Badge>;
+  };
+
   return (
     <>
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle>Datos generales</CardTitle>
+          <CardTitle>Información general</CardTitle>
           <div className="flex gap-2">
-            <Button variant="outline" size="sm" onClick={() => {
-              setEditName(company.company_name);
-              setEditRuc(company.ruc ?? "");
-              setEditIndustry(company.industry ?? "");
-              setEditOpen(true);
-            }}>
-              <Pencil className="h-4 w-4 mr-2" />Editar
-            </Button>
             <Button variant="destructive" size="sm" onClick={() => setDeleteOpen(true)}>
-              <Trash2 className="h-4 w-4 mr-2" />Eliminar
+              <Trash2 className="h-4 w-4 mr-2" />Eliminar empresa
             </Button>
           </div>
         </CardHeader>
-        <CardContent className="grid sm:grid-cols-3 gap-4">
-          <div>
-            <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">Nombre</p>
-            <p className="font-medium">{company.company_name}</p>
-          </div>
-          <div>
-            <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">RUC</p>
-            <p className="font-medium">{company.ruc ?? "—"}</p>
-          </div>
-          <div>
-            <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">Industria</p>
-            <p className="font-medium">{company.industry ?? "—"}</p>
-          </div>
-        </CardContent>
-      </Card>
-
-      <Dialog open={editOpen} onOpenChange={setEditOpen}>
-        <DialogContent className="max-w-md">
-          <DialogHeader><DialogTitle>Editar empresa</DialogTitle></DialogHeader>
-          <div className="space-y-4">
+        <CardContent>
+          <div className="grid sm:grid-cols-2 gap-6">
             <div className="space-y-2">
-              <Label>Nombre *</Label>
-              <Input value={editName} onChange={(e) => setEditName(e.target.value)} />
+              <Label>Nombre de la empresa *</Label>
+              <Input value={formName} onChange={(e) => setFormName(e.target.value)} />
             </div>
             <div className="space-y-2">
               <Label>RUC</Label>
-              <Input value={editRuc} onChange={(e) => setEditRuc(e.target.value)} placeholder="20123456789" />
+              <Input value={formRuc} onChange={(e) => setFormRuc(e.target.value)} placeholder="20123456789" />
             </div>
             <div className="space-y-2">
-              <Label>Industria</Label>
-              <Input value={editIndustry} onChange={(e) => setEditIndustry(e.target.value)} />
+              <Label>Sector</Label>
+              <Input value={formIndustry} onChange={(e) => setFormIndustry(e.target.value)} placeholder="Manufactura, Minería…" />
+            </div>
+            <div className="space-y-2">
+              <Label>Distribuidora eléctrica</Label>
+              <Input value={distribuidora} onChange={(e) => setDistribuidora(e.target.value)} placeholder="Ej: Luz del Sur" />
+            </div>
+            <div className="space-y-2">
+              <Label>Potencia contratada (kW)</Label>
+              <Input value={potenciaContratada} onChange={(e) => setPotenciaContratada(e.target.value)} placeholder="Ej: 2500" />
+            </div>
+            <div className="space-y-2">
+              <Label>Estado</Label>
+              <div className="flex items-center h-10">
+                <StatusBadge />
+              </div>
             </div>
           </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setEditOpen(false)}>Cancelar</Button>
-            <Button onClick={() => updateMutation.mutate()} disabled={updateMutation.isPending || !editName.trim()}>
-              {updateMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : "Guardar"}
+          <div className="flex justify-end mt-6">
+            <Button onClick={() => updateMutation.mutate()} disabled={updateMutation.isPending || !formName.trim()}>
+              {updateMutation.isPending ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Save className="h-4 w-4 mr-2" />}
+              Guardar cambios
             </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+          </div>
+        </CardContent>
+      </Card>
 
       <AlertDialog open={deleteOpen} onOpenChange={setDeleteOpen}>
         <AlertDialogContent>
