@@ -164,22 +164,42 @@ const ActualizacionAlertaPage = () => {
   const todayFormatted = format(new Date(), "d 'de' MMMM 'del' yyyy", { locale: es });
   const isLowRisk = riskLevel === "BAJO";
 
-  // Auto-capturar gráfico cuando los datos cambian
+  // Capturar gráfico como imagen (siempre datos frescos)
+  const captureChart = useCallback(async (): Promise<string> => {
+    // 1. Obtener datos frescos
+    await refetchForecastData();
+    // 2. Esperar a que el gráfico se renderice con los nuevos datos
+    await new Promise(resolve => setTimeout(resolve, 1500));
+    const grafico = document.getElementById("grafico-pronostico");
+    if (!grafico) throw new Error("No se encontró el gráfico");
+    // 3. Capturar
+    const canvas = await html2canvas(grafico, { useCORS: true, scale: 2, backgroundColor: "#ffffff" });
+    const blob = await new Promise<Blob>((resolve) =>
+      canvas.toBlob((b) => resolve(b!), "image/png")
+    );
+    // 4. Subir con nombre único (sin cache)
+    const fileName = `chart-${Date.now()}.png`;
+    const { error: uploadError } = await supabase.storage
+      .from("chart-images")
+      .upload(fileName, blob, { contentType: "image/png", upsert: true });
+    if (uploadError) throw uploadError;
+    const { data: urlData } = supabase.storage
+      .from("chart-images")
+      .getPublicUrl(fileName);
+    // 5. Anti-cache
+    const publicUrl = `${urlData.publicUrl}?t=${Date.now()}`;
+    setChartDataUrl(publicUrl);
+    return publicUrl;
+  }, [refetchForecastData]);
+
+  // Captura inicial al cargar datos
   useEffect(() => {
     if (forecastData.length === 0) return;
-    const timer = setTimeout(async () => {
-      const grafico = document.getElementById("grafico-pronostico");
-      if (!grafico) return;
-      try {
-        const canvas = await html2canvas(grafico, { useCORS: true, scale: 2, backgroundColor: "#ffffff" });
-        const dataUrl = canvas.toDataURL("image/png");
-        setChartDataUrl(dataUrl);
-      } catch (err) {
-        console.warn("No se pudo capturar el gráfico:", err);
-      }
-    }, 1000);
+    const timer = setTimeout(() => {
+      captureChart().catch(err => console.warn("Captura inicial falló:", err));
+    }, 1500);
     return () => clearTimeout(timer);
-  }, [forecastData]);
+  }, [forecastData.length > 0]); // solo al primer load
 
   // Regenerar preview HTML cada vez que cambian los campos del formulario o la imagen del gráfico
   useEffect(() => {
