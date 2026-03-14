@@ -17,6 +17,7 @@ import { format, endOfMonth } from "date-fns";
 import { es } from "date-fns/locale";
 import html2canvas from "html2canvas";
 import { generarHTMLCorreo } from "../../utils/generarHTMLCorreo";
+import { v4 as uuidv4 } from "crypto";
 
 const RISK_OPTIONS = [
   { value: "BAJO", label: "Bajo", color: "bg-green-500" },
