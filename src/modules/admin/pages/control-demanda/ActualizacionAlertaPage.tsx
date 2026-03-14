@@ -210,16 +210,14 @@ const ActualizacionAlertaPage = () => {
 
       // 1. Refrescar datos del gráfico
       await refetchForecastData();
+      await new Promise(resolve => setTimeout(resolve, 1200));
 
-      // 2. Esperar a que el gráfico se renderice con los datos actualizados
-      await new Promise(resolve => setTimeout(resolve, 800));
-
-      // 3. Capturar el gráfico y subir a storage como imagen
+      // 2. Capturar gráfico actualizado y subir a storage
       let graficoUrl = "";
       const grafico = document.getElementById("grafico-pronostico");
       if (grafico) {
         try {
-          const canvas = await html2canvas(grafico, { useCORS: true, scale: 2 });
+          const canvas = await html2canvas(grafico, { useCORS: true, scale: 2, backgroundColor: "#ffffff" });
           const blob = await new Promise<Blob>((resolve) =>
             canvas.toBlob((b) => resolve(b!), "image/png")
           );
@@ -237,6 +235,7 @@ const ActualizacionAlertaPage = () => {
         }
       }
 
+      // 3. Generar HTML con la URL pública de la imagen
       const htmlContent = generarHTMLCorreo({
         fecha: todayFormatted,
         riskColor: getRiskColor(riskLevel),
