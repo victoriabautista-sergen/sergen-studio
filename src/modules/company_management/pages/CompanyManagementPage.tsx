@@ -64,7 +64,7 @@ const CompanyManagementContent = () => {
   }, [companies, search]);
 
   return (
-    <ModuleLayout title="Gestión de Empresa" backTo="/dashboard">
+    <ModuleLayout title="Gestión de Empresa">
       <div className="space-y-6">
         {/* Company selector for SERGEN users */}
         {isSergen && (
