@@ -1,7 +1,10 @@
 import { Link } from "react-router-dom";
 import { Building2, Inbox, Settings, Users } from "lucide-react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import AdminShell from "../components/AdminShell";
+
+const PARENT_GRADIENT = "from-slate-600 via-gray-700 to-slate-800";
 
 const NAV_CARDS = [
   {
@@ -39,21 +42,29 @@ const AdminPanelHomePage = () => (
           Gestión completa de la plataforma SERGEN.
         </p>
       </div>
-      <div className="grid gap-4 sm:grid-cols-2">
+      <div className="grid gap-6 sm:grid-cols-2">
         {NAV_CARDS.map(({ href, title, description, icon: Icon }) => (
           <Link key={href} to={href} className="group">
-            <Card className="h-full transition-all group-hover:border-primary/50 group-hover:shadow-sm">
-              <CardHeader className="pb-3">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-lg bg-primary/10 transition-colors group-hover:bg-primary/15">
-                    <Icon className="h-5 w-5 text-primary" />
+            <Card className="h-full transition-all duration-300 group-hover:shadow-lg group-hover:-translate-y-1 overflow-hidden border-0 shadow-sm">
+              <div className={`relative bg-gradient-to-r ${PARENT_GRADIENT} px-6 py-5`}>
+                <div className="absolute inset-0 opacity-10 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMjAiIGN5PSIyMCIgcj0iMSIgZmlsbD0id2hpdGUiLz48L3N2Zz4=')]" />
+                <div className="relative flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-lg bg-white/20 backdrop-blur-sm flex items-center justify-center">
+                    <Icon className="h-5 w-5 text-white" />
                   </div>
-                  <CardTitle className="text-base">{title}</CardTitle>
+                  <span className="font-heading font-bold text-lg text-white">{title}</span>
                 </div>
-              </CardHeader>
-              <CardContent>
-                <CardDescription>{description}</CardDescription>
-              </CardContent>
+              </div>
+              <div className="bg-card px-6 py-4 space-y-3">
+                <p className="text-sm text-muted-foreground leading-relaxed">{description}</p>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="group-hover:border-primary group-hover:text-primary transition-colors"
+                >
+                  Abrir módulo →
+                </Button>
+              </div>
             </Card>
           </Link>
         ))}
