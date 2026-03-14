@@ -43,5 +43,5 @@ export const useForecastData = () => {
     return () => clearInterval(interval);
   }, []);
 
-  return { data, loading };
+  return { data, loading, refetch: fetchData };
 };
