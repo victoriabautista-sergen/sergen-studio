@@ -63,36 +63,62 @@ const DashboardContent = () => {
             <p className="text-sm mt-2">Contacta a tu administrador para obtener acceso.</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
-            {visibleModules.map((module, index) => {
-              const Icon = module.icon;
-              return (
-                <Card
-                  key={module.id}
-                  className="group cursor-pointer transition-all duration-300 hover:shadow-lg hover:-translate-y-1 animate-fade-in"
-                  style={{ animationDelay: `${index * 100}ms` }}
-                  onClick={() => navigate(module.basePath)}
-                >
-                  <CardHeader>
-                    <div className={`w-14 h-14 rounded-xl flex items-center justify-center mb-3 ${module.color}`}>
-                      <Icon className="h-7 w-7" />
+          (() => {
+            // Group modules by category
+            const grouped = visibleModules.reduce<Record<string, typeof visibleModules>>((acc, m) => {
+              const cat = m.category;
+              if (!acc[cat]) acc[cat] = [];
+              acc[cat].push(m);
+              return acc;
+            }, {});
+
+            return (
+              <div className="max-w-4xl mx-auto space-y-10">
+                {Object.entries(grouped).map(([category, modules]) => (
+                  <div key={category}>
+                    <h3 className="text-xs font-semibold tracking-widest text-muted-foreground mb-4 uppercase">
+                      {category}
+                    </h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      {modules.map((module, index) => {
+                        const Icon = module.icon;
+                        return (
+                          <Card
+                            key={module.id}
+                            className="group cursor-pointer transition-all duration-300 hover:shadow-lg hover:-translate-y-1 animate-fade-in overflow-hidden border-0 shadow-sm"
+                            style={{ animationDelay: `${index * 80}ms` }}
+                            onClick={() => navigate(module.basePath)}
+                          >
+                            {/* Gradient banner */}
+                            <div className={`relative bg-gradient-to-r ${module.gradient} px-6 py-5`}>
+                              <div className="absolute inset-0 opacity-10 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMjAiIGN5PSIyMCIgcj0iMSIgZmlsbD0id2hpdGUiLz48L3N2Zz4=')]" />
+                              <div className="relative flex items-center gap-3">
+                                <div className="w-10 h-10 rounded-lg bg-white/20 backdrop-blur-sm flex items-center justify-center">
+                                  <Icon className="h-5 w-5 text-white" />
+                                </div>
+                                <span className="font-heading font-bold text-lg text-white">{module.name}</span>
+                              </div>
+                            </div>
+                            {/* Content */}
+                            <div className="bg-card px-6 py-4 space-y-3">
+                              <p className="text-sm text-muted-foreground leading-relaxed">{module.description}</p>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className="group-hover:border-primary group-hover:text-primary transition-colors"
+                              >
+                                Abrir módulo →
+                              </Button>
+                            </div>
+                          </Card>
+                        );
+                      })}
                     </div>
-                    <CardTitle className="font-heading text-xl">{module.name}</CardTitle>
-                    <CardDescription className="text-sm">{module.description}</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="group-hover:border-primary group-hover:text-primary transition-colors"
-                    >
-                      Abrir módulo →
-                    </Button>
-                  </CardContent>
-                </Card>
-              );
-            })}
-          </div>
+                  </div>
+                ))}
+              </div>
+            );
+          })()
         )}
       </main>
     </div>
