@@ -52,6 +52,7 @@ const ActualizacionAlertaPage = () => {
   const [sendingEmail, setSendingEmail] = useState(false);
   const [loading, setLoading] = useState(true);
   const [previewHtml, setPreviewHtml] = useState("");
+  const [chartDataUrl, setChartDataUrl] = useState<string>("");
 
   const { data: forecastData, refetch: refetchForecastData } = useForecastData();
 
@@ -163,7 +164,24 @@ const ActualizacionAlertaPage = () => {
   const todayFormatted = format(new Date(), "d 'de' MMMM 'del' yyyy", { locale: es });
   const isLowRisk = riskLevel === "BAJO";
 
-  // Regenerar preview HTML cada vez que cambian los campos del formulario
+  // Auto-capturar gráfico cuando los datos cambian
+  useEffect(() => {
+    if (forecastData.length === 0) return;
+    const timer = setTimeout(async () => {
+      const grafico = document.getElementById("grafico-pronostico");
+      if (!grafico) return;
+      try {
+        const canvas = await html2canvas(grafico, { useCORS: true, scale: 2, backgroundColor: "#ffffff" });
+        const dataUrl = canvas.toDataURL("image/png");
+        setChartDataUrl(dataUrl);
+      } catch (err) {
+        console.warn("No se pudo capturar el gráfico:", err);
+      }
+    }, 1000);
+    return () => clearTimeout(timer);
+  }, [forecastData]);
+
+  // Regenerar preview HTML cada vez que cambian los campos del formulario o la imagen del gráfico
   useEffect(() => {
     const html = generarHTMLCorreo({
       fecha: todayFormatted,
@@ -173,9 +191,10 @@ const ActualizacionAlertaPage = () => {
       demandaEstimada: demandaEstimada || "—",
       mensaje,
       estatus,
+      graficoUrl: chartDataUrl || undefined,
     });
     setPreviewHtml(html);
-  }, [riskLevel, timeRange, demandaEstimada, mensaje, estatus, todayFormatted, isLowRisk]);
+  }, [riskLevel, timeRange, demandaEstimada, mensaje, estatus, todayFormatted, isLowRisk, chartDataUrl]);
 
   const handleSendEmail = async () => {
     if (recipients.length === 0) {
@@ -191,16 +210,14 @@ const ActualizacionAlertaPage = () => {
 
       // 1. Refrescar datos del gráfico
       await refetchForecastData();
+      await new Promise(resolve => setTimeout(resolve, 1200));
 
-      // 2. Esperar a que el gráfico se renderice con los datos actualizados
-      await new Promise(resolve => setTimeout(resolve, 800));
-
-      // 3. Capturar el gráfico y subir a storage como imagen
+      // 2. Capturar gráfico actualizado y subir a storage
       let graficoUrl = "";
       const grafico = document.getElementById("grafico-pronostico");
       if (grafico) {
         try {
-          const canvas = await html2canvas(grafico, { useCORS: true, scale: 2 });
+          const canvas = await html2canvas(grafico, { useCORS: true, scale: 2, backgroundColor: "#ffffff" });
           const blob = await new Promise<Blob>((resolve) =>
             canvas.toBlob((b) => resolve(b!), "image/png")
           );
@@ -218,6 +235,7 @@ const ActualizacionAlertaPage = () => {
         }
       }
 
+      // 3. Generar HTML con la URL pública de la imagen
       const htmlContent = generarHTMLCorreo({
         fecha: todayFormatted,
         riskColor: getRiskColor(riskLevel),
@@ -362,9 +380,9 @@ const ActualizacionAlertaPage = () => {
             </CardHeader>
             <CardContent>
               {/* Gráfico oculto para captura con html2canvas */}
-              <div className="absolute -left-[9999px] top-0">
-                <div id="grafico-pronostico" className="w-[600px] h-[400px]">
-                  <ForecastChart data={forecastData} onPeakValueChange={handlePeakValueChange} />
+              <div style={{ position: "absolute", left: "-9999px", top: 0 }}>
+                <div id="grafico-pronostico" style={{ width: 600, height: 350, background: "#fff", padding: "12px" }}>
+                  <ForecastChart data={forecastData} onPeakValueChange={handlePeakValueChange} showPeakLabel={false} />
                 </div>
               </div>
 
