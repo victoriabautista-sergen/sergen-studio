@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
-import { Building2, ExternalLink, Loader2, Pencil, Plus } from "lucide-react";
+import { Building2, ExternalLink, Loader2, Pencil, Plus, Search } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -21,7 +21,10 @@ type CompanyRow = {
   id: string;
   company_name: string;
   ruc: string | null;
+  industry: string | null;
   subscription_status: string | null;
+  user_count: number;
+  active_modules: number;
 };
 
 const StatusBadge = ({ status }: { status: string | null }) => {
@@ -39,13 +42,12 @@ const EmpresasPage = () => {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
 
-  // Create dialog
+  const [search, setSearch] = useState("");
   const [createOpen, setCreateOpen] = useState(false);
   const [name, setName] = useState("");
   const [ruc, setRuc] = useState("");
   const [industry, setIndustry] = useState("");
 
-  // Edit dialog
   const [editOpen, setEditOpen] = useState(false);
   const [editId, setEditId] = useState("");
   const [editName, setEditName] = useState("");
@@ -54,9 +56,11 @@ const EmpresasPage = () => {
   const { data: companies = [], isLoading } = useQuery({
     queryKey: ["admin-empresas"],
     queryFn: async () => {
-      const [{ data: clients, error }, { data: subs }] = await Promise.all([
-        supabase.from("clients").select("id, company_name, ruc").order("company_name"),
+      const [{ data: clients, error }, { data: subs }, { data: clientUsers }, { data: companyMods }] = await Promise.all([
+        supabase.from("clients").select("id, company_name, ruc, industry").order("company_name"),
         supabase.from("subscriptions").select("client_id, status").order("created_at", { ascending: false }),
+        supabase.from("client_users").select("client_id"),
+        supabase.from("company_modules").select("company_id").eq("enabled", true),
       ]);
       if (error) throw error;
 
@@ -65,13 +69,32 @@ const EmpresasPage = () => {
         if (!subByClient.has(s.client_id)) subByClient.set(s.client_id, s.status);
       }
 
+      const userCountByClient = new Map<string, number>();
+      for (const cu of clientUsers ?? []) {
+        userCountByClient.set(cu.client_id, (userCountByClient.get(cu.client_id) ?? 0) + 1);
+      }
+
+      const modCountByClient = new Map<string, number>();
+      for (const cm of companyMods ?? []) {
+        modCountByClient.set(cm.company_id, (modCountByClient.get(cm.company_id) ?? 0) + 1);
+      }
+
       return (clients ?? []).map((c): CompanyRow => ({
         id: c.id,
         company_name: c.company_name,
         ruc: c.ruc,
+        industry: c.industry,
         subscription_status: subByClient.get(c.id) ?? null,
+        user_count: userCountByClient.get(c.id) ?? 0,
+        active_modules: modCountByClient.get(c.id) ?? 0,
       }));
     },
+  });
+
+  const filtered = companies.filter((c) => {
+    if (!search.trim()) return true;
+    const q = search.toLowerCase();
+    return c.company_name.toLowerCase().includes(q) || (c.ruc?.toLowerCase().includes(q) ?? false);
   });
 
   const createMutation = useMutation({
@@ -120,7 +143,7 @@ const EmpresasPage = () => {
           <div>
             <h2 className="text-2xl font-semibold">Empresas</h2>
             <p className="text-sm text-muted-foreground mt-1">
-              Centro de administración de empresas clientes.
+              Gestión de empresas clientes del sistema.
             </p>
           </div>
           <Button onClick={() => setCreateOpen(true)}>
@@ -130,15 +153,26 @@ const EmpresasPage = () => {
         </div>
 
         <Card>
+          <div className="p-4 border-b">
+            <div className="relative max-w-sm">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Buscar por nombre o RUC…"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="pl-9"
+              />
+            </div>
+          </div>
           <CardContent className="p-0">
             {isLoading ? (
               <div className="flex h-40 items-center justify-center">
                 <Loader2 className="h-6 w-6 animate-spin text-primary" />
               </div>
-            ) : companies.length === 0 ? (
+            ) : filtered.length === 0 ? (
               <div className="flex h-56 flex-col items-center justify-center gap-3 text-muted-foreground">
                 <Building2 className="h-10 w-10" />
-                <p className="text-sm">No hay empresas registradas</p>
+                <p className="text-sm">{search ? "Sin resultados" : "No hay empresas registradas"}</p>
               </div>
             ) : (
               <Table>
@@ -146,23 +180,28 @@ const EmpresasPage = () => {
                   <TableRow>
                     <TableHead>Empresa</TableHead>
                     <TableHead>RUC</TableHead>
+                    <TableHead>Sector</TableHead>
+                    <TableHead className="text-center">Usuarios</TableHead>
+                    <TableHead className="text-center">Módulos activos</TableHead>
                     <TableHead>Estado</TableHead>
                     <TableHead className="text-right">Acciones</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {companies.map((c) => (
+                  {filtered.map((c) => (
                     <TableRow key={c.id}>
                       <TableCell className="font-medium">{c.company_name}</TableCell>
                       <TableCell className="text-muted-foreground">{c.ruc ?? "—"}</TableCell>
+                      <TableCell className="text-muted-foreground">{c.industry ?? "—"}</TableCell>
+                      <TableCell className="text-center">{c.user_count}</TableCell>
+                      <TableCell className="text-center">{c.active_modules}</TableCell>
                       <TableCell><StatusBadge status={c.subscription_status} /></TableCell>
                       <TableCell className="text-right">
                         <div className="flex items-center justify-end gap-2">
-                          <Button variant="outline" size="sm" onClick={() => openEdit(c)}>
-                            <Pencil className="h-4 w-4 mr-1" />
-                            Editar
+                          <Button variant="ghost" size="sm" onClick={() => openEdit(c)}>
+                            <Pencil className="h-4 w-4" />
                           </Button>
-                          <Button size="sm" onClick={() => navigate(`/admin-panel/empresas/${c.id}`)}>
+                          <Button variant="outline" size="sm" onClick={() => navigate(`/admin-panel/empresas/${c.id}`)}>
                             <ExternalLink className="h-4 w-4 mr-1" />
                             Abrir
                           </Button>
@@ -191,7 +230,7 @@ const EmpresasPage = () => {
               <Input value={ruc} onChange={(e) => setRuc(e.target.value)} placeholder="Ej: 20123456789" />
             </div>
             <div className="space-y-2">
-              <Label>Industria</Label>
+              <Label>Sector</Label>
               <Input value={industry} onChange={(e) => setIndustry(e.target.value)} placeholder="Ej: Manufactura, Minería..." />
             </div>
           </div>
