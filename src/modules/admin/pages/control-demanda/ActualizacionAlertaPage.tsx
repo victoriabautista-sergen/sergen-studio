@@ -52,6 +52,7 @@ const ActualizacionAlertaPage = () => {
   const [sendingEmail, setSendingEmail] = useState(false);
   const [loading, setLoading] = useState(true);
   const [previewHtml, setPreviewHtml] = useState("");
+  const [chartDataUrl, setChartDataUrl] = useState<string>("");
 
   const { data: forecastData, refetch: refetchForecastData } = useForecastData();
 
