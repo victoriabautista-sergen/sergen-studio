@@ -51,7 +51,7 @@ const ActualizacionAlertaPage = () => {
   const [saving, setSaving] = useState(false);
   const [sendingEmail, setSendingEmail] = useState(false);
   const [loading, setLoading] = useState(true);
-  
+  const [previewHtml, setPreviewHtml] = useState("");
 
   const { data: forecastData, refetch: refetchForecastData } = useForecastData();
 
@@ -162,6 +162,20 @@ const ActualizacionAlertaPage = () => {
 
   const todayFormatted = format(new Date(), "d 'de' MMMM 'del' yyyy", { locale: es });
   const isLowRisk = riskLevel === "BAJO";
+
+  // Regenerar preview HTML cada vez que cambian los campos del formulario
+  useEffect(() => {
+    const html = generarHTMLCorreo({
+      fecha: todayFormatted,
+      riskColor: getRiskColor(riskLevel),
+      riskLabel: RISK_OPTIONS.find(o => o.value === riskLevel)?.label || riskLevel,
+      timeRange: isLowRisk ? "Uso libre de equipos" : timeRange,
+      demandaEstimada: demandaEstimada || "—",
+      mensaje,
+      estatus,
+    });
+    setPreviewHtml(html);
+  }, [riskLevel, timeRange, demandaEstimada, mensaje, estatus, todayFormatted, isLowRisk]);
 
   const handleSendEmail = async () => {
     if (recipients.length === 0) {
@@ -347,74 +361,21 @@ const ActualizacionAlertaPage = () => {
               <CardTitle className="text-lg">Vista previa del mensaje</CardTitle>
             </CardHeader>
             <CardContent>
-              {/* Gráfico interactivo visible en el dashboard */}
-              <div className="rounded-lg border overflow-hidden bg-white text-foreground">
-                {/* Header del correo */}
-                <div className="flex flex-col items-center pt-10 pb-6 px-6">
-                  <div className="h-16 w-16 rounded-full border-4 border-blue-400 flex items-center justify-center mb-4">
-                    <span className="text-3xl">⚡</span>
-                  </div>
-                  <h3 className="text-xl font-bold text-gray-900">Pronóstico de potencia máxima</h3>
-                  <p className="text-lg font-bold text-gray-900 mt-2 capitalize">{todayFormatted}</p>
-                </div>
-
-                {/* Badge de riesgo */}
-                <div className="flex justify-center pb-6">
-                  <span
-                    className="text-white text-sm font-bold px-7 py-2 rounded-full tracking-wide"
-                    style={{ backgroundColor: getRiskColor(riskLevel) }}
-                  >
-                    RIESGO {(RISK_OPTIONS.find(o => o.value === riskLevel)?.label || riskLevel).toUpperCase()}
-                  </span>
-                </div>
-
-                <div className="mx-6 border-t border-gray-200" />
-
-                {/* Gráfico interactivo (se captura con html2canvas al enviar) */}
-                <div className="px-5 pt-4 pb-2">
-                  <p className="text-sm font-semibold text-gray-700 mb-3 px-1">Pronóstico de Demanda</p>
-                  <div id="grafico-pronostico" className="h-[450px]">
-                    <ForecastChart data={forecastData} onPeakValueChange={handlePeakValueChange} />
-                  </div>
-                </div>
-
-                {/* Tabla: Rango horario + Demanda estimada */}
-                <div className="px-6 pt-4 pb-4">
-                  <div className="grid grid-cols-2 text-sm font-bold text-gray-800 border-b-2 border-gray-300 pb-3">
-                    <span>Rango horario</span>
-                    <span className="text-right">Demanda estimada</span>
-                  </div>
-                  <div className="grid grid-cols-2 text-sm py-4 border-b border-gray-200">
-                    <span className="text-gray-700">{isLowRisk ? "Uso libre de equipos" : timeRange}</span>
-                    <span className="text-gray-700 text-right">{demandaEstimada || "—"} MW</span>
-                  </div>
-                </div>
-
-                {/* Recuerde + Estatus */}
-                <div className="px-6 py-6">
-                  <div className="grid grid-cols-[3fr_2fr] gap-16">
-                    <div className="pr-4 border-r border-gray-200">
-                      <p className="text-sm font-bold text-gray-800">Recuerde:</p>
-                      <p className="text-sm text-gray-600 mt-2 leading-relaxed">{mensaje}</p>
-                    </div>
-                    <div className="pl-4">
-                      <p className="text-sm font-bold text-gray-800">Estatus:</p>
-                      <p className="text-sm text-gray-600 mt-2 leading-relaxed">{estatus}</p>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Banner */}
-                <div className="py-5 text-center text-white font-bold text-lg tracking-wider" style={{ backgroundColor: "#e8920d" }}>
-                  USUARIO ACTIVO
-                </div>
-
-                {/* Footer */}
-                <div className="text-center py-5">
-                  <p className="text-xs text-gray-400">Este correo fue enviado por <strong className="text-gray-700">SERGEN</strong></p>
-                  <p className="text-xs text-gray-400 mt-1">info@sergen.pe</p>
+              {/* Gráfico oculto para captura con html2canvas */}
+              <div className="absolute -left-[9999px] top-0">
+                <div id="grafico-pronostico" className="w-[600px] h-[400px]">
+                  <ForecastChart data={forecastData} onPeakValueChange={handlePeakValueChange} />
                 </div>
               </div>
+
+              {/* iframe que muestra el HTML exacto del correo */}
+              <iframe
+                srcDoc={previewHtml}
+                title="Vista previa del correo"
+                className="w-full border rounded-lg bg-white"
+                style={{ height: "720px" }}
+                sandbox=""
+              />
 
               {/* Send buttons */}
               <div className="flex gap-3 mt-4">
