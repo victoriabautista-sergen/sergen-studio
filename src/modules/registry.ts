@@ -68,7 +68,7 @@ export const moduleRegistry: ModuleDefinition[] = [
     icon: Shield,
     basePath: "/admin-panel",
     color: "bg-sergen-dark/10 text-sergen-dark",
-    gradient: "from-slate-600 via-gray-700 to-slate-800",
+    gradient: "from-emerald-500 via-teal-600 to-cyan-700",
     category: "ADMINISTRACIÓN",
     submodules: ["clients", "users", "settings"],
   },
