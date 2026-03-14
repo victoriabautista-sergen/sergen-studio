@@ -43,6 +43,15 @@ export const moduleRegistry: ModuleDefinition[] = [
     color: "bg-purple-100 text-purple-600",
   },
   {
+    id: "company-management",
+    name: "Gestión de Empresa",
+    description: "Administración de información, usuarios, permisos y solicitudes de tu empresa",
+    icon: Building2,
+    basePath: "/company-management",
+    color: "bg-teal-100 text-teal-600",
+    submodules: ["info", "users", "permissions", "requests"],
+  },
+  {
     id: "admin-panel",
     name: "SERGEN Admin Panel",
     description: "Gestión de usuarios, clientes, roles y configuración de la plataforma",
