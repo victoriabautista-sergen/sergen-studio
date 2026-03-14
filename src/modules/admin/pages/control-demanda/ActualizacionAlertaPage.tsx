@@ -55,6 +55,7 @@ const ActualizacionAlertaPage = () => {
   const [chartDataUrl, setChartDataUrl] = useState<string>("");
 
   const { data: forecastData, refetch: refetchForecastData } = useForecastData();
+  const [isCapturing, setIsCapturing] = useState(false);
 
   const breadcrumbs = [
     { label: "Configuración de Módulos", href: "/admin-panel/modulos" },
