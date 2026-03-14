@@ -163,20 +163,6 @@ const ActualizacionAlertaPage = () => {
   const todayFormatted = format(new Date(), "d 'de' MMMM 'del' yyyy", { locale: es });
   const isLowRisk = riskLevel === "BAJO";
 
-  // Build template data for shared HTML generator
-  const templateData = useMemo(() => ({
-    fecha: todayFormatted,
-    riskColor: getRiskColor(riskLevel),
-    riskLabel: RISK_OPTIONS.find(o => o.value === riskLevel)?.label || riskLevel,
-    timeRange: isLowRisk ? "Uso libre de equipos" : timeRange,
-    demandaEstimada: demandaEstimada || "—",
-    mensaje,
-    estatus,
-    graficoBase64: chartBase64,
-  }), [todayFormatted, riskLevel, isLowRisk, timeRange, demandaEstimada, mensaje, estatus, chartBase64]);
-
-  // previewHtml no longer needed — preview uses React components directly
-
   const handleSendEmail = async () => {
     if (recipients.length === 0) {
       toast.error("Debe ingresar al menos un correo de destino");
@@ -189,20 +175,29 @@ const ActualizacionAlertaPage = () => {
       const bccList = bccEmails.split(",").map(e => e.trim().toLowerCase()).filter(e => isValidEmail(e));
       localStorage.setItem("alert_bcc_emails", bccEmails);
 
-      // Re-capture chart right before sending for freshest image
-      let freshBase64 = chartBase64;
+      // Capture chart with html2canvas before generating email HTML
+      let graficoBase64 = "";
       const grafico = document.getElementById("grafico-pronostico");
       if (grafico) {
         try {
           const canvas = await html2canvas(grafico, { useCORS: true, scale: 2 });
-          freshBase64 = canvas.toDataURL("image/png");
+          graficoBase64 = canvas.toDataURL("image/png");
         } catch (err) {
-          console.warn("No se pudo re-capturar el gráfico:", err);
+          console.warn("No se pudo capturar el gráfico:", err);
         }
       }
 
-      // Generate the EXACT same HTML that is previewed
-      const htmlContent = generarHTMLCorreo({ ...templateData, graficoBase64: freshBase64 });
+      // Generate email HTML with the captured chart image
+      const htmlContent = generarHTMLCorreo({
+        fecha: todayFormatted,
+        riskColor: getRiskColor(riskLevel),
+        riskLabel: RISK_OPTIONS.find(o => o.value === riskLevel)?.label || riskLevel,
+        timeRange: isLowRisk ? "Uso libre de equipos" : timeRange,
+        demandaEstimada: demandaEstimada || "—",
+        mensaje,
+        estatus,
+        graficoBase64,
+      });
 
       const { data, error } = await supabase.functions.invoke("send-email-alert", {
         body: { emails, bccEmails: bccList, htmlContent },
