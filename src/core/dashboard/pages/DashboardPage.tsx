@@ -81,7 +81,7 @@ const DashboardContent = () => {
             }, {});
 
             return (
-              <div className="max-w-7xl mx-auto space-y-10">
+              <div className="space-y-10">
                 {Object.entries(grouped).map(([category, modules]) => (
                   <div key={category}>
                     <h3 className="text-xs font-semibold tracking-widest text-muted-foreground mb-4 uppercase">
