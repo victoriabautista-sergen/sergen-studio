@@ -11,6 +11,7 @@ export interface ModuleDefinition {
   gradient: string;
   category: string;
   submodules?: string[];
+  illustration?: string;
 }
 
 /**

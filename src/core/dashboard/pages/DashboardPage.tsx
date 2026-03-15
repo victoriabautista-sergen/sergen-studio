@@ -1,11 +1,26 @@
 import { useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { LogOut } from "lucide-react";
 import { useAuthContext } from "@/core/auth/context/AuthContext";
 import PrivateRoute from "@/core/auth/components/PrivateRoute";
 import { moduleRegistry } from "@/modules/registry";
+
+// Import illustrations
+import controlDemandaImg from "@/assets/module-control-demanda.png";
+import billingImg from "@/assets/module-billing.png";
+import induvexImg from "@/assets/module-induvex.png";
+import companyImg from "@/assets/module-company.png";
+import adminImg from "@/assets/module-admin.png";
+
+const illustrationMap: Record<string, string> = {
+  "energy-intelligence": controlDemandaImg,
+  "billing-optimization": billingImg,
+  induvex: induvexImg,
+  "company-management": companyImg,
+  "admin-panel": adminImg,
+};
 
 const DashboardContent = () => {
   const navigate = useNavigate();
@@ -13,18 +28,12 @@ const DashboardContent = () => {
 
   const visibleModules = useMemo(() => {
     if (role === "super_admin" || role === "technical_user") {
-      // Show all modules including the admin panel
       return moduleRegistry;
     }
-
-    // Exclude admin-panel card for admin and client_user
     const appModules = moduleRegistry.filter((m) => m.id !== "admin-panel");
-
     if (role === "admin") {
       return appModules;
     }
-
-    // client_user: only show modules explicitly enabled in user_modules
     return appModules.filter((m) => enabledModuleSlugs.includes(m.id));
   }, [role, enabledModuleSlugs]);
 
@@ -64,7 +73,6 @@ const DashboardContent = () => {
           </div>
         ) : (
           (() => {
-            // Group modules by category
             const grouped = visibleModules.reduce<Record<string, typeof visibleModules>>((acc, m) => {
               const cat = m.category;
               if (!acc[cat]) acc[cat] = [];
@@ -82,6 +90,7 @@ const DashboardContent = () => {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       {modules.map((module, index) => {
                         const Icon = module.icon;
+                        const illustration = illustrationMap[module.id];
                         return (
                           <Card
                             key={module.id}
@@ -90,17 +99,24 @@ const DashboardContent = () => {
                             onClick={() => navigate(module.basePath)}
                           >
                             {/* Gradient banner */}
-                            <div className={`relative bg-gradient-to-r ${module.gradient} px-6 py-5`}>
+                            <div className={`relative bg-gradient-to-r ${module.gradient} px-6 py-4`}>
                               <div className="absolute inset-0 opacity-10 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMjAiIGN5PSIyMCIgcj0iMSIgZmlsbD0id2hpdGUiLz48L3N2Zz4=')]" />
                               <div className="relative flex items-center gap-3">
-                                <div className="w-10 h-10 rounded-lg bg-white/20 backdrop-blur-sm flex items-center justify-center">
-                                  <Icon className="h-5 w-5 text-white" />
+                                <div className="w-9 h-9 rounded-lg bg-white/20 backdrop-blur-sm flex items-center justify-center">
+                                  <Icon className="h-4 w-4 text-white" />
                                 </div>
                                 <span className="font-heading font-bold text-lg text-white">{module.name}</span>
                               </div>
                             </div>
-                            {/* Content */}
-                            <div className="bg-card px-6 py-4 space-y-3">
+                            {/* Content with illustration */}
+                            <div className="bg-card px-6 py-5 flex flex-col items-center text-center space-y-3">
+                              {illustration && (
+                                <img
+                                  src={illustration}
+                                  alt={module.name}
+                                  className="w-28 h-28 object-contain group-hover:scale-105 transition-transform duration-300"
+                                />
+                              )}
                               <p className="text-sm text-muted-foreground leading-relaxed">{module.description}</p>
                               <Button
                                 variant="outline"
