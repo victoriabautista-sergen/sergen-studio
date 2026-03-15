@@ -26,7 +26,7 @@ export const moduleRegistry: ModuleDefinition[] = [
     icon: Zap,
     basePath: "/energy-intelligence/control",
     color: "bg-sergen-orange/10 text-primary",
-    gradient: "from-orange-400 via-orange-500 to-red-400",
+    gradient: "from-orange-500 via-orange-600 to-red-600",
     category: "INTELIGENCIA ENERGÉTICA",
     submodules: ["control", "forecast", "historico", "reportes", "configuracion"],
   },
