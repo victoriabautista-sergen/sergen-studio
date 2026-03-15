@@ -56,7 +56,7 @@ const DashboardContent = () => {
         </div>
       </header>
 
-      <main className="px-8 py-10">
+      <main className="px-8 py-10 max-w-[1600px]">
         <div className="mb-10">
           <h1 className="text-3xl font-heading font-bold text-foreground">
             Bienvenido, {session?.user?.user_metadata?.full_name || "Usuario"}
