@@ -40,23 +40,23 @@ const DashboardContent = () => {
   return (
     <div className="min-h-screen bg-background">
       <header className="border-b bg-card">
-        <div className="container flex items-center justify-between h-16">
+        <div className="w-full flex items-center justify-between h-16 px-8">
           <div className="flex items-center gap-3">
-            <span className="font-heading font-bold text-lg text-foreground">SERGEN</span>
+            <span className="font-heading font-bold text-xl text-foreground">SERGEN</span>
           </div>
-          <div className="flex items-center gap-2">
-            <span className="text-sm text-muted-foreground hidden sm:inline">
+          <div className="flex items-center gap-3">
+            <span className="text-base text-muted-foreground hidden sm:inline">
               {session?.user?.email}
             </span>
-            <Button variant="ghost" size="sm" onClick={logout}>
-              <LogOut className="h-4 w-4 mr-1" />
+            <Button variant="ghost" size="default" onClick={logout} className="text-base">
+              <LogOut className="h-5 w-5 mr-1" />
               Salir
             </Button>
           </div>
         </div>
       </header>
 
-      <main className="container py-10">
+      <main className="px-8 py-10">
         <div className="mb-10 text-center">
           <h1 className="text-3xl font-heading font-bold text-foreground">
             Bienvenido, {session?.user?.user_metadata?.full_name || "Usuario"}
@@ -81,7 +81,7 @@ const DashboardContent = () => {
             }, {});
 
             return (
-              <div className="max-w-4xl mx-auto space-y-10">
+              <div className="max-w-7xl mx-auto space-y-10">
                 {Object.entries(grouped).map(([category, modules]) => (
                   <div key={category}>
                     <h3 className="text-xs font-semibold tracking-widest text-muted-foreground mb-4 uppercase">

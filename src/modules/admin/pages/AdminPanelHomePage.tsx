@@ -4,7 +4,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import AdminShell from "../components/AdminShell";
 
-const PARENT_GRADIENT = "from-emerald-500 via-teal-600 to-cyan-700";
+const PARENT_GRADIENT = "from-emerald-400 via-green-500 to-green-700";
 
 const NAV_CARDS = [
   {
