@@ -111,11 +111,13 @@ const DashboardContent = () => {
                             {/* Content with illustration */}
                             <div className="bg-card px-6 py-5 flex flex-col items-center text-center space-y-3">
                               {illustration && (
-                                <img
-                                  src={illustration}
-                                  alt={module.name}
-                                  className="w-28 h-28 object-contain group-hover:scale-105 transition-transform duration-300"
-                                />
+                                <div className="w-32 h-32 flex items-center justify-center overflow-hidden">
+                                  <img
+                                    src={illustration}
+                                    alt={module.name}
+                                    className="max-w-[160%] max-h-[160%] object-contain group-hover:scale-110 transition-transform duration-300"
+                                  />
+                                </div>
                               )}
                               <p className="text-sm text-muted-foreground leading-relaxed">{module.description}</p>
                               <Button
