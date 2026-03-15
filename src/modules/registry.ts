@@ -58,8 +58,8 @@ export const moduleRegistry: ModuleDefinition[] = [
     icon: Building2,
     basePath: "/company-management",
     color: "bg-teal-100 text-teal-600",
-    gradient: "from-sky-300 via-sky-400 to-blue-500",
-    category: "INGENIERÍA",
+    gradient: "from-emerald-400 via-green-500 to-green-700",
+    category: "ADMINISTRACIÓN",
     submodules: ["info", "users", "permissions", "requests"],
   },
   {
