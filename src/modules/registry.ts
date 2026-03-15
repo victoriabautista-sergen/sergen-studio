@@ -37,7 +37,7 @@ export const moduleRegistry: ModuleDefinition[] = [
     icon: Receipt,
     basePath: "/modules/billing-optimization",
     color: "bg-sergen-info/10 text-sergen-info",
-    gradient: "from-sky-400 via-blue-500 to-indigo-500",
+    gradient: "from-orange-400 via-orange-500 to-red-400",
     category: "INTELIGENCIA ENERGÉTICA",
     submodules: ["report_studio", "billing_simulation"],
   },
