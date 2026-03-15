@@ -48,7 +48,7 @@ export const moduleRegistry: ModuleDefinition[] = [
     icon: Bot,
     basePath: "/modules/induvex",
     color: "bg-purple-100 text-purple-600",
-    gradient: "from-fuchsia-500 via-purple-500 to-violet-600",
+    gradient: "from-sky-300 via-sky-400 to-blue-500",
     category: "INGENIERÍA",
   },
   {
