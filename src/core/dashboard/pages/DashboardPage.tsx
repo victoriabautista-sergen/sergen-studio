@@ -57,11 +57,11 @@ const DashboardContent = () => {
       </header>
 
       <main className="px-8 py-10">
-        <div className="mb-10 text-center">
+        <div className="mb-10">
           <h1 className="text-3xl font-heading font-bold text-foreground">
             Bienvenido, {session?.user?.user_metadata?.full_name || "Usuario"}
           </h1>
-          <p className="text-muted-foreground mt-2 max-w-lg mx-auto">
+          <p className="text-muted-foreground mt-2">
             Plataforma de gestión energética industrial. Selecciona un módulo para comenzar.
           </p>
         </div>
