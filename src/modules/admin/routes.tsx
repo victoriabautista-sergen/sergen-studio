@@ -16,7 +16,7 @@ export const adminRoutes: RouteObject[] = [
   { path: "/admin-panel", element: <AdminPanelHomePage /> },
   { path: "/admin-panel/empresas", element: <EmpresasPage /> },
   { path: "/admin-panel/empresas/:id", element: <EmpresaDetailPage /> },
-  { path: "/admin-panel/usuarios-sergen", element: <UsuariosSergenPage /> },
+  { path: "/admin-panel/usuarios", element: <UsuariosSergenPage /> },
   { path: "/admin-panel/configuracion", element: <ConfiguracionPage /> },
   { path: "/admin-panel/solicitudes", element: <SolicitudesPage /> },
   { path: "/admin-panel/modulos", element: <ModulosPage /> },

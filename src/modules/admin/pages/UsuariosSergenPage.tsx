@@ -1,43 +1,24 @@
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Loader2, Shield, Trash2, UserPlus } from "lucide-react";
+import { Loader2, MessageCircle, Shield, Trash2, UserPlus } from "lucide-react";
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
+  Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
+  Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -50,18 +31,19 @@ type SergenUser = {
   is_active: boolean;
   role: "super_admin" | "technical_user";
   role_row_id: string;
+  telegram_chat_id: string | null;
 };
 
-const BREADCRUMBS = [{ label: "Usuarios Sergen" }];
+const BREADCRUMBS = [{ label: "Usuarios" }];
 
 const RoleBadge = ({ role }: { role: string }) =>
   role === "super_admin" ? (
     <Badge className="bg-purple-500/20 text-purple-700 border-purple-500/30">
-      Super Admin
+      Administrador
     </Badge>
   ) : (
     <Badge className="bg-blue-500/20 text-blue-700 border-blue-500/30">
-      Usuario técnico
+      Usuario
     </Badge>
   );
 
@@ -75,6 +57,11 @@ const UsuariosSergenPage = () => {
   const [newName, setNewName] = useState("");
   const [newRole, setNewRole] = useState<"super_admin" | "technical_user">("technical_user");
   const [newPassword, setNewPassword] = useState("");
+  const [newTelegramChatId, setNewTelegramChatId] = useState("");
+
+  // Edit telegram dialog
+  const [editTelegramUserId, setEditTelegramUserId] = useState<string | null>(null);
+  const [editTelegramValue, setEditTelegramValue] = useState("");
 
   const { data: users = [], isLoading } = useQuery({
     queryKey: ["admin-sergen-users"],
@@ -89,7 +76,7 @@ const UsuariosSergenPage = () => {
       const userIds = roleRows.map((r) => r.user_id);
       const { data: profiles } = await supabase
         .from("profiles")
-        .select("user_id, full_name, email, is_active")
+        .select("user_id, full_name, email, is_active, telegram_chat_id")
         .in("user_id", userIds);
 
       const profileByUser = new Map(
@@ -105,6 +92,7 @@ const UsuariosSergenPage = () => {
           is_active: p?.is_active ?? true,
           role: r.role as "super_admin" | "technical_user",
           role_row_id: r.id,
+          telegram_chat_id: (p as any)?.telegram_chat_id ?? null,
         };
       });
     },
@@ -112,32 +100,19 @@ const UsuariosSergenPage = () => {
 
   const toggleActiveMutation = useMutation({
     mutationFn: async ({ userId, active }: { userId: string; active: boolean }) => {
-      const { error } = await supabase
-        .from("profiles")
-        .update({ is_active: active })
-        .eq("user_id", userId);
+      const { error } = await supabase.from("profiles").update({ is_active: active }).eq("user_id", userId);
       if (error) throw error;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin-sergen-users"] });
       queryClient.invalidateQueries({ queryKey: ["admin-resumen"] });
     },
-    onError: () =>
-      toast({ title: "Error al cambiar estado.", variant: "destructive" }),
+    onError: () => toast({ title: "Error al cambiar estado.", variant: "destructive" }),
   });
 
   const changeRoleMutation = useMutation({
-    mutationFn: async ({
-      userId,
-      role,
-    }: {
-      userId: string;
-      role: "super_admin" | "technical_user";
-    }) => {
-      const { error } = await supabase
-        .from("user_roles")
-        .update({ role })
-        .eq("user_id", userId);
+    mutationFn: async ({ userId, role }: { userId: string; role: "super_admin" | "technical_user" }) => {
+      const { error } = await supabase.from("user_roles").update({ role }).eq("user_id", userId);
       if (error) throw error;
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["admin-sergen-users"] }),
@@ -146,66 +121,58 @@ const UsuariosSergenPage = () => {
 
   const deleteUserMutation = useMutation({
     mutationFn: async (roleRowId: string) => {
-      const { error } = await supabase
-        .from("user_roles")
-        .delete()
-        .eq("id", roleRowId);
+      const { error } = await supabase.from("user_roles").delete().eq("id", roleRowId);
       if (error) throw error;
     },
     onSuccess: () => {
-      toast({ title: "Rol Sergen eliminado. El usuario seguirá existiendo en la plataforma." });
+      toast({ title: "Rol eliminado. El usuario seguirá existiendo en la plataforma." });
       queryClient.invalidateQueries({ queryKey: ["admin-sergen-users"] });
       setDeletingId(null);
     },
     onError: () => toast({ title: "Error al eliminar.", variant: "destructive" }),
   });
 
-  // Note: creating auth users requires server-side (service_role).
-  // We use supabase.auth.signUp here, which works only if email confirmations
-  // are disabled in the Supabase project settings.
+  const updateTelegramMutation = useMutation({
+    mutationFn: async ({ userId, telegramChatId }: { userId: string; telegramChatId: string | null }) => {
+      const { error } = await supabase
+        .from("profiles")
+        .update({ telegram_chat_id: telegramChatId } as any)
+        .eq("user_id", userId);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast({ title: "Telegram Chat ID actualizado." });
+      queryClient.invalidateQueries({ queryKey: ["admin-sergen-users"] });
+      setEditTelegramUserId(null);
+      setEditTelegramValue("");
+    },
+    onError: () => toast({ title: "Error al actualizar Telegram.", variant: "destructive" }),
+  });
+
   const createUserMutation = useMutation({
     mutationFn: async ({
-      email,
-      password,
-      fullName,
-      role,
+      email, password, fullName, role, telegramChatId,
     }: {
-      email: string;
-      password: string;
-      fullName: string;
-      role: "super_admin" | "technical_user";
+      email: string; password: string; fullName: string;
+      role: "super_admin" | "technical_user"; telegramChatId?: string;
     }) => {
-      // Check if profile already exists
       const { data: existing } = await supabase
-        .from("profiles")
-        .select("user_id")
-        .eq("email", email.trim().toLowerCase())
-        .maybeSingle();
+        .from("profiles").select("user_id").eq("email", email.trim().toLowerCase()).maybeSingle();
 
       if (existing) {
-        // User already exists — just assign Sergen role
         const { data: existingRole } = await supabase
-          .from("user_roles")
-          .select("id, role")
-          .eq("user_id", existing.user_id)
-          .maybeSingle();
-
+          .from("user_roles").select("id, role").eq("user_id", existing.user_id).maybeSingle();
         if (existingRole) {
-          const { error } = await supabase
-            .from("user_roles")
-            .update({ role })
-            .eq("user_id", existing.user_id);
-          if (error) throw error;
+          await supabase.from("user_roles").update({ role }).eq("user_id", existing.user_id);
         } else {
-          const { error } = await supabase
-            .from("user_roles")
-            .insert({ user_id: existing.user_id, role });
-          if (error) throw error;
+          await supabase.from("user_roles").insert({ user_id: existing.user_id, role });
+        }
+        if (telegramChatId) {
+          await supabase.from("profiles").update({ telegram_chat_id: telegramChatId } as any).eq("user_id", existing.user_id);
         }
         return;
       }
 
-      // New user — sign up via Supabase Auth
       const { data: authData, error: signUpError } = await supabase.auth.signUp({
         email: email.trim().toLowerCase(),
         password,
@@ -214,27 +181,22 @@ const UsuariosSergenPage = () => {
       if (signUpError) throw signUpError;
       if (!authData.user) throw new Error("No se pudo crear el usuario.");
 
-      // Insert role (profile may be created by DB trigger)
-      const { error: roleError } = await supabase
-        .from("user_roles")
-        .insert({ user_id: authData.user.id, role });
+      const { error: roleError } = await supabase.from("user_roles").insert({ user_id: authData.user.id, role });
       if (roleError) throw roleError;
+
+      if (telegramChatId) {
+        await supabase.from("profiles").update({ telegram_chat_id: telegramChatId } as any).eq("user_id", authData.user.id);
+      }
     },
     onSuccess: () => {
-      toast({ title: "Usuario Sergen creado correctamente." });
+      toast({ title: "Usuario creado correctamente." });
       queryClient.invalidateQueries({ queryKey: ["admin-sergen-users"] });
       setCreateOpen(false);
-      setNewEmail("");
-      setNewName("");
-      setNewPassword("");
-      setNewRole("technical_user");
+      setNewEmail(""); setNewName(""); setNewPassword("");
+      setNewRole("technical_user"); setNewTelegramChatId("");
     },
     onError: (err: Error) =>
-      toast({
-        title: "Error al crear usuario.",
-        description: err.message,
-        variant: "destructive",
-      }),
+      toast({ title: "Error al crear usuario.", description: err.message, variant: "destructive" }),
   });
 
   return (
@@ -242,14 +204,14 @@ const UsuariosSergenPage = () => {
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-2xl font-semibold">Usuarios Sergen</h2>
+            <h2 className="text-2xl font-semibold">Usuarios</h2>
             <p className="text-sm text-muted-foreground mt-1">
-              Usuarios internos con acceso al panel de administración.
+              Gestión de usuarios internos de la plataforma.
             </p>
           </div>
           <Button onClick={() => setCreateOpen(true)}>
             <UserPlus className="h-4 w-4 mr-2" />
-            Nuevo usuario Sergen
+            Nuevo usuario
           </Button>
         </div>
 
@@ -262,7 +224,7 @@ const UsuariosSergenPage = () => {
             ) : users.length === 0 ? (
               <div className="flex h-56 flex-col items-center justify-center gap-3 text-muted-foreground">
                 <Shield className="h-10 w-10" />
-                <p className="text-sm">No hay usuarios Sergen registrados</p>
+                <p className="text-sm">No hay usuarios registrados</p>
               </div>
             ) : (
               <Table>
@@ -271,6 +233,7 @@ const UsuariosSergenPage = () => {
                     <TableHead>Nombre</TableHead>
                     <TableHead>Email</TableHead>
                     <TableHead>Rol</TableHead>
+                    <TableHead>Telegram</TableHead>
                     <TableHead>Estado</TableHead>
                     <TableHead className="text-right">Acciones</TableHead>
                   </TableRow>
@@ -278,54 +241,51 @@ const UsuariosSergenPage = () => {
                 <TableBody>
                   {users.map((user) => (
                     <TableRow key={user.user_id}>
-                      <TableCell className="font-medium">
-                        {user.full_name ?? "—"}
-                      </TableCell>
-                      <TableCell className="text-muted-foreground">
-                        {user.email ?? "—"}
-                      </TableCell>
+                      <TableCell className="font-medium">{user.full_name ?? "—"}</TableCell>
+                      <TableCell className="text-muted-foreground">{user.email ?? "—"}</TableCell>
                       <TableCell>
                         <Select
                           value={user.role}
                           onValueChange={(role) =>
-                            changeRoleMutation.mutate({
-                              userId: user.user_id,
-                              role: role as "super_admin" | "technical_user",
-                            })
+                            changeRoleMutation.mutate({ userId: user.user_id, role: role as "super_admin" | "technical_user" })
                           }
                         >
-                          <SelectTrigger className="h-8 w-40">
-                            <SelectValue />
-                          </SelectTrigger>
+                          <SelectTrigger className="h-8 w-40"><SelectValue /></SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="super_admin">Super Admin</SelectItem>
-                            <SelectItem value="technical_user">Usuario técnico</SelectItem>
+                            <SelectItem value="super_admin">Administrador</SelectItem>
+                            <SelectItem value="technical_user">Usuario</SelectItem>
                           </SelectContent>
                         </Select>
+                      </TableCell>
+                      <TableCell>
+                        <button
+                          onClick={() => {
+                            setEditTelegramUserId(user.user_id);
+                            setEditTelegramValue(user.telegram_chat_id ?? "");
+                          }}
+                          className="flex items-center gap-1.5 text-sm hover:underline"
+                        >
+                          {user.telegram_chat_id ? (
+                            <span className="text-emerald-600 flex items-center gap-1">
+                              <MessageCircle className="h-3.5 w-3.5" /> ✔ Configurado
+                            </span>
+                          ) : (
+                            <span className="text-muted-foreground">— No configurado</span>
+                          )}
+                        </button>
                       </TableCell>
                       <TableCell>
                         <div className="flex items-center gap-2">
                           <Switch
                             checked={user.is_active}
-                            onCheckedChange={(active) =>
-                              toggleActiveMutation.mutate({
-                                userId: user.user_id,
-                                active,
-                              })
-                            }
+                            onCheckedChange={(active) => toggleActiveMutation.mutate({ userId: user.user_id, active })}
                           />
-                          <span className="text-sm text-muted-foreground">
-                            {user.is_active ? "Activo" : "Inactivo"}
-                          </span>
+                          <span className="text-sm text-muted-foreground">{user.is_active ? "Activo" : "Inactivo"}</span>
                         </div>
                       </TableCell>
                       <TableCell className="text-right">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="text-destructive hover:text-destructive"
-                          onClick={() => setDeletingId(user.role_row_id)}
-                        >
+                        <Button variant="ghost" size="sm" className="text-destructive hover:text-destructive"
+                          onClick={() => setDeletingId(user.role_row_id)}>
                           <Trash2 className="h-4 w-4" />
                         </Button>
                       </TableCell>
@@ -341,103 +301,108 @@ const UsuariosSergenPage = () => {
       {/* ── Create user dialog ── */}
       <Dialog open={createOpen} onOpenChange={setCreateOpen}>
         <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle>Nuevo usuario Sergen</DialogTitle>
-          </DialogHeader>
+          <DialogHeader><DialogTitle>Nuevo usuario</DialogTitle></DialogHeader>
           <div className="space-y-4">
             <div className="space-y-2">
               <Label>Nombre completo</Label>
-              <Input
-                value={newName}
-                onChange={(e) => setNewName(e.target.value)}
-                placeholder="Nombre Apellido"
-              />
+              <Input value={newName} onChange={(e) => setNewName(e.target.value)} placeholder="Nombre Apellido" />
             </div>
             <div className="space-y-2">
               <Label>Email *</Label>
-              <Input
-                type="email"
-                value={newEmail}
-                onChange={(e) => setNewEmail(e.target.value)}
-                placeholder="usuario@sergen.pe"
-              />
+              <Input type="email" value={newEmail} onChange={(e) => setNewEmail(e.target.value)} placeholder="usuario@sergen.pe" />
             </div>
             <div className="space-y-2">
               <Label>Contraseña temporal *</Label>
-              <Input
-                type="password"
-                value={newPassword}
-                onChange={(e) => setNewPassword(e.target.value)}
-                placeholder="Mínimo 8 caracteres"
-              />
+              <Input type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} placeholder="Mínimo 8 caracteres" />
             </div>
             <div className="space-y-2">
               <Label>Rol</Label>
-              <Select
-                value={newRole}
-                onValueChange={(r) => setNewRole(r as "super_admin" | "technical_user")}
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
+              <Select value={newRole} onValueChange={(r) => setNewRole(r as "super_admin" | "technical_user")}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="super_admin">Super Admin</SelectItem>
-                  <SelectItem value="technical_user">Usuario técnico</SelectItem>
+                  <SelectItem value="super_admin">Administrador</SelectItem>
+                  <SelectItem value="technical_user">Usuario</SelectItem>
                 </SelectContent>
               </Select>
             </div>
+            <div className="space-y-2">
+              <Label>Telegram Chat ID</Label>
+              <Input
+                value={newTelegramChatId}
+                onChange={(e) => setNewTelegramChatId(e.target.value)}
+                placeholder="Ejemplo: 123456789"
+              />
+              <p className="text-xs text-muted-foreground">
+                ID de chat de Telegram que se utilizará para enviar alertas automáticas de la plataforma.
+              </p>
+            </div>
             <p className="text-xs text-muted-foreground">
-              Si el email ya tiene cuenta en la plataforma, se le asignará el rol Sergen
-              directamente sin necesidad de contraseña.
+              Si el email ya tiene cuenta en la plataforma, se le asignará el rol directamente sin necesidad de contraseña.
             </p>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setCreateOpen(false)}>
-              Cancelar
-            </Button>
+            <Button variant="outline" onClick={() => setCreateOpen(false)}>Cancelar</Button>
             <Button
-              onClick={() =>
-                createUserMutation.mutate({
-                  email: newEmail,
-                  password: newPassword,
-                  fullName: newName,
-                  role: newRole,
-                })
-              }
-              disabled={
-                createUserMutation.isPending || !newEmail.trim() || !newPassword.trim()
-              }
+              onClick={() => createUserMutation.mutate({
+                email: newEmail, password: newPassword, fullName: newName,
+                role: newRole, telegramChatId: newTelegramChatId.trim() || undefined,
+              })}
+              disabled={createUserMutation.isPending || !newEmail.trim() || !newPassword.trim()}
             >
-              {createUserMutation.isPending ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                "Crear usuario"
-              )}
+              {createUserMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : "Crear usuario"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* ── Edit Telegram Chat ID dialog ── */}
+      <Dialog open={Boolean(editTelegramUserId)} onOpenChange={(open) => { if (!open) setEditTelegramUserId(null); }}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader><DialogTitle>Telegram Chat ID</DialogTitle></DialogHeader>
+          <div className="space-y-2">
+            <Label>Chat ID</Label>
+            <Input
+              value={editTelegramValue}
+              onChange={(e) => setEditTelegramValue(e.target.value)}
+              placeholder="Ejemplo: 123456789"
+            />
+            <p className="text-xs text-muted-foreground">
+              ID de chat de Telegram que se utilizará para enviar alertas automáticas de la plataforma.
+            </p>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setEditTelegramUserId(null)}>Cancelar</Button>
+            <Button
+              onClick={() => {
+                if (editTelegramUserId) {
+                  updateTelegramMutation.mutate({
+                    userId: editTelegramUserId,
+                    telegramChatId: editTelegramValue.trim() || null,
+                  });
+                }
+              }}
+              disabled={updateTelegramMutation.isPending}
+            >
+              {updateTelegramMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : "Guardar"}
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
       {/* ── Delete role confirm ── */}
-      <AlertDialog
-        open={Boolean(deletingId)}
-        onOpenChange={(open) => !open && setDeletingId(null)}
-      >
+      <AlertDialog open={Boolean(deletingId)} onOpenChange={(open) => !open && setDeletingId(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>¿Eliminar rol Sergen?</AlertDialogTitle>
+            <AlertDialogTitle>¿Eliminar usuario?</AlertDialogTitle>
             <AlertDialogDescription>
-              El usuario perderá su acceso al panel de administración. Su cuenta en la
-              plataforma no se eliminará.
+              El usuario perderá su acceso al panel de administración. Su cuenta en la plataforma no se eliminará.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancelar</AlertDialogCancel>
             <AlertDialogAction
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-              onClick={() => {
-                if (deletingId) deleteUserMutation.mutate(deletingId);
-              }}
+              onClick={() => { if (deletingId) deleteUserMutation.mutate(deletingId); }}
             >
               Eliminar
             </AlertDialogAction>

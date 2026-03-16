@@ -14,9 +14,9 @@ const NAV_CARDS = [
     icon: Building2,
   },
   {
-    href: "/admin-panel/usuarios-sergen",
-    title: "Usuarios Sergen",
-    description: "Usuarios internos del equipo Sergen",
+    href: "/admin-panel/usuarios",
+    title: "Usuarios",
+    description: "Gestión de usuarios internos de la plataforma.",
     icon: Users,
   },
   {
