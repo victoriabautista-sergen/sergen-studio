@@ -42,10 +42,11 @@ const ActualizacionAlertaPage = () => {
   const [demandaEstimada, setDemandaEstimada] = useState("");
   const [demandaManuallyEdited, setDemandaManuallyEdited] = useState(false);
   const [mensaje, setMensaje] = useState("Solo usar equipos indispensables.");
-  const [estatus, setEstatus] = useState(() => {
+  const computeEstatus = () => {
     const lastDay = endOfMonth(new Date());
-    return `Activo hasta el ${format(lastDay, "d 'de' MMMM", { locale: es })}.`;
-  });
+    return `Activo hasta el ${format(lastDay, "d 'de' MMMM", { locale: es })}`;
+  };
+  const [estatus, setEstatus] = useState(computeEstatus);
   const [recipients, setRecipients] = useState<{ id: string; email: string }[]>([]);
   const [newEmail, setNewEmail] = useState("");
   const [bccEmails, setBccEmails] = useState<string>(() => {
