@@ -135,21 +135,24 @@ const ActualizacionAlertaPage = () => {
 
   const isValidEmail = (email: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
-  const handleAddBcc = () => {
+  const handleAddBcc = async () => {
     const email = newBccEmail.trim().toLowerCase();
     if (!email) return;
     if (!isValidEmail(email)) { toast.error("Formato de correo BCC inválido"); return; }
-    if (bccChips.includes(email)) { toast.error("Este correo BCC ya está en la lista"); return; }
-    const updated = [...bccChips, email];
-    setBccChips(updated);
-    localStorage.setItem("alert_bcc_emails", updated.join(","));
+    if (bccRecipients.some(r => r.email === email)) { toast.error("Este correo BCC ya está en la lista"); return; }
+
+    const { data: session } = await supabase.auth.getSession();
+    const { error } = await supabase.from("alert_recipients").insert({ email, added_by: session.session?.user.id, recipient_type: "bcc" });
+    if (error) { toast.error("Error al agregar correo BCC"); console.error(error); return; }
     setNewBccEmail("");
+    fetchRecipients();
+    toast.success("Correo BCC agregado");
   };
 
-  const handleRemoveBcc = (email: string) => {
-    const updated = bccChips.filter(e => e !== email);
-    setBccChips(updated);
-    localStorage.setItem("alert_bcc_emails", updated.join(","));
+  const handleRemoveBcc = async (id: string) => {
+    const { error } = await supabase.from("alert_recipients").delete().eq("id", id);
+    if (error) { toast.error("Error al eliminar correo BCC"); return; }
+    setBccRecipients(prev => prev.filter(r => r.id !== id));
   };
 
   const handleAddRecipient = async () => {
