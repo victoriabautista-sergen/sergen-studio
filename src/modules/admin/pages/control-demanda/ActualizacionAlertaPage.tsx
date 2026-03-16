@@ -369,7 +369,8 @@ const ActualizacionAlertaPage = () => {
 
               <div className="space-y-2">
                 <Label htmlFor="estatus">Estatus</Label>
-                <Input id="estatus" value={estatus} onChange={(e) => setEstatus(e.target.value)} placeholder="Activo hasta el 31 de marzo." />
+                <Input id="estatus" value={estatus} readOnly className="bg-muted cursor-not-allowed" />
+                <p className="text-xs text-muted-foreground">Se calcula automáticamente según el mes actual.</p>
               </div>
 
               <Separator />
