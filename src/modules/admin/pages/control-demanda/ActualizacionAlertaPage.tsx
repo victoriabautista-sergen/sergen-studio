@@ -3,7 +3,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { Mail, MessageSquare, Save, Loader2, X, Plus } from "lucide-react";
@@ -49,9 +48,11 @@ const ActualizacionAlertaPage = () => {
   const [estatus, setEstatus] = useState(computeEstatus);
   const [recipients, setRecipients] = useState<{ id: string; email: string }[]>([]);
   const [newEmail, setNewEmail] = useState("");
-  const [bccEmails, setBccEmails] = useState<string>(() => {
-    return localStorage.getItem("alert_bcc_emails") || "";
+  const [bccChips, setBccChips] = useState<string[]>(() => {
+    const stored = localStorage.getItem("alert_bcc_emails") || "";
+    return stored ? stored.split(",").map(e => e.trim()).filter(Boolean) : [];
   });
+  const [newBccEmail, setNewBccEmail] = useState("");
   const [saving, setSaving] = useState(false);
   const [sendingEmail, setSendingEmail] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -118,6 +119,23 @@ const ActualizacionAlertaPage = () => {
   useEffect(() => { fetchRecipients(); }, [fetchRecipients]);
 
   const isValidEmail = (email: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+
+  const handleAddBcc = () => {
+    const email = newBccEmail.trim().toLowerCase();
+    if (!email) return;
+    if (!isValidEmail(email)) { toast.error("Formato de correo BCC inválido"); return; }
+    if (bccChips.includes(email)) { toast.error("Este correo BCC ya está en la lista"); return; }
+    const updated = [...bccChips, email];
+    setBccChips(updated);
+    localStorage.setItem("alert_bcc_emails", updated.join(","));
+    setNewBccEmail("");
+  };
+
+  const handleRemoveBcc = (email: string) => {
+    const updated = bccChips.filter(e => e !== email);
+    setBccChips(updated);
+    localStorage.setItem("alert_bcc_emails", updated.join(","));
+  };
 
   const handleAddRecipient = async () => {
     const email = newEmail.trim().toLowerCase();
@@ -249,8 +267,8 @@ const ActualizacionAlertaPage = () => {
     setSendingEmail(true);
     try {
       const emails = recipients.map(r => r.email);
-      const bccList = bccEmails.split(",").map(e => e.trim().toLowerCase()).filter(e => isValidEmail(e));
-      localStorage.setItem("alert_bcc_emails", bccEmails);
+      const bccList = bccChips.filter(e => isValidEmail(e));
+      localStorage.setItem("alert_bcc_emails", bccChips.join(","));
 
       // 1. Capturar gráfico con datos frescos y subirlo
       toast.info("Capturando gráfico actualizado...");
@@ -392,8 +410,23 @@ const ActualizacionAlertaPage = () => {
 
               <div className="space-y-3">
                 <Label className="text-base font-semibold">Destinatarios ocultos (BCC)</Label>
-                <Textarea value={bccEmails} onChange={(e) => setBccEmails(e.target.value)} placeholder="operaciones@empresa.com, mantenimiento@empresa.com" rows={2} />
-                <p className="text-xs text-muted-foreground">Ingrese múltiples correos separados por coma. Se guardan automáticamente.</p>
+                <div className="flex gap-2">
+                  <Input type="email" value={newBccEmail} onChange={(e) => setNewBccEmail(e.target.value)} placeholder="operaciones@empresa.com" onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); handleAddBcc(); } }} />
+                  <Button type="button" size="sm" variant="outline" onClick={handleAddBcc}><Plus className="h-4 w-4" /></Button>
+                </div>
+                {bccChips.length > 0 && (
+                  <div className="flex flex-wrap gap-2">
+                    {bccChips.map((email) => (
+                      <Badge key={email} variant="secondary" className="gap-1 pl-3 pr-1 py-1.5 text-xs">
+                        {email}
+                        <button type="button" onClick={() => handleRemoveBcc(email)} className="ml-1 rounded-full p-0.5 hover:bg-muted-foreground/20 transition-colors">
+                          <X className="h-3 w-3" />
+                        </button>
+                      </Badge>
+                    ))}
+                  </div>
+                )}
+                {bccChips.length === 0 && <p className="text-xs text-muted-foreground">No hay correos BCC guardados.</p>}
               </div>
 
               <Button onClick={handleSave} disabled={saving} className="w-full">
