@@ -276,11 +276,16 @@ Deno.serve(async () => {
       const callbackData = update.callback_query?.data ?? "";
       const callbackQueryId = update.callback_query?.id;
 
-      if (!chatId || !authorizedIds.has(chatId)) {
+      // Authorization check using profiles.telegram_chat_id
+      const authorizedUser = authorizedMap.get(chatId);
+      console.log(`Telegram chat_id recibido: ${chatId}`);
+      
+      if (!authorizedUser) {
+        console.log(`Usuario no encontrado. Acceso denegado.`);
         if (chatId) {
           await sendMessage(
             chatId,
-            "⛔ No estás autorizado para usar este bot.",
+            "⚠️ Tu Telegram no está autorizado en la plataforma SERGEN.\n\nSolicita al administrador que registre tu Chat ID en el módulo Usuarios.",
             undefined,
             LOVABLE_API_KEY,
             TELEGRAM_API_KEY
@@ -288,6 +293,9 @@ Deno.serve(async () => {
         }
         continue;
       }
+      
+      console.log(`Usuario encontrado: ${authorizedUser.email ?? authorizedUser.full_name}`);
+      console.log(`Acceso autorizado`);
 
       // Answer callback query to remove loading state
       if (callbackQueryId) {
