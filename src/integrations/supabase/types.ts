@@ -673,6 +673,7 @@ export type Database = {
       telegram_bot_state: {
         Row: {
           alerta_enviada_hoy: boolean
+          bcc_emails: Json
           chat_id: number
           estado_conversacion: string
           id: string
@@ -683,6 +684,7 @@ export type Database = {
         }
         Insert: {
           alerta_enviada_hoy?: boolean
+          bcc_emails?: Json
           chat_id: number
           estado_conversacion?: string
           id?: string
@@ -693,6 +695,7 @@ export type Database = {
         }
         Update: {
           alerta_enviada_hoy?: boolean
+          bcc_emails?: Json
           chat_id?: number
           estado_conversacion?: string
           id?: string

@@ -1,0 +1,1 @@
+ALTER TABLE public.telegram_bot_state ADD COLUMN bcc_emails jsonb NOT NULL DEFAULT '[]'::jsonb;
