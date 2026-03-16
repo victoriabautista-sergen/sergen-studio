@@ -133,7 +133,7 @@ Deno.serve(async (req) => {
       if (!text) continue;
 
       const body: Record<string, unknown> = {
-        chat_id: chat.chat_id,
+        chat_id: chatId,
         text,
         parse_mode: "HTML",
         reply_markup: { inline_keyboard: buttons },
