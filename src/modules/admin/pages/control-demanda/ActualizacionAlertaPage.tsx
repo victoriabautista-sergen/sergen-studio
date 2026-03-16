@@ -150,6 +150,7 @@ const ActualizacionAlertaPage = () => {
         return;
       }
     }
+    setEstatus(computeEstatus());
     setSaving(true);
     try {
       const { data: existing } = await supabase
