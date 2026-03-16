@@ -14,6 +14,7 @@ import { ForecastChart } from "@/modules/energy_intelligence/components/forecast
 import { useForecastData } from "@/modules/energy_intelligence/hooks/useForecastData";
 import { format, endOfMonth } from "date-fns";
 import { es } from "date-fns/locale";
+import { toZonedTime } from "date-fns-tz";
 import html2canvas from "html2canvas";
 import { generarHTMLCorreo } from "../../utils/generarHTMLCorreo";
 
@@ -203,8 +204,9 @@ const ActualizacionAlertaPage = () => {
     }
   };
 
-  const todayRaw = format(new Date(), "d 'de' MMMM 'del' yyyy", { locale: es });
-  const todayFormatted = todayRaw.replace(/\b[A-ZÁÉÍÓÚÑ][a-záéíóúñ]*/g, w => w.toLowerCase());
+  const nowPeru = toZonedTime(new Date(), "America/Lima");
+  const todayRaw = format(nowPeru, "d 'de' MMMM 'del' yyyy", { locale: es });
+  const todayFormatted = todayRaw.toLowerCase();
   const isLowRisk = riskLevel === "BAJO";
 
   // Capturar gráfico como imagen (siempre datos frescos)
