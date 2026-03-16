@@ -269,9 +269,9 @@ const ActualizacionAlertaPage = () => {
       const emails = recipients.map(r => r.email);
       const bccList = bccRecipients.map(r => r.email);
 
-      // 1. Capturar gráfico con datos frescos y subirlo
-      toast.info("Capturando gráfico actualizado...");
-      const graficoUrl = await captureChart();
+      // 1. Generate chart image via backend
+      toast.info("Generando imagen del dashboard...");
+      const graficoUrl = await generateChartImage();
 
       // 2. Generar HTML con la misma URL pública usada en el preview
       const htmlContent = generarHTMLCorreo({
