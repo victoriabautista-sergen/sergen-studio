@@ -203,7 +203,7 @@ const ActualizacionAlertaPage = () => {
     }
   };
 
-  const todayFormatted = format(new Date(), "d 'de' MMMM 'del' yyyy", { locale: es });
+  const todayFormatted = format(new Date(), "d 'de' MMMM 'del' yyyy", { locale: es }).toLowerCase().replace(/^\d/, m => format(new Date(), "d"));
   const isLowRisk = riskLevel === "BAJO";
 
   // Capturar gráfico como imagen (siempre datos frescos)
