@@ -60,7 +60,6 @@ const ActualizacionAlertaPage = () => {
 
   const { data: forecastData } = useForecastData();
   const [isCapturing, setIsCapturing] = useState(false);
-  const chartRef = useRef<HTMLDivElement>(null);
 
   const breadcrumbs = [
     { label: "Configuración", href: "/admin-panel/configuracion" },
