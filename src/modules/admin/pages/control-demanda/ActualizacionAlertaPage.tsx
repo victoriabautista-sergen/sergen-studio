@@ -251,8 +251,8 @@ const ActualizacionAlertaPage = () => {
     setSendingEmail(true);
     try {
       const emails = recipients.map(r => r.email);
-      const bccList = bccEmails.split(",").map(e => e.trim().toLowerCase()).filter(e => isValidEmail(e));
-      localStorage.setItem("alert_bcc_emails", bccEmails);
+      const bccList = bccChips.filter(e => isValidEmail(e));
+      localStorage.setItem("alert_bcc_emails", bccChips.join(","));
 
       // 1. Capturar gráfico con datos frescos y subirlo
       toast.info("Capturando gráfico actualizado...");
