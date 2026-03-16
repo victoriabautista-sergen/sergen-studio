@@ -320,11 +320,28 @@ const ActualizacionAlertaPage = () => {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="timeRange">Rango horario</Label>
-                <Input id="timeRange" value={timeRange} onChange={(e) => setTimeRange(e.target.value)} placeholder="06:30 pm - 08:30 pm" />
+                <Label htmlFor="timeRange">Rango horario {riskLevel === "ALTO" && <span className="text-destructive">*</span>}</Label>
+                <Input
+                  id="timeRange"
+                  value={timeRange}
+                  onChange={(e) => {
+                    setTimeRange(e.target.value);
+                    if (riskLevel === "ALTO" && e.target.value && !TIME_12H_RANGE_REGEX.test(e.target.value.trim())) {
+                      setTimeRangeError('El rango horario debe estar en formato de 12 horas (AM/PM). Ejemplo: 6:00 PM - 8:30 PM.');
+                    } else {
+                      setTimeRangeError("");
+                    }
+                  }}
+                  placeholder="6:00 PM - 8:30 PM"
+                  readOnly={isLowRisk}
+                  className={isLowRisk ? "bg-muted cursor-not-allowed" : ""}
+                />
+                {timeRangeError && (
+                  <p className="text-xs text-destructive">{timeRangeError}</p>
+                )}
                 {isLowRisk && (
                   <p className="text-xs text-muted-foreground">
-                    En riesgo bajo se mostrará "Uso libre de equipos" en lugar del rango horario.
+                    En riesgo bajo el rango horario se establece como "Libre" automáticamente.
                   </p>
                 )}
               </div>
