@@ -33,9 +33,12 @@ const getRiskColor = (level: string) => {
   }
 };
 
+const TIME_12H_RANGE_REGEX = /^\d{1,2}:\d{2}\s?(AM|PM)\s?-\s?\d{1,2}:\d{2}\s?(AM|PM)$/i;
+
 const ActualizacionAlertaPage = () => {
   const [timeRange, setTimeRange] = useState("18:00 - 23:00");
   const [riskLevel, setRiskLevel] = useState("MEDIO");
+  const [timeRangeError, setTimeRangeError] = useState("");
   const [demandaEstimada, setDemandaEstimada] = useState("");
   const [demandaManuallyEdited, setDemandaManuallyEdited] = useState(false);
   const [mensaje, setMensaje] = useState("Solo usar equipos indispensables.");
@@ -72,8 +75,12 @@ const ActualizacionAlertaPage = () => {
   useEffect(() => {
     if (riskLevel === "BAJO") {
       setMensaje("El día de hoy puede usar sus equipos sin rango horario de restricción.");
+      setTimeRange("Libre");
+      setTimeRangeError("");
     } else {
       setMensaje("Solo usar equipos indispensables.");
+      // If switching from BAJO, clear the "Libre" value
+      setTimeRange(prev => prev === "Libre" ? "" : prev);
     }
   }, [riskLevel]);
 
@@ -132,6 +139,16 @@ const ActualizacionAlertaPage = () => {
   };
 
   const handleSave = async () => {
+    if (riskLevel === "ALTO") {
+      if (!timeRange.trim()) {
+        toast.error("El rango horario es obligatorio cuando el riesgo es ALTO");
+        return;
+      }
+      if (!TIME_12H_RANGE_REGEX.test(timeRange.trim())) {
+        toast.error("El rango horario debe estar en formato de 12 horas (AM/PM). Ejemplo: 6:00 PM - 8:30 PM.");
+        return;
+      }
+    }
     setSaving(true);
     try {
       const { data: existing } = await supabase
@@ -313,11 +330,28 @@ const ActualizacionAlertaPage = () => {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="timeRange">Rango horario</Label>
-                <Input id="timeRange" value={timeRange} onChange={(e) => setTimeRange(e.target.value)} placeholder="06:30 pm - 08:30 pm" />
+                <Label htmlFor="timeRange">Rango horario {riskLevel === "ALTO" && <span className="text-destructive">*</span>}</Label>
+                <Input
+                  id="timeRange"
+                  value={timeRange}
+                  onChange={(e) => {
+                    setTimeRange(e.target.value);
+                    if (riskLevel === "ALTO" && e.target.value && !TIME_12H_RANGE_REGEX.test(e.target.value.trim())) {
+                      setTimeRangeError('El rango horario debe estar en formato de 12 horas (AM/PM). Ejemplo: 6:00 PM - 8:30 PM.');
+                    } else {
+                      setTimeRangeError("");
+                    }
+                  }}
+                  placeholder="6:00 PM - 8:30 PM"
+                  readOnly={isLowRisk}
+                  className={isLowRisk ? "bg-muted cursor-not-allowed" : ""}
+                />
+                {timeRangeError && (
+                  <p className="text-xs text-destructive">{timeRangeError}</p>
+                )}
                 {isLowRisk && (
                   <p className="text-xs text-muted-foreground">
-                    En riesgo bajo se mostrará "Uso libre de equipos" en lugar del rango horario.
+                    En riesgo bajo el rango horario se establece como "Libre" automáticamente.
                   </p>
                 )}
               </div>
