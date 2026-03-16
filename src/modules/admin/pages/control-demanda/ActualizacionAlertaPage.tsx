@@ -451,43 +451,21 @@ const ActualizacionAlertaPage = () => {
               <div className="space-y-3">
                 <Label className="text-base font-semibold flex items-center gap-2">
                   <Bot className="h-4 w-4" />
-                  Telegram – Chats autorizados
+                  Telegram – Usuarios autorizados
                 </Label>
-                <div className="flex gap-2">
-                  <Input
-                    type="text"
-                    value={newChatId}
-                    onChange={(e) => setNewChatId(e.target.value)}
-                    placeholder="Chat ID"
-                    className="w-32"
-                    onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), handleAddTelegramChat())}
-                  />
-                  <Input
-                    type="text"
-                    value={newChatLabel}
-                    onChange={(e) => setNewChatLabel(e.target.value)}
-                    placeholder="Etiqueta (opcional)"
-                    onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), handleAddTelegramChat())}
-                  />
-                  <Button type="button" size="sm" variant="outline" onClick={handleAddTelegramChat}>
-                    <Plus className="h-4 w-4" />
-                  </Button>
-                </div>
-                {telegramChats.length > 0 && (
+                {telegramUsers.length > 0 && (
                   <div className="flex flex-wrap gap-2">
-                    {telegramChats.map((c) => (
-                      <Badge key={c.id} variant="secondary" className="gap-1 pl-3 pr-1 py-1.5 text-xs">
-                        {c.label ? `${c.label} (${c.chat_id})` : String(c.chat_id)}
-                        <button type="button" onClick={() => handleRemoveTelegramChat(c.id)} className="ml-1 rounded-full p-0.5 hover:bg-muted-foreground/20 transition-colors">
-                          <X className="h-3 w-3" />
-                        </button>
+                    {telegramUsers.map((u) => (
+                      <Badge key={u.user_id} variant="secondary" className="pl-3 pr-3 py-1.5 text-xs">
+                        {u.full_name || u.email || u.telegram_chat_id}
+                        <span className="ml-1 text-muted-foreground">({u.telegram_chat_id})</span>
                       </Badge>
                     ))}
                   </div>
                 )}
-                {telegramChats.length === 0 && (
+                {telegramUsers.length === 0 && (
                   <p className="text-xs text-muted-foreground">
-                    No hay chats autorizados. Envíe <code>/start</code> al bot y use el chat ID que aparece.
+                    No hay usuarios con Telegram configurado. Configure el Chat ID desde el módulo Usuarios.
                   </p>
                 )}
               </div>
