@@ -120,6 +120,23 @@ const ActualizacionAlertaPage = () => {
 
   const isValidEmail = (email: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
+  const handleAddBcc = () => {
+    const email = newBccEmail.trim().toLowerCase();
+    if (!email) return;
+    if (!isValidEmail(email)) { toast.error("Formato de correo BCC inválido"); return; }
+    if (bccChips.includes(email)) { toast.error("Este correo BCC ya está en la lista"); return; }
+    const updated = [...bccChips, email];
+    setBccChips(updated);
+    localStorage.setItem("alert_bcc_emails", updated.join(","));
+    setNewBccEmail("");
+  };
+
+  const handleRemoveBcc = (email: string) => {
+    const updated = bccChips.filter(e => e !== email);
+    setBccChips(updated);
+    localStorage.setItem("alert_bcc_emails", updated.join(","));
+  };
+
   const handleAddRecipient = async () => {
     const email = newEmail.trim().toLowerCase();
     if (!email) return;
