@@ -35,26 +35,30 @@ Deno.serve(async (req) => {
 
     // ── DAILY RESET ──
     if (action === "daily_reset") {
+      // Reset all bot states for the new day
       await supabase
         .from("telegram_bot_state")
         .update({
           alerta_enviada_hoy: false,
+          correo_enviado: false,
           estado_conversacion: "inicio",
           riesgo_actual: null,
           rango_actual: null,
+          modo_conversacion: null,
           last_interaction: new Date().toISOString(),
           updated_at: new Date().toISOString(),
         })
         .gte("chat_id", 0);
 
-      // Also update where chat_id < 0 (group chats)
       await supabase
         .from("telegram_bot_state")
         .update({
           alerta_enviada_hoy: false,
+          correo_enviado: false,
           estado_conversacion: "inicio",
           riesgo_actual: null,
           rango_actual: null,
+          modo_conversacion: null,
           last_interaction: new Date().toISOString(),
           updated_at: new Date().toISOString(),
         })
@@ -66,14 +70,13 @@ Deno.serve(async (req) => {
       );
     }
 
-    // ── REMINDERS ──
-    // Get Peru time hour
+    // ── REMINDERS (3:00 PM, 4:00 PM, 5:00 PM) ──
     const peruNow = new Date(
       new Date().toLocaleString("en-US", { timeZone: "America/Lima" })
     );
     const hour = peruNow.getHours();
 
-    // Get authorized users from profiles table (same source as Admin Panel)
+    // Get authorized users from profiles table
     const { data: authorizedProfiles } = await supabase
       .from("profiles")
       .select("telegram_chat_id")
@@ -93,39 +96,47 @@ Deno.serve(async (req) => {
 
     let sent = 0;
     for (const chatId of authorizedChatIds) {
-      // Check if alert already sent today
+      // Check if correo already sent today
       const { data: state } = await supabase
         .from("telegram_bot_state")
-        .select("alerta_enviada_hoy")
+        .select("correo_enviado, alerta_enviada_hoy")
         .eq("chat_id", chatId)
         .single();
 
-      if (state?.alerta_enviada_hoy) continue;
+      // If correo already sent, skip
+      if (state?.correo_enviado) continue;
 
+      // Determine message based on hour
       let text = "";
-      let buttons: { text: string; callback_data: string }[][] = [];
 
       if (hour >= 17) {
         text =
           "⚠️ <b>SERGEN ALERTA – Último aviso</b>\n\nDebe registrar ahora la alerta de potencia coincidente.";
-        buttons = [[{ text: "📋 Actualizar", callback_data: "actualizar" }]];
       } else if (hour >= 16) {
         text =
           "⚡ <b>SERGEN ALERTA</b>\n\nEl sistema sigue sin registrar la actualización de la alerta de potencia coincidente.";
-        buttons = [
-          [{ text: "📋 Actualizar", callback_data: "actualizar" }],
-          [{ text: "⏳ Posponer", callback_data: "posponer" }],
-        ];
       } else if (hour >= 15) {
         text =
           "⚡ <b>SERGEN ALERTA</b>\n\nAún no se ha registrado la actualización de la alerta de potencia coincidente para hoy.";
-        buttons = [
-          [{ text: "📋 Actualizar", callback_data: "actualizar" }],
-          [{ text: "⏳ Posponer", callback_data: "posponer" }],
-        ];
       }
 
       if (!text) continue;
+
+      // Automatic mode: show both buttons
+      const buttons = [
+        [{ text: "🔧 Actualizar información", callback_data: "actualizar" }],
+        [{ text: "⏳ Posponer", callback_data: "posponer" }],
+      ];
+
+      // Set mode to "automatico" so the poll function knows
+      await supabase
+        .from("telegram_bot_state")
+        .upsert({
+          chat_id: chatId,
+          modo_conversacion: "automatico",
+          last_interaction: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        }, { onConflict: "chat_id" });
 
       const body: Record<string, unknown> = {
         chat_id: chatId,
