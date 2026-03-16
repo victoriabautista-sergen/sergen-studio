@@ -139,6 +139,16 @@ const ActualizacionAlertaPage = () => {
   };
 
   const handleSave = async () => {
+    if (riskLevel === "ALTO") {
+      if (!timeRange.trim()) {
+        toast.error("El rango horario es obligatorio cuando el riesgo es ALTO");
+        return;
+      }
+      if (!TIME_12H_RANGE_REGEX.test(timeRange.trim())) {
+        toast.error("El rango horario debe estar en formato de 12 horas (AM/PM). Ejemplo: 6:00 PM - 8:30 PM.");
+        return;
+      }
+    }
     setSaving(true);
     try {
       const { data: existing } = await supabase
