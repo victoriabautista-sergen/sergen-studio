@@ -4,12 +4,13 @@ const GATEWAY_URL = "https://connector-gateway.lovable.dev/telegram";
 const MAX_RUNTIME_MS = 55_000;
 const MIN_REMAINING_MS = 5_000;
 const PERU_TZ = "America/Lima";
+const INACTIVITY_TIMEOUT_MS = 30 * 60 * 1000; // 30 minutes
 
 // ─── Telegram helpers ───────────────────────────────────────────
 async function sendMessage(
   chatId: number,
   text: string,
-  buttons?: { text: string; callback_data: string }[][],
+  buttons: { text: string; callback_data: string }[][] | undefined,
   lovableKey: string,
   telegramKey: string
 ) {
@@ -54,7 +55,45 @@ async function answerCallbackQuery(
 
 // ─── Time range validation ──────────────────────────────────────
 const TIME_12H_RANGE_REGEX =
-  /^\d{1,2}:\d{2}\s?(AM|PM)\s?-\s?\d{1,2}:\d{2}\s?(AM|PM)$/i;
+  /^(\d{1,2}):(\d{2})\s?(AM|PM)\s?-\s?(\d{1,2}):(\d{2})\s?(AM|PM)$/i;
+
+function parseTimeTo24h(hour: number, minute: number, period: string): number {
+  let h = hour;
+  const p = period.toUpperCase();
+  if (p === "AM" && h === 12) h = 0;
+  if (p === "PM" && h !== 12) h += 12;
+  return h * 60 + minute;
+}
+
+function validateTimeRange(input: string): { valid: boolean; error?: string } {
+  const match = input.match(TIME_12H_RANGE_REGEX);
+  if (!match) {
+    return { valid: false, error: "Formato incorrecto.\n\nIngrese el rango en formato:\n<code>6:00 PM - 8:00 PM</code>" };
+  }
+
+  const startH = parseInt(match[1]);
+  const startM = parseInt(match[2]);
+  const startP = match[3];
+  const endH = parseInt(match[4]);
+  const endM = parseInt(match[5]);
+  const endP = match[6];
+
+  if (startH < 1 || startH > 12 || endH < 1 || endH > 12 || startM > 59 || endM > 59) {
+    return { valid: false, error: "Formato incorrecto.\n\nIngrese el rango en formato:\n<code>6:00 PM - 8:00 PM</code>" };
+  }
+
+  const startMinutes = parseTimeTo24h(startH, startM, startP);
+  const endMinutes = parseTimeTo24h(endH, endM, endP);
+
+  let diff = endMinutes - startMinutes;
+  if (diff < 0) diff += 24 * 60; // crosses midnight
+
+  if (diff !== 120) {
+    return { valid: false, error: "El rango horario debe ser de exactamente <b>2 horas</b>.\n\nEjemplo: <code>6:00 PM - 8:00 PM</code>" };
+  }
+
+  return { valid: true };
+}
 
 // ─── Risk helpers ───────────────────────────────────────────────
 function getRiskColor(level: string) {
@@ -100,7 +139,7 @@ function lastDayOfMonth() {
   return `Activo hasta el ${last.getDate()} de ${months[last.getMonth()]}`;
 }
 
-// ─── Email HTML generator (mirroring generarHTMLCorreo) ─────────
+// ─── Email HTML generator ───────────────────────────────────────
 function generarHTMLCorreo(d: {
   fecha: string;
   riskColor: string;
@@ -151,6 +190,14 @@ ${chartRow}
 </html>`;
 }
 
+// ─── Inactivity check ───────────────────────────────────────────
+function isSessionExpired(state: any): boolean {
+  if (!state?.last_interaction) return false;
+  const lastInteraction = new Date(state.last_interaction).getTime();
+  const now = Date.now();
+  return (now - lastInteraction) > INACTIVITY_TIMEOUT_MS;
+}
+
 // ─── Main handler ───────────────────────────────────────────────
 Deno.serve(async () => {
   const startTime = Date.now();
@@ -172,7 +219,7 @@ Deno.serve(async () => {
     .select("chat_id");
   const authorizedIds = new Set((authChats || []).map((c: any) => c.chat_id));
 
-  // Get global offset (use first authorized chat's state or 0)
+  // Get global offset
   const { data: allStates } = await supabase
     .from("telegram_bot_state")
     .select("update_offset")
@@ -255,6 +302,39 @@ Deno.serve(async () => {
         state = newState;
       }
 
+      // ── Inactivity timeout check ──
+      if (state && state.estado_conversacion !== "inicio" && isSessionExpired(state)) {
+        await supabase
+          .from("telegram_bot_state")
+          .update({
+            estado_conversacion: "inicio",
+            riesgo_actual: null,
+            rango_actual: null,
+            last_interaction: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+          })
+          .eq("chat_id", chatId);
+
+        await sendMessage(
+          chatId,
+          "⏰ La sesión anterior fue reiniciada por inactividad.\n\nPuede comenzar nuevamente.",
+          [
+            [{ text: "📋 Actualizar alerta", callback_data: "actualizar" }],
+            [{ text: "📊 Estado del día", callback_data: "estado" }],
+          ],
+          LOVABLE_API_KEY,
+          TELEGRAM_API_KEY
+        );
+
+        // Re-fetch state after reset
+        const { data: resetState } = await supabase
+          .from("telegram_bot_state")
+          .select("*")
+          .eq("chat_id", chatId)
+          .single();
+        state = resetState;
+      }
+
       const input = callbackData || text.trim();
 
       await processConversation(
@@ -298,13 +378,18 @@ async function processConversation(
   const updateState = (fields: Record<string, unknown>) =>
     supabase
       .from("telegram_bot_state")
-      .update({ ...fields, updated_at: new Date().toISOString() })
+      .update({
+        ...fields,
+        last_interaction: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      })
       .eq("chat_id", chatId);
 
   const estado = state.estado_conversacion || "inicio";
 
   // ── Handle /start or /actualizar commands ──
   if (input === "/start" || input === "/actualizar") {
+    await updateState({ estado_conversacion: "inicio" });
     await send("⚡ <b>SERGEN – Control de Demanda</b>\n\n¿Qué deseas hacer?", [
       [{ text: "📋 Actualizar alerta", callback_data: "actualizar" }],
       [{ text: "📊 Estado del día", callback_data: "estado" }],
@@ -314,6 +399,7 @@ async function processConversation(
 
   // ── Handle "estado" ──
   if (input === "estado") {
+    await updateState({});
     const alertaHoy = state.alerta_enviada_hoy ? "✅ Sí" : "❌ No";
     await send(
       `📊 <b>Estado del día</b>\n\nAlerta enviada hoy: ${alertaHoy}\nEstado: ${estado}`
@@ -323,12 +409,19 @@ async function processConversation(
 
   // ── Handle "posponer" ──
   if (input === "posponer") {
+    await updateState({});
     await send("⏳ De acuerdo, se pospondrá. Recibirás otro recordatorio más tarde.");
     return;
   }
 
   // ── Handle "actualizar" → start flow ──
   if (input === "actualizar") {
+    // Check double-send before starting
+    if (state.alerta_enviada_hoy) {
+      await updateState({});
+      await send("⚠️ La alerta de potencia coincidente ya fue enviada hoy.\n\nNo es posible enviar otra alerta hasta mañana.");
+      return;
+    }
     await updateState({ estado_conversacion: "esperando_riesgo" });
     await send("¿El riesgo de potencia coincidente es?", [
       [
@@ -356,7 +449,7 @@ async function processConversation(
         estado_conversacion: "esperando_rango",
       });
       await send(
-        "📝 Ingrese el rango horario de riesgo.\n\n<b>Formato requerido:</b>\n<code>6:00 PM - 8:00 PM</code>\n\nDebe ser un rango de 2 horas en formato 12h AM/PM."
+        "📝 Ingrese el rango horario de riesgo.\n\n<b>Formato requerido:</b>\n<code>6:00 PM - 8:00 PM</code>\n\nDebe ser un rango de exactamente 2 horas en formato 12h AM/PM."
       );
       return;
     }
@@ -371,10 +464,10 @@ async function processConversation(
 
   // ── ESPERANDO RANGO ──
   if (estado === "esperando_rango") {
-    if (!TIME_12H_RANGE_REGEX.test(input)) {
-      await send(
-        "❌ Formato inválido.\n\nUse el formato: <code>6:00 PM - 8:00 PM</code>"
-      );
+    const validation = validateTimeRange(input);
+    if (!validation.valid) {
+      await updateState({});
+      await send(`❌ ${validation.error}`);
       return;
     }
     await updateState({
@@ -400,6 +493,7 @@ async function processConversation(
     if (input.startsWith("eliminar_correo_")) {
       const id = input.replace("eliminar_correo_", "");
       await supabase.from("alert_recipients").delete().eq("id", id);
+      await updateState({});
       await send("✅ Correo eliminado.");
       await showRecipients(chatId, "principales", supabase, send);
       return;
@@ -412,10 +506,10 @@ async function processConversation(
   if (estado === "agregando_correo") {
     const email = input.trim().toLowerCase();
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      await updateState({});
       await send("❌ Formato de correo inválido. Intente de nuevo:");
       return;
     }
-    // Get any admin user to use as added_by
     const { data: anyAdmin } = await supabase
       .from("user_roles")
       .select("user_id")
@@ -435,7 +529,6 @@ async function processConversation(
   // ── CONFIRMANDO BCC ──
   if (estado === "confirmando_bcc") {
     if (input === "confirmar_bcc") {
-      // Refresh state to get latest values
       const { data: freshState } = await supabase
         .from("telegram_bot_state")
         .select("*")
@@ -452,12 +545,10 @@ async function processConversation(
     }
     if (input.startsWith("eliminar_bcc_")) {
       const email = input.replace("eliminar_bcc_", "");
-      // BCC stored in bot_state as JSON array
       const currentBcc: string[] = state.bcc_emails || [];
       const updated = currentBcc.filter((e: string) => e !== email);
       await updateState({ bcc_emails: updated });
       await send(`✅ BCC <b>${email}</b> eliminado.`);
-      // Refresh state
       const { data: freshState } = await supabase
         .from("telegram_bot_state")
         .select("*")
@@ -474,6 +565,7 @@ async function processConversation(
   if (estado === "agregando_bcc") {
     const email = input.trim().toLowerCase();
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      await updateState({});
       await send("❌ Formato de correo inválido. Intente de nuevo:");
       return;
     }
@@ -491,6 +583,23 @@ async function processConversation(
   // ── CONFIRMACIÓN FINAL ──
   if (estado === "confirmacion_final") {
     if (input === "enviar_alerta") {
+      // ── Double-send protection ──
+      const { data: latestState } = await supabase
+        .from("telegram_bot_state")
+        .select("alerta_enviada_hoy")
+        .eq("chat_id", chatId)
+        .single();
+
+      if (latestState?.alerta_enviada_hoy) {
+        await updateState({
+          estado_conversacion: "inicio",
+          riesgo_actual: null,
+          rango_actual: null,
+        });
+        await send("⚠️ La alerta de potencia coincidente ya fue enviada hoy.\n\nNo es posible enviar otra alerta hasta mañana.");
+        return;
+      }
+
       await send("⏳ Procesando... Guardando configuración y enviando correo...");
 
       try {
@@ -540,7 +649,7 @@ async function processConversation(
           graficoUrl = `${urlData.publicUrl}?t=${Date.now()}`;
         }
 
-        // 3. Get demand estimate from latest forecast data
+        // 3. Get demand estimate
         const { data: forecastData } = await supabase
           .from("coes_forecast")
           .select("pronostico")
@@ -582,9 +691,8 @@ async function processConversation(
           return;
         }
 
-        // 6. Send email via edge function
+        // 6. Send email
         const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-        const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
         const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 
         const emailRes = await fetch(
@@ -605,7 +713,7 @@ async function processConversation(
           throw new Error("Email send failed");
         }
 
-        // 7. Update state
+        // 7. Update state - mark alert as sent
         await updateState({
           alerta_enviada_hoy: true,
           estado_conversacion: "inicio",
@@ -647,6 +755,7 @@ async function processConversation(
   }
 
   // ── Default: show menu ──
+  await updateState({});
   await send("⚡ <b>SERGEN – Control de Demanda</b>\n\nEscriba /actualizar para comenzar.", [
     [{ text: "📋 Actualizar alerta", callback_data: "actualizar" }],
     [{ text: "📊 Estado del día", callback_data: "estado" }],
@@ -718,7 +827,7 @@ async function showBccRecipients(
   );
 }
 
-// ─── Helper: show final summary ─────────────────────────────────
+// ─── Helper: show final summary (improved) ──────────────────────
 async function showFinalSummary(
   chatId: number,
   state: any,
@@ -733,9 +842,12 @@ async function showFinalSummary(
   const rango = state?.rango_actual || "—";
   const correoCount = (recipients || []).length;
   const bccCount = (state?.bcc_emails || []).length;
+  const isLowRisk = riesgo === "BAJO";
+
+  const riesgoEmoji = riesgo === "ALTO" ? "🔴" : riesgo === "BAJO" ? "🟢" : "🟡";
 
   await send(
-    `📋 <b>Resumen de la alerta:</b>\n\n🚦 Riesgo: <b>${getRiskLabel(riesgo)}</b>\n🕐 Horario: <b>${rango}</b>\n📧 Correos principales: <b>${correoCount}</b>\n📧 Correos BCC: <b>${bccCount}</b>\n\n¿Confirmar envío?`,
+    `⚡ <b>SERGEN – Confirmación de alerta</b>\n\n${riesgoEmoji} Riesgo: <b>${getRiskLabel(riesgo).toUpperCase()}</b>\n🕐 Horario: <b>${isLowRisk ? "Libre" : rango}</b>\n📧 Destinatarios: <b>${correoCount}</b>\n📧 BCC: <b>${bccCount}</b>\n\n¿Desea enviar la alerta a los clientes?`,
     [
       [{ text: "✅ Enviar alerta", callback_data: "enviar_alerta" }],
       [{ text: "❌ Cancelar", callback_data: "cancelar_alerta" }],
