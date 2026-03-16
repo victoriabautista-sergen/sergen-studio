@@ -469,8 +469,8 @@ const ActualizacionAlertaPage = () => {
               <CardTitle className="text-lg">Vista previa del mensaje</CardTitle>
             </CardHeader>
             <CardContent>
-              {/* ForecastChart rendered offscreen for html2canvas capture and peak value calculation */}
-              <div style={{ position: 'fixed', left: '-9999px', top: 0, width: 800, paddingTop: 32, paddingLeft: 16, paddingRight: 16, paddingBottom: 16, background: '#fff' }} ref={chartRef}>
+              {/* ForecastChart rendered offscreen for peak value calculation only */}
+              <div style={{ position: 'fixed', left: '-9999px', top: 0, width: 800, paddingTop: 32, paddingLeft: 16, paddingRight: 16, paddingBottom: 16, background: '#fff' }}>
                 <ForecastChart data={forecastData} onPeakValueChange={handlePeakValueChange} showPeakLabel={true} />
               </div>
 
