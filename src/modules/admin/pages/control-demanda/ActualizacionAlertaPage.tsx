@@ -204,8 +204,9 @@ const ActualizacionAlertaPage = () => {
     }
   };
 
-  const todayRaw = format(new Date(), "d 'de' MMMM 'del' yyyy", { locale: es });
-  const todayFormatted = todayRaw.replace(/\b[A-ZÁÉÍÓÚÑ][a-záéíóúñ]*/g, w => w.toLowerCase());
+  const nowPeru = toZonedTime(new Date(), "America/Lima");
+  const todayRaw = format(nowPeru, "d 'de' MMMM 'del' yyyy", { locale: es });
+  const todayFormatted = todayRaw.toLowerCase();
   const isLowRisk = riskLevel === "BAJO";
 
   // Capturar gráfico como imagen (siempre datos frescos)
