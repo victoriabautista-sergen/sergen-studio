@@ -465,11 +465,9 @@ const ActualizacionAlertaPage = () => {
               <CardTitle className="text-lg">Vista previa del mensaje</CardTitle>
             </CardHeader>
             <CardContent>
-              {/* Gráfico oculto para captura con html2canvas — tamaño mayor y tooltip visible */}
-              <div style={{ position: "absolute", left: "-9999px", top: 0 }}>
-                <div id="grafico-pronostico" style={{ width: 750, height: 400, background: "#fff", padding: "16px" }}>
-                  <ForecastChart data={forecastData} onPeakValueChange={handlePeakValueChange} showPeakLabel={true} />
-                </div>
+              {/* Preview chart (visible for reference) */}
+              <div className="mb-4">
+                <ForecastChart data={forecastData} onPeakValueChange={handlePeakValueChange} showPeakLabel={true} />
               </div>
 
               {/* iframe que muestra el HTML exacto del correo */}
