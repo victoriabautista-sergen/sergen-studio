@@ -208,9 +208,9 @@ const ActualizacionAlertaPage = () => {
         if (error) throw error;
       }
 
-      // Regenerar imagen del gráfico con datos frescos
-      toast.info("Capturando gráfico actualizado...");
-      await captureChart();
+      // Regenerar imagen del gráfico en el backend
+      toast.info("Generando imagen del dashboard...");
+      await generateChartImage();
       toast.success("Alerta y gráfico actualizados correctamente");
     } catch (err: any) {
       console.error(err);
