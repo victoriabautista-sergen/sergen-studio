@@ -489,9 +489,9 @@ const ActualizacionAlertaPage = () => {
               <CardTitle className="text-lg">Vista previa del mensaje</CardTitle>
             </CardHeader>
             <CardContent>
-              {/* Hidden ForecastChart only for peak value calculation */}
-              <div className="hidden">
-                <ForecastChart data={forecastData} onPeakValueChange={handlePeakValueChange} showPeakLabel={false} />
+              {/* ForecastChart rendered offscreen for html2canvas capture and peak value calculation */}
+              <div style={{ position: 'fixed', left: '-9999px', top: 0, width: 800 }} ref={chartRef}>
+                <ForecastChart data={forecastData} onPeakValueChange={handlePeakValueChange} showPeakLabel={true} />
               </div>
 
               {/* iframe que muestra el HTML exacto del correo (incluye la imagen del gráfico generada en backend) */}
