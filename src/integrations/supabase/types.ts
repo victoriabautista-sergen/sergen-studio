@@ -58,18 +58,21 @@ export type Database = {
           created_at: string
           email: string
           id: string
+          recipient_type: string
         }
         Insert: {
           added_by: string
           created_at?: string
           email: string
           id?: string
+          recipient_type?: string
         }
         Update: {
           added_by?: string
           created_at?: string
           email?: string
           id?: string
+          recipient_type?: string
         }
         Relationships: []
       }

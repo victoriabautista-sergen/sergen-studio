@@ -49,10 +49,7 @@ const ActualizacionAlertaPage = () => {
   const [estatus, setEstatus] = useState(computeEstatus);
   const [recipients, setRecipients] = useState<{ id: string; email: string }[]>([]);
   const [newEmail, setNewEmail] = useState("");
-  const [bccChips, setBccChips] = useState<string[]>(() => {
-    const stored = localStorage.getItem("alert_bcc_emails") || "";
-    return stored ? stored.split(",").map(e => e.trim()).filter(Boolean) : [];
-  });
+  const [bccRecipients, setBccRecipients] = useState<{ id: string; email: string }[]>([]);
   const [newBccEmail, setNewBccEmail] = useState("");
   const [saving, setSaving] = useState(false);
   const [sendingEmail, setSendingEmail] = useState(false);
@@ -114,9 +111,12 @@ const ActualizacionAlertaPage = () => {
   const fetchRecipients = useCallback(async () => {
     const { data, error } = await supabase
       .from("alert_recipients")
-      .select("id, email")
+      .select("id, email, recipient_type")
       .order("created_at", { ascending: true });
-    if (!error && data) setRecipients(data);
+    if (!error && data) {
+      setRecipients(data.filter((r: any) => r.recipient_type === "to" || !r.recipient_type).map((r: any) => ({ id: r.id, email: r.email })));
+      setBccRecipients(data.filter((r: any) => r.recipient_type === "bcc").map((r: any) => ({ id: r.id, email: r.email })));
+    }
   }, []);
 
   useEffect(() => { fetchRecipients(); }, [fetchRecipients]);
@@ -135,21 +135,24 @@ const ActualizacionAlertaPage = () => {
 
   const isValidEmail = (email: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
-  const handleAddBcc = () => {
+  const handleAddBcc = async () => {
     const email = newBccEmail.trim().toLowerCase();
     if (!email) return;
     if (!isValidEmail(email)) { toast.error("Formato de correo BCC inválido"); return; }
-    if (bccChips.includes(email)) { toast.error("Este correo BCC ya está en la lista"); return; }
-    const updated = [...bccChips, email];
-    setBccChips(updated);
-    localStorage.setItem("alert_bcc_emails", updated.join(","));
+    if (bccRecipients.some(r => r.email === email)) { toast.error("Este correo BCC ya está en la lista"); return; }
+
+    const { data: session } = await supabase.auth.getSession();
+    const { error } = await supabase.from("alert_recipients").insert({ email, added_by: session.session?.user.id, recipient_type: "bcc" });
+    if (error) { toast.error("Error al agregar correo BCC"); console.error(error); return; }
     setNewBccEmail("");
+    fetchRecipients();
+    toast.success("Correo BCC agregado");
   };
 
-  const handleRemoveBcc = (email: string) => {
-    const updated = bccChips.filter(e => e !== email);
-    setBccChips(updated);
-    localStorage.setItem("alert_bcc_emails", updated.join(","));
+  const handleRemoveBcc = async (id: string) => {
+    const { error } = await supabase.from("alert_recipients").delete().eq("id", id);
+    if (error) { toast.error("Error al eliminar correo BCC"); return; }
+    setBccRecipients(prev => prev.filter(r => r.id !== id));
   };
 
   const handleAddRecipient = async () => {
@@ -159,7 +162,7 @@ const ActualizacionAlertaPage = () => {
     if (recipients.some(r => r.email === email)) { toast.error("Este correo ya está en la lista"); return; }
 
     const { data: session } = await supabase.auth.getSession();
-    const { error } = await supabase.from("alert_recipients").insert({ email, added_by: session.session?.user.id });
+    const { error } = await supabase.from("alert_recipients").insert({ email, added_by: session.session?.user.id, recipient_type: "to" });
     if (error) { toast.error("Error al agregar correo"); console.error(error); return; }
     setNewEmail("");
     fetchRecipients();
@@ -284,8 +287,7 @@ const ActualizacionAlertaPage = () => {
     setSendingEmail(true);
     try {
       const emails = recipients.map(r => r.email);
-      const bccList = bccChips.filter(e => isValidEmail(e));
-      localStorage.setItem("alert_bcc_emails", bccChips.join(","));
+      const bccList = bccRecipients.map(r => r.email);
 
       // 1. Capturar gráfico con datos frescos y subirlo
       toast.info("Capturando gráfico actualizado...");
@@ -431,19 +433,19 @@ const ActualizacionAlertaPage = () => {
                   <Input type="email" value={newBccEmail} onChange={(e) => setNewBccEmail(e.target.value)} placeholder="operaciones@empresa.com" onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); handleAddBcc(); } }} />
                   <Button type="button" size="sm" variant="outline" onClick={handleAddBcc}><Plus className="h-4 w-4" /></Button>
                 </div>
-                {bccChips.length > 0 && (
+                {bccRecipients.length > 0 && (
                   <div className="flex flex-wrap gap-2">
-                    {bccChips.map((email) => (
-                      <Badge key={email} variant="secondary" className="gap-1 pl-3 pr-1 py-1.5 text-xs">
-                        {email}
-                        <button type="button" onClick={() => handleRemoveBcc(email)} className="ml-1 rounded-full p-0.5 hover:bg-muted-foreground/20 transition-colors">
+                    {bccRecipients.map((r) => (
+                      <Badge key={r.id} variant="secondary" className="gap-1 pl-3 pr-1 py-1.5 text-xs">
+                        {r.email}
+                        <button type="button" onClick={() => handleRemoveBcc(r.id)} className="ml-1 rounded-full p-0.5 hover:bg-muted-foreground/20 transition-colors">
                           <X className="h-3 w-3" />
                         </button>
                       </Badge>
                     ))}
                   </div>
                 )}
-                {bccChips.length === 0 && <p className="text-xs text-muted-foreground">No hay correos BCC guardados.</p>}
+                {bccRecipients.length === 0 && <p className="text-xs text-muted-foreground">No hay correos BCC guardados.</p>}
               </div>
 
               <Separator />

@@ -5,7 +5,7 @@ const MAX_RUNTIME_MS = 55_000;
 const MIN_REMAINING_MS = 5_000;
 const PERU_TZ = "America/Lima";
 const INACTIVITY_TIMEOUT_MS = 30 * 60 * 1000;
-const LOCK_TIMEOUT_MS = 5 * 60 * 1000; // 5 minutes
+const LOCK_TIMEOUT_MS = 5 * 60 * 1000;
 
 // ─── Telegram helpers ───────────────────────────────────────────
 async function sendMessage(
@@ -199,7 +199,6 @@ function isSessionExpired(state: any): boolean {
 
 // ─── Lock helpers ───────────────────────────────────────────────
 async function isLockExpired(supabase: any): Promise<boolean> {
-  // Check ALL rows for an active lock
   const { data: lockedRows } = await supabase
     .from("telegram_bot_state")
     .select("chat_id, actualizacion_en_proceso, timestamp_actualizacion")
@@ -211,7 +210,6 @@ async function isLockExpired(supabase: any): Promise<boolean> {
     if (row.timestamp_actualizacion) {
       const elapsed = Date.now() - new Date(row.timestamp_actualizacion).getTime();
       if (elapsed > LOCK_TIMEOUT_MS) {
-        // Auto-release expired lock
         console.log(`[LOCK] Auto-releasing expired lock for chat_id ${row.chat_id} (${Math.round(elapsed / 1000)}s)`);
         await supabase
           .from("telegram_bot_state")
@@ -229,14 +227,12 @@ async function isLockExpired(supabase: any): Promise<boolean> {
     }
   }
 
-  return false; // After cleanup, caller should re-check
+  return false;
 }
 
 async function tryAcquireLock(chatId: number, supabase: any): Promise<{ acquired: boolean; blockedBy?: string }> {
-  // First clean up expired locks
   await isLockExpired(supabase);
 
-  // Check if anyone else has the lock
   const { data: lockedRows } = await supabase
     .from("telegram_bot_state")
     .select("chat_id, actualizacion_en_proceso, usuario_actualizando")
@@ -247,7 +243,6 @@ async function tryAcquireLock(chatId: number, supabase: any): Promise<{ acquired
     return { acquired: false, blockedBy: lockedRows[0].usuario_actualizando || "otro usuario" };
   }
 
-  // Acquire lock
   await supabase
     .from("telegram_bot_state")
     .update({
@@ -273,6 +268,72 @@ async function releaseLock(chatId: number, supabase: any) {
     })
     .eq("chat_id", chatId);
   console.log(`[LOCK] Released by chat_id ${chatId}`);
+}
+
+// ─── Email validation ───────────────────────────────────────────
+function isValidEmail(email: string): boolean {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+}
+
+// ─── Load recipients from unified alert_recipients table ────────
+async function loadRecipients(supabase: any): Promise<{ toEmails: string[]; bccEmails: string[] }> {
+  const { data, error } = await supabase
+    .from("alert_recipients")
+    .select("email, recipient_type")
+    .order("created_at", { ascending: true });
+
+  if (error) {
+    console.error("[RECIPIENTS] Error loading:", error);
+    return { toEmails: [], bccEmails: [] };
+  }
+
+  const toEmails: string[] = [];
+  const bccEmails: string[] = [];
+
+  for (const row of (data || [])) {
+    if (row.recipient_type === "bcc") {
+      bccEmails.push(row.email);
+    } else {
+      toEmails.push(row.email);
+    }
+  }
+
+  console.log(`[RECIPIENTS] Loaded ${toEmails.length} TO, ${bccEmails.length} BCC from alert_recipients`);
+  return { toEmails, bccEmails };
+}
+
+// ─── Show email review ──────────────────────────────────────────
+async function showEmailReview(
+  chatId: number,
+  supabase: any,
+  send: (text: string, buttons?: any[][]) => Promise<void>
+) {
+  const { toEmails, bccEmails } = await loadRecipients(supabase);
+
+  let msg = "📧 <b>Correos de alerta</b>\n\n";
+  msg += "<b>Destinatarios (TO):</b>\n";
+  if (toEmails.length > 0) {
+    toEmails.forEach((e: string, i: number) => { msg += `  ${i + 1}. ${e}\n`; });
+  } else {
+    msg += "  <i>No hay destinatarios configurados.</i>\n";
+  }
+  msg += "\n<b>Destinatarios ocultos (BCC):</b>\n";
+  if (bccEmails.length > 0) {
+    bccEmails.forEach((e: string, i: number) => { msg += `  ${i + 1}. ${e}\n`; });
+  } else {
+    msg += "  <i>No hay correos BCC configurados.</i>\n";
+  }
+
+  const buttons = [
+    [
+      { text: "➕ Agregar correo", callback_data: "agregar_correo" },
+      { text: "➕ Agregar BCC", callback_data: "agregar_bcc" },
+    ],
+    [{ text: "▶️ Continuar (Guardar y Enviar)", callback_data: "enviar_correo" }],
+    [{ text: "❌ Cancelar", callback_data: "cancelar_flujo" }],
+  ];
+
+  await send(msg, buttons);
 }
 
 // ─── Main handler ───────────────────────────────────────────────
@@ -394,7 +455,7 @@ Deno.serve(async () => {
         state = newState;
       }
 
-      // Inactivity timeout — also release lock if this user had it
+      // Inactivity timeout
       if (state && state.estado_conversacion !== "idle" && isSessionExpired(state)) {
         if (state.actualizacion_en_proceso) {
           await releaseLock(chatId, supabase);
@@ -446,57 +507,6 @@ Deno.serve(async () => {
     JSON.stringify({ ok: true, processed: totalProcessed, offset: globalOffset })
   );
 });
-
-// ─── Email list helper ──────────────────────────────────────────
-async function showEmailReview(
-  chatId: number,
-  supabase: any,
-  send: (text: string, buttons?: any[][]) => Promise<void>
-) {
-  const { data: recipients } = await supabase
-    .from("alert_recipients")
-    .select("email")
-    .order("created_at", { ascending: true });
-  const emails = (recipients || []).map((r: any) => r.email);
-
-  const { data: botState } = await supabase
-    .from("telegram_bot_state")
-    .select("bcc_emails")
-    .eq("chat_id", chatId)
-    .single();
-  const bccEmails: string[] = botState?.bcc_emails || [];
-
-  let msg = "📧 <b>Correos de alerta</b>\n\n";
-  msg += "<b>Destinatarios:</b>\n";
-  if (emails.length > 0) {
-    emails.forEach((e: string, i: number) => { msg += `  ${i + 1}. ${e}\n`; });
-  } else {
-    msg += "  <i>No hay destinatarios configurados.</i>\n";
-  }
-  msg += "\n<b>Destinatarios ocultos (BCC):</b>\n";
-  if (bccEmails.length > 0) {
-    bccEmails.forEach((e: string, i: number) => { msg += `  ${i + 1}. ${e}\n`; });
-  } else {
-    msg += "  <i>No hay correos BCC configurados.</i>\n";
-  }
-
-  const buttons = [
-    [
-      { text: "➕ Agregar correo", callback_data: "agregar_correo" },
-      { text: "➕ Agregar correo oculto", callback_data: "agregar_bcc" },
-    ],
-    [{ text: "💾 Guardar cambios", callback_data: "guardar_cambios" }],
-    [{ text: "📧 Enviar correo", callback_data: "enviar_correo" }],
-    [{ text: "❌ Cancelar", callback_data: "cancelar_flujo" }],
-  ];
-
-  await send(msg, buttons);
-}
-
-// ─── Email validation ───────────────────────────────────────────
-function isValidEmail(email: string): boolean {
-  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-}
 
 // ─── State machine ─────────────────────────────────────────────
 async function processConversation(
@@ -642,7 +652,7 @@ async function processConversation(
   if (estado === "revisando_correos") {
     if (input === "agregar_correo") {
       await updateState({ estado_conversacion: "agregando_correo" });
-      await send("📝 Ingrese el correo electrónico del destinatario:");
+      await send("📝 Ingrese el correo electrónico del destinatario (TO):");
       return;
     }
 
@@ -665,15 +675,6 @@ async function processConversation(
       return;
     }
 
-    if (input === "guardar_cambios") {
-      const riesgo = state?.riesgo_actual || "MEDIO";
-      const rango = state?.rango_actual || "Libre";
-      await executeGuardarCambios(chatId, riesgo, rango, supabase, send);
-      // Stay in revisando_correos so user can then send
-      await showEmailReview(chatId, supabase, send);
-      return;
-    }
-
     if (input === "enviar_correo") {
       const riesgo = state?.riesgo_actual || "MEDIO";
       const rango = state?.rango_actual || "Libre";
@@ -681,7 +682,7 @@ async function processConversation(
       return;
     }
 
-    // Any other input in this state — show the review again
+    // Any other input — show the review again
     await showEmailReview(chatId, supabase, send);
     return;
   }
@@ -695,11 +696,11 @@ async function processConversation(
       await send("❌ Formato de correo inválido. Intente nuevamente:");
       return;
     }
-    // Check duplicate
     const { data: existing } = await supabase
       .from("alert_recipients")
       .select("id")
       .eq("email", email)
+      .eq("recipient_type", "to")
       .limit(1);
     if (existing && existing.length > 0) {
       await send("⚠️ Este correo ya está en la lista de destinatarios.");
@@ -707,13 +708,13 @@ async function processConversation(
       await showEmailReview(chatId, supabase, send);
       return;
     }
-    // Insert
-    const { data: session } = await supabase.auth.getSession();
+    // Use a placeholder UUID for added_by since we're in service_role context
     await supabase.from("alert_recipients").insert({
       email,
-      added_by: session?.session?.user?.id || "00000000-0000-0000-0000-000000000000",
+      added_by: "00000000-0000-0000-0000-000000000000",
+      recipient_type: "to",
     });
-    console.log(`[EMAIL] Added recipient: ${email}`);
+    console.log(`[RECIPIENTS] Added TO: ${email}`);
     await send(`✅ Correo <b>${email}</b> agregado como destinatario.`);
     await updateState({ estado_conversacion: "revisando_correos" });
     await showEmailReview(chatId, supabase, send);
@@ -729,25 +730,24 @@ async function processConversation(
       await send("❌ Formato de correo inválido. Intente nuevamente:");
       return;
     }
-    // Get current BCC list
-    const { data: botState } = await supabase
-      .from("telegram_bot_state")
-      .select("bcc_emails")
-      .eq("chat_id", chatId)
-      .single();
-    const bccList: string[] = botState?.bcc_emails || [];
-    if (bccList.includes(email)) {
+    const { data: existing } = await supabase
+      .from("alert_recipients")
+      .select("id")
+      .eq("email", email)
+      .eq("recipient_type", "bcc")
+      .limit(1);
+    if (existing && existing.length > 0) {
       await send("⚠️ Este correo ya está en la lista BCC.");
       await updateState({ estado_conversacion: "revisando_correos" });
       await showEmailReview(chatId, supabase, send);
       return;
     }
-    bccList.push(email);
-    await supabase
-      .from("telegram_bot_state")
-      .update({ bcc_emails: bccList, updated_at: new Date().toISOString() })
-      .eq("chat_id", chatId);
-    console.log(`[EMAIL] Added BCC: ${email}`);
+    await supabase.from("alert_recipients").insert({
+      email,
+      added_by: "00000000-0000-0000-0000-000000000000",
+      recipient_type: "bcc",
+    });
+    console.log(`[RECIPIENTS] Added BCC: ${email}`);
     await send(`✅ Correo <b>${email}</b> agregado como BCC.`);
     await updateState({ estado_conversacion: "revisando_correos" });
     await showEmailReview(chatId, supabase, send);
@@ -767,57 +767,6 @@ async function processConversation(
   }
 }
 
-// ─── Execute "Guardar cambios" only (no email) ─────────────────
-async function executeGuardarCambios(
-  chatId: number,
-  riesgo: string,
-  rango: string,
-  supabase: any,
-  send: (text: string, buttons?: any[][]) => Promise<void>
-) {
-  try {
-    console.log(`[SAVE] riesgo=${riesgo}, rango=${rango}`);
-
-    const { data: existing } = await supabase
-      .from("forecast_settings")
-      .select("id")
-      .order("last_update", { ascending: false })
-      .limit(1)
-      .single();
-
-    if (existing) {
-      await supabase
-        .from("forecast_settings")
-        .update({
-          risk_level: riesgo,
-          modulation_time: rango,
-          last_update: new Date().toISOString(),
-        })
-        .eq("id", existing.id);
-    } else {
-      await supabase.from("forecast_settings").insert({
-        risk_level: riesgo,
-        modulation_time: rango,
-      });
-    }
-
-    await supabase
-      .from("telegram_bot_state")
-      .update({
-        correo_enviado: false,
-        last_interaction: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-      })
-      .eq("chat_id", chatId);
-
-    console.log(`[SAVE] Done. correo_enviado=false`);
-    await send("✅ <b>Cambios guardados correctamente.</b>\n\nAhora puede enviar el correo.");
-  } catch (err) {
-    console.error("[ERROR] executeGuardarCambios:", err);
-    await send("❌ Error al guardar los cambios. Intente nuevamente.");
-  }
-}
-
 // ─── Execute "Guardar cambios" + Send email ─────────────────────
 async function executeGuardarYEnviar(
   chatId: number,
@@ -826,33 +775,34 @@ async function executeGuardarYEnviar(
   supabase: any,
   send: (text: string, buttons?: any[][]) => Promise<void>
 ) {
-  // Check recipients first
-  const { data: recipients } = await supabase
-    .from("alert_recipients")
-    .select("email");
-  const emails = (recipients || []).map((r: any) => r.email);
+  // Load recipients from the SAME table used by the web UI
+  const { toEmails, bccEmails } = await loadRecipients(supabase);
 
-  if (emails.length === 0) {
+  if (toEmails.length === 0) {
     await send("⚠️ No hay destinatarios configurados para esta alerta.\n\nAgregue correos antes de enviar.");
     await showEmailReview(chatId, supabase, send);
     return;
   }
 
-  await send("⏳ Guardando cambios y preparando envío de correo...");
+  await send("⏳ <b>Paso 1/3:</b> Guardando cambios en Vista General...");
 
   try {
     // ── STEP 1: Save forecast_settings ("Guardar cambios") ──
-    console.log(`[SAVE] riesgo=${riesgo}, rango=${rango}`);
+    console.log(`[SAVE] Saving forecast_settings: riesgo=${riesgo}, rango=${rango}`);
 
-    const { data: existing } = await supabase
+    const { data: existing, error: fetchErr } = await supabase
       .from("forecast_settings")
       .select("id")
       .order("last_update", { ascending: false })
       .limit(1)
       .single();
 
+    if (fetchErr) {
+      console.error("[SAVE] Error fetching forecast_settings:", fetchErr);
+    }
+
     if (existing) {
-      await supabase
+      const { error: updateErr } = await supabase
         .from("forecast_settings")
         .update({
           risk_level: riesgo,
@@ -860,11 +810,19 @@ async function executeGuardarYEnviar(
           last_update: new Date().toISOString(),
         })
         .eq("id", existing.id);
+      if (updateErr) {
+        console.error("[SAVE] Error updating forecast_settings:", updateErr);
+        throw new Error(`Error guardando configuración: ${updateErr.message}`);
+      }
     } else {
-      await supabase.from("forecast_settings").insert({
+      const { error: insertErr } = await supabase.from("forecast_settings").insert({
         risk_level: riesgo,
         modulation_time: rango,
       });
+      if (insertErr) {
+        console.error("[SAVE] Error inserting forecast_settings:", insertErr);
+        throw new Error(`Error guardando configuración: ${insertErr.message}`);
+      }
     }
 
     await supabase
@@ -879,6 +837,8 @@ async function executeGuardarYEnviar(
     console.log(`[SAVE] Done. correo_enviado=false`);
 
     // ── STEP 2: Get chart image ──
+    await send("⏳ <b>Paso 2/3:</b> Preparando contenido del correo...");
+
     const { data: chartFiles } = await supabase.storage
       .from("chart-images")
       .list("", { limit: 1, sortBy: { column: "created_at", order: "desc" } });
@@ -889,6 +849,9 @@ async function executeGuardarYEnviar(
         .from("chart-images")
         .getPublicUrl(chartFiles[0].name);
       graficoUrl = `${urlData.publicUrl}?t=${Date.now()}`;
+      console.log(`[CHART] Using chart: ${chartFiles[0].name}`);
+    } else {
+      console.log(`[CHART] No chart images found, sending without chart`);
     }
 
     // ── STEP 3: Get demand estimate ──
@@ -902,6 +865,7 @@ async function executeGuardarYEnviar(
     const demandaEstimada = forecastData?.pronostico
       ? Number(forecastData.pronostico).toFixed(2)
       : "—";
+    console.log(`[DATA] demandaEstimada: ${demandaEstimada}`);
 
     // ── STEP 4: Generate email HTML ──
     const isLowRisk = riesgo === "BAJO";
@@ -918,16 +882,14 @@ async function executeGuardarYEnviar(
       graficoUrl,
     });
 
-    // ── STEP 5: Get BCC ──
-    const { data: botState } = await supabase
-      .from("telegram_bot_state")
-      .select("bcc_emails")
-      .eq("chat_id", chatId)
-      .single();
-    const bccEmails: string[] = botState?.bcc_emails || [];
+    console.log(`[HTML] Generated email HTML (${htmlContent.length} chars)`);
 
-    // ── STEP 6: Send email ──
-    console.log(`[EMAIL] Sending to ${emails.length} + ${bccEmails.length} BCC`);
+    // ── STEP 5: Send email ──
+    await send("⏳ <b>Paso 3/3:</b> Enviando correo...");
+
+    console.log(`[EMAIL] Sending to ${toEmails.length} TO + ${bccEmails.length} BCC`);
+    console.log(`[EMAIL] TO: ${JSON.stringify(toEmails)}`);
+    console.log(`[EMAIL] BCC: ${JSON.stringify(bccEmails)}`);
 
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
@@ -940,17 +902,23 @@ async function executeGuardarYEnviar(
           "Content-Type": "application/json",
           Authorization: `Bearer ${serviceRoleKey}`,
         },
-        body: JSON.stringify({ emails, bccEmails, htmlContent }),
+        body: JSON.stringify({
+          emails: toEmails,
+          bccEmails: bccEmails.length > 0 ? bccEmails : undefined,
+          htmlContent,
+        }),
       }
     );
 
     const emailData = await emailRes.json();
+    console.log(`[EMAIL] Response status: ${emailRes.status}`);
+    console.log(`[EMAIL] Response body: ${JSON.stringify(emailData)}`);
 
     if (!emailRes.ok || !emailData.success) {
-      throw new Error(`Email failed: ${JSON.stringify(emailData)}`);
+      throw new Error(`Error del servicio de correo (status ${emailRes.status}): ${JSON.stringify(emailData)}`);
     }
 
-    // ── STEP 7: Mark as sent + release lock ──
+    // ── STEP 6: Mark as sent + release lock ──
     await supabase
       .from("telegram_bot_state")
       .update({
@@ -968,11 +936,11 @@ async function executeGuardarYEnviar(
       })
       .eq("chat_id", chatId);
 
-    console.log(`[EMAIL] Sent. correo_enviado=true, lock released.`);
+    console.log(`[DONE] correo_enviado=true, lock released`);
 
     const riesgoEmoji = riesgo === "ALTO" ? "🔴" : "🟢";
     await send(
-      `✅ <b>Alerta enviada correctamente.</b>\n\n${riesgoEmoji} Riesgo: <b>${getRiskLabel(riesgo)}</b>\n🕐 Horario: <b>${isLowRisk ? "Libre" : rango}</b>\n📧 Enviada a ${emails.length} destinatario(s)\n\n<i>Los cambios fueron guardados en el sistema antes del envío.</i>`
+      `✅ <b>Alerta enviada correctamente.</b>\n\n${riesgoEmoji} Riesgo: <b>${getRiskLabel(riesgo)}</b>\n🕐 Horario: <b>${isLowRisk ? "Libre" : rango}</b>\n📧 Enviada a ${toEmails.length} destinatario(s)${bccEmails.length > 0 ? ` + ${bccEmails.length} BCC` : ""}\n\n<i>Los cambios fueron guardados en el sistema antes del envío.</i>`
     );
   } catch (err) {
     console.error("[ERROR] executeGuardarYEnviar:", err);
@@ -991,6 +959,8 @@ async function executeGuardarYEnviar(
       })
       .eq("chat_id", chatId);
 
-    await send("❌ Error al procesar la alerta. Intente nuevamente o use la interfaz web.");
+    // Show specific error instead of generic message
+    const errorMsg = err instanceof Error ? err.message : String(err);
+    await send(`❌ <b>Error al procesar la alerta:</b>\n\n<code>${errorMsg}</code>\n\nIntente nuevamente o use la interfaz web.`);
   }
 }
