@@ -363,16 +363,7 @@ const ActualizacionAlertaPage = () => {
                 <Input id="demanda" value={demandaEstimada} onChange={(e) => { setDemandaEstimada(e.target.value); setDemandaManuallyEdited(true); }} placeholder="8173.83" />
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="mensaje">Mensaje (Recuerde)</Label>
-                <Textarea id="mensaje" value={mensaje} onChange={(e) => setMensaje(e.target.value)} rows={2} />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="estatus">Estatus</Label>
-                <Input id="estatus" value={estatus} readOnly className="bg-muted cursor-not-allowed" />
-                <p className="text-xs text-muted-foreground">Se calcula automáticamente según el mes actual.</p>
-              </div>
+              {/* Mensaje y Estatus se generan automáticamente y no se muestran en el panel */}
 
               <Separator />
 
@@ -430,7 +421,7 @@ const ActualizacionAlertaPage = () => {
                 srcDoc={previewHtml}
                 title="Vista previa del correo"
                 className="w-full border rounded-lg bg-white"
-                style={{ height: "720px" }}
+                style={{ height: "800px" }}
                 sandbox=""
               />
 
