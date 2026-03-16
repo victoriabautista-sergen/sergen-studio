@@ -490,7 +490,7 @@ const ActualizacionAlertaPage = () => {
             </CardHeader>
             <CardContent>
               {/* ForecastChart rendered offscreen for html2canvas capture and peak value calculation */}
-              <div style={{ position: 'fixed', left: '-9999px', top: 0, width: 800, paddingTop: 128, paddingLeft: 16, paddingRight: 16, paddingBottom: 16, background: '#fff' }} ref={chartRef}>
+              <div style={{ position: 'fixed', left: '-9999px', top: 0, width: 800, paddingTop: 32, paddingLeft: 16, paddingRight: 16, paddingBottom: 16, background: '#fff' }} ref={chartRef}>
                 <ForecastChart data={forecastData} onPeakValueChange={handlePeakValueChange} showPeakLabel={true} />
               </div>
 
