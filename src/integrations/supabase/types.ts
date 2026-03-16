@@ -657,9 +657,11 @@ export type Database = {
           alerta_enviada_hoy: boolean
           bcc_emails: Json
           chat_id: number
+          correo_enviado: boolean
           estado_conversacion: string
           id: string
           last_interaction: string
+          modo_conversacion: string | null
           rango_actual: string | null
           riesgo_actual: string | null
           update_offset: number
@@ -669,9 +671,11 @@ export type Database = {
           alerta_enviada_hoy?: boolean
           bcc_emails?: Json
           chat_id: number
+          correo_enviado?: boolean
           estado_conversacion?: string
           id?: string
           last_interaction?: string
+          modo_conversacion?: string | null
           rango_actual?: string | null
           riesgo_actual?: string | null
           update_offset?: number
@@ -681,9 +685,11 @@ export type Database = {
           alerta_enviada_hoy?: boolean
           bcc_emails?: Json
           chat_id?: number
+          correo_enviado?: boolean
           estado_conversacion?: string
           id?: string
           last_interaction?: string
+          modo_conversacion?: string | null
           rango_actual?: string | null
           riesgo_actual?: string | null
           update_offset?: number

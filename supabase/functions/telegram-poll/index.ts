@@ -4,7 +4,7 @@ const GATEWAY_URL = "https://connector-gateway.lovable.dev/telegram";
 const MAX_RUNTIME_MS = 55_000;
 const MIN_REMAINING_MS = 5_000;
 const PERU_TZ = "America/Lima";
-const INACTIVITY_TIMEOUT_MS = 30 * 60 * 1000; // 30 minutes
+const INACTIVITY_TIMEOUT_MS = 30 * 60 * 1000;
 
 // ─── Telegram helpers ───────────────────────────────────────────
 async function sendMessage(
@@ -55,7 +55,7 @@ async function answerCallbackQuery(
 
 // ─── Time range validation ──────────────────────────────────────
 const TIME_12H_RANGE_REGEX =
-  /^(\d{1,2}):(\d{2})\s?(AM|PM)\s?-\s?(\d{1,2}):(\d{2})\s?(AM|PM)$/i;
+  /^(\d{1,2}):(\d{2})\s?(am|pm)\s?-\s?(\d{1,2}):(\d{2})\s?(am|pm)$/i;
 
 function parseTimeTo24h(hour: number, minute: number, period: string): number {
   let h = hour;
@@ -68,7 +68,10 @@ function parseTimeTo24h(hour: number, minute: number, period: string): number {
 function validateTimeRange(input: string): { valid: boolean; error?: string } {
   const match = input.match(TIME_12H_RANGE_REGEX);
   if (!match) {
-    return { valid: false, error: "Formato incorrecto.\n\nIngrese el rango en formato:\n<code>6:00 PM - 8:00 PM</code>" };
+    return {
+      valid: false,
+      error: "Formato inválido. Ingrese el rango en formato:\n<code>2:00 pm - 4:00 pm</code>",
+    };
   }
 
   const startH = parseInt(match[1]);
@@ -79,17 +82,23 @@ function validateTimeRange(input: string): { valid: boolean; error?: string } {
   const endP = match[6];
 
   if (startH < 1 || startH > 12 || endH < 1 || endH > 12 || startM > 59 || endM > 59) {
-    return { valid: false, error: "Formato incorrecto.\n\nIngrese el rango en formato:\n<code>6:00 PM - 8:00 PM</code>" };
+    return {
+      valid: false,
+      error: "Formato inválido. Ingrese el rango en formato:\n<code>2:00 pm - 4:00 pm</code>",
+    };
   }
 
   const startMinutes = parseTimeTo24h(startH, startM, startP);
   const endMinutes = parseTimeTo24h(endH, endM, endP);
 
   let diff = endMinutes - startMinutes;
-  if (diff < 0) diff += 24 * 60; // crosses midnight
+  if (diff < 0) diff += 24 * 60;
 
-  if (diff !== 120) {
-    return { valid: false, error: "El rango horario debe ser de exactamente <b>2 horas</b>.\n\nEjemplo: <code>6:00 PM - 8:00 PM</code>" };
+  if (diff < 120) {
+    return {
+      valid: false,
+      error: "El rango horario debe tener una diferencia mínima de <b>2 horas</b>.\n\nEjemplo: <code>2:00 pm - 4:00 pm</code>",
+    };
   }
 
   return { valid: true };
@@ -99,7 +108,6 @@ function validateTimeRange(input: string): { valid: boolean; error?: string } {
 function getRiskColor(level: string) {
   switch (level) {
     case "ALTO": return "#C00000";
-    case "MEDIO": return "#D4A017";
     case "BAJO": return "#196B24";
     default: return "#D4A017";
   }
@@ -115,9 +123,7 @@ function getRiskLabel(level: string) {
 
 // ─── Date helpers (Peru TZ) ─────────────────────────────────────
 function peruNow() {
-  return new Date(
-    new Date().toLocaleString("en-US", { timeZone: PERU_TZ })
-  );
+  return new Date(new Date().toLocaleString("en-US", { timeZone: PERU_TZ }));
 }
 
 function peruDateFormatted() {
@@ -194,8 +200,7 @@ ${chartRow}
 function isSessionExpired(state: any): boolean {
   if (!state?.last_interaction) return false;
   const lastInteraction = new Date(state.last_interaction).getTime();
-  const now = Date.now();
-  return (now - lastInteraction) > INACTIVITY_TIMEOUT_MS;
+  return (Date.now() - lastInteraction) > INACTIVITY_TIMEOUT_MS;
 }
 
 // ─── Main handler ───────────────────────────────────────────────
@@ -213,13 +218,13 @@ Deno.serve(async () => {
     Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
   );
 
-  // Load authorized users from profiles table (telegram_chat_id field)
+  // Load authorized users from profiles table
   const { data: authorizedProfiles } = await supabase
     .from("profiles")
     .select("telegram_chat_id, email, full_name, is_active")
     .not("telegram_chat_id", "is", null)
     .eq("is_active", true);
-  
+
   const authorizedMap = new Map<number, { email: string | null; full_name: string | null }>();
   for (const p of (authorizedProfiles || [])) {
     const chatIdNum = parseInt(p.telegram_chat_id, 10);
@@ -276,12 +281,12 @@ Deno.serve(async () => {
       const callbackData = update.callback_query?.data ?? "";
       const callbackQueryId = update.callback_query?.id;
 
-      // Authorization check using profiles.telegram_chat_id
+      // Authorization check
       const authorizedUser = authorizedMap.get(chatId);
-      console.log(`Telegram chat_id recibido: ${chatId}`);
-      
+      console.log(`[AUTH] chat_id: ${chatId}`);
+
       if (!authorizedUser) {
-        console.log(`Usuario no encontrado. Acceso denegado.`);
+        console.log(`[AUTH] DENIED - user not found in profiles`);
         if (chatId) {
           await sendMessage(
             chatId,
@@ -293,16 +298,14 @@ Deno.serve(async () => {
         }
         continue;
       }
-      
-      console.log(`Usuario encontrado: ${authorizedUser.email ?? authorizedUser.full_name}`);
-      console.log(`Acceso autorizado`);
 
-      // Answer callback query to remove loading state
+      console.log(`[AUTH] OK - ${authorizedUser.email ?? authorizedUser.full_name}`);
+
       if (callbackQueryId) {
         await answerCallbackQuery(callbackQueryId, LOVABLE_API_KEY, TELEGRAM_API_KEY);
       }
 
-      // Get or create bot state for this chat
+      // Get or create bot state
       let { data: state } = await supabase
         .from("telegram_bot_state")
         .select("*")
@@ -319,7 +322,7 @@ Deno.serve(async () => {
         state = newState;
       }
 
-      // ── Inactivity timeout check ──
+      // Inactivity timeout
       if (state && state.estado_conversacion !== "inicio" && isSessionExpired(state)) {
         await supabase
           .from("telegram_bot_state")
@@ -327,6 +330,7 @@ Deno.serve(async () => {
             estado_conversacion: "inicio",
             riesgo_actual: null,
             rango_actual: null,
+            modo_conversacion: null,
             last_interaction: new Date().toISOString(),
             updated_at: new Date().toISOString(),
           })
@@ -334,16 +338,12 @@ Deno.serve(async () => {
 
         await sendMessage(
           chatId,
-          "⏰ La sesión anterior fue reiniciada por inactividad.\n\nPuede comenzar nuevamente.",
-          [
-            [{ text: "📋 Actualizar alerta", callback_data: "actualizar" }],
-            [{ text: "📊 Estado del día", callback_data: "estado" }],
-          ],
+          "⏰ La sesión anterior fue reiniciada por inactividad.",
+          undefined,
           LOVABLE_API_KEY,
           TELEGRAM_API_KEY
         );
 
-        // Re-fetch state after reset
         const { data: resetState } = await supabase
           .from("telegram_bot_state")
           .select("*")
@@ -368,7 +368,6 @@ Deno.serve(async () => {
 
     globalOffset = Math.max(...updates.map((u: any) => u.update_id)) + 1;
 
-    // Update offset on all states
     await supabase
       .from("telegram_bot_state")
       .update({ update_offset: globalOffset })
@@ -402,48 +401,53 @@ async function processConversation(
       })
       .eq("chat_id", chatId);
 
-  const estado = state.estado_conversacion || "inicio";
+  const estado = state?.estado_conversacion || "inicio";
+  const modo = state?.modo_conversacion || null;
 
-  // ── Handle /start or /actualizar commands ──
+  // ── /start: MANUAL conversation ──
   if (input === "/start" || input === "/actualizar") {
-    await updateState({ estado_conversacion: "inicio" });
-    await send("⚡ <b>SERGEN – Control de Demanda</b>\n\n¿Qué deseas hacer?", [
-      [{ text: "📋 Actualizar alerta", callback_data: "actualizar" }],
-      [{ text: "📊 Estado del día", callback_data: "estado" }],
+    console.log(`[FLOW] Manual conversation started by user`);
+
+    // Check if email already sent today
+    if (state?.correo_enviado) {
+      await updateState({});
+      await send("✅ La alerta de potencia del día ya fue enviada.");
+      return;
+    }
+
+    // Email not sent — show update button (NO posponer for manual)
+    await updateState({
+      estado_conversacion: "inicio",
+      modo_conversacion: "manual",
+    });
+    await send("⚡ <b>SERGEN – Control de Demanda</b>\n\n¿Desea actualizar la información de alerta?", [
+      [{ text: "🔧 Actualizar información", callback_data: "actualizar" }],
     ]);
     return;
   }
 
-  // ── Handle "estado" ──
-  if (input === "estado") {
-    await updateState({});
-    const alertaHoy = state.alerta_enviada_hoy ? "✅ Sí" : "❌ No";
-    await send(
-      `📊 <b>Estado del día</b>\n\nAlerta enviada hoy: ${alertaHoy}\nEstado: ${estado}`
-    );
-    return;
-  }
-
-  // ── Handle "posponer" ──
+  // ── Handle "posponer" (only from automatic mode) ──
   if (input === "posponer") {
-    await updateState({});
+    await updateState({ estado_conversacion: "inicio" });
     await send("⏳ De acuerdo, se pospondrá. Recibirás otro recordatorio más tarde.");
     return;
   }
 
-  // ── Handle "actualizar" → start flow ──
+  // ── Handle "actualizar" → start risk question ──
   if (input === "actualizar") {
-    // Check double-send before starting
-    if (state.alerta_enviada_hoy) {
-      await updateState({});
-      await send("⚠️ La alerta de potencia coincidente ya fue enviada hoy.\n\nNo es posible enviar otra alerta hasta mañana.");
+    // Double check correo_enviado
+    if (state?.correo_enviado) {
+      await updateState({ estado_conversacion: "inicio" });
+      await send("✅ La alerta de potencia del día ya fue enviada.");
       return;
     }
+
+    console.log(`[FLOW] Starting update flow, mode: ${modo || "manual"}`);
     await updateState({ estado_conversacion: "esperando_riesgo" });
-    await send("¿El riesgo de potencia coincidente es?", [
+    await send("¿Existe riesgo de potencia coincidente?", [
       [
-        { text: "🟢 Bajo", callback_data: "riesgo_BAJO" },
         { text: "🔴 Alto", callback_data: "riesgo_ALTO" },
+        { text: "🟢 Bajo", callback_data: "riesgo_BAJO" },
       ],
     ]);
     return;
@@ -452,28 +456,32 @@ async function processConversation(
   // ── ESPERANDO RIESGO ──
   if (estado === "esperando_riesgo") {
     if (input === "riesgo_BAJO") {
+      console.log(`[FLOW] Risk selected: BAJO`);
       await updateState({
         riesgo_actual: "BAJO",
         rango_actual: "Libre",
-        estado_conversacion: "confirmando_correos",
+        estado_conversacion: "procesando_envio",
       });
-      await showRecipients(chatId, "principales", supabase, send);
+      // Go directly to save + send
+      await executeGuardarYEnviar(chatId, "BAJO", "Libre", state, supabase, send, lovableKey, telegramKey);
       return;
     }
     if (input === "riesgo_ALTO") {
+      console.log(`[FLOW] Risk selected: ALTO`);
       await updateState({
         riesgo_actual: "ALTO",
         estado_conversacion: "esperando_rango",
       });
       await send(
-        "📝 Ingrese el rango horario de riesgo.\n\n<b>Formato requerido:</b>\n<code>6:00 PM - 8:00 PM</code>\n\nDebe ser un rango de exactamente 2 horas en formato 12h AM/PM."
+        "📝 Ingrese el rango horario para evitar coincidencia.\n\n<b>Formato requerido:</b>\n<code>2:00 pm - 4:00 pm</code>\n\nDiferencia mínima de 2 horas."
       );
       return;
     }
+    // Invalid input
     await send("Por favor seleccione una opción:", [
       [
-        { text: "🟢 Bajo", callback_data: "riesgo_BAJO" },
         { text: "🔴 Alto", callback_data: "riesgo_ALTO" },
+        { text: "🟢 Bajo", callback_data: "riesgo_BAJO" },
       ],
     ]);
     return;
@@ -487,387 +495,222 @@ async function processConversation(
       await send(`❌ ${validation.error}`);
       return;
     }
+
+    console.log(`[FLOW] Time range accepted: ${input}`);
     await updateState({
       rango_actual: input,
-      estado_conversacion: "confirmando_correos",
+      estado_conversacion: "procesando_envio",
     });
-    await showRecipients(chatId, "principales", supabase, send);
+    await executeGuardarYEnviar(chatId, "ALTO", input, state, supabase, send, lovableKey, telegramKey);
     return;
   }
 
-  // ── CONFIRMANDO CORREOS PRINCIPALES ──
-  if (estado === "confirmando_correos") {
-    if (input === "confirmar_correos") {
-      await updateState({ estado_conversacion: "confirmando_bcc" });
-      await showBccRecipients(chatId, supabase, send);
-      return;
-    }
-    if (input === "agregar_correo") {
-      await updateState({ estado_conversacion: "agregando_correo" });
-      await send("📧 Escriba el correo electrónico a agregar:");
-      return;
-    }
-    if (input.startsWith("eliminar_correo_")) {
-      const id = input.replace("eliminar_correo_", "");
-      await supabase.from("alert_recipients").delete().eq("id", id);
-      await updateState({});
-      await send("✅ Correo eliminado.");
-      await showRecipients(chatId, "principales", supabase, send);
-      return;
-    }
-    await showRecipients(chatId, "principales", supabase, send);
-    return;
+  // ── Default: show menu based on correo_enviado ──
+  if (state?.correo_enviado) {
+    await send("✅ La alerta de potencia del día ya fue enviada.");
+  } else {
+    await send("⚡ <b>SERGEN – Control de Demanda</b>\n\nEscriba /start para comenzar.", [
+      [{ text: "🔧 Actualizar información", callback_data: "actualizar" }],
+    ]);
   }
+}
 
-  // ── AGREGANDO CORREO ──
-  if (estado === "agregando_correo") {
-    const email = input.trim().toLowerCase();
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      await updateState({});
-      await send("❌ Formato de correo inválido. Intente de nuevo:");
-      return;
-    }
-    const { data: anyAdmin } = await supabase
-      .from("user_roles")
-      .select("user_id")
-      .eq("role", "super_admin")
+// ─── Execute "Guardar cambios" + Send email ─────────────────────
+async function executeGuardarYEnviar(
+  chatId: number,
+  riesgo: string,
+  rango: string,
+  _state: any,
+  supabase: any,
+  send: (text: string, buttons?: any[][]) => Promise<void>,
+  _lovableKey: string,
+  _telegramKey: string
+) {
+  await send("⏳ Guardando cambios y preparando envío de correo...");
+
+  try {
+    // ════════════════════════════════════════════════════════════
+    // STEP 1: "Guardar cambios" — Update forecast_settings
+    // ════════════════════════════════════════════════════════════
+    console.log(`[SAVE] Saving forecast_settings: riesgo=${riesgo}, rango=${rango}`);
+
+    const { data: existing } = await supabase
+      .from("forecast_settings")
+      .select("id")
+      .order("last_update", { ascending: false })
       .limit(1)
       .single();
 
-    await supabase
-      .from("alert_recipients")
-      .insert({ email, added_by: anyAdmin?.user_id || "00000000-0000-0000-0000-000000000000" });
-    await send(`✅ Correo <b>${email}</b> agregado.`);
-    await updateState({ estado_conversacion: "confirmando_correos" });
-    await showRecipients(chatId, "principales", supabase, send);
-    return;
-  }
-
-  // ── CONFIRMANDO BCC ──
-  if (estado === "confirmando_bcc") {
-    if (input === "confirmar_bcc") {
-      const { data: freshState } = await supabase
-        .from("telegram_bot_state")
-        .select("*")
-        .eq("chat_id", chatId)
-        .single();
-      await updateState({ estado_conversacion: "confirmacion_final" });
-      await showFinalSummary(chatId, freshState, supabase, send);
-      return;
-    }
-    if (input === "agregar_bcc") {
-      await updateState({ estado_conversacion: "agregando_bcc" });
-      await send("📧 Escriba el correo BCC a agregar:");
-      return;
-    }
-    if (input.startsWith("eliminar_bcc_")) {
-      const email = input.replace("eliminar_bcc_", "");
-      const currentBcc: string[] = state.bcc_emails || [];
-      const updated = currentBcc.filter((e: string) => e !== email);
-      await updateState({ bcc_emails: updated });
-      await send(`✅ BCC <b>${email}</b> eliminado.`);
-      const { data: freshState } = await supabase
-        .from("telegram_bot_state")
-        .select("*")
-        .eq("chat_id", chatId)
-        .single();
-      await showBccRecipients(chatId, supabase, send, freshState?.bcc_emails);
-      return;
-    }
-    await showBccRecipients(chatId, supabase, send);
-    return;
-  }
-
-  // ── AGREGANDO BCC ──
-  if (estado === "agregando_bcc") {
-    const email = input.trim().toLowerCase();
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      await updateState({});
-      await send("❌ Formato de correo inválido. Intente de nuevo:");
-      return;
-    }
-    const currentBcc: string[] = state.bcc_emails || [];
-    currentBcc.push(email);
-    await updateState({
-      bcc_emails: currentBcc,
-      estado_conversacion: "confirmando_bcc",
-    });
-    await send(`✅ BCC <b>${email}</b> agregado.`);
-    await showBccRecipients(chatId, supabase, send, currentBcc);
-    return;
-  }
-
-  // ── CONFIRMACIÓN FINAL ──
-  if (estado === "confirmacion_final") {
-    if (input === "enviar_alerta") {
-      // ── Double-send protection ──
-      const { data: latestState } = await supabase
-        .from("telegram_bot_state")
-        .select("alerta_enviada_hoy")
-        .eq("chat_id", chatId)
-        .single();
-
-      if (latestState?.alerta_enviada_hoy) {
-        await updateState({
-          estado_conversacion: "inicio",
-          riesgo_actual: null,
-          rango_actual: null,
-        });
-        await send("⚠️ La alerta de potencia coincidente ya fue enviada hoy.\n\nNo es posible enviar otra alerta hasta mañana.");
-        return;
-      }
-
-      await send("⏳ Procesando... Guardando configuración y enviando correo...");
-
-      try {
-        // 1. Save forecast settings (like "Guardar cambios")
-        const { data: freshState } = await supabase
-          .from("telegram_bot_state")
-          .select("*")
-          .eq("chat_id", chatId)
-          .single();
-
-        const riesgo = freshState.riesgo_actual || "BAJO";
-        const rango = freshState.rango_actual || "Libre";
-
-        const { data: existing } = await supabase
-          .from("forecast_settings")
-          .select("id")
-          .order("last_update", { ascending: false })
-          .limit(1)
-          .single();
-
-        if (existing) {
-          await supabase
-            .from("forecast_settings")
-            .update({
-              risk_level: riesgo,
-              modulation_time: rango,
-              last_update: new Date().toISOString(),
-            })
-            .eq("id", existing.id);
-        } else {
-          await supabase.from("forecast_settings").insert({
-            risk_level: riesgo,
-            modulation_time: rango,
-          });
-        }
-
-        // 2. Get latest chart image
-        const { data: chartFiles } = await supabase.storage
-          .from("chart-images")
-          .list("", { limit: 1, sortBy: { column: "created_at", order: "desc" } });
-
-        let graficoUrl: string | undefined;
-        if (chartFiles && chartFiles.length > 0) {
-          const { data: urlData } = supabase.storage
-            .from("chart-images")
-            .getPublicUrl(chartFiles[0].name);
-          graficoUrl = `${urlData.publicUrl}?t=${Date.now()}`;
-        }
-
-        // 3. Get demand estimate
-        const { data: forecastData } = await supabase
-          .from("coes_forecast")
-          .select("pronostico")
-          .order("fecha", { ascending: false })
-          .limit(1)
-          .single();
-
-        const demandaEstimada = forecastData?.pronostico
-          ? Number(forecastData.pronostico).toFixed(2)
-          : "—";
-
-        // 4. Generate email HTML
-        const isLowRisk = riesgo === "BAJO";
-        const fecha = peruDateFormatted();
-        const htmlContent = generarHTMLCorreo({
-          fecha,
-          riskColor: getRiskColor(riesgo),
-          riskLabel: getRiskLabel(riesgo),
-          timeRange: isLowRisk ? "Uso libre de equipos" : rango,
-          demandaEstimada,
-          mensaje: isLowRisk
-            ? "El día de hoy puede usar sus equipos sin rango horario de restricción."
-            : "Solo usar equipos indispensables.",
-          estatus: lastDayOfMonth(),
-          graficoUrl,
-        });
-
-        // 5. Get recipients
-        const { data: recipients } = await supabase
-          .from("alert_recipients")
-          .select("email");
-        const emails = (recipients || []).map((r: any) => r.email);
-        const bccEmails: string[] = freshState.bcc_emails || [];
-
-        if (emails.length === 0) {
-          await send("❌ No hay correos de destino configurados. Agregue al menos uno.");
-          await updateState({ estado_conversacion: "confirmando_correos" });
-          await showRecipients(chatId, "principales", supabase, send);
-          return;
-        }
-
-        // 6. Send email
-        const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-        const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-
-        const emailRes = await fetch(
-          `${supabaseUrl}/functions/v1/send-email-alert`,
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${serviceRoleKey}`,
-            },
-            body: JSON.stringify({ emails, bccEmails, htmlContent }),
-          }
-        );
-
-        const emailData = await emailRes.json();
-
-        if (!emailRes.ok || !emailData.success) {
-          throw new Error("Email send failed");
-        }
-
-        // 7. Update state - mark alert as sent
-        await updateState({
-          alerta_enviada_hoy: true,
-          estado_conversacion: "inicio",
-          riesgo_actual: null,
-          rango_actual: null,
-        });
-
-        await send(
-          `✅ <b>Alerta enviada correctamente.</b>\n\n📧 Enviada a ${emails.length} destinatario(s)\n📋 Riesgo: ${getRiskLabel(riesgo)}\n🕐 Horario: ${isLowRisk ? "Libre" : rango}`
-        );
-      } catch (err) {
-        console.error("Error sending alert:", err);
-        await send(
-          "❌ Error al enviar la alerta. Intente nuevamente o use la interfaz web."
-        );
-        await updateState({ estado_conversacion: "confirmacion_final" });
-      }
-      return;
-    }
-
-    if (input === "cancelar_alerta") {
-      await updateState({
-        estado_conversacion: "inicio",
-        riesgo_actual: null,
-        rango_actual: null,
+    if (existing) {
+      await supabase
+        .from("forecast_settings")
+        .update({
+          risk_level: riesgo,
+          modulation_time: rango,
+          last_update: new Date().toISOString(),
+        })
+        .eq("id", existing.id);
+    } else {
+      await supabase.from("forecast_settings").insert({
+        risk_level: riesgo,
+        modulation_time: rango,
       });
-      await send("❌ Actualización de alerta cancelada.");
-      return;
     }
 
-    // Show summary again
-    const { data: freshState } = await supabase
+    // Mark correo_enviado = false (changes saved, email not yet sent)
+    await supabase
       .from("telegram_bot_state")
-      .select("*")
-      .eq("chat_id", chatId)
+      .update({
+        correo_enviado: false,
+        last_interaction: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      })
+      .eq("chat_id", chatId);
+
+    console.log(`[SAVE] forecast_settings updated. correo_enviado set to false.`);
+
+    // ════════════════════════════════════════════════════════════
+    // STEP 2: Get latest chart image from storage
+    // ════════════════════════════════════════════════════════════
+    const { data: chartFiles } = await supabase.storage
+      .from("chart-images")
+      .list("", { limit: 1, sortBy: { column: "created_at", order: "desc" } });
+
+    let graficoUrl: string | undefined;
+    if (chartFiles && chartFiles.length > 0) {
+      const { data: urlData } = supabase.storage
+        .from("chart-images")
+        .getPublicUrl(chartFiles[0].name);
+      graficoUrl = `${urlData.publicUrl}?t=${Date.now()}`;
+    }
+
+    // ════════════════════════════════════════════════════════════
+    // STEP 3: Get demand estimate from latest forecast
+    // ════════════════════════════════════════════════════════════
+    const { data: forecastData } = await supabase
+      .from("coes_forecast")
+      .select("pronostico")
+      .order("fecha", { ascending: false })
+      .limit(1)
       .single();
-    await showFinalSummary(chatId, freshState, supabase, send);
-    return;
-  }
 
-  // ── Default: show menu ──
-  await updateState({});
-  await send("⚡ <b>SERGEN – Control de Demanda</b>\n\nEscriba /actualizar para comenzar.", [
-    [{ text: "📋 Actualizar alerta", callback_data: "actualizar" }],
-    [{ text: "📊 Estado del día", callback_data: "estado" }],
-  ]);
-}
+    const demandaEstimada = forecastData?.pronostico
+      ? Number(forecastData.pronostico).toFixed(2)
+      : "—";
 
-// ─── Helper: show recipients list ───────────────────────────────
-async function showRecipients(
-  chatId: number,
-  _type: string,
-  supabase: any,
-  send: (text: string, buttons?: any[][]) => Promise<void>
-) {
-  const { data: recipients } = await supabase
-    .from("alert_recipients")
-    .select("id, email")
-    .order("created_at", { ascending: true });
+    // ════════════════════════════════════════════════════════════
+    // STEP 4: Generate email HTML
+    // ════════════════════════════════════════════════════════════
+    const isLowRisk = riesgo === "BAJO";
+    const fecha = peruDateFormatted();
+    const htmlContent = generarHTMLCorreo({
+      fecha,
+      riskColor: getRiskColor(riesgo),
+      riskLabel: getRiskLabel(riesgo),
+      timeRange: isLowRisk ? "Uso libre de equipos" : rango,
+      demandaEstimada,
+      mensaje: isLowRisk
+        ? "El día de hoy puede usar sus equipos sin rango horario de restricción."
+        : "Solo usar equipos indispensables.",
+      estatus: lastDayOfMonth(),
+      graficoUrl,
+    });
 
-  const list = (recipients || [])
-    .map((r: any, i: number) => `${i + 1}. ${r.email}`)
-    .join("\n");
+    console.log(`[EMAIL] HTML generated. Demand: ${demandaEstimada} MW`);
 
-  const deleteButtons = (recipients || []).map((r: any) => [
-    { text: `❌ ${r.email}`, callback_data: `eliminar_correo_${r.id}` },
-  ]);
+    // ════════════════════════════════════════════════════════════
+    // STEP 5: Get recipients
+    // ════════════════════════════════════════════════════════════
+    const { data: recipients } = await supabase
+      .from("alert_recipients")
+      .select("email");
+    const emails = (recipients || []).map((r: any) => r.email);
 
-  await send(
-    `📧 <b>Correos principales:</b>\n\n${list || "No hay correos configurados."}\n\nSeleccione una opción:`,
-    [
-      ...deleteButtons,
-      [{ text: "➕ Agregar correo", callback_data: "agregar_correo" }],
-      [{ text: "✅ Confirmar correos", callback_data: "confirmar_correos" }],
-    ]
-  );
-}
-
-// ─── Helper: show BCC recipients ────────────────────────────────
-async function showBccRecipients(
-  chatId: number,
-  supabase: any,
-  send: (text: string, buttons?: any[][]) => Promise<void>,
-  bccOverride?: string[]
-) {
-  let bccEmails = bccOverride;
-  if (!bccEmails) {
-    const { data: state } = await supabase
+    // Get BCC from bot state
+    const { data: botState } = await supabase
       .from("telegram_bot_state")
       .select("bcc_emails")
       .eq("chat_id", chatId)
       .single();
-    bccEmails = state?.bcc_emails || [];
+    const bccEmails: string[] = botState?.bcc_emails || [];
+
+    if (emails.length === 0) {
+      await send("❌ No hay correos de destino configurados.\n\nAgregue correos desde el panel de administración.");
+      await supabase
+        .from("telegram_bot_state")
+        .update({
+          estado_conversacion: "inicio",
+          riesgo_actual: null,
+          rango_actual: null,
+          last_interaction: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        })
+        .eq("chat_id", chatId);
+      return;
+    }
+
+    // ════════════════════════════════════════════════════════════
+    // STEP 6: Send email via send-email-alert function
+    // ════════════════════════════════════════════════════════════
+    console.log(`[EMAIL] Sending to ${emails.length} recipients, ${bccEmails.length} BCC`);
+
+    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+
+    const emailRes = await fetch(
+      `${supabaseUrl}/functions/v1/send-email-alert`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${serviceRoleKey}`,
+        },
+        body: JSON.stringify({ emails, bccEmails, htmlContent }),
+      }
+    );
+
+    const emailData = await emailRes.json();
+
+    if (!emailRes.ok || !emailData.success) {
+      throw new Error(`Email send failed: ${JSON.stringify(emailData)}`);
+    }
+
+    // ════════════════════════════════════════════════════════════
+    // STEP 7: Mark correo_enviado = true, reset conversation
+    // ════════════════════════════════════════════════════════════
+    await supabase
+      .from("telegram_bot_state")
+      .update({
+        correo_enviado: true,
+        alerta_enviada_hoy: true,
+        estado_conversacion: "inicio",
+        riesgo_actual: null,
+        rango_actual: null,
+        modo_conversacion: null,
+        last_interaction: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      })
+      .eq("chat_id", chatId);
+
+    console.log(`[EMAIL] Sent successfully. correo_enviado set to true.`);
+
+    const riesgoEmoji = riesgo === "ALTO" ? "🔴" : "🟢";
+    await send(
+      `✅ <b>Alerta enviada correctamente.</b>\n\n${riesgoEmoji} Riesgo: <b>${getRiskLabel(riesgo)}</b>\n🕐 Horario: <b>${isLowRisk ? "Libre" : rango}</b>\n📧 Enviada a ${emails.length} destinatario(s)\n\n<i>Los cambios fueron guardados en el sistema antes del envío.</i>`
+    );
+  } catch (err) {
+    console.error("[ERROR] executeGuardarYEnviar:", err);
+    await supabase
+      .from("telegram_bot_state")
+      .update({
+        estado_conversacion: "inicio",
+        riesgo_actual: null,
+        rango_actual: null,
+        modo_conversacion: null,
+        last_interaction: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      })
+      .eq("chat_id", chatId);
+    await send("❌ Error al procesar la alerta. Intente nuevamente o use la interfaz web.");
   }
-
-  const list = (bccEmails || [])
-    .map((e: string, i: number) => `${i + 1}. ${e}`)
-    .join("\n");
-
-  const deleteButtons = (bccEmails || []).map((e: string) => [
-    { text: `❌ ${e}`, callback_data: `eliminar_bcc_${e}` },
-  ]);
-
-  await send(
-    `📧 <b>Destinatarios ocultos (BCC):</b>\n\n${list || "No hay correos BCC configurados."}\n\nSeleccione una opción:`,
-    [
-      ...deleteButtons,
-      [{ text: "➕ Agregar BCC", callback_data: "agregar_bcc" }],
-      [{ text: "✅ Confirmar BCC", callback_data: "confirmar_bcc" }],
-    ]
-  );
-}
-
-// ─── Helper: show final summary (improved) ──────────────────────
-async function showFinalSummary(
-  chatId: number,
-  state: any,
-  supabase: any,
-  send: (text: string, buttons?: any[][]) => Promise<void>
-) {
-  const { data: recipients } = await supabase
-    .from("alert_recipients")
-    .select("id");
-
-  const riesgo = state?.riesgo_actual || "—";
-  const rango = state?.rango_actual || "—";
-  const correoCount = (recipients || []).length;
-  const bccCount = (state?.bcc_emails || []).length;
-  const isLowRisk = riesgo === "BAJO";
-
-  const riesgoEmoji = riesgo === "ALTO" ? "🔴" : riesgo === "BAJO" ? "🟢" : "🟡";
-
-  await send(
-    `⚡ <b>SERGEN – Confirmación de alerta</b>\n\n${riesgoEmoji} Riesgo: <b>${getRiskLabel(riesgo).toUpperCase()}</b>\n🕐 Horario: <b>${isLowRisk ? "Libre" : rango}</b>\n📧 Destinatarios: <b>${correoCount}</b>\n📧 BCC: <b>${bccCount}</b>\n\n¿Desea enviar la alerta a los clientes?`,
-    [
-      [{ text: "✅ Enviar alerta", callback_data: "enviar_alerta" }],
-      [{ text: "❌ Cancelar", callback_data: "cancelar_alerta" }],
-    ]
-  );
 }
