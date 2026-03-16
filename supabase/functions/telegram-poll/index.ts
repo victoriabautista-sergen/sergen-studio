@@ -156,8 +156,8 @@ function generarHTMLCorreo(d: {
     : "";
 
   return `<!DOCTYPE html>
-<html lang="es">
-<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>Pronóstico</title></head>
+<html lang="es" xml:lang="es" xmlns="http://www.w3.org/1999/xhtml" dir="ltr">
+<head><meta charset="UTF-8"><meta http-equiv="Content-Language" content="es"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>Pronóstico de potencia</title></head>
 <body style="margin:0;padding:0;background:#f4f4f7;font-family:Arial,sans-serif">
 <table width="100%" cellpadding="0" cellspacing="0" style="background:#f4f4f7">
 <tr><td align="center" style="padding:32px 10px">
@@ -836,22 +836,37 @@ async function executeGuardarYEnviar(
 
     console.log(`[SAVE] Done. correo_enviado=false`);
 
-    // ── STEP 2: Get chart image ──
-    await send("⏳ <b>Paso 2/3:</b> Preparando contenido del correo...");
+    // ── STEP 2: Generate chart image via backend ──
+    await send("⏳ <b>Paso 2/3:</b> Generando imagen del dashboard...");
 
-    const { data: chartFiles } = await supabase.storage
-      .from("chart-images")
-      .list("", { limit: 1, sortBy: { column: "created_at", order: "desc" } });
+    const supabaseUrlForChart = Deno.env.get("SUPABASE_URL")!;
+    const serviceRoleKeyForChart = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 
     let graficoUrl: string | undefined;
-    if (chartFiles && chartFiles.length > 0) {
-      const { data: urlData } = supabase.storage
-        .from("chart-images")
-        .getPublicUrl(chartFiles[0].name);
-      graficoUrl = `${urlData.publicUrl}?t=${Date.now()}`;
-      console.log(`[CHART] Using chart: ${chartFiles[0].name}`);
-    } else {
-      console.log(`[CHART] No chart images found, sending without chart`);
+    try {
+      const chartRes = await fetch(
+        `${supabaseUrlForChart}/functions/v1/generate-chart-image`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${serviceRoleKeyForChart}`,
+          },
+          body: JSON.stringify({}),
+        }
+      );
+
+      const chartData = await chartRes.json();
+      if (chartRes.ok && chartData.success && chartData.url) {
+        graficoUrl = chartData.url;
+        console.log(`[CHART] Generated new chart image: ${graficoUrl}`);
+      } else {
+        console.error(`[CHART] Failed to generate chart:`, JSON.stringify(chartData));
+        console.log(`[CHART] Continuing without chart image`);
+      }
+    } catch (chartErr) {
+      console.error(`[CHART] Error calling generate-chart-image:`, chartErr);
+      console.log(`[CHART] Continuing without chart image`);
     }
 
     // ── STEP 3: Get demand estimate ──

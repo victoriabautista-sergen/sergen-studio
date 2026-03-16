@@ -15,7 +15,6 @@ import { useForecastData } from "@/modules/energy_intelligence/hooks/useForecast
 import { format, endOfMonth } from "date-fns";
 import { es } from "date-fns/locale";
 import { toZonedTime } from "date-fns-tz";
-import html2canvas from "html2canvas";
 import { generarHTMLCorreo } from "../../utils/generarHTMLCorreo";
 
 const RISK_OPTIONS = [
@@ -59,7 +58,7 @@ const ActualizacionAlertaPage = () => {
   const [previewHtml, setPreviewHtml] = useState("");
   const [chartDataUrl, setChartDataUrl] = useState<string>("");
 
-  const { data: forecastData, refetch: refetchForecastData } = useForecastData();
+  const { data: forecastData } = useForecastData();
   const [isCapturing, setIsCapturing] = useState(false);
 
   const breadcrumbs = [
@@ -209,9 +208,9 @@ const ActualizacionAlertaPage = () => {
         if (error) throw error;
       }
 
-      // Regenerar imagen del gráfico con datos frescos
-      toast.info("Capturando gráfico actualizado...");
-      await captureChart();
+      // Regenerar imagen del gráfico en el backend
+      toast.info("Generando imagen del dashboard...");
+      await generateChartImage();
       toast.success("Alerta y gráfico actualizados correctamente");
     } catch (err: any) {
       console.error(err);
@@ -226,42 +225,23 @@ const ActualizacionAlertaPage = () => {
   const todayFormatted = todayRaw.toLowerCase();
   const isLowRisk = riskLevel === "BAJO";
 
-  // Capturar gráfico como imagen (siempre datos frescos)
-  const captureChart = useCallback(async (): Promise<string> => {
-    // 1. Obtener datos frescos
-    await refetchForecastData();
-    // 2. Esperar a que el gráfico se renderice con los nuevos datos
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    const grafico = document.getElementById("grafico-pronostico");
-    if (!grafico) throw new Error("No se encontró el gráfico");
-    // 3. Capturar
-    const canvas = await html2canvas(grafico, { useCORS: true, scale: 2, backgroundColor: "#ffffff" });
-    const blob = await new Promise<Blob>((resolve) =>
-      canvas.toBlob((b) => resolve(b!), "image/png")
-    );
-    // 4. Subir con nombre único (sin cache)
-    const fileName = `chart-${Date.now()}.png`;
-    const { error: uploadError } = await supabase.storage
-      .from("chart-images")
-      .upload(fileName, blob, { contentType: "image/png", upsert: true });
-    if (uploadError) throw uploadError;
-    const { data: urlData } = supabase.storage
-      .from("chart-images")
-      .getPublicUrl(fileName);
-    // 5. Anti-cache
-    const publicUrl = `${urlData.publicUrl}?t=${Date.now()}`;
-    setChartDataUrl(publicUrl);
-    return publicUrl;
-  }, [refetchForecastData]);
+  // Generate chart image via backend
+  const generateChartImage = useCallback(async (): Promise<string> => {
+    const { data, error } = await supabase.functions.invoke("generate-chart-image");
+    if (error) throw new Error(`Error generando imagen: ${error.message}`);
+    if (!data?.success || !data?.url) throw new Error("No se pudo generar la imagen del gráfico");
+    setChartDataUrl(data.url);
+    return data.url;
+  }, []);
 
-  // Captura inicial al cargar datos
+  // Generate chart on initial load
   useEffect(() => {
     if (forecastData.length === 0) return;
     const timer = setTimeout(() => {
-      captureChart().catch(err => console.warn("Captura inicial falló:", err));
-    }, 1500);
+      generateChartImage().catch(err => console.warn("Generación inicial falló:", err));
+    }, 500);
     return () => clearTimeout(timer);
-  }, [forecastData.length > 0]); // solo al primer load
+  }, [forecastData.length > 0]);
 
   // Regenerar preview HTML cada vez que cambian los campos del formulario o la imagen del gráfico
   useEffect(() => {
@@ -289,9 +269,9 @@ const ActualizacionAlertaPage = () => {
       const emails = recipients.map(r => r.email);
       const bccList = bccRecipients.map(r => r.email);
 
-      // 1. Capturar gráfico con datos frescos y subirlo
-      toast.info("Capturando gráfico actualizado...");
-      const graficoUrl = await captureChart();
+      // 1. Generate chart image via backend
+      toast.info("Generando imagen del dashboard...");
+      const graficoUrl = await generateChartImage();
 
       // 2. Generar HTML con la misma URL pública usada en el preview
       const htmlContent = generarHTMLCorreo({
@@ -485,11 +465,9 @@ const ActualizacionAlertaPage = () => {
               <CardTitle className="text-lg">Vista previa del mensaje</CardTitle>
             </CardHeader>
             <CardContent>
-              {/* Gráfico oculto para captura con html2canvas — tamaño mayor y tooltip visible */}
-              <div style={{ position: "absolute", left: "-9999px", top: 0 }}>
-                <div id="grafico-pronostico" style={{ width: 750, height: 400, background: "#fff", padding: "16px" }}>
-                  <ForecastChart data={forecastData} onPeakValueChange={handlePeakValueChange} showPeakLabel={true} />
-                </div>
+              {/* Preview chart (visible for reference) */}
+              <div className="mb-4">
+                <ForecastChart data={forecastData} onPeakValueChange={handlePeakValueChange} showPeakLabel={true} />
               </div>
 
               {/* iframe que muestra el HTML exacto del correo */}

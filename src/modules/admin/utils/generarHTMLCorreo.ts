@@ -15,8 +15,8 @@ export function generarHTMLCorreo(d: EmailTemplateData): string {
     : "";
 
   return `<!DOCTYPE html>
-<html lang="es">
-<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>Pronóstico</title></head>
+<html lang="es" xml:lang="es" xmlns="http://www.w3.org/1999/xhtml" dir="ltr">
+<head><meta charset="UTF-8"><meta http-equiv="Content-Language" content="es"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>Pronóstico de potencia</title></head>
 <body style="margin:0;padding:0;background:#f4f4f7;font-family:Arial,sans-serif">
 <table width="100%" cellpadding="0" cellspacing="0" style="background:#f4f4f7">
 <tr><td align="center" style="padding:32px 10px">
