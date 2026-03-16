@@ -213,11 +213,20 @@ Deno.serve(async () => {
     Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
   );
 
-  // Load authorized chats
-  const { data: authChats } = await supabase
-    .from("telegram_authorized_chats")
-    .select("chat_id");
-  const authorizedIds = new Set((authChats || []).map((c: any) => c.chat_id));
+  // Load authorized users from profiles table (telegram_chat_id field)
+  const { data: authorizedProfiles } = await supabase
+    .from("profiles")
+    .select("telegram_chat_id, email, full_name, is_active")
+    .not("telegram_chat_id", "is", null)
+    .eq("is_active", true);
+  
+  const authorizedMap = new Map<number, { email: string | null; full_name: string | null }>();
+  for (const p of (authorizedProfiles || [])) {
+    const chatIdNum = parseInt(p.telegram_chat_id, 10);
+    if (!isNaN(chatIdNum)) {
+      authorizedMap.set(chatIdNum, { email: p.email, full_name: p.full_name });
+    }
+  }
 
   // Get global offset
   const { data: allStates } = await supabase
