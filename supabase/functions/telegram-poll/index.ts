@@ -447,6 +447,57 @@ Deno.serve(async () => {
   );
 });
 
+// ─── Email list helper ──────────────────────────────────────────
+async function showEmailReview(
+  chatId: number,
+  supabase: any,
+  send: (text: string, buttons?: any[][]) => Promise<void>
+) {
+  const { data: recipients } = await supabase
+    .from("alert_recipients")
+    .select("email")
+    .order("created_at", { ascending: true });
+  const emails = (recipients || []).map((r: any) => r.email);
+
+  const { data: botState } = await supabase
+    .from("telegram_bot_state")
+    .select("bcc_emails")
+    .eq("chat_id", chatId)
+    .single();
+  const bccEmails: string[] = botState?.bcc_emails || [];
+
+  let msg = "📧 <b>Correos de alerta</b>\n\n";
+  msg += "<b>Destinatarios:</b>\n";
+  if (emails.length > 0) {
+    emails.forEach((e: string, i: number) => { msg += `  ${i + 1}. ${e}\n`; });
+  } else {
+    msg += "  <i>No hay destinatarios configurados.</i>\n";
+  }
+  msg += "\n<b>Destinatarios ocultos (BCC):</b>\n";
+  if (bccEmails.length > 0) {
+    bccEmails.forEach((e: string, i: number) => { msg += `  ${i + 1}. ${e}\n`; });
+  } else {
+    msg += "  <i>No hay correos BCC configurados.</i>\n";
+  }
+
+  const buttons = [
+    [
+      { text: "➕ Agregar correo", callback_data: "agregar_correo" },
+      { text: "➕ Agregar correo oculto", callback_data: "agregar_bcc" },
+    ],
+    [{ text: "💾 Guardar cambios", callback_data: "guardar_cambios" }],
+    [{ text: "📧 Enviar correo", callback_data: "enviar_correo" }],
+    [{ text: "❌ Cancelar", callback_data: "cancelar_flujo" }],
+  ];
+
+  await send(msg, buttons);
+}
+
+// ─── Email validation ───────────────────────────────────────────
+function isValidEmail(email: string): boolean {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+}
+
 // ─── State machine ─────────────────────────────────────────────
 async function processConversation(
   chatId: number,
@@ -509,7 +560,6 @@ async function processConversation(
       return;
     }
 
-    // Try to acquire the update lock
     const lockResult = await tryAcquireLock(chatId, supabase);
     if (!lockResult.acquired) {
       await send("⚠️ Otro usuario de SERGEN está actualizando la alerta en este momento.\n\nEspere unos segundos e intente nuevamente.");
@@ -528,21 +578,21 @@ async function processConversation(
   }
 
   // ════════════════════════════════════════════════════════════════
-  // ESPERANDO_RIESGO — STRICT: only accept riesgo_BAJO or riesgo_ALTO
+  // ESPERANDO_RIESGO — only accept riesgo_BAJO or riesgo_ALTO
   // ════════════════════════════════════════════════════════════════
   if (estado === "esperando_riesgo") {
     if (input === "riesgo_BAJO") {
-      console.log(`[FLOW] Risk: BAJO`);
+      console.log(`[FLOW] Risk: BAJO → showing email review`);
       await updateState({
         riesgo_actual: "BAJO",
         rango_actual: "Libre",
-        estado_conversacion: "procesando_envio",
+        estado_conversacion: "revisando_correos",
       });
-      await executeGuardarYEnviar(chatId, "BAJO", "Libre", supabase, send);
+      await showEmailReview(chatId, supabase, send);
       return;
     }
     if (input === "riesgo_ALTO") {
-      console.log(`[FLOW] Risk: ALTO`);
+      console.log(`[FLOW] Risk: ALTO → asking time range`);
       await updateState({
         riesgo_actual: "ALTO",
         estado_conversacion: "esperando_rango",
@@ -553,7 +603,6 @@ async function processConversation(
       return;
     }
 
-    // STRICT: reject any other input
     await send("Seleccione una opción utilizando los botones.", [
       [
         { text: "🔴 Alto", callback_data: "riesgo_ALTO" },
@@ -564,10 +613,9 @@ async function processConversation(
   }
 
   // ════════════════════════════════════════════════════════════════
-  // ESPERANDO_RANGO — STRICT: only accept valid time range
+  // ESPERANDO_RANGO — only accept valid time range
   // ════════════════════════════════════════════════════════════════
   if (estado === "esperando_rango") {
-    // Reject callback buttons that aren't time ranges
     if (input.startsWith("riesgo_") || input === "actualizar" || input === "posponer") {
       await send("📝 Ingrese el rango horario.\n\n<code>2:00 pm - 4:00 pm</code>");
       return;
@@ -579,12 +627,130 @@ async function processConversation(
       return;
     }
 
-    console.log(`[FLOW] Time range accepted: ${input}`);
+    console.log(`[FLOW] Time range accepted: ${input} → showing email review`);
     await updateState({
       rango_actual: input,
-      estado_conversacion: "procesando_envio",
+      estado_conversacion: "revisando_correos",
     });
-    await executeGuardarYEnviar(chatId, "ALTO", input, supabase, send);
+    await showEmailReview(chatId, supabase, send);
+    return;
+  }
+
+  // ════════════════════════════════════════════════════════════════
+  // REVISANDO_CORREOS — email review screen actions
+  // ════════════════════════════════════════════════════════════════
+  if (estado === "revisando_correos") {
+    if (input === "agregar_correo") {
+      await updateState({ estado_conversacion: "agregando_correo" });
+      await send("📝 Ingrese el correo electrónico del destinatario:");
+      return;
+    }
+
+    if (input === "agregar_bcc") {
+      await updateState({ estado_conversacion: "agregando_correo_oculto" });
+      await send("📝 Ingrese el correo electrónico para BCC (oculto):");
+      return;
+    }
+
+    if (input === "cancelar_flujo") {
+      console.log(`[FLOW] Cancelled by user`);
+      await releaseLock(chatId, supabase);
+      await updateState({
+        estado_conversacion: "idle",
+        riesgo_actual: null,
+        rango_actual: null,
+        modo_conversacion: null,
+      });
+      await send("❌ Actualización cancelada.");
+      return;
+    }
+
+    if (input === "guardar_cambios") {
+      const riesgo = state?.riesgo_actual || "MEDIO";
+      const rango = state?.rango_actual || "Libre";
+      await executeGuardarCambios(chatId, riesgo, rango, supabase, send);
+      // Stay in revisando_correos so user can then send
+      await showEmailReview(chatId, supabase, send);
+      return;
+    }
+
+    if (input === "enviar_correo") {
+      const riesgo = state?.riesgo_actual || "MEDIO";
+      const rango = state?.rango_actual || "Libre";
+      await executeGuardarYEnviar(chatId, riesgo, rango, supabase, send);
+      return;
+    }
+
+    // Any other input in this state — show the review again
+    await showEmailReview(chatId, supabase, send);
+    return;
+  }
+
+  // ════════════════════════════════════════════════════════════════
+  // AGREGANDO_CORREO — waiting for email address (TO)
+  // ════════════════════════════════════════════════════════════════
+  if (estado === "agregando_correo") {
+    const email = input.trim().toLowerCase();
+    if (!isValidEmail(email)) {
+      await send("❌ Formato de correo inválido. Intente nuevamente:");
+      return;
+    }
+    // Check duplicate
+    const { data: existing } = await supabase
+      .from("alert_recipients")
+      .select("id")
+      .eq("email", email)
+      .limit(1);
+    if (existing && existing.length > 0) {
+      await send("⚠️ Este correo ya está en la lista de destinatarios.");
+      await updateState({ estado_conversacion: "revisando_correos" });
+      await showEmailReview(chatId, supabase, send);
+      return;
+    }
+    // Insert
+    const { data: session } = await supabase.auth.getSession();
+    await supabase.from("alert_recipients").insert({
+      email,
+      added_by: session?.session?.user?.id || "00000000-0000-0000-0000-000000000000",
+    });
+    console.log(`[EMAIL] Added recipient: ${email}`);
+    await send(`✅ Correo <b>${email}</b> agregado como destinatario.`);
+    await updateState({ estado_conversacion: "revisando_correos" });
+    await showEmailReview(chatId, supabase, send);
+    return;
+  }
+
+  // ════════════════════════════════════════════════════════════════
+  // AGREGANDO_CORREO_OCULTO — waiting for BCC email
+  // ════════════════════════════════════════════════════════════════
+  if (estado === "agregando_correo_oculto") {
+    const email = input.trim().toLowerCase();
+    if (!isValidEmail(email)) {
+      await send("❌ Formato de correo inválido. Intente nuevamente:");
+      return;
+    }
+    // Get current BCC list
+    const { data: botState } = await supabase
+      .from("telegram_bot_state")
+      .select("bcc_emails")
+      .eq("chat_id", chatId)
+      .single();
+    const bccList: string[] = botState?.bcc_emails || [];
+    if (bccList.includes(email)) {
+      await send("⚠️ Este correo ya está en la lista BCC.");
+      await updateState({ estado_conversacion: "revisando_correos" });
+      await showEmailReview(chatId, supabase, send);
+      return;
+    }
+    bccList.push(email);
+    await supabase
+      .from("telegram_bot_state")
+      .update({ bcc_emails: bccList, updated_at: new Date().toISOString() })
+      .eq("chat_id", chatId);
+    console.log(`[EMAIL] Added BCC: ${email}`);
+    await send(`✅ Correo <b>${email}</b> agregado como BCC.`);
+    await updateState({ estado_conversacion: "revisando_correos" });
+    await showEmailReview(chatId, supabase, send);
     return;
   }
 
@@ -601,6 +767,57 @@ async function processConversation(
   }
 }
 
+// ─── Execute "Guardar cambios" only (no email) ─────────────────
+async function executeGuardarCambios(
+  chatId: number,
+  riesgo: string,
+  rango: string,
+  supabase: any,
+  send: (text: string, buttons?: any[][]) => Promise<void>
+) {
+  try {
+    console.log(`[SAVE] riesgo=${riesgo}, rango=${rango}`);
+
+    const { data: existing } = await supabase
+      .from("forecast_settings")
+      .select("id")
+      .order("last_update", { ascending: false })
+      .limit(1)
+      .single();
+
+    if (existing) {
+      await supabase
+        .from("forecast_settings")
+        .update({
+          risk_level: riesgo,
+          modulation_time: rango,
+          last_update: new Date().toISOString(),
+        })
+        .eq("id", existing.id);
+    } else {
+      await supabase.from("forecast_settings").insert({
+        risk_level: riesgo,
+        modulation_time: rango,
+      });
+    }
+
+    await supabase
+      .from("telegram_bot_state")
+      .update({
+        correo_enviado: false,
+        last_interaction: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      })
+      .eq("chat_id", chatId);
+
+    console.log(`[SAVE] Done. correo_enviado=false`);
+    await send("✅ <b>Cambios guardados correctamente.</b>\n\nAhora puede enviar el correo.");
+  } catch (err) {
+    console.error("[ERROR] executeGuardarCambios:", err);
+    await send("❌ Error al guardar los cambios. Intente nuevamente.");
+  }
+}
+
 // ─── Execute "Guardar cambios" + Send email ─────────────────────
 async function executeGuardarYEnviar(
   chatId: number,
@@ -609,6 +826,18 @@ async function executeGuardarYEnviar(
   supabase: any,
   send: (text: string, buttons?: any[][]) => Promise<void>
 ) {
+  // Check recipients first
+  const { data: recipients } = await supabase
+    .from("alert_recipients")
+    .select("email");
+  const emails = (recipients || []).map((r: any) => r.email);
+
+  if (emails.length === 0) {
+    await send("⚠️ No hay destinatarios configurados para esta alerta.\n\nAgregue correos antes de enviar.");
+    await showEmailReview(chatId, supabase, send);
+    return;
+  }
+
   await send("⏳ Guardando cambios y preparando envío de correo...");
 
   try {
@@ -638,7 +867,6 @@ async function executeGuardarYEnviar(
       });
     }
 
-    // Mark correo_enviado = false (saved but not yet sent)
     await supabase
       .from("telegram_bot_state")
       .update({
@@ -690,34 +918,13 @@ async function executeGuardarYEnviar(
       graficoUrl,
     });
 
-    // ── STEP 5: Get recipients ──
-    const { data: recipients } = await supabase
-      .from("alert_recipients")
-      .select("email");
-    const emails = (recipients || []).map((r: any) => r.email);
-
+    // ── STEP 5: Get BCC ──
     const { data: botState } = await supabase
       .from("telegram_bot_state")
       .select("bcc_emails")
       .eq("chat_id", chatId)
       .single();
     const bccEmails: string[] = botState?.bcc_emails || [];
-
-    if (emails.length === 0) {
-      await send("❌ No hay correos de destino configurados.\n\nAgregue correos desde el panel de administración.");
-      await releaseLock(chatId, supabase);
-      await supabase
-        .from("telegram_bot_state")
-        .update({
-          estado_conversacion: "idle",
-          riesgo_actual: null,
-          rango_actual: null,
-          last_interaction: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-        })
-        .eq("chat_id", chatId);
-      return;
-    }
 
     // ── STEP 6: Send email ──
     console.log(`[EMAIL] Sending to ${emails.length} + ${bccEmails.length} BCC`);
@@ -770,7 +977,6 @@ async function executeGuardarYEnviar(
   } catch (err) {
     console.error("[ERROR] executeGuardarYEnviar:", err);
 
-    // Release lock on error
     await releaseLock(chatId, supabase);
 
     await supabase
