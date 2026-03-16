@@ -56,6 +56,10 @@ const ActualizacionAlertaPage = () => {
   const [newBccEmail, setNewBccEmail] = useState("");
   const [saving, setSaving] = useState(false);
   const [sendingEmail, setSendingEmail] = useState(false);
+  // Telegram authorized chats
+  const [telegramChats, setTelegramChats] = useState<{ id: string; chat_id: number; label: string | null }[]>([]);
+  const [newChatId, setNewChatId] = useState("");
+  const [newChatLabel, setNewChatLabel] = useState("");
   const [loading, setLoading] = useState(true);
   const [previewHtml, setPreviewHtml] = useState("");
   const [chartDataUrl, setChartDataUrl] = useState<string>("");
