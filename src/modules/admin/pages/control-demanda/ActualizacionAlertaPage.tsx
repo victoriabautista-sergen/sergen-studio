@@ -162,7 +162,7 @@ const ActualizacionAlertaPage = () => {
     if (recipients.some(r => r.email === email)) { toast.error("Este correo ya está en la lista"); return; }
 
     const { data: session } = await supabase.auth.getSession();
-    const { error } = await supabase.from("alert_recipients").insert({ email, added_by: session.session?.user.id });
+    const { error } = await supabase.from("alert_recipients").insert({ email, added_by: session.session?.user.id, recipient_type: "to" });
     if (error) { toast.error("Error al agregar correo"); console.error(error); return; }
     setNewEmail("");
     fetchRecipients();
