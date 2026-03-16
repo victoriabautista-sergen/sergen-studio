@@ -56,10 +56,8 @@ const ActualizacionAlertaPage = () => {
   const [newBccEmail, setNewBccEmail] = useState("");
   const [saving, setSaving] = useState(false);
   const [sendingEmail, setSendingEmail] = useState(false);
-  // Telegram authorized chats
-  const [telegramChats, setTelegramChats] = useState<{ id: string; chat_id: number; label: string | null }[]>([]);
-  const [newChatId, setNewChatId] = useState("");
-  const [newChatLabel, setNewChatLabel] = useState("");
+  // Telegram authorized users (from profiles table)
+  const [telegramUsers, setTelegramUsers] = useState<{ user_id: string; full_name: string | null; email: string | null; telegram_chat_id: string }[]>([]);
   const [loading, setLoading] = useState(true);
   const [previewHtml, setPreviewHtml] = useState("");
   const [chartDataUrl, setChartDataUrl] = useState<string>("");
@@ -123,37 +121,17 @@ const ActualizacionAlertaPage = () => {
 
   useEffect(() => { fetchRecipients(); }, [fetchRecipients]);
 
-  // Telegram authorized chats
-  const fetchTelegramChats = useCallback(async () => {
+  // Telegram users from profiles
+  const fetchTelegramUsers = useCallback(async () => {
     const { data, error } = await supabase
-      .from("telegram_authorized_chats")
-      .select("id, chat_id, label")
-      .order("created_at", { ascending: true });
-    if (!error && data) setTelegramChats(data);
+      .from("profiles")
+      .select("user_id, full_name, email, telegram_chat_id")
+      .not("telegram_chat_id", "is", null)
+      .eq("is_active", true);
+    if (!error && data) setTelegramUsers(data.filter(p => p.telegram_chat_id) as any);
   }, []);
 
-  useEffect(() => { fetchTelegramChats(); }, [fetchTelegramChats]);
-
-  const handleAddTelegramChat = async () => {
-    const chatIdNum = parseInt(newChatId.trim());
-    if (isNaN(chatIdNum)) { toast.error("Chat ID debe ser un número"); return; }
-    if (telegramChats.some(c => c.chat_id === chatIdNum)) { toast.error("Este Chat ID ya está registrado"); return; }
-    const { error } = await supabase.from("telegram_authorized_chats").insert({
-      chat_id: chatIdNum,
-      label: newChatLabel.trim() || null,
-    });
-    if (error) { toast.error("Error al agregar chat"); console.error(error); return; }
-    setNewChatId("");
-    setNewChatLabel("");
-    fetchTelegramChats();
-    toast.success("Chat autorizado agregado");
-  };
-
-  const handleRemoveTelegramChat = async (id: string) => {
-    const { error } = await supabase.from("telegram_authorized_chats").delete().eq("id", id);
-    if (error) { toast.error("Error al eliminar chat"); return; }
-    setTelegramChats(prev => prev.filter(c => c.id !== id));
-  };
+  useEffect(() => { fetchTelegramUsers(); }, [fetchTelegramUsers]);
 
   const isValidEmail = (email: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
@@ -473,43 +451,21 @@ const ActualizacionAlertaPage = () => {
               <div className="space-y-3">
                 <Label className="text-base font-semibold flex items-center gap-2">
                   <Bot className="h-4 w-4" />
-                  Telegram – Chats autorizados
+                  Telegram – Usuarios autorizados
                 </Label>
-                <div className="flex gap-2">
-                  <Input
-                    type="text"
-                    value={newChatId}
-                    onChange={(e) => setNewChatId(e.target.value)}
-                    placeholder="Chat ID"
-                    className="w-32"
-                    onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), handleAddTelegramChat())}
-                  />
-                  <Input
-                    type="text"
-                    value={newChatLabel}
-                    onChange={(e) => setNewChatLabel(e.target.value)}
-                    placeholder="Etiqueta (opcional)"
-                    onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), handleAddTelegramChat())}
-                  />
-                  <Button type="button" size="sm" variant="outline" onClick={handleAddTelegramChat}>
-                    <Plus className="h-4 w-4" />
-                  </Button>
-                </div>
-                {telegramChats.length > 0 && (
+                {telegramUsers.length > 0 && (
                   <div className="flex flex-wrap gap-2">
-                    {telegramChats.map((c) => (
-                      <Badge key={c.id} variant="secondary" className="gap-1 pl-3 pr-1 py-1.5 text-xs">
-                        {c.label ? `${c.label} (${c.chat_id})` : String(c.chat_id)}
-                        <button type="button" onClick={() => handleRemoveTelegramChat(c.id)} className="ml-1 rounded-full p-0.5 hover:bg-muted-foreground/20 transition-colors">
-                          <X className="h-3 w-3" />
-                        </button>
+                    {telegramUsers.map((u) => (
+                      <Badge key={u.user_id} variant="secondary" className="pl-3 pr-3 py-1.5 text-xs">
+                        {u.full_name || u.email || u.telegram_chat_id}
+                        <span className="ml-1 text-muted-foreground">({u.telegram_chat_id})</span>
                       </Badge>
                     ))}
                   </div>
                 )}
-                {telegramChats.length === 0 && (
+                {telegramUsers.length === 0 && (
                   <p className="text-xs text-muted-foreground">
-                    No hay chats autorizados. Envíe <code>/start</code> al bot y use el chat ID que aparece.
+                    No hay usuarios con Telegram configurado. Configure el Chat ID desde el módulo Usuarios.
                   </p>
                 )}
               </div>
