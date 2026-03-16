@@ -836,22 +836,37 @@ async function executeGuardarYEnviar(
 
     console.log(`[SAVE] Done. correo_enviado=false`);
 
-    // ── STEP 2: Get chart image ──
-    await send("⏳ <b>Paso 2/3:</b> Preparando contenido del correo...");
+    // ── STEP 2: Generate chart image via backend ──
+    await send("⏳ <b>Paso 2/3:</b> Generando imagen del dashboard...");
 
-    const { data: chartFiles } = await supabase.storage
-      .from("chart-images")
-      .list("", { limit: 1, sortBy: { column: "created_at", order: "desc" } });
+    const supabaseUrlForChart = Deno.env.get("SUPABASE_URL")!;
+    const serviceRoleKeyForChart = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 
     let graficoUrl: string | undefined;
-    if (chartFiles && chartFiles.length > 0) {
-      const { data: urlData } = supabase.storage
-        .from("chart-images")
-        .getPublicUrl(chartFiles[0].name);
-      graficoUrl = `${urlData.publicUrl}?t=${Date.now()}`;
-      console.log(`[CHART] Using chart: ${chartFiles[0].name}`);
-    } else {
-      console.log(`[CHART] No chart images found, sending without chart`);
+    try {
+      const chartRes = await fetch(
+        `${supabaseUrlForChart}/functions/v1/generate-chart-image`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${serviceRoleKeyForChart}`,
+          },
+          body: JSON.stringify({}),
+        }
+      );
+
+      const chartData = await chartRes.json();
+      if (chartRes.ok && chartData.success && chartData.url) {
+        graficoUrl = chartData.url;
+        console.log(`[CHART] Generated new chart image: ${graficoUrl}`);
+      } else {
+        console.error(`[CHART] Failed to generate chart:`, JSON.stringify(chartData));
+        console.log(`[CHART] Continuing without chart image`);
+      }
+    } catch (chartErr) {
+      console.error(`[CHART] Error calling generate-chart-image:`, chartErr);
+      console.log(`[CHART] Continuing without chart image`);
     }
 
     // ── STEP 3: Get demand estimate ──
