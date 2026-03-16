@@ -42,9 +42,10 @@ Deno.serve(async (req) => {
           estado_conversacion: "inicio",
           riesgo_actual: null,
           rango_actual: null,
+          last_interaction: new Date().toISOString(),
           updated_at: new Date().toISOString(),
         })
-        .gte("chat_id", 0); // update all
+        .gte("chat_id", 0);
 
       // Also update where chat_id < 0 (group chats)
       await supabase
@@ -54,6 +55,7 @@ Deno.serve(async (req) => {
           estado_conversacion: "inicio",
           riesgo_actual: null,
           rango_actual: null,
+          last_interaction: new Date().toISOString(),
           updated_at: new Date().toISOString(),
         })
         .lt("chat_id", 0);
