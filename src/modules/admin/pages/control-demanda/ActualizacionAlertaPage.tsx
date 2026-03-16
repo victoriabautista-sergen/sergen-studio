@@ -33,9 +33,12 @@ const getRiskColor = (level: string) => {
   }
 };
 
+const TIME_12H_RANGE_REGEX = /^\d{1,2}:\d{2}\s?(AM|PM)\s?-\s?\d{1,2}:\d{2}\s?(AM|PM)$/i;
+
 const ActualizacionAlertaPage = () => {
   const [timeRange, setTimeRange] = useState("18:00 - 23:00");
   const [riskLevel, setRiskLevel] = useState("MEDIO");
+  const [timeRangeError, setTimeRangeError] = useState("");
   const [demandaEstimada, setDemandaEstimada] = useState("");
   const [demandaManuallyEdited, setDemandaManuallyEdited] = useState(false);
   const [mensaje, setMensaje] = useState("Solo usar equipos indispensables.");
