@@ -111,9 +111,12 @@ const ActualizacionAlertaPage = () => {
   const fetchRecipients = useCallback(async () => {
     const { data, error } = await supabase
       .from("alert_recipients")
-      .select("id, email")
+      .select("id, email, recipient_type")
       .order("created_at", { ascending: true });
-    if (!error && data) setRecipients(data);
+    if (!error && data) {
+      setRecipients(data.filter((r: any) => r.recipient_type === "to" || !r.recipient_type).map((r: any) => ({ id: r.id, email: r.email })));
+      setBccRecipients(data.filter((r: any) => r.recipient_type === "bcc").map((r: any) => ({ id: r.id, email: r.email })));
+    }
   }, []);
 
   useEffect(() => { fetchRecipients(); }, [fetchRecipients]);
