@@ -27,10 +27,14 @@ const DashboardContent = () => {
   const { session, logout, role, enabledModuleSlugs } = useAuthContext();
 
   const visibleModules = useMemo(() => {
-    if (role === "super_admin" || role === "technical_user") {
+    if (role === "super_admin") {
       return moduleRegistry;
     }
+    // technical_user and other roles: no admin panel
     const appModules = moduleRegistry.filter((m) => m.id !== "admin-panel");
+    if (role === "technical_user") {
+      return appModules;
+    }
     if (role === "admin") {
       return appModules;
     }

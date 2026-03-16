@@ -8,7 +8,7 @@ interface PrivateRouteProps {
 }
 
 const redirectByRole = (role: AppRole | null): string => {
-  if (role === "super_admin" || role === "technical_user") return "/admin-panel";
+  if (role === "super_admin") return "/admin-panel";
   if (role === "admin") return "/admin-empresa";
   return "/dashboard";
 };

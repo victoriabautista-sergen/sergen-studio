@@ -14,7 +14,7 @@ interface AdminShellProps {
 }
 
 const AdminShell = ({ children, breadcrumbs = [] }: AdminShellProps) => (
-  <PrivateRoute allowedRoles={["super_admin", "technical_user"]}>
+  <PrivateRoute allowedRoles={["super_admin"]}>
     <div className="min-h-screen bg-background flex flex-col">
       <header className="border-b bg-card shrink-0">
         <div className="container flex items-center h-16 gap-4">
