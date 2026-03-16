@@ -468,6 +468,52 @@ const ActualizacionAlertaPage = () => {
                 {bccChips.length === 0 && <p className="text-xs text-muted-foreground">No hay correos BCC guardados.</p>}
               </div>
 
+              <Separator />
+
+              <div className="space-y-3">
+                <Label className="text-base font-semibold flex items-center gap-2">
+                  <Bot className="h-4 w-4" />
+                  Telegram – Chats autorizados
+                </Label>
+                <div className="flex gap-2">
+                  <Input
+                    type="text"
+                    value={newChatId}
+                    onChange={(e) => setNewChatId(e.target.value)}
+                    placeholder="Chat ID"
+                    className="w-32"
+                    onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), handleAddTelegramChat())}
+                  />
+                  <Input
+                    type="text"
+                    value={newChatLabel}
+                    onChange={(e) => setNewChatLabel(e.target.value)}
+                    placeholder="Etiqueta (opcional)"
+                    onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), handleAddTelegramChat())}
+                  />
+                  <Button type="button" size="sm" variant="outline" onClick={handleAddTelegramChat}>
+                    <Plus className="h-4 w-4" />
+                  </Button>
+                </div>
+                {telegramChats.length > 0 && (
+                  <div className="flex flex-wrap gap-2">
+                    {telegramChats.map((c) => (
+                      <Badge key={c.id} variant="secondary" className="gap-1 pl-3 pr-1 py-1.5 text-xs">
+                        {c.label ? `${c.label} (${c.chat_id})` : String(c.chat_id)}
+                        <button type="button" onClick={() => handleRemoveTelegramChat(c.id)} className="ml-1 rounded-full p-0.5 hover:bg-muted-foreground/20 transition-colors">
+                          <X className="h-3 w-3" />
+                        </button>
+                      </Badge>
+                    ))}
+                  </div>
+                )}
+                {telegramChats.length === 0 && (
+                  <p className="text-xs text-muted-foreground">
+                    No hay chats autorizados. Envíe <code>/start</code> al bot y use el chat ID que aparece.
+                  </p>
+                )}
+              </div>
+
               <Button onClick={handleSave} disabled={saving} className="w-full">
                 <Save className="h-4 w-4 mr-2" />
                 {saving ? "Guardando..." : "Guardar cambios en Vista General"}
