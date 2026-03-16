@@ -649,6 +649,63 @@ export type Database = {
           },
         ]
       }
+      telegram_authorized_chats: {
+        Row: {
+          chat_id: number
+          created_at: string
+          id: string
+          label: string | null
+        }
+        Insert: {
+          chat_id: number
+          created_at?: string
+          id?: string
+          label?: string | null
+        }
+        Update: {
+          chat_id?: number
+          created_at?: string
+          id?: string
+          label?: string | null
+        }
+        Relationships: []
+      }
+      telegram_bot_state: {
+        Row: {
+          alerta_enviada_hoy: boolean
+          bcc_emails: Json
+          chat_id: number
+          estado_conversacion: string
+          id: string
+          rango_actual: string | null
+          riesgo_actual: string | null
+          update_offset: number
+          updated_at: string
+        }
+        Insert: {
+          alerta_enviada_hoy?: boolean
+          bcc_emails?: Json
+          chat_id: number
+          estado_conversacion?: string
+          id?: string
+          rango_actual?: string | null
+          riesgo_actual?: string | null
+          update_offset?: number
+          updated_at?: string
+        }
+        Update: {
+          alerta_enviada_hoy?: boolean
+          bcc_emails?: Json
+          chat_id?: number
+          estado_conversacion?: string
+          id?: string
+          rango_actual?: string | null
+          riesgo_actual?: string | null
+          update_offset?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       user_modules: {
         Row: {
           created_at: string
