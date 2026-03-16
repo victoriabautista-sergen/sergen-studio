@@ -654,6 +654,7 @@ export type Database = {
       }
       telegram_bot_state: {
         Row: {
+          actualizacion_en_proceso: boolean
           alerta_enviada_hoy: boolean
           bcc_emails: Json
           chat_id: number
@@ -664,10 +665,13 @@ export type Database = {
           modo_conversacion: string | null
           rango_actual: string | null
           riesgo_actual: string | null
+          timestamp_actualizacion: string | null
           update_offset: number
           updated_at: string
+          usuario_actualizando: string | null
         }
         Insert: {
+          actualizacion_en_proceso?: boolean
           alerta_enviada_hoy?: boolean
           bcc_emails?: Json
           chat_id: number
@@ -678,10 +682,13 @@ export type Database = {
           modo_conversacion?: string | null
           rango_actual?: string | null
           riesgo_actual?: string | null
+          timestamp_actualizacion?: string | null
           update_offset?: number
           updated_at?: string
+          usuario_actualizando?: string | null
         }
         Update: {
+          actualizacion_en_proceso?: boolean
           alerta_enviada_hoy?: boolean
           bcc_emails?: Json
           chat_id?: number
@@ -692,8 +699,10 @@ export type Database = {
           modo_conversacion?: string | null
           rango_actual?: string | null
           riesgo_actual?: string | null
+          timestamp_actualizacion?: string | null
           update_offset?: number
           updated_at?: string
+          usuario_actualizando?: string | null
         }
         Relationships: []
       }
