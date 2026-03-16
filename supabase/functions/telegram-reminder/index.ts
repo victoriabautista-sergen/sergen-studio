@@ -73,26 +73,37 @@ Deno.serve(async (req) => {
     );
     const hour = peruNow.getHours();
 
-    // Get all authorized chats
-    const { data: authChats } = await supabase
-      .from("telegram_authorized_chats")
-      .select("chat_id");
+    // Get authorized users from profiles table (same source as Admin Panel)
+    const { data: authorizedProfiles } = await supabase
+      .from("profiles")
+      .select("telegram_chat_id")
+      .not("telegram_chat_id", "is", null)
+      .eq("is_active", true);
 
-    if (!authChats || authChats.length === 0) {
+    const authorizedChatIds = (authorizedProfiles || [])
+      .map((p: any) => parseInt(p.telegram_chat_id, 10))
+      .filter((id: number) => !isNaN(id));
+
+    if (authorizedChatIds.length === 0) {
       return new Response(
-        JSON.stringify({ ok: true, message: "No authorized chats" }),
+        JSON.stringify({ ok: true, message: "No authorized users with Telegram" }),
         { headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
     let sent = 0;
-    for (const chat of authChats) {
+    for (const chatId of authorizedChatIds) {
       // Check if alert already sent today
       const { data: state } = await supabase
         .from("telegram_bot_state")
         .select("alerta_enviada_hoy")
-        .eq("chat_id", chat.chat_id)
+        .eq("chat_id", chatId)
         .single();
+
+      if (state?.alerta_enviada_hoy) continue;
+
+      let text = "";
+      let buttons: { text: string; callback_data: string }[][] = [];
 
       if (state?.alerta_enviada_hoy) continue;
 
@@ -122,7 +133,7 @@ Deno.serve(async (req) => {
       if (!text) continue;
 
       const body: Record<string, unknown> = {
-        chat_id: chat.chat_id,
+        chat_id: chatId,
         text,
         parse_mode: "HTML",
         reply_markup: { inline_keyboard: buttons },
