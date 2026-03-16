@@ -677,6 +677,7 @@ export type Database = {
           chat_id: number
           estado_conversacion: string
           id: string
+          last_interaction: string
           rango_actual: string | null
           riesgo_actual: string | null
           update_offset: number
@@ -688,6 +689,7 @@ export type Database = {
           chat_id: number
           estado_conversacion?: string
           id?: string
+          last_interaction?: string
           rango_actual?: string | null
           riesgo_actual?: string | null
           update_offset?: number
@@ -699,6 +701,7 @@ export type Database = {
           chat_id?: number
           estado_conversacion?: string
           id?: string
+          last_interaction?: string
           rango_actual?: string | null
           riesgo_actual?: string | null
           update_offset?: number

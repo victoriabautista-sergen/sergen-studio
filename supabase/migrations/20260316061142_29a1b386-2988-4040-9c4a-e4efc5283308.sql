@@ -1,0 +1,1 @@
+ALTER TABLE public.telegram_bot_state ADD COLUMN IF NOT EXISTS last_interaction timestamptz NOT NULL DEFAULT now();
