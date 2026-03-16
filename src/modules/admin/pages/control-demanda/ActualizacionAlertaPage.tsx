@@ -58,7 +58,7 @@ const ActualizacionAlertaPage = () => {
   const [previewHtml, setPreviewHtml] = useState("");
   const [chartDataUrl, setChartDataUrl] = useState<string>("");
 
-  const { data: forecastData, refetch: refetchForecastData } = useForecastData();
+  const { data: forecastData } = useForecastData();
   const [isCapturing, setIsCapturing] = useState(false);
 
   const breadcrumbs = [
