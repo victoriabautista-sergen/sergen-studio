@@ -97,8 +97,13 @@ Deno.serve(async (req) => {
       const { data: state } = await supabase
         .from("telegram_bot_state")
         .select("alerta_enviada_hoy")
-        .eq("chat_id", chat.chat_id)
+        .eq("chat_id", chatId)
         .single();
+
+      if (state?.alerta_enviada_hoy) continue;
+
+      let text = "";
+      let buttons: { text: string; callback_data: string }[][] = [];
 
       if (state?.alerta_enviada_hoy) continue;
 
