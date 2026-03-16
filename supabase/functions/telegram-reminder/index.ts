@@ -105,11 +105,6 @@ Deno.serve(async (req) => {
       let text = "";
       let buttons: { text: string; callback_data: string }[][] = [];
 
-      if (state?.alerta_enviada_hoy) continue;
-
-      let text = "";
-      let buttons: { text: string; callback_data: string }[][] = [];
-
       if (hour >= 17) {
         text =
           "⚠️ <b>SERGEN ALERTA – Último aviso</b>\n\nDebe registrar ahora la alerta de potencia coincidente.";
