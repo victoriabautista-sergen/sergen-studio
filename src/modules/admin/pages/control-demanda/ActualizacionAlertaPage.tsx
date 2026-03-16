@@ -225,42 +225,23 @@ const ActualizacionAlertaPage = () => {
   const todayFormatted = todayRaw.toLowerCase();
   const isLowRisk = riskLevel === "BAJO";
 
-  // Capturar gráfico como imagen (siempre datos frescos)
-  const captureChart = useCallback(async (): Promise<string> => {
-    // 1. Obtener datos frescos
-    await refetchForecastData();
-    // 2. Esperar a que el gráfico se renderice con los nuevos datos
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    const grafico = document.getElementById("grafico-pronostico");
-    if (!grafico) throw new Error("No se encontró el gráfico");
-    // 3. Capturar
-    const canvas = await html2canvas(grafico, { useCORS: true, scale: 2, backgroundColor: "#ffffff" });
-    const blob = await new Promise<Blob>((resolve) =>
-      canvas.toBlob((b) => resolve(b!), "image/png")
-    );
-    // 4. Subir con nombre único (sin cache)
-    const fileName = `chart-${Date.now()}.png`;
-    const { error: uploadError } = await supabase.storage
-      .from("chart-images")
-      .upload(fileName, blob, { contentType: "image/png", upsert: true });
-    if (uploadError) throw uploadError;
-    const { data: urlData } = supabase.storage
-      .from("chart-images")
-      .getPublicUrl(fileName);
-    // 5. Anti-cache
-    const publicUrl = `${urlData.publicUrl}?t=${Date.now()}`;
-    setChartDataUrl(publicUrl);
-    return publicUrl;
-  }, [refetchForecastData]);
+  // Generate chart image via backend
+  const generateChartImage = useCallback(async (): Promise<string> => {
+    const { data, error } = await supabase.functions.invoke("generate-chart-image");
+    if (error) throw new Error(`Error generando imagen: ${error.message}`);
+    if (!data?.success || !data?.url) throw new Error("No se pudo generar la imagen del gráfico");
+    setChartDataUrl(data.url);
+    return data.url;
+  }, []);
 
-  // Captura inicial al cargar datos
+  // Generate chart on initial load
   useEffect(() => {
     if (forecastData.length === 0) return;
     const timer = setTimeout(() => {
-      captureChart().catch(err => console.warn("Captura inicial falló:", err));
-    }, 1500);
+      generateChartImage().catch(err => console.warn("Generación inicial falló:", err));
+    }, 500);
     return () => clearTimeout(timer);
-  }, [forecastData.length > 0]); // solo al primer load
+  }, [forecastData.length > 0]);
 
   // Regenerar preview HTML cada vez que cambian los campos del formulario o la imagen del gráfico
   useEffect(() => {
