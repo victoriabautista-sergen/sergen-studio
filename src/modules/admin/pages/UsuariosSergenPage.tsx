@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Loader2, MessageCircle, Shield, Trash2, UserPlus } from "lucide-react";
+import { Loader2, MessageCircle, Pencil, Shield, Trash2, UserPlus } from "lucide-react";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/table";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuthContext } from "@/core/auth/context/AuthContext";
 import AdminShell from "../components/AdminShell";
 
 type SergenUser = {
@@ -50,18 +51,41 @@ const RoleBadge = ({ role }: { role: string }) =>
 const UsuariosSergenPage = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { user, role: currentUserRole } = useAuthContext();
+  const isAdmin = currentUserRole === "super_admin";
 
-  const [deletingId, setDeletingId] = useState<string | null>(null);
-  const [createOpen, setCreateOpen] = useState(false);
+  const [deletingUser, setDeletingUser] = useState<SergenUser | null>(null);
+  const [formOpen, setFormOpen] = useState(false);
+  const [editingUser, setEditingUser] = useState<SergenUser | null>(null);
   const [newEmail, setNewEmail] = useState("");
   const [newName, setNewName] = useState("");
   const [newRole, setNewRole] = useState<"super_admin" | "technical_user">("technical_user");
   const [newPassword, setNewPassword] = useState("");
   const [newTelegramChatId, setNewTelegramChatId] = useState("");
 
-  // Edit telegram dialog
-  const [editTelegramUserId, setEditTelegramUserId] = useState<string | null>(null);
-  const [editTelegramValue, setEditTelegramValue] = useState("");
+  const resetForm = () => {
+    setNewEmail("");
+    setNewName("");
+    setNewPassword("");
+    setNewRole("technical_user");
+    setNewTelegramChatId("");
+    setEditingUser(null);
+  };
+
+  const openCreateForm = () => {
+    resetForm();
+    setFormOpen(true);
+  };
+
+  const openEditForm = (u: SergenUser) => {
+    setEditingUser(u);
+    setNewEmail(u.email ?? "");
+    setNewName(u.full_name ?? "");
+    setNewRole(u.role);
+    setNewTelegramChatId(u.telegram_chat_id ?? "");
+    setNewPassword("");
+    setFormOpen(true);
+  };
 
   const { data: users = [], isLoading } = useQuery({
     queryKey: ["admin-sergen-users"],
@@ -127,26 +151,44 @@ const UsuariosSergenPage = () => {
     onSuccess: () => {
       toast({ title: "Rol eliminado. El usuario seguirá existiendo en la plataforma." });
       queryClient.invalidateQueries({ queryKey: ["admin-sergen-users"] });
-      setDeletingId(null);
+      setDeletingUser(null);
     },
     onError: () => toast({ title: "Error al eliminar.", variant: "destructive" }),
   });
 
-  const updateTelegramMutation = useMutation({
-    mutationFn: async ({ userId, telegramChatId }: { userId: string; telegramChatId: string | null }) => {
-      const { error } = await supabase
+  const editUserMutation = useMutation({
+    mutationFn: async ({
+      userId, fullName, email, role, telegramChatId,
+    }: {
+      userId: string; fullName: string; email: string;
+      role: "super_admin" | "technical_user"; telegramChatId: string | null;
+    }) => {
+      // Update profile
+      const { error: profileError } = await supabase
         .from("profiles")
-        .update({ telegram_chat_id: telegramChatId } as any)
+        .update({
+          full_name: fullName || null,
+          email: email || null,
+          telegram_chat_id: telegramChatId,
+        } as any)
         .eq("user_id", userId);
-      if (error) throw error;
+      if (profileError) throw profileError;
+
+      // Update role
+      const { error: roleError } = await supabase
+        .from("user_roles")
+        .update({ role })
+        .eq("user_id", userId);
+      if (roleError) throw roleError;
     },
     onSuccess: () => {
-      toast({ title: "Telegram Chat ID actualizado." });
+      toast({ title: "Usuario actualizado correctamente." });
       queryClient.invalidateQueries({ queryKey: ["admin-sergen-users"] });
-      setEditTelegramUserId(null);
-      setEditTelegramValue("");
+      setFormOpen(false);
+      resetForm();
     },
-    onError: () => toast({ title: "Error al actualizar Telegram.", variant: "destructive" }),
+    onError: (err: Error) =>
+      toast({ title: "Error al actualizar usuario.", description: err.message, variant: "destructive" }),
   });
 
   const createUserMutation = useMutation({
@@ -191,13 +233,45 @@ const UsuariosSergenPage = () => {
     onSuccess: () => {
       toast({ title: "Usuario creado correctamente." });
       queryClient.invalidateQueries({ queryKey: ["admin-sergen-users"] });
-      setCreateOpen(false);
-      setNewEmail(""); setNewName(""); setNewPassword("");
-      setNewRole("technical_user"); setNewTelegramChatId("");
+      setFormOpen(false);
+      resetForm();
     },
     onError: (err: Error) =>
       toast({ title: "Error al crear usuario.", description: err.message, variant: "destructive" }),
   });
+
+  const handleFormSubmit = () => {
+    if (editingUser) {
+      editUserMutation.mutate({
+        userId: editingUser.user_id,
+        fullName: newName,
+        email: newEmail,
+        role: newRole,
+        telegramChatId: newTelegramChatId.trim() || null,
+      });
+    } else {
+      createUserMutation.mutate({
+        email: newEmail,
+        password: newPassword,
+        fullName: newName,
+        role: newRole,
+        telegramChatId: newTelegramChatId.trim() || undefined,
+      });
+    }
+  };
+
+  const handleDeleteClick = (u: SergenUser) => {
+    if (u.user_id === user?.id) {
+      toast({ title: "No puedes eliminar tu propio usuario administrador.", variant: "destructive" });
+      return;
+    }
+    setDeletingUser(u);
+  };
+
+  const isFormPending = editingUser ? editUserMutation.isPending : createUserMutation.isPending;
+  const isFormValid = editingUser
+    ? newEmail.trim().length > 0
+    : newEmail.trim().length > 0 && newPassword.trim().length > 0;
 
   return (
     <AdminShell breadcrumbs={BREADCRUMBS}>
@@ -209,10 +283,12 @@ const UsuariosSergenPage = () => {
               Gestión de usuarios internos de la plataforma.
             </p>
           </div>
-          <Button onClick={() => setCreateOpen(true)}>
-            <UserPlus className="h-4 w-4 mr-2" />
-            Nuevo usuario
-          </Button>
+          {isAdmin && (
+            <Button onClick={openCreateForm}>
+              <UserPlus className="h-4 w-4 mr-2" />
+              Nuevo usuario
+            </Button>
+          )}
         </div>
 
         <Card>
@@ -235,60 +311,56 @@ const UsuariosSergenPage = () => {
                     <TableHead>Rol</TableHead>
                     <TableHead>Telegram</TableHead>
                     <TableHead>Estado</TableHead>
-                    <TableHead className="text-right">Acciones</TableHead>
+                    {isAdmin && <TableHead className="text-right">Acciones</TableHead>}
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {users.map((user) => (
-                    <TableRow key={user.user_id}>
-                      <TableCell className="font-medium">{user.full_name ?? "—"}</TableCell>
-                      <TableCell className="text-muted-foreground">{user.email ?? "—"}</TableCell>
+                  {users.map((u) => (
+                    <TableRow key={u.user_id}>
+                      <TableCell className="font-medium">{u.full_name ?? "—"}</TableCell>
+                      <TableCell className="text-muted-foreground">{u.email ?? "—"}</TableCell>
                       <TableCell>
-                        <Select
-                          value={user.role}
-                          onValueChange={(role) =>
-                            changeRoleMutation.mutate({ userId: user.user_id, role: role as "super_admin" | "technical_user" })
-                          }
-                        >
-                          <SelectTrigger className="h-8 w-40"><SelectValue /></SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="super_admin">Administrador</SelectItem>
-                            <SelectItem value="technical_user">Usuario</SelectItem>
-                          </SelectContent>
-                        </Select>
+                        <RoleBadge role={u.role} />
                       </TableCell>
                       <TableCell>
-                        <button
-                          onClick={() => {
-                            setEditTelegramUserId(user.user_id);
-                            setEditTelegramValue(user.telegram_chat_id ?? "");
-                          }}
-                          className="flex items-center gap-1.5 text-sm hover:underline"
-                        >
-                          {user.telegram_chat_id ? (
+                        <span className="flex items-center gap-1.5 text-sm">
+                          {u.telegram_chat_id ? (
                             <span className="text-emerald-600 flex items-center gap-1">
                               <MessageCircle className="h-3.5 w-3.5" /> ✔ Configurado
                             </span>
                           ) : (
                             <span className="text-muted-foreground">— No configurado</span>
                           )}
-                        </button>
+                        </span>
                       </TableCell>
                       <TableCell>
                         <div className="flex items-center gap-2">
-                          <Switch
-                            checked={user.is_active}
-                            onCheckedChange={(active) => toggleActiveMutation.mutate({ userId: user.user_id, active })}
-                          />
-                          <span className="text-sm text-muted-foreground">{user.is_active ? "Activo" : "Inactivo"}</span>
+                          {isAdmin ? (
+                            <>
+                              <Switch
+                                checked={u.is_active}
+                                onCheckedChange={(active) => toggleActiveMutation.mutate({ userId: u.user_id, active })}
+                              />
+                              <span className="text-sm text-muted-foreground">{u.is_active ? "Activo" : "Inactivo"}</span>
+                            </>
+                          ) : (
+                            <span className="text-sm text-muted-foreground">{u.is_active ? "Activo" : "Inactivo"}</span>
+                          )}
                         </div>
                       </TableCell>
-                      <TableCell className="text-right">
-                        <Button variant="ghost" size="sm" className="text-destructive hover:text-destructive"
-                          onClick={() => setDeletingId(user.role_row_id)}>
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </TableCell>
+                      {isAdmin && (
+                        <TableCell className="text-right">
+                          <div className="flex items-center justify-end gap-1">
+                            <Button variant="ghost" size="sm" onClick={() => openEditForm(u)}>
+                              <Pencil className="h-4 w-4" />
+                            </Button>
+                            <Button variant="ghost" size="sm" className="text-destructive hover:text-destructive"
+                              onClick={() => handleDeleteClick(u)}>
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </TableCell>
+                      )}
                     </TableRow>
                   ))}
                 </TableBody>
@@ -298,10 +370,12 @@ const UsuariosSergenPage = () => {
         </Card>
       </div>
 
-      {/* ── Create user dialog ── */}
-      <Dialog open={createOpen} onOpenChange={setCreateOpen}>
+      {/* ── Create / Edit user dialog ── */}
+      <Dialog open={formOpen} onOpenChange={(open) => { if (!open) { setFormOpen(false); resetForm(); } }}>
         <DialogContent className="max-w-md">
-          <DialogHeader><DialogTitle>Nuevo usuario</DialogTitle></DialogHeader>
+          <DialogHeader>
+            <DialogTitle>{editingUser ? "Editar usuario" : "Nuevo usuario"}</DialogTitle>
+          </DialogHeader>
           <div className="space-y-4">
             <div className="space-y-2">
               <Label>Nombre completo</Label>
@@ -309,12 +383,20 @@ const UsuariosSergenPage = () => {
             </div>
             <div className="space-y-2">
               <Label>Email *</Label>
-              <Input type="email" value={newEmail} onChange={(e) => setNewEmail(e.target.value)} placeholder="usuario@sergen.pe" />
+              <Input
+                type="email"
+                value={newEmail}
+                onChange={(e) => setNewEmail(e.target.value)}
+                placeholder="usuario@sergen.pe"
+                disabled={!!editingUser}
+              />
             </div>
-            <div className="space-y-2">
-              <Label>Contraseña temporal *</Label>
-              <Input type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} placeholder="Mínimo 8 caracteres" />
-            </div>
+            {!editingUser && (
+              <div className="space-y-2">
+                <Label>Contraseña temporal *</Label>
+                <Input type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} placeholder="Mínimo 8 caracteres" />
+              </div>
+            )}
             <div className="space-y-2">
               <Label>Rol</Label>
               <Select value={newRole} onValueChange={(r) => setNewRole(r as "super_admin" | "technical_user")}>
@@ -336,61 +418,23 @@ const UsuariosSergenPage = () => {
                 ID de chat de Telegram que se utilizará para enviar alertas automáticas de la plataforma.
               </p>
             </div>
-            <p className="text-xs text-muted-foreground">
-              Si el email ya tiene cuenta en la plataforma, se le asignará el rol directamente sin necesidad de contraseña.
-            </p>
+            {!editingUser && (
+              <p className="text-xs text-muted-foreground">
+                Si el email ya tiene cuenta en la plataforma, se le asignará el rol directamente sin necesidad de contraseña.
+              </p>
+            )}
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setCreateOpen(false)}>Cancelar</Button>
-            <Button
-              onClick={() => createUserMutation.mutate({
-                email: newEmail, password: newPassword, fullName: newName,
-                role: newRole, telegramChatId: newTelegramChatId.trim() || undefined,
-              })}
-              disabled={createUserMutation.isPending || !newEmail.trim() || !newPassword.trim()}
-            >
-              {createUserMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : "Crear usuario"}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* ── Edit Telegram Chat ID dialog ── */}
-      <Dialog open={Boolean(editTelegramUserId)} onOpenChange={(open) => { if (!open) setEditTelegramUserId(null); }}>
-        <DialogContent className="max-w-sm">
-          <DialogHeader><DialogTitle>Telegram Chat ID</DialogTitle></DialogHeader>
-          <div className="space-y-2">
-            <Label>Chat ID</Label>
-            <Input
-              value={editTelegramValue}
-              onChange={(e) => setEditTelegramValue(e.target.value)}
-              placeholder="Ejemplo: 123456789"
-            />
-            <p className="text-xs text-muted-foreground">
-              ID de chat de Telegram que se utilizará para enviar alertas automáticas de la plataforma.
-            </p>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setEditTelegramUserId(null)}>Cancelar</Button>
-            <Button
-              onClick={() => {
-                if (editTelegramUserId) {
-                  updateTelegramMutation.mutate({
-                    userId: editTelegramUserId,
-                    telegramChatId: editTelegramValue.trim() || null,
-                  });
-                }
-              }}
-              disabled={updateTelegramMutation.isPending}
-            >
-              {updateTelegramMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : "Guardar"}
+            <Button variant="outline" onClick={() => { setFormOpen(false); resetForm(); }}>Cancelar</Button>
+            <Button onClick={handleFormSubmit} disabled={isFormPending || !isFormValid}>
+              {isFormPending ? <Loader2 className="h-4 w-4 animate-spin" /> : editingUser ? "Guardar cambios" : "Crear usuario"}
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
       {/* ── Delete role confirm ── */}
-      <AlertDialog open={Boolean(deletingId)} onOpenChange={(open) => !open && setDeletingId(null)}>
+      <AlertDialog open={Boolean(deletingUser)} onOpenChange={(open) => !open && setDeletingUser(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>¿Eliminar usuario?</AlertDialogTitle>
@@ -402,7 +446,7 @@ const UsuariosSergenPage = () => {
             <AlertDialogCancel>Cancelar</AlertDialogCancel>
             <AlertDialogAction
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-              onClick={() => { if (deletingId) deleteUserMutation.mutate(deletingId); }}
+              onClick={() => { if (deletingUser) deleteUserMutation.mutate(deletingUser.role_row_id); }}
             >
               Eliminar
             </AlertDialogAction>
