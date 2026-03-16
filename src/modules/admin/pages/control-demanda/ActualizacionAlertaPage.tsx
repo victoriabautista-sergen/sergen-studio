@@ -49,10 +49,7 @@ const ActualizacionAlertaPage = () => {
   const [estatus, setEstatus] = useState(computeEstatus);
   const [recipients, setRecipients] = useState<{ id: string; email: string }[]>([]);
   const [newEmail, setNewEmail] = useState("");
-  const [bccChips, setBccChips] = useState<string[]>(() => {
-    const stored = localStorage.getItem("alert_bcc_emails") || "";
-    return stored ? stored.split(",").map(e => e.trim()).filter(Boolean) : [];
-  });
+  const [bccRecipients, setBccRecipients] = useState<{ id: string; email: string }[]>([]);
   const [newBccEmail, setNewBccEmail] = useState("");
   const [saving, setSaving] = useState(false);
   const [sendingEmail, setSendingEmail] = useState(false);
