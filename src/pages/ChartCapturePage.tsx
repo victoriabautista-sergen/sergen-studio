@@ -50,7 +50,7 @@ const ChartCapturePage = () => {
   }
 
   return (
-    <div id="chart-container" style={{ width: 800, paddingTop: 128, paddingLeft: 16, paddingRight: 16, paddingBottom: 16, background: '#fff' }}>
+    <div id="chart-container" style={{ width: 800, paddingTop: 32, paddingLeft: 16, paddingRight: 16, paddingBottom: 16, background: '#fff' }}>
       <ForecastChart data={data} showPeakLabel={true} />
     </div>
   );
