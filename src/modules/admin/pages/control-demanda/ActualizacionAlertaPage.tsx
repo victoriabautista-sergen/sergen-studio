@@ -1,5 +1,6 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import html2canvas from "html2canvas";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -60,6 +61,7 @@ const ActualizacionAlertaPage = () => {
 
   const { data: forecastData } = useForecastData();
   const [isCapturing, setIsCapturing] = useState(false);
+  const chartRef = useRef<HTMLDivElement>(null);
 
   const breadcrumbs = [
     { label: "Configuración", href: "/admin-panel/configuracion" },
@@ -227,11 +229,33 @@ const ActualizacionAlertaPage = () => {
 
   // Generate chart image via backend
   const generateChartImage = useCallback(async (): Promise<string> => {
-    const { data, error } = await supabase.functions.invoke("generate-chart-image");
-    if (error) throw new Error(`Error generando imagen: ${error.message}`);
-    if (!data?.success || !data?.url) throw new Error("No se pudo generar la imagen del gráfico");
-    setChartDataUrl(data.url);
-    return data.url;
+    if (!chartRef.current) throw new Error("Chart ref not available");
+    
+    // Wait a tick for the chart to fully render
+    await new Promise(r => setTimeout(r, 300));
+    
+    const canvas = await html2canvas(chartRef.current, {
+      backgroundColor: "#ffffff",
+      scale: 2,
+      useCORS: true,
+      logging: false,
+    });
+    
+    const blob = await new Promise<Blob>((resolve, reject) => {
+      canvas.toBlob((b) => (b ? resolve(b) : reject(new Error("toBlob failed"))), "image/png");
+    });
+    
+    const fileName = `dashboard_alerta_actual.png`;
+    const { error: uploadError } = await supabase.storage
+      .from("chart-images")
+      .upload(fileName, blob, { contentType: "image/png", upsert: true });
+    
+    if (uploadError) throw new Error(`Upload error: ${uploadError.message}`);
+    
+    const { data: urlData } = supabase.storage.from("chart-images").getPublicUrl(fileName);
+    const publicUrl = `${urlData.publicUrl}?t=${Date.now()}`;
+    setChartDataUrl(publicUrl);
+    return publicUrl;
   }, []);
 
   // Generate chart on initial load
@@ -465,9 +489,9 @@ const ActualizacionAlertaPage = () => {
               <CardTitle className="text-lg">Vista previa del mensaje</CardTitle>
             </CardHeader>
             <CardContent>
-              {/* Hidden ForecastChart only for peak value calculation */}
-              <div className="hidden">
-                <ForecastChart data={forecastData} onPeakValueChange={handlePeakValueChange} showPeakLabel={false} />
+              {/* ForecastChart rendered offscreen for html2canvas capture and peak value calculation */}
+              <div style={{ position: 'fixed', left: '-9999px', top: 0, width: 800 }} ref={chartRef}>
+                <ForecastChart data={forecastData} onPeakValueChange={handlePeakValueChange} showPeakLabel={true} />
               </div>
 
               {/* iframe que muestra el HTML exacto del correo (incluye la imagen del gráfico generada en backend) */}

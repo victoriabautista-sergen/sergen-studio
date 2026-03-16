@@ -18,6 +18,7 @@ import { moduleRoutes } from "@/modules/routes";
 // Pages
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
+import ChartCapturePage from "./pages/ChartCapturePage";
 
 const queryClient = new QueryClient();
 
@@ -29,6 +30,7 @@ const App = () => (
       <BrowserRouter>
         <AuthProvider>
           <Routes>
+            <Route path="/chart-capture" element={<ChartCapturePage />} />
             <Route path="/" element={<Index />} />
 
             {/* Public routes (login, reset-password) */}
