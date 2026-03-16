@@ -36,32 +36,28 @@ Deno.serve(async (req) => {
     // ── DAILY RESET ──
     if (action === "daily_reset") {
       // Reset all bot states for the new day
+      const resetFields = {
+        alerta_enviada_hoy: false,
+        correo_enviado: false,
+        estado_conversacion: "idle",
+        riesgo_actual: null,
+        rango_actual: null,
+        modo_conversacion: null,
+        actualizacion_en_proceso: false,
+        usuario_actualizando: null,
+        timestamp_actualizacion: null,
+        last_interaction: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      };
+
       await supabase
         .from("telegram_bot_state")
-        .update({
-          alerta_enviada_hoy: false,
-          correo_enviado: false,
-          estado_conversacion: "inicio",
-          riesgo_actual: null,
-          rango_actual: null,
-          modo_conversacion: null,
-          last_interaction: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-        })
+        .update(resetFields)
         .gte("chat_id", 0);
 
       await supabase
         .from("telegram_bot_state")
-        .update({
-          alerta_enviada_hoy: false,
-          correo_enviado: false,
-          estado_conversacion: "inicio",
-          riesgo_actual: null,
-          rango_actual: null,
-          modo_conversacion: null,
-          last_interaction: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-        })
+        .update(resetFields)
         .lt("chat_id", 0);
 
       return new Response(
