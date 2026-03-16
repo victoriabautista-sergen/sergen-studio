@@ -465,12 +465,12 @@ const ActualizacionAlertaPage = () => {
               <CardTitle className="text-lg">Vista previa del mensaje</CardTitle>
             </CardHeader>
             <CardContent>
-              {/* Preview chart (visible for reference) */}
-              <div className="mb-4">
-                <ForecastChart data={forecastData} onPeakValueChange={handlePeakValueChange} showPeakLabel={true} />
+              {/* Hidden ForecastChart only for peak value calculation */}
+              <div className="hidden">
+                <ForecastChart data={forecastData} onPeakValueChange={handlePeakValueChange} showPeakLabel={false} />
               </div>
 
-              {/* iframe que muestra el HTML exacto del correo */}
+              {/* iframe que muestra el HTML exacto del correo (incluye la imagen del gráfico generada en backend) */}
               <iframe
                 srcDoc={previewHtml}
                 title="Vista previa del correo"

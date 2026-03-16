@@ -16,7 +16,6 @@ Deno.serve(async (req) => {
   }
 
   try {
-    // Auth: accept service role or user JWT
     const authHeader = req.headers.get("Authorization");
     if (!authHeader) {
       return new Response(JSON.stringify({ error: "No autorizado" }), {
@@ -79,7 +78,6 @@ Deno.serve(async (req) => {
 
     console.log(`[CHART] Fetched ${forecastData.length} forecast records`);
 
-    // Sort and process data
     const sorted = [...forecastData].sort(
       (a, b) => new Date(a.fecha).getTime() - new Date(b.fecha).getTime()
     );
@@ -115,25 +113,19 @@ Deno.serve(async (req) => {
       rangoSuperior.push(showForecast && item.rango_superior && item.rango_superior > 0 ? item.rango_superior : null);
     }
 
-    // Find peak hour indices (18:00-23:00)
+    // Find peak hour indices (18:00-23:00) for shaded zones
     const peakStartIndices: number[] = [];
     const peakEndIndices: number[] = [];
     let inPeak = false;
     for (let i = 0; i < sorted.length; i++) {
       const h = new Date(sorted[i].fecha).getUTCHours();
       if (h >= 18 && h < 23) {
-        if (!inPeak) {
-          peakStartIndices.push(i);
-          inPeak = true;
-        }
-      } else if (inPeak) {
-        peakEndIndices.push(i - 1);
-        inPeak = false;
-      }
+        if (!inPeak) { peakStartIndices.push(i); inPeak = true; }
+      } else if (inPeak) { peakEndIndices.push(i - 1); inPeak = false; }
     }
     if (inPeak) peakEndIndices.push(sorted.length - 1);
 
-    // Build annotations for peak zones
+    // Build annotations
     const annotations: Record<string, any> = {};
     for (let z = 0; z < peakStartIndices.length; z++) {
       annotations[`peak${z}`] = {
@@ -145,38 +137,68 @@ Deno.serve(async (req) => {
       };
     }
 
-    // Find peak reprogramado value in 18-23 range
-    let peakVal = -Infinity;
-    let peakIdx = -1;
+    // Find peak REPROGRAMADO value in 18-23 range for the marker
+    let peakRepVal = -Infinity;
+    let peakRepIdx = -1;
     for (let i = 0; i < sorted.length; i++) {
       const h = new Date(sorted[i].fecha).getUTCHours();
-      if (h >= 18 && h < 23 && reprogramacion[i] !== null && reprogramacion[i]! > peakVal) {
-        peakVal = reprogramacion[i]!;
-        peakIdx = i;
+      if (h >= 18 && h < 23 && reprogramacion[i] !== null && reprogramacion[i]! > peakRepVal) {
+        peakRepVal = reprogramacion[i]!;
+        peakRepIdx = i;
       }
     }
 
-    if (peakIdx >= 0) {
+    // Build full date label for the peak point (dd/mm/yyyy HH:MM)
+    const buildPeakDateLabel = (idx: number): string => {
+      const d = new Date(sorted[idx].fecha);
+      const dd = d.getUTCDate().toString().padStart(2, "0");
+      const mm = (d.getUTCMonth() + 1).toString().padStart(2, "0");
+      const yyyy = d.getUTCFullYear();
+      const hh = d.getUTCHours().toString().padStart(2, "0");
+      const min = d.getUTCMinutes().toString().padStart(2, "0");
+      return `${dd}/${mm}/${yyyy} ${hh}:${min}`;
+    };
+
+    if (peakRepIdx >= 0) {
+      // Gather all series values at peak index for tooltip
+      const peakTime = labels[peakRepIdx];
+      const peakDate = buildPeakDateLabel(peakRepIdx);
+      const repVal = reprogramacion[peakRepIdx];
+      const proVal = pronostico[peakRepIdx];
+      const riVal = rangoInferior[peakRepIdx];
+      const rsVal = rangoSuperior[peakRepIdx];
+
+      // Build tooltip content lines
+      const tooltipLines = [peakDate];
+      if (repVal != null) tooltipLines.push(`Reprogramación : ${repVal.toFixed(2)} MW`);
+      if (proVal != null) tooltipLines.push(`Pronóstico Diario : ${proVal.toFixed(2)} MW`);
+      if (riVal != null) tooltipLines.push(`Rango Inferior : ${riVal.toFixed(2)} MW`);
+      if (rsVal != null) tooltipLines.push(`Rango Superior : ${rsVal.toFixed(2)} MW`);
+
+      // Peak point marker (circle)
       annotations["peakPoint"] = {
         type: "point",
-        xValue: peakIdx,
-        yValue: peakVal,
-        radius: 6,
-        backgroundColor: "#C00000",
+        xValue: peakRepIdx,
+        yValue: peakRepVal,
+        radius: 8,
+        backgroundColor: SERIES_COLORS.reprogramacion,
         borderColor: "#fff",
         borderWidth: 2,
       };
+
+      // Tooltip label below the peak point, centered
       annotations["peakLabel"] = {
         type: "label",
-        xValue: peakIdx,
-        yValue: peakVal - 150,
-        content: [`Pico: ${peakVal.toFixed(2)} MW`, `${labels[peakIdx]}`],
-        backgroundColor: "rgba(255,255,255,0.9)",
+        xValue: peakRepIdx,
+        yValue: peakRepVal - 200,
+        content: tooltipLines,
+        backgroundColor: "rgba(255,255,255,0.96)",
         borderColor: "#d1d5db",
         borderWidth: 1,
-        borderRadius: 4,
-        font: { size: 11 },
-        padding: 6,
+        borderRadius: 6,
+        font: { size: 11, family: "Arial" },
+        padding: { top: 8, bottom: 8, left: 12, right: 12 },
+        color: "#374151",
       };
     }
 
@@ -188,7 +210,7 @@ Deno.serve(async (req) => {
           {
             label: "Reprogramación",
             data: reprogramacion,
-            borderColor: "#C00000",
+            borderColor: SERIES_COLORS.reprogramacion,
             borderWidth: 2,
             fill: false,
             pointRadius: 0,
@@ -197,7 +219,7 @@ Deno.serve(async (req) => {
           {
             label: "Pronóstico Diario",
             data: pronostico,
-            borderColor: "#f39200",
+            borderColor: SERIES_COLORS.pronostico,
             borderWidth: 2,
             fill: false,
             pointRadius: 0,
@@ -206,7 +228,7 @@ Deno.serve(async (req) => {
           {
             label: "Rango Inferior",
             data: rangoInferior,
-            borderColor: "#90C418",
+            borderColor: SERIES_COLORS.rangoInferior,
             borderWidth: 1,
             borderDash: [5, 5],
             fill: false,
@@ -216,7 +238,7 @@ Deno.serve(async (req) => {
           {
             label: "Rango Superior",
             data: rangoSuperior,
-            borderColor: "#90C418",
+            borderColor: SERIES_COLORS.rangoSuperior,
             borderWidth: 1,
             borderDash: [5, 5],
             fill: false,
@@ -226,7 +248,7 @@ Deno.serve(async (req) => {
           {
             label: "Demanda Real",
             data: demandaReal,
-            borderColor: "#156082",
+            borderColor: SERIES_COLORS.demandaReal,
             borderWidth: 2,
             fill: false,
             pointRadius: 0,
@@ -237,30 +259,18 @@ Deno.serve(async (req) => {
       options: {
         responsive: true,
         plugins: {
-          legend: {
-            position: "bottom",
-          },
-          annotation: {
-            annotations,
-          },
+          legend: { position: "bottom" },
+          annotation: { annotations },
         },
         scales: {
           x: {
-            ticks: {
-              maxRotation: 45,
-              autoSkip: true,
-              maxTicksLimit: 24,
-            },
+            ticks: { maxRotation: 45, autoSkip: true, maxTicksLimit: 24 },
           },
-          y: {
-            min: 5500,
-            max: 8500,
-          },
+          y: { min: 5500, max: 8500 },
         },
       },
     };
 
-    // Call QuickChart API to generate PNG
     console.log("[CHART] Calling QuickChart API...");
     const quickchartRes = await fetch(QUICKCHART_URL, {
       method: "POST",
@@ -287,7 +297,6 @@ Deno.serve(async (req) => {
     const imageBlob = await quickchartRes.arrayBuffer();
     console.log(`[CHART] Image generated: ${imageBlob.byteLength} bytes`);
 
-    // Upload to storage, overwriting the single file
     const { error: uploadError } = await supabase.storage
       .from(BUCKET)
       .upload(FILE_NAME, new Uint8Array(imageBlob), {
@@ -310,19 +319,22 @@ Deno.serve(async (req) => {
 
     return new Response(
       JSON.stringify({ success: true, url: publicUrl }),
-      {
-        status: 200,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      }
+      { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   } catch (err) {
     console.error("[CHART] Fatal error:", err);
     return new Response(
       JSON.stringify({ error: err instanceof Error ? err.message : String(err) }),
-      {
-        status: 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      }
+      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   }
 });
+
+// Series colors matching the frontend ForecastChart
+const SERIES_COLORS = {
+  reprogramacion: "#C00000",
+  pronostico: "#f39200",
+  rangoInferior: "#90C418",
+  rangoSuperior: "#90C418",
+  demandaReal: "#156082",
+};
