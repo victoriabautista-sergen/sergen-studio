@@ -433,19 +433,19 @@ const ActualizacionAlertaPage = () => {
                   <Input type="email" value={newBccEmail} onChange={(e) => setNewBccEmail(e.target.value)} placeholder="operaciones@empresa.com" onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); handleAddBcc(); } }} />
                   <Button type="button" size="sm" variant="outline" onClick={handleAddBcc}><Plus className="h-4 w-4" /></Button>
                 </div>
-                {bccChips.length > 0 && (
+                {bccRecipients.length > 0 && (
                   <div className="flex flex-wrap gap-2">
-                    {bccChips.map((email) => (
-                      <Badge key={email} variant="secondary" className="gap-1 pl-3 pr-1 py-1.5 text-xs">
-                        {email}
-                        <button type="button" onClick={() => handleRemoveBcc(email)} className="ml-1 rounded-full p-0.5 hover:bg-muted-foreground/20 transition-colors">
+                    {bccRecipients.map((r) => (
+                      <Badge key={r.id} variant="secondary" className="gap-1 pl-3 pr-1 py-1.5 text-xs">
+                        {r.email}
+                        <button type="button" onClick={() => handleRemoveBcc(r.id)} className="ml-1 rounded-full p-0.5 hover:bg-muted-foreground/20 transition-colors">
                           <X className="h-3 w-3" />
                         </button>
                       </Badge>
                     ))}
                   </div>
                 )}
-                {bccChips.length === 0 && <p className="text-xs text-muted-foreground">No hay correos BCC guardados.</p>}
+                {bccRecipients.length === 0 && <p className="text-xs text-muted-foreground">No hay correos BCC guardados.</p>}
               </div>
 
               <Separator />
