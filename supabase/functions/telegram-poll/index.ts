@@ -5,6 +5,7 @@ const MAX_RUNTIME_MS = 55_000;
 const MIN_REMAINING_MS = 5_000;
 const PERU_TZ = "America/Lima";
 const INACTIVITY_TIMEOUT_MS = 30 * 60 * 1000;
+const LOCK_TIMEOUT_MS = 5 * 60 * 1000; // 5 minutes
 
 // ─── Telegram helpers ───────────────────────────────────────────
 async function sendMessage(
@@ -104,7 +105,7 @@ function validateTimeRange(input: string): { valid: boolean; error?: string } {
   return { valid: true };
 }
 
-// ─── Risk helpers ───────────────────────────────────────────────
+// ─── Risk / date helpers ────────────────────────────────────────
 function getRiskColor(level: string) {
   switch (level) {
     case "ALTO": return "#C00000";
@@ -121,7 +122,6 @@ function getRiskLabel(level: string) {
   }
 }
 
-// ─── Date helpers (Peru TZ) ─────────────────────────────────────
 function peruNow() {
   return new Date(new Date().toLocaleString("en-US", { timeZone: PERU_TZ }));
 }
@@ -147,14 +147,9 @@ function lastDayOfMonth() {
 
 // ─── Email HTML generator ───────────────────────────────────────
 function generarHTMLCorreo(d: {
-  fecha: string;
-  riskColor: string;
-  riskLabel: string;
-  timeRange: string;
-  demandaEstimada: string;
-  mensaje: string;
-  estatus: string;
-  graficoUrl?: string;
+  fecha: string; riskColor: string; riskLabel: string;
+  timeRange: string; demandaEstimada: string; mensaje: string;
+  estatus: string; graficoUrl?: string;
 }) {
   const chartRow = d.graficoUrl
     ? `<tr><td style="padding:12px 24px"><p style="margin:0 0 8px;font-size:13px;font-weight:700;color:#374151">Pronóstico de Demanda</p><img src="${d.graficoUrl}" alt="Gráfico" width="520" style="display:block;width:100%;max-width:520px;height:auto;border-radius:8px;border:1px solid #e5e7eb" /></td></tr>`
@@ -199,8 +194,85 @@ ${chartRow}
 // ─── Inactivity check ───────────────────────────────────────────
 function isSessionExpired(state: any): boolean {
   if (!state?.last_interaction) return false;
-  const lastInteraction = new Date(state.last_interaction).getTime();
-  return (Date.now() - lastInteraction) > INACTIVITY_TIMEOUT_MS;
+  return (Date.now() - new Date(state.last_interaction).getTime()) > INACTIVITY_TIMEOUT_MS;
+}
+
+// ─── Lock helpers ───────────────────────────────────────────────
+async function isLockExpired(supabase: any): Promise<boolean> {
+  // Check ALL rows for an active lock
+  const { data: lockedRows } = await supabase
+    .from("telegram_bot_state")
+    .select("chat_id, actualizacion_en_proceso, timestamp_actualizacion")
+    .eq("actualizacion_en_proceso", true);
+
+  if (!lockedRows || lockedRows.length === 0) return false;
+
+  for (const row of lockedRows) {
+    if (row.timestamp_actualizacion) {
+      const elapsed = Date.now() - new Date(row.timestamp_actualizacion).getTime();
+      if (elapsed > LOCK_TIMEOUT_MS) {
+        // Auto-release expired lock
+        console.log(`[LOCK] Auto-releasing expired lock for chat_id ${row.chat_id} (${Math.round(elapsed / 1000)}s)`);
+        await supabase
+          .from("telegram_bot_state")
+          .update({
+            actualizacion_en_proceso: false,
+            usuario_actualizando: null,
+            timestamp_actualizacion: null,
+            estado_conversacion: "idle",
+            riesgo_actual: null,
+            rango_actual: null,
+            updated_at: new Date().toISOString(),
+          })
+          .eq("chat_id", row.chat_id);
+      }
+    }
+  }
+
+  return false; // After cleanup, caller should re-check
+}
+
+async function tryAcquireLock(chatId: number, supabase: any): Promise<{ acquired: boolean; blockedBy?: string }> {
+  // First clean up expired locks
+  await isLockExpired(supabase);
+
+  // Check if anyone else has the lock
+  const { data: lockedRows } = await supabase
+    .from("telegram_bot_state")
+    .select("chat_id, actualizacion_en_proceso, usuario_actualizando")
+    .eq("actualizacion_en_proceso", true)
+    .neq("chat_id", chatId);
+
+  if (lockedRows && lockedRows.length > 0) {
+    return { acquired: false, blockedBy: lockedRows[0].usuario_actualizando || "otro usuario" };
+  }
+
+  // Acquire lock
+  await supabase
+    .from("telegram_bot_state")
+    .update({
+      actualizacion_en_proceso: true,
+      usuario_actualizando: String(chatId),
+      timestamp_actualizacion: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    })
+    .eq("chat_id", chatId);
+
+  console.log(`[LOCK] Acquired by chat_id ${chatId}`);
+  return { acquired: true };
+}
+
+async function releaseLock(chatId: number, supabase: any) {
+  await supabase
+    .from("telegram_bot_state")
+    .update({
+      actualizacion_en_proceso: false,
+      usuario_actualizando: null,
+      timestamp_actualizacion: null,
+      updated_at: new Date().toISOString(),
+    })
+    .eq("chat_id", chatId);
+  console.log(`[LOCK] Released by chat_id ${chatId}`);
 }
 
 // ─── Main handler ───────────────────────────────────────────────
@@ -218,7 +290,7 @@ Deno.serve(async () => {
     Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
   );
 
-  // Load authorized users from profiles table
+  // Load authorized users from profiles
   const { data: authorizedProfiles } = await supabase
     .from("profiles")
     .select("telegram_chat_id, email, full_name, is_active")
@@ -281,25 +353,22 @@ Deno.serve(async () => {
       const callbackData = update.callback_query?.data ?? "";
       const callbackQueryId = update.callback_query?.id;
 
-      // Authorization check
       const authorizedUser = authorizedMap.get(chatId);
       console.log(`[AUTH] chat_id: ${chatId}`);
 
       if (!authorizedUser) {
-        console.log(`[AUTH] DENIED - user not found in profiles`);
+        console.log(`[AUTH] DENIED`);
         if (chatId) {
           await sendMessage(
             chatId,
             "⚠️ Tu Telegram no está autorizado en la plataforma SERGEN.\n\nSolicita al administrador que registre tu Chat ID en el módulo Usuarios.",
-            undefined,
-            LOVABLE_API_KEY,
-            TELEGRAM_API_KEY
+            undefined, LOVABLE_API_KEY, TELEGRAM_API_KEY
           );
         }
         continue;
       }
 
-      console.log(`[AUTH] OK - ${authorizedUser.email ?? authorizedUser.full_name}`);
+      console.log(`[AUTH] OK - ${authorizedUser.email}`);
 
       if (callbackQueryId) {
         await answerCallbackQuery(callbackQueryId, LOVABLE_API_KEY, TELEGRAM_API_KEY);
@@ -313,7 +382,10 @@ Deno.serve(async () => {
         .single();
 
       if (!state) {
-        await supabase.from("telegram_bot_state").insert({ chat_id: chatId });
+        await supabase.from("telegram_bot_state").insert({
+          chat_id: chatId,
+          estado_conversacion: "idle",
+        });
         const { data: newState } = await supabase
           .from("telegram_bot_state")
           .select("*")
@@ -322,12 +394,15 @@ Deno.serve(async () => {
         state = newState;
       }
 
-      // Inactivity timeout
-      if (state && state.estado_conversacion !== "inicio" && isSessionExpired(state)) {
+      // Inactivity timeout — also release lock if this user had it
+      if (state && state.estado_conversacion !== "idle" && isSessionExpired(state)) {
+        if (state.actualizacion_en_proceso) {
+          await releaseLock(chatId, supabase);
+        }
         await supabase
           .from("telegram_bot_state")
           .update({
-            estado_conversacion: "inicio",
+            estado_conversacion: "idle",
             riesgo_actual: null,
             rango_actual: null,
             modo_conversacion: null,
@@ -339,9 +414,7 @@ Deno.serve(async () => {
         await sendMessage(
           chatId,
           "⏰ La sesión anterior fue reiniciada por inactividad.",
-          undefined,
-          LOVABLE_API_KEY,
-          TELEGRAM_API_KEY
+          undefined, LOVABLE_API_KEY, TELEGRAM_API_KEY
         );
 
         const { data: resetState } = await supabase
@@ -355,12 +428,7 @@ Deno.serve(async () => {
       const input = callbackData || text.trim();
 
       await processConversation(
-        chatId,
-        input,
-        state,
-        supabase,
-        LOVABLE_API_KEY,
-        TELEGRAM_API_KEY
+        chatId, input, state, supabase, LOVABLE_API_KEY, TELEGRAM_API_KEY
       );
 
       totalProcessed++;
@@ -379,7 +447,7 @@ Deno.serve(async () => {
   );
 });
 
-// ─── Conversation state machine ────────────────────────────────
+// ─── State machine ─────────────────────────────────────────────
 async function processConversation(
   chatId: number,
   input: string,
@@ -401,48 +469,54 @@ async function processConversation(
       })
       .eq("chat_id", chatId);
 
-  const estado = state?.estado_conversacion || "inicio";
-  const modo = state?.modo_conversacion || null;
+  const estado = state?.estado_conversacion || "idle";
 
-  // ── /start: MANUAL conversation ──
+  // ════════════════════════════════════════════════════════════════
+  // /start or /actualizar — MANUAL conversation
+  // ════════════════════════════════════════════════════════════════
   if (input === "/start" || input === "/actualizar") {
-    console.log(`[FLOW] Manual conversation started by user`);
+    console.log(`[FLOW] Manual conversation started`);
 
-    // Check if email already sent today
     if (state?.correo_enviado) {
-      await updateState({});
+      await updateState({ estado_conversacion: "idle" });
       await send("✅ La alerta de potencia del día ya fue enviada.");
       return;
     }
 
-    // Email not sent — show update button (NO posponer for manual)
-    await updateState({
-      estado_conversacion: "inicio",
-      modo_conversacion: "manual",
-    });
+    await updateState({ estado_conversacion: "idle", modo_conversacion: "manual" });
     await send("⚡ <b>SERGEN – Control de Demanda</b>\n\n¿Desea actualizar la información de alerta?", [
       [{ text: "🔧 Actualizar información", callback_data: "actualizar" }],
     ]);
     return;
   }
 
-  // ── Handle "posponer" (only from automatic mode) ──
-  if (input === "posponer") {
-    await updateState({ estado_conversacion: "inicio" });
+  // ════════════════════════════════════════════════════════════════
+  // "posponer" — only valid from idle/automatic
+  // ════════════════════════════════════════════════════════════════
+  if (input === "posponer" && (estado === "idle" || estado === "inicio")) {
+    await updateState({ estado_conversacion: "idle" });
     await send("⏳ De acuerdo, se pospondrá. Recibirás otro recordatorio más tarde.");
     return;
   }
 
-  // ── Handle "actualizar" → start risk question ──
-  if (input === "actualizar") {
-    // Double check correo_enviado
+  // ════════════════════════════════════════════════════════════════
+  // "actualizar" — acquire lock, start risk question
+  // ════════════════════════════════════════════════════════════════
+  if (input === "actualizar" && (estado === "idle" || estado === "inicio")) {
     if (state?.correo_enviado) {
-      await updateState({ estado_conversacion: "inicio" });
+      await updateState({ estado_conversacion: "idle" });
       await send("✅ La alerta de potencia del día ya fue enviada.");
       return;
     }
 
-    console.log(`[FLOW] Starting update flow, mode: ${modo || "manual"}`);
+    // Try to acquire the update lock
+    const lockResult = await tryAcquireLock(chatId, supabase);
+    if (!lockResult.acquired) {
+      await send("⚠️ Otro usuario de SERGEN está actualizando la alerta en este momento.\n\nEspere unos segundos e intente nuevamente.");
+      return;
+    }
+
+    console.log(`[FLOW] Update flow started, lock acquired`);
     await updateState({ estado_conversacion: "esperando_riesgo" });
     await send("¿Existe riesgo de potencia coincidente?", [
       [
@@ -453,21 +527,22 @@ async function processConversation(
     return;
   }
 
-  // ── ESPERANDO RIESGO ──
+  // ════════════════════════════════════════════════════════════════
+  // ESPERANDO_RIESGO — STRICT: only accept riesgo_BAJO or riesgo_ALTO
+  // ════════════════════════════════════════════════════════════════
   if (estado === "esperando_riesgo") {
     if (input === "riesgo_BAJO") {
-      console.log(`[FLOW] Risk selected: BAJO`);
+      console.log(`[FLOW] Risk: BAJO`);
       await updateState({
         riesgo_actual: "BAJO",
         rango_actual: "Libre",
         estado_conversacion: "procesando_envio",
       });
-      // Go directly to save + send
-      await executeGuardarYEnviar(chatId, "BAJO", "Libre", state, supabase, send, lovableKey, telegramKey);
+      await executeGuardarYEnviar(chatId, "BAJO", "Libre", supabase, send);
       return;
     }
     if (input === "riesgo_ALTO") {
-      console.log(`[FLOW] Risk selected: ALTO`);
+      console.log(`[FLOW] Risk: ALTO`);
       await updateState({
         riesgo_actual: "ALTO",
         estado_conversacion: "esperando_rango",
@@ -477,8 +552,9 @@ async function processConversation(
       );
       return;
     }
-    // Invalid input
-    await send("Por favor seleccione una opción:", [
+
+    // STRICT: reject any other input
+    await send("Seleccione una opción utilizando los botones.", [
       [
         { text: "🔴 Alto", callback_data: "riesgo_ALTO" },
         { text: "🟢 Bajo", callback_data: "riesgo_BAJO" },
@@ -487,11 +563,18 @@ async function processConversation(
     return;
   }
 
-  // ── ESPERANDO RANGO ──
+  // ════════════════════════════════════════════════════════════════
+  // ESPERANDO_RANGO — STRICT: only accept valid time range
+  // ════════════════════════════════════════════════════════════════
   if (estado === "esperando_rango") {
+    // Reject callback buttons that aren't time ranges
+    if (input.startsWith("riesgo_") || input === "actualizar" || input === "posponer") {
+      await send("📝 Ingrese el rango horario.\n\n<code>2:00 pm - 4:00 pm</code>");
+      return;
+    }
+
     const validation = validateTimeRange(input);
     if (!validation.valid) {
-      await updateState({});
       await send(`❌ ${validation.error}`);
       return;
     }
@@ -501,14 +584,17 @@ async function processConversation(
       rango_actual: input,
       estado_conversacion: "procesando_envio",
     });
-    await executeGuardarYEnviar(chatId, "ALTO", input, state, supabase, send, lovableKey, telegramKey);
+    await executeGuardarYEnviar(chatId, "ALTO", input, supabase, send);
     return;
   }
 
-  // ── Default: show menu based on correo_enviado ──
+  // ════════════════════════════════════════════════════════════════
+  // Default — show menu or status
+  // ════════════════════════════════════════════════════════════════
   if (state?.correo_enviado) {
     await send("✅ La alerta de potencia del día ya fue enviada.");
   } else {
+    await updateState({ estado_conversacion: "idle" });
     await send("⚡ <b>SERGEN – Control de Demanda</b>\n\nEscriba /start para comenzar.", [
       [{ text: "🔧 Actualizar información", callback_data: "actualizar" }],
     ]);
@@ -520,19 +606,14 @@ async function executeGuardarYEnviar(
   chatId: number,
   riesgo: string,
   rango: string,
-  _state: any,
   supabase: any,
-  send: (text: string, buttons?: any[][]) => Promise<void>,
-  _lovableKey: string,
-  _telegramKey: string
+  send: (text: string, buttons?: any[][]) => Promise<void>
 ) {
   await send("⏳ Guardando cambios y preparando envío de correo...");
 
   try {
-    // ════════════════════════════════════════════════════════════
-    // STEP 1: "Guardar cambios" — Update forecast_settings
-    // ════════════════════════════════════════════════════════════
-    console.log(`[SAVE] Saving forecast_settings: riesgo=${riesgo}, rango=${rango}`);
+    // ── STEP 1: Save forecast_settings ("Guardar cambios") ──
+    console.log(`[SAVE] riesgo=${riesgo}, rango=${rango}`);
 
     const { data: existing } = await supabase
       .from("forecast_settings")
@@ -557,7 +638,7 @@ async function executeGuardarYEnviar(
       });
     }
 
-    // Mark correo_enviado = false (changes saved, email not yet sent)
+    // Mark correo_enviado = false (saved but not yet sent)
     await supabase
       .from("telegram_bot_state")
       .update({
@@ -567,11 +648,9 @@ async function executeGuardarYEnviar(
       })
       .eq("chat_id", chatId);
 
-    console.log(`[SAVE] forecast_settings updated. correo_enviado set to false.`);
+    console.log(`[SAVE] Done. correo_enviado=false`);
 
-    // ════════════════════════════════════════════════════════════
-    // STEP 2: Get latest chart image from storage
-    // ════════════════════════════════════════════════════════════
+    // ── STEP 2: Get chart image ──
     const { data: chartFiles } = await supabase.storage
       .from("chart-images")
       .list("", { limit: 1, sortBy: { column: "created_at", order: "desc" } });
@@ -584,9 +663,7 @@ async function executeGuardarYEnviar(
       graficoUrl = `${urlData.publicUrl}?t=${Date.now()}`;
     }
 
-    // ════════════════════════════════════════════════════════════
-    // STEP 3: Get demand estimate from latest forecast
-    // ════════════════════════════════════════════════════════════
+    // ── STEP 3: Get demand estimate ──
     const { data: forecastData } = await supabase
       .from("coes_forecast")
       .select("pronostico")
@@ -598,13 +675,10 @@ async function executeGuardarYEnviar(
       ? Number(forecastData.pronostico).toFixed(2)
       : "—";
 
-    // ════════════════════════════════════════════════════════════
-    // STEP 4: Generate email HTML
-    // ════════════════════════════════════════════════════════════
+    // ── STEP 4: Generate email HTML ──
     const isLowRisk = riesgo === "BAJO";
-    const fecha = peruDateFormatted();
     const htmlContent = generarHTMLCorreo({
-      fecha,
+      fecha: peruDateFormatted(),
       riskColor: getRiskColor(riesgo),
       riskLabel: getRiskLabel(riesgo),
       timeRange: isLowRisk ? "Uso libre de equipos" : rango,
@@ -616,17 +690,12 @@ async function executeGuardarYEnviar(
       graficoUrl,
     });
 
-    console.log(`[EMAIL] HTML generated. Demand: ${demandaEstimada} MW`);
-
-    // ════════════════════════════════════════════════════════════
-    // STEP 5: Get recipients
-    // ════════════════════════════════════════════════════════════
+    // ── STEP 5: Get recipients ──
     const { data: recipients } = await supabase
       .from("alert_recipients")
       .select("email");
     const emails = (recipients || []).map((r: any) => r.email);
 
-    // Get BCC from bot state
     const { data: botState } = await supabase
       .from("telegram_bot_state")
       .select("bcc_emails")
@@ -636,10 +705,11 @@ async function executeGuardarYEnviar(
 
     if (emails.length === 0) {
       await send("❌ No hay correos de destino configurados.\n\nAgregue correos desde el panel de administración.");
+      await releaseLock(chatId, supabase);
       await supabase
         .from("telegram_bot_state")
         .update({
-          estado_conversacion: "inicio",
+          estado_conversacion: "idle",
           riesgo_actual: null,
           rango_actual: null,
           last_interaction: new Date().toISOString(),
@@ -649,10 +719,8 @@ async function executeGuardarYEnviar(
       return;
     }
 
-    // ════════════════════════════════════════════════════════════
-    // STEP 6: Send email via send-email-alert function
-    // ════════════════════════════════════════════════════════════
-    console.log(`[EMAIL] Sending to ${emails.length} recipients, ${bccEmails.length} BCC`);
+    // ── STEP 6: Send email ──
+    console.log(`[EMAIL] Sending to ${emails.length} + ${bccEmails.length} BCC`);
 
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
@@ -672,27 +740,28 @@ async function executeGuardarYEnviar(
     const emailData = await emailRes.json();
 
     if (!emailRes.ok || !emailData.success) {
-      throw new Error(`Email send failed: ${JSON.stringify(emailData)}`);
+      throw new Error(`Email failed: ${JSON.stringify(emailData)}`);
     }
 
-    // ════════════════════════════════════════════════════════════
-    // STEP 7: Mark correo_enviado = true, reset conversation
-    // ════════════════════════════════════════════════════════════
+    // ── STEP 7: Mark as sent + release lock ──
     await supabase
       .from("telegram_bot_state")
       .update({
         correo_enviado: true,
         alerta_enviada_hoy: true,
-        estado_conversacion: "inicio",
+        estado_conversacion: "correo_enviado",
         riesgo_actual: null,
         rango_actual: null,
         modo_conversacion: null,
+        actualizacion_en_proceso: false,
+        usuario_actualizando: null,
+        timestamp_actualizacion: null,
         last_interaction: new Date().toISOString(),
         updated_at: new Date().toISOString(),
       })
       .eq("chat_id", chatId);
 
-    console.log(`[EMAIL] Sent successfully. correo_enviado set to true.`);
+    console.log(`[EMAIL] Sent. correo_enviado=true, lock released.`);
 
     const riesgoEmoji = riesgo === "ALTO" ? "🔴" : "🟢";
     await send(
@@ -700,10 +769,14 @@ async function executeGuardarYEnviar(
     );
   } catch (err) {
     console.error("[ERROR] executeGuardarYEnviar:", err);
+
+    // Release lock on error
+    await releaseLock(chatId, supabase);
+
     await supabase
       .from("telegram_bot_state")
       .update({
-        estado_conversacion: "inicio",
+        estado_conversacion: "idle",
         riesgo_actual: null,
         rango_actual: null,
         modo_conversacion: null,
@@ -711,6 +784,7 @@ async function executeGuardarYEnviar(
         updated_at: new Date().toISOString(),
       })
       .eq("chat_id", chatId);
+
     await send("❌ Error al procesar la alerta. Intente nuevamente o use la interfaz web.");
   }
 }
