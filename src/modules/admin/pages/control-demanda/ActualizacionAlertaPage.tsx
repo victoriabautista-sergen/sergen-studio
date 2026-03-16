@@ -75,8 +75,12 @@ const ActualizacionAlertaPage = () => {
   useEffect(() => {
     if (riskLevel === "BAJO") {
       setMensaje("El día de hoy puede usar sus equipos sin rango horario de restricción.");
+      setTimeRange("Libre");
+      setTimeRangeError("");
     } else {
       setMensaje("Solo usar equipos indispensables.");
+      // If switching from BAJO, clear the "Libre" value
+      setTimeRange(prev => prev === "Libre" ? "" : prev);
     }
   }, [riskLevel]);
 
