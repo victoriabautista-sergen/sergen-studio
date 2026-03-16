@@ -652,27 +652,6 @@ export type Database = {
           },
         ]
       }
-      telegram_authorized_chats: {
-        Row: {
-          chat_id: number
-          created_at: string
-          id: string
-          label: string | null
-        }
-        Insert: {
-          chat_id: number
-          created_at?: string
-          id?: string
-          label?: string | null
-        }
-        Update: {
-          chat_id?: number
-          created_at?: string
-          id?: string
-          label?: string | null
-        }
-        Relationships: []
-      }
       telegram_bot_state: {
         Row: {
           alerta_enviada_hoy: boolean
