@@ -229,11 +229,33 @@ const ActualizacionAlertaPage = () => {
 
   // Generate chart image via backend
   const generateChartImage = useCallback(async (): Promise<string> => {
-    const { data, error } = await supabase.functions.invoke("generate-chart-image");
-    if (error) throw new Error(`Error generando imagen: ${error.message}`);
-    if (!data?.success || !data?.url) throw new Error("No se pudo generar la imagen del gráfico");
-    setChartDataUrl(data.url);
-    return data.url;
+    if (!chartRef.current) throw new Error("Chart ref not available");
+    
+    // Wait a tick for the chart to fully render
+    await new Promise(r => setTimeout(r, 300));
+    
+    const canvas = await html2canvas(chartRef.current, {
+      backgroundColor: "#ffffff",
+      scale: 2,
+      useCORS: true,
+      logging: false,
+    });
+    
+    const blob = await new Promise<Blob>((resolve, reject) => {
+      canvas.toBlob((b) => (b ? resolve(b) : reject(new Error("toBlob failed"))), "image/png");
+    });
+    
+    const fileName = `dashboard_alerta_actual.png`;
+    const { error: uploadError } = await supabase.storage
+      .from("chart-images")
+      .upload(fileName, blob, { contentType: "image/png", upsert: true });
+    
+    if (uploadError) throw new Error(`Upload error: ${uploadError.message}`);
+    
+    const { data: urlData } = supabase.storage.from("chart-images").getPublicUrl(fileName);
+    const publicUrl = `${urlData.publicUrl}?t=${Date.now()}`;
+    setChartDataUrl(publicUrl);
+    return publicUrl;
   }, []);
 
   // Generate chart on initial load
