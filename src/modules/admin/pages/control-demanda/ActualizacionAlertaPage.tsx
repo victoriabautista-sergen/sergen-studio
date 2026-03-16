@@ -15,7 +15,6 @@ import { useForecastData } from "@/modules/energy_intelligence/hooks/useForecast
 import { format, endOfMonth } from "date-fns";
 import { es } from "date-fns/locale";
 import { toZonedTime } from "date-fns-tz";
-import html2canvas from "html2canvas";
 import { generarHTMLCorreo } from "../../utils/generarHTMLCorreo";
 
 const RISK_OPTIONS = [
