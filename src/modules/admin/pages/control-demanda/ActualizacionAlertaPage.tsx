@@ -121,37 +121,17 @@ const ActualizacionAlertaPage = () => {
 
   useEffect(() => { fetchRecipients(); }, [fetchRecipients]);
 
-  // Telegram authorized chats
-  const fetchTelegramChats = useCallback(async () => {
+  // Telegram users from profiles
+  const fetchTelegramUsers = useCallback(async () => {
     const { data, error } = await supabase
-      .from("telegram_authorized_chats")
-      .select("id, chat_id, label")
-      .order("created_at", { ascending: true });
-    if (!error && data) setTelegramChats(data);
+      .from("profiles")
+      .select("user_id, full_name, email, telegram_chat_id")
+      .not("telegram_chat_id", "is", null)
+      .eq("is_active", true);
+    if (!error && data) setTelegramUsers(data.filter(p => p.telegram_chat_id) as any);
   }, []);
 
-  useEffect(() => { fetchTelegramChats(); }, [fetchTelegramChats]);
-
-  const handleAddTelegramChat = async () => {
-    const chatIdNum = parseInt(newChatId.trim());
-    if (isNaN(chatIdNum)) { toast.error("Chat ID debe ser un número"); return; }
-    if (telegramChats.some(c => c.chat_id === chatIdNum)) { toast.error("Este Chat ID ya está registrado"); return; }
-    const { error } = await supabase.from("telegram_authorized_chats").insert({
-      chat_id: chatIdNum,
-      label: newChatLabel.trim() || null,
-    });
-    if (error) { toast.error("Error al agregar chat"); console.error(error); return; }
-    setNewChatId("");
-    setNewChatLabel("");
-    fetchTelegramChats();
-    toast.success("Chat autorizado agregado");
-  };
-
-  const handleRemoveTelegramChat = async (id: string) => {
-    const { error } = await supabase.from("telegram_authorized_chats").delete().eq("id", id);
-    if (error) { toast.error("Error al eliminar chat"); return; }
-    setTelegramChats(prev => prev.filter(c => c.id !== id));
-  };
+  useEffect(() => { fetchTelegramUsers(); }, [fetchTelegramUsers]);
 
   const isValidEmail = (email: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
