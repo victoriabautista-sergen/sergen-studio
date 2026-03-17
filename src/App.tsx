@@ -18,7 +18,7 @@ import { moduleRoutes } from "@/modules/routes";
 // Pages
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
-import ChartCapturePage from "./pages/ChartCapturePage";
+import RenderPronosticoPage from "./pages/RenderPronosticoPage";
 
 const queryClient = new QueryClient();
 
@@ -30,7 +30,7 @@ const App = () => (
       <BrowserRouter>
         <AuthProvider>
           <Routes>
-            <Route path="/render/pronostico" element={<ChartCapturePage />} />
+            <Route path="/render/pronostico" element={<RenderPronosticoPage />} />
             <Route path="/" element={<Index />} />
 
             {/* Public routes (login, reset-password) */}
