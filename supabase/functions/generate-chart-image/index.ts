@@ -3,7 +3,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers":
-    "authorization, x-client-info, apikey, content-type",
+    "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
 const BUCKET = "chart-images";
@@ -56,46 +56,19 @@ Deno.serve(async (req) => {
       console.log("[CHART] Usuario autenticado correctamente");
     }
 
-    // --- Domain detection ---
-    const FIXED_LOVABLE_URL = "https://sergen-studio.lovable.app";
-    const origin = req.headers.get("origin");
-    const referer = req.headers.get("referer");
-    console.log("[CHART] Detección de dominio - origin:", origin);
-    console.log("[CHART] Detección de dominio - referer:", referer);
+    // --- Always use published URL for Microlink (stable, publicly accessible) ---
+    const captureBaseUrl = "https://sergen-studio.lovable.app";
+    const chartPageUrl = `${captureBaseUrl}/render/pronostico`;
+    console.log("[CHART] URL de captura:", chartPageUrl);
 
-    let appUrl: string;
-    const rawOrigin = origin || referer;
-
-    if (rawOrigin) {
-      try {
-        const parsed = new URL(rawOrigin);
-        const host = parsed.host.toLowerCase();
-        const isLovable = host.includes("lovable");
-        console.log("[CHART] Host detectado:", host);
-        console.log("[CHART] ¿Entorno Lovable?:", isLovable);
-        appUrl = isLovable ? FIXED_LOVABLE_URL : `${parsed.protocol}//${parsed.host}`;
-      } catch {
-        console.warn("[CHART] No se pudo parsear origin/referer, usando URL fija Lovable");
-        appUrl = FIXED_LOVABLE_URL;
-      }
-    } else {
-      console.log("[CHART] No se detectó origin ni referer, usando URL fija Lovable");
-      appUrl = FIXED_LOVABLE_URL;
-    }
-
-    // --- Build capture URL ---
-    const chartPageUrl = `${appUrl}/render/pronostico`;
-    console.log("[CHART] URL base de la app:", appUrl);
-    console.log("[CHART] URL de captura (captureUrl):", chartPageUrl);
-
-    // --- Microlink screenshot ---
-    console.log("[CHART] Intentando abrir la página /render/pronostico vía Microlink...");
+    // --- Microlink screenshot with longer wait for data to load ---
+    console.log("[CHART] Intentando captura vía Microlink...");
 
     const microlinkUrl = new URL("https://api.microlink.io/");
     microlinkUrl.searchParams.set("url", chartPageUrl);
     microlinkUrl.searchParams.set("screenshot", "true");
     microlinkUrl.searchParams.set("meta", "false");
-    microlinkUrl.searchParams.set("waitForTimeout", "5000");
+    microlinkUrl.searchParams.set("waitForTimeout", "8000");
     microlinkUrl.searchParams.set("element", "#chart-container");
     microlinkUrl.searchParams.set("screenshot.type", "png");
 
@@ -107,7 +80,7 @@ Deno.serve(async (req) => {
     if (!microlinkRes.ok) {
       const errText = await microlinkRes.text();
       console.error("[CHART] Microlink error body:", errText);
-      return new Response(JSON.stringify({ error: "Error generando screenshot del gráfico" }), {
+      return new Response(JSON.stringify({ error: "Error generando screenshot del gráfico", details: errText }), {
         status: 500,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
@@ -115,7 +88,6 @@ Deno.serve(async (req) => {
 
     const microlinkData = await microlinkRes.json();
     console.log("[CHART] Microlink response status:", microlinkData.status);
-    console.log("[CHART] Microlink screenshot URL:", microlinkData.data?.screenshot?.url ?? "NO DISPONIBLE");
 
     if (microlinkData.status !== "success" || !microlinkData.data?.screenshot?.url) {
       console.error("[CHART] Microlink no generó screenshot. Response:", JSON.stringify(microlinkData).substring(0, 500));
@@ -127,11 +99,9 @@ Deno.serve(async (req) => {
 
     // --- Download screenshot ---
     const screenshotUrl = microlinkData.data.screenshot.url;
-    console.log("[CHART] Iniciando descarga de la captura desde:", screenshotUrl);
+    console.log("[CHART] Screenshot URL:", screenshotUrl);
 
     const imageRes = await fetch(screenshotUrl);
-    console.log("[CHART] Descarga HTTP status:", imageRes.status);
-
     if (!imageRes.ok) {
       console.error("[CHART] Error descargando screenshot, status:", imageRes.status);
       return new Response(JSON.stringify({ error: "Error descargando la imagen del gráfico" }), {
@@ -141,10 +111,23 @@ Deno.serve(async (req) => {
     }
 
     const imageBlob = await imageRes.arrayBuffer();
-    console.log("[CHART] Captura descargada correctamente:", imageBlob.byteLength, "bytes");
+    const imageSize = imageBlob.byteLength;
+    console.log("[CHART] Imagen descargada:", imageSize, "bytes");
 
-    // --- Upload to storage ---
-    console.log("[CHART] Iniciando subida al bucket:", BUCKET, "archivo:", FILE_NAME);
+    // --- Validate image is not empty/too small (blank captures are ~30KB or less) ---
+    if (imageSize < 5000) {
+      console.error("[CHART] Imagen demasiado pequeña, probablemente vacía:", imageSize, "bytes");
+      return new Response(JSON.stringify({ 
+        error: "La captura del gráfico está vacía. Es posible que los datos no se hayan cargado a tiempo.",
+        imageSize 
+      }), {
+        status: 500,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // --- Upload to storage (upsert to always overwrite) ---
+    console.log("[CHART] Subiendo al bucket:", BUCKET, "archivo:", FILE_NAME);
 
     const { error: uploadError } = await supabase.storage
       .from(BUCKET)
@@ -154,26 +137,41 @@ Deno.serve(async (req) => {
       });
 
     if (uploadError) {
-      console.error("[CHART] Error subiendo imagen:", uploadError);
-      return new Response(JSON.stringify({ error: "Error subiendo imagen al almacenamiento" }), {
+      console.error("[CHART] Error subiendo imagen:", JSON.stringify(uploadError));
+      return new Response(JSON.stringify({ error: "Error subiendo imagen al almacenamiento", details: uploadError.message }), {
         status: 500,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
+    // --- Verify file exists after upload ---
+    const { data: fileList, error: listError } = await supabase.storage
+      .from(BUCKET)
+      .list("", { search: FILE_NAME });
+
+    if (listError || !fileList?.some(f => f.name === FILE_NAME)) {
+      console.error("[CHART] Verificación post-upload falló. El archivo no existe en storage.");
+      return new Response(JSON.stringify({ error: "El archivo se subió pero no se encontró en storage" }), {
+        status: 500,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    console.log("[CHART] Verificación post-upload exitosa: archivo confirmado en storage");
+
     const { data: urlData } = supabase.storage.from(BUCKET).getPublicUrl(FILE_NAME);
     const publicUrl = `${urlData.publicUrl}?t=${Date.now()}`;
 
     console.log("[CHART] Imagen subida exitosamente:", publicUrl);
-    console.log("[CHART] Archivo generado:", FILE_NAME);
+    console.log("[CHART] Tamaño:", imageSize, "bytes");
     console.log("[CHART] ========================================");
 
     return new Response(
-      JSON.stringify({ success: true, url: publicUrl }),
+      JSON.stringify({ success: true, url: publicUrl, imageSize }),
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   } catch (err) {
-    console.error("[CHART] Error fatal en el proceso:", err);
+    console.error("[CHART] Error fatal:", err);
     console.error("[CHART] Stack:", err instanceof Error ? err.stack : "N/A");
     return new Response(
       JSON.stringify({ error: err instanceof Error ? err.message : String(err) }),
