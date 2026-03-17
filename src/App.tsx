@@ -18,7 +18,7 @@ import { moduleRoutes } from "@/modules/routes";
 // Pages
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
-import ChartCapturePage from "./pages/ChartCapturePage";
+import RenderPronosticoPage from "./pages/RenderPronosticoPage";
 
 const queryClient = new QueryClient();
 
