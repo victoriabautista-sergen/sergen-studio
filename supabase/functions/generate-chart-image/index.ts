@@ -10,9 +10,13 @@ const BUCKET = "chart-images";
 const FILE_NAME = "dashboard_alerta_actual.png";
 
 /**
- * Generates a chart image by taking a screenshot of the /chart-capture page
+ * Generates a chart image by taking a screenshot of the /render/pronostico page
  * which renders the real ForecastChart component with current data.
- * Used primarily by the Telegram flow where html2canvas is not available.
+ * 
+ * Domain logic:
+ * - If the detected domain contains "lovable", uses the fixed published URL
+ *   to avoid preview-auth issues.
+ * - Otherwise, builds the URL dynamically from the request origin.
  */
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -52,20 +56,25 @@ Deno.serve(async (req) => {
       }
     }
 
-    // Detect domain dynamically from the request's Origin or Referer header
+    // Build the capture URL based on the request origin
+    const FIXED_LOVABLE_URL = "https://sergen-studio.lovable.app";
     const origin = req.headers.get("origin") || req.headers.get("referer");
     let appUrl: string;
+
     if (origin) {
       try {
         const parsed = new URL(origin);
-        appUrl = `${parsed.protocol}//${parsed.host}`;
+        const host = parsed.host.toLowerCase();
+        // If running inside Lovable, always use the fixed published URL
+        appUrl = host.includes("lovable") ? FIXED_LOVABLE_URL : `${parsed.protocol}//${parsed.host}`;
       } catch {
-        appUrl = "https://sergen-studio.lovable.app";
+        appUrl = FIXED_LOVABLE_URL;
       }
     } else {
-      appUrl = Deno.env.get("APP_URL") || "https://sergen-studio.lovable.app";
+      appUrl = FIXED_LOVABLE_URL;
     }
-    const chartPageUrl = `${appUrl}/chart-capture`;
+
+    const chartPageUrl = `${appUrl}/render/pronostico`;
 
     console.log(`[CHART] Taking screenshot of: ${chartPageUrl}`);
 

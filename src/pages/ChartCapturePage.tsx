@@ -5,7 +5,7 @@ import type { CoesData } from '@/modules/energy_intelligence/types';
 /**
  * Public page that renders ONLY the ForecastChart with current data.
  * Used by the screenshot service to capture the chart image for emails/Telegram.
- * Route: /chart-capture
+ * Route: /render/pronostico
  */
 const ChartCapturePage = () => {
   const [data, setData] = useState<CoesData[]>([]);
