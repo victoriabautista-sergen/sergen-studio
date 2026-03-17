@@ -46,7 +46,11 @@ const RenderPronosticoPage = () => {
 
   useEffect(() => {
     if (!loading && data.length > 0) {
-      console.log('[RENDER] Render del gráfico completado con', data.length, 'puntos de datos');
+      console.log('[RENDER] ✅ Render del gráfico completado con', data.length, 'puntos de datos');
+      // Signal to Microlink that content is ready
+      document.title = 'Chart Ready';
+    } else if (!loading && data.length === 0) {
+      console.log('[RENDER] ⚠️ No hay datos disponibles para el gráfico');
     }
   }, [loading, data]);
 
