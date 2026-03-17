@@ -252,6 +252,7 @@ const ActualizacionAlertaPage = () => {
 
   // Regenerar preview HTML cada vez que cambian los campos del formulario o la imagen del gráfico
   useEffect(() => {
+    console.log("Dashboard image URL:", chartDataUrl);
     const html = generarHTMLCorreo({
       fecha: todayFormatted,
       riskColor: getRiskColor(riskLevel),
