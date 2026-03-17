@@ -56,11 +56,8 @@ const ActualizacionAlertaPage = () => {
   const [telegramUsers, setTelegramUsers] = useState<{ user_id: string; full_name: string | null; email: string | null; telegram_chat_id: string }[]>([]);
   const [loading, setLoading] = useState(true);
   const [previewHtml, setPreviewHtml] = useState("");
-  const [chartDataUrl, setChartDataUrl] = useState<string>(() => {
-    // Load existing image URL from storage immediately (avoid empty state)
-    const baseUrl = `https://rckytijvinsghojgqjfn.supabase.co/storage/v1/object/public/chart-images/dashboard_alerta_actual.png`;
-    return `${baseUrl}?t=${Date.now()}`;
-  });
+  const [chartDataUrl, setChartDataUrl] = useState<string>("");
+  const [chartError, setChartError] = useState<string>("");
 
   const { data: forecastData } = useForecastData();
   const [isCapturing, setIsCapturing] = useState(false);
