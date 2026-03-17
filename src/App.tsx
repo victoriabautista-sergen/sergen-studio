@@ -30,7 +30,7 @@ const App = () => (
       <BrowserRouter>
         <AuthProvider>
           <Routes>
-            <Route path="/render/pronostico" element={<ChartCapturePage />} />
+            <Route path="/render/pronostico" element={<RenderPronosticoPage />} />
             <Route path="/" element={<Index />} />
 
             {/* Public routes (login, reset-password) */}
