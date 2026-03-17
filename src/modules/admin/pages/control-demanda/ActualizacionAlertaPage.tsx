@@ -299,7 +299,7 @@ const ActualizacionAlertaPage = () => {
 
   // Regenerar preview HTML cada vez que cambian los campos del formulario o la imagen del gráfico
   useEffect(() => {
-    console.log("Dashboard image URL:", chartDataUrl);
+    console.log("[ALERTA] Dashboard image URL:", chartDataUrl || "(sin imagen)");
     const html = generarHTMLCorreo({
       fecha: todayFormatted,
       riskColor: getRiskColor(riskLevel),
@@ -326,7 +326,13 @@ const ActualizacionAlertaPage = () => {
 
       // 1. Generate chart image via backend
       toast.info("Generando imagen del dashboard...");
-      const graficoUrl = await generateChartImage();
+      let graficoUrl: string | undefined;
+      try {
+        graficoUrl = await generateChartImage();
+      } catch (imgErr: any) {
+        console.error("[ALERTA] No se pudo generar la imagen para el correo:", imgErr.message);
+        toast.error("No se pudo generar la imagen del dashboard. El correo se enviará sin imagen.");
+      }
 
       // 2. Generar HTML con la misma URL pública usada en el preview
       const htmlContent = generarHTMLCorreo({
