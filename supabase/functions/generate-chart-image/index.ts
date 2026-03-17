@@ -52,9 +52,19 @@ Deno.serve(async (req) => {
       }
     }
 
-    // Get the app URL for the chart-capture page
-    // Use the published URL or fallback to preview URL
-    const appUrl = Deno.env.get("APP_URL") || "https://sergen-studio.lovable.app";
+    // Detect domain dynamically from the request's Origin or Referer header
+    const origin = req.headers.get("origin") || req.headers.get("referer");
+    let appUrl: string;
+    if (origin) {
+      try {
+        const parsed = new URL(origin);
+        appUrl = `${parsed.protocol}//${parsed.host}`;
+      } catch {
+        appUrl = "https://sergen-studio.lovable.app";
+      }
+    } else {
+      appUrl = Deno.env.get("APP_URL") || "https://sergen-studio.lovable.app";
+    }
     const chartPageUrl = `${appUrl}/chart-capture`;
 
     console.log(`[CHART] Taking screenshot of: ${chartPageUrl}`);
