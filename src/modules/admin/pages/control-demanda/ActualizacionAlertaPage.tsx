@@ -226,23 +226,73 @@ const ActualizacionAlertaPage = () => {
   const todayFormatted = todayRaw.toLowerCase();
   const isLowRisk = riskLevel === "BAJO";
 
-  // Generate chart image via server-side screenshot (works on all devices)
+  // Generate chart image via server-side screenshot
   const generateChartImage = useCallback(async (): Promise<string> => {
+    setChartError("");
+    console.log("[ALERTA] Iniciando generación de imagen del dashboard...");
+    
     const { data, error } = await supabase.functions.invoke("generate-chart-image");
     
-    if (error) throw new Error(`Error generando imagen: ${error.message}`);
-    if (!data?.success || !data?.url) throw new Error(data?.error || "No se pudo generar la imagen");
+    if (error) {
+      const msg = `Error generando imagen: ${error.message}`;
+      console.error("[ALERTA]", msg);
+      setChartError(msg);
+      throw new Error(msg);
+    }
+    if (!data?.success || !data?.url) {
+      const msg = data?.error || "No se pudo generar la imagen";
+      console.error("[ALERTA]", msg);
+      setChartError(msg);
+      throw new Error(msg);
+    }
     
+    // Verify the image URL is accessible
     const publicUrl = data.url;
+    console.log("[ALERTA] Imagen generada:", publicUrl, "Tamaño:", data.imageSize, "bytes");
+    
+    try {
+      const testRes = await fetch(publicUrl, { method: "HEAD" });
+      if (!testRes.ok) {
+        const msg = `La imagen se generó pero no es accesible (HTTP ${testRes.status})`;
+        console.error("[ALERTA]", msg);
+        setChartError(msg);
+        throw new Error(msg);
+      }
+      console.log("[ALERTA] Imagen verificada y accesible");
+    } catch (fetchErr: any) {
+      console.warn("[ALERTA] No se pudo verificar la imagen (puede ser CORS), continuando...", fetchErr.message);
+    }
+    
     setChartDataUrl(publicUrl);
     return publicUrl;
   }, []);
 
-  // Generate chart on initial load
+  // Try to load existing image from storage on mount
+  useEffect(() => {
+    const checkExistingImage = async () => {
+      const baseUrl = `https://rckytijvinsghojgqjfn.supabase.co/storage/v1/object/public/chart-images/dashboard_alerta_actual.png`;
+      try {
+        const res = await fetch(baseUrl, { method: "HEAD" });
+        if (res.ok) {
+          console.log("[ALERTA] Imagen existente encontrada en storage");
+          setChartDataUrl(`${baseUrl}?t=${Date.now()}`);
+        } else {
+          console.log("[ALERTA] No hay imagen existente en storage (HTTP", res.status, ")");
+        }
+      } catch {
+        console.log("[ALERTA] No se pudo verificar imagen existente");
+      }
+    };
+    checkExistingImage();
+  }, []);
+
+  // Generate chart when forecast data is available
   useEffect(() => {
     if (forecastData.length === 0) return;
     const timer = setTimeout(() => {
-      generateChartImage().catch(err => console.warn("Generación inicial falló:", err));
+      generateChartImage().catch(err => {
+        console.warn("[ALERTA] Generación inicial falló:", err.message);
+      });
     }, 500);
     return () => clearTimeout(timer);
   }, [forecastData.length > 0]);
