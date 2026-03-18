@@ -27,6 +27,7 @@ Deno.serve(async (req) => {
     const todayStartUTC = `${year}-${month}-${day}T05:00:00.000Z`;
 
     console.log(`[CHART-DATA] Peru date: ${year}-${month}-${day}, querying from: ${todayStartUTC}`);
+    console.log(`[DATA] Fecha de datos solicitados: ${year}-${month}-${day} (hora Peru: ${peruNow.toISOString()})`);
 
     // Query today's data only (from midnight Peru time onwards)
     const { data, error } = await supabase
@@ -36,21 +37,30 @@ Deno.serve(async (req) => {
       .order("fecha", { ascending: true });
 
     if (error) {
-      console.error("Error fetching forecast data:", error);
+      console.error("[CHART-DATA] Error fetching forecast data:", error);
       return new Response(JSON.stringify({ error: error.message }), {
         status: 500,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    console.log(`[CHART-DATA] Registros encontrados: ${data?.length ?? 0}`);
+    const count = data?.length ?? 0;
+    console.log(`[CHART-DATA] Registros encontrados: ${count}`);
 
-    return new Response(JSON.stringify({ data: data || [] }), {
+    if (count > 0 && data) {
+      const firstDate = data[0].fecha;
+      const lastDate = data[count - 1].fecha;
+      console.log(`[DATA] Rango de datos: ${firstDate} → ${lastDate}`);
+    } else {
+      console.warn(`[DATA] ⚠️ No hay datos para la fecha ${year}-${month}-${day}`);
+    }
+
+    return new Response(JSON.stringify({ data: data || [], date: `${year}-${month}-${day}` }), {
       status: 200,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (err) {
-    console.error("Fatal error:", err);
+    console.error("[CHART-DATA] Fatal error:", err);
     return new Response(
       JSON.stringify({ error: err instanceof Error ? err.message : String(err) }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }

@@ -14,15 +14,18 @@ const RenderPronosticoPage = () => {
       try {
         const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID;
         const anonKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
-        const url = `https://${projectId}.supabase.co/functions/v1/get-chart-data`;
+        // Always bust cache to get fresh data
+        const url = `https://${projectId}.supabase.co/functions/v1/get-chart-data?t=${Date.now()}`;
 
-        console.log('[RENDER] Inicio de consulta a Supabase:', url);
+        console.log('[RENDER] Consultando datos frescos desde:', url);
 
         const res = await fetch(url, {
           headers: {
             'Content-Type': 'application/json',
             'apikey': anonKey,
             'Authorization': `Bearer ${anonKey}`,
+            'Cache-Control': 'no-cache, no-store, must-revalidate',
+            'Pragma': 'no-cache',
           },
         });
 
@@ -31,9 +34,16 @@ const RenderPronosticoPage = () => {
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const json = await res.json();
 
-        console.log('[RENDER] Datos recibidos desde Supabase:', json.data?.length ?? 0, 'registros');
+        const records = json.data || [];
+        console.log(`[RENDER] Datos recibidos: ${records.length} registros`);
+        console.log(`[DATA] Fecha de datos: ${json.date || 'no reportada'}`);
 
-        setData(json.data || []);
+        if (records.length > 0) {
+          console.log(`[DATA] Primer registro: ${records[0].fecha}`);
+          console.log(`[DATA] Último registro: ${records[records.length - 1].fecha}`);
+        }
+
+        setData(records);
       } catch (err: any) {
         console.error('[RENDER] Error al obtener datos:', err);
         setError(err.message);
@@ -50,7 +60,8 @@ const RenderPronosticoPage = () => {
       // Signal to Microlink that content is ready
       document.title = 'Chart Ready';
     } else if (!loading && data.length === 0) {
-      console.log('[RENDER] ⚠️ No hay datos disponibles para el gráfico');
+      console.log('[RENDER] ⚠️ No hay datos disponibles para el gráfico — NO se marca Chart Ready');
+      // DO NOT set title to 'Chart Ready' — this prevents Microlink from capturing an empty chart
     }
   }, [loading, data]);
 

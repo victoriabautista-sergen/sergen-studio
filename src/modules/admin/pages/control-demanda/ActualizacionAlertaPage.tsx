@@ -259,12 +259,16 @@ const ActualizacionAlertaPage = () => {
       });
 
       if (error) throw error;
+
+      // Backend blocks email if chart capture failed
+      if (data?.blocked) {
+        toast.error(data.error || "No hay datos disponibles para generar el gráfico. El correo no fue enviado.");
+        return;
+      }
+
       if (!data?.success) throw new Error("Error al enviar el correo");
 
-      const chartMsg = data.hasChart
-        ? "con gráfico embebido"
-        : "sin gráfico (la generación falló)";
-      toast.success(`Correo enviado a ${recipients.length} destinatario(s) ${chartMsg}`);
+      toast.success(`Correo enviado a ${recipients.length} destinatario(s) con gráfico embebido`);
     } catch (err: any) {
       console.error("Error enviando correo:", err);
       toast.error("Error al enviar el correo");
