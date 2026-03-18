@@ -55,6 +55,7 @@ const ActualizacionAlertaPage = () => {
   const [sendingEmail, setSendingEmail] = useState(false);
   const [telegramUsers, setTelegramUsers] = useState<{ user_id: string; full_name: string | null; email: string | null; telegram_chat_id: string }[]>([]);
   const [loading, setLoading] = useState(true);
+  const [refreshKey, setRefreshKey] = useState(Date.now());
   const [previewHtml, setPreviewHtml] = useState("");
 
   const { data: forecastData } = useForecastData();
