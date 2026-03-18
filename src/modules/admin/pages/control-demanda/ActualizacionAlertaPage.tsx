@@ -55,6 +55,7 @@ const ActualizacionAlertaPage = () => {
   const [sendingEmail, setSendingEmail] = useState(false);
   const [telegramUsers, setTelegramUsers] = useState<{ user_id: string; full_name: string | null; email: string | null; telegram_chat_id: string }[]>([]);
   const [loading, setLoading] = useState(true);
+  const [refreshKey, setRefreshKey] = useState(Date.now());
   const [previewHtml, setPreviewHtml] = useState("");
 
   const { data: forecastData } = useForecastData();
@@ -201,6 +202,7 @@ const ActualizacionAlertaPage = () => {
         if (error) throw error;
       }
 
+      setRefreshKey(Date.now());
       toast.success("Configuración guardada correctamente");
     } catch (err: any) {
       console.error(err);
@@ -451,6 +453,24 @@ const ActualizacionAlertaPage = () => {
                   <ForecastChart data={forecastData} onPeakValueChange={handlePeakValueChange} showPeakLabel={false} />
                 </div>
               )}
+
+              {/* Gráfico en vivo desde /render/pronostico */}
+              <div>
+                <p className="text-xs font-medium text-muted-foreground mb-2">Pronóstico de Demanda (vista actual)</p>
+                <iframe
+                  key={refreshKey}
+                  src={`/render/pronostico?t=${refreshKey}`}
+                  title="Gráfico de pronóstico en vivo"
+                  style={{
+                    width: "100%",
+                    height: "420px",
+                    border: "none",
+                    borderRadius: "8px",
+                    background: "#fff",
+                    marginBottom: "16px",
+                  }}
+                />
+              </div>
 
               {/* iframe que muestra el HTML del correo */}
               <iframe
