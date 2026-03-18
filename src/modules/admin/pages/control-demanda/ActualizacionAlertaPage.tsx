@@ -202,6 +202,7 @@ const ActualizacionAlertaPage = () => {
         if (error) throw error;
       }
 
+      setRefreshKey(Date.now());
       toast.success("Configuración guardada correctamente");
     } catch (err: any) {
       console.error(err);
