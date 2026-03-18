@@ -217,7 +217,8 @@ const ActualizacionAlertaPage = () => {
   const todayFormatted = todayRaw.toLowerCase();
   const isLowRisk = riskLevel === "BAJO";
 
-  // Preview HTML (sin imagen - la imagen se genera en el servidor al enviar)
+  // Preview HTML — incluye el gráfico en vivo dentro del cuerpo del correo
+  const chartPreviewUrl = `https://sergen-studio.lovable.app/render/pronostico?t=${refreshKey}`;
   useEffect(() => {
     const html = generarHTMLCorreo({
       fecha: todayFormatted,
@@ -227,9 +228,10 @@ const ActualizacionAlertaPage = () => {
       demandaEstimada: demandaEstimada || "—",
       mensaje,
       estatus,
+      chartImageUrl: chartPreviewUrl,
     });
     setPreviewHtml(html);
-  }, [riskLevel, timeRange, demandaEstimada, mensaje, estatus, todayFormatted, isLowRisk]);
+  }, [riskLevel, timeRange, demandaEstimada, mensaje, estatus, todayFormatted, isLowRisk, refreshKey]);
 
   const handleSendEmail = async () => {
     if (recipients.length === 0) {
@@ -454,27 +456,12 @@ const ActualizacionAlertaPage = () => {
                 </div>
               )}
 
-              {/* Vista previa del gráfico que se adjuntará en el correo */}
-              <div>
-                <p className="text-xs font-medium text-muted-foreground mb-2">
-                  Gráfico que se adjuntará en el correo (captura en vivo)
-                </p>
-                <iframe
-                  key={refreshKey}
-                  src={`https://sergen-studio.lovable.app/render/pronostico?t=${refreshKey}`}
-                  title="Vista previa del gráfico adjunto"
-                  className="w-full border rounded-lg"
-                  style={{ height: "420px", background: "#fff" }}
-                  sandbox=""
-                />
-              </div>
-
-              {/* iframe que muestra el HTML del correo */}
+              {/* iframe que muestra el HTML del correo con gráfico embebido */}
               <iframe
                 srcDoc={previewHtml}
                 title="Vista previa del correo"
                 className="w-full border rounded-lg bg-white"
-                style={{ height: "700px" }}
+                style={{ height: "900px" }}
                 sandbox=""
               />
 
