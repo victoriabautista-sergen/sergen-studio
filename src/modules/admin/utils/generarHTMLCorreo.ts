@@ -14,7 +14,9 @@ export function generarHTMLCorreo(d: EmailTemplateData): string {
   // En el correo real, el backend reemplaza esto por una imagen CID capturada por Microlink
   const chartBlock = d.chartPreviewUrl
     ? `<tr><td align="center" style="padding:8px 16px">
-        <iframe src="${d.chartPreviewUrl}" style="width:100%;max-width:552px;height:260px;border:1px solid #e5e7eb;border-radius:8px;background:#fff;overflow:hidden" frameborder="0" scrolling="no"></iframe>
+        <div style="width:100%;max-width:552px;height:220px;overflow:hidden;border:1px solid #e5e7eb;border-radius:8px;margin:0 auto">
+          <iframe src="${d.chartPreviewUrl}" style="width:800px;height:400px;border:none;transform:scale(0.69);transform-origin:0 0" frameborder="0" scrolling="no"></iframe>
+        </div>
        </td></tr>`
     : `<tr><td align="center" style="padding:12px 24px"><p style="margin:0;font-size:12px;color:#9ca3af;font-style:italic">📊 El gráfico se adjunta como imagen en el correo enviado</p></td></tr>`;
 
