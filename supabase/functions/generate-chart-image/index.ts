@@ -71,6 +71,7 @@ Deno.serve(async (req) => {
     microlinkUrl.searchParams.set("waitForTimeout", "8000");
     microlinkUrl.searchParams.set("element", "#chart-container");
     microlinkUrl.searchParams.set("screenshot.type", "png");
+    microlinkUrl.searchParams.set("force", "true");
 
     console.log("[CHART] Microlink request URL:", microlinkUrl.toString());
 
