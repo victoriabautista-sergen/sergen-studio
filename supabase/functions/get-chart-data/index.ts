@@ -50,35 +50,11 @@ Deno.serve(async (req) => {
     const todayCount = data?.length ?? 0;
     console.log(`[DATA] Registros de hoy: ${todayCount}`);
 
-    // 2. If no data for today, fallback to last 2 days (same as useForecastData in admin panel)
     if (todayCount === 0) {
-      console.log("[DATA] No hay datos de hoy, consultando últimos 2 días como fallback...");
-
-      // 2 days ago at midnight Peru time
-      const twoDaysAgo = new Date(peruNow);
-      twoDaysAgo.setDate(twoDaysAgo.getDate() - 2);
-      const fbYear = twoDaysAgo.getFullYear();
-      const fbMonth = String(twoDaysAgo.getMonth() + 1).padStart(2, "0");
-      const fbDay = String(twoDaysAgo.getDate()).padStart(2, "0");
-      const fallbackStartUTC = `${fbYear}-${fbMonth}-${fbDay}T05:00:00.000Z`;
-
-      console.log(`[DATA] Fallback desde: ${fallbackStartUTC}`);
-
-      const { data: fbData, error: fbError } = await supabase
-        .from("coes_forecast")
-        .select("fecha, reprogramado, pronostico, rango_inferior, rango_superior, ejecutado")
-        .gte("fecha", fallbackStartUTC)
-        .order("fecha", { ascending: true });
-
-      if (fbError) {
-        console.error("[DATA] Error en fallback query:", fbError);
-      } else {
-        data = fbData;
-        console.log(`[DATA] Registros fallback: ${data?.length ?? 0}`);
-      }
+      console.warn("[DATA] ⚠️ No hay datos del día actual. No se usarán datos históricos.");
     }
 
-    // 3. Also fetch latest forecast_settings for context
+    // Fetch latest forecast_settings for context
     const { data: settings } = await supabase
       .from("forecast_settings")
       .select("risk_level, modulation_time, last_update")
