@@ -454,6 +454,21 @@ const ActualizacionAlertaPage = () => {
                 </div>
               )}
 
+              {/* Vista previa del gráfico que se adjuntará en el correo */}
+              <div>
+                <p className="text-xs font-medium text-muted-foreground mb-2">
+                  Gráfico que se adjuntará en el correo (captura en vivo)
+                </p>
+                <iframe
+                  key={refreshKey}
+                  src={`https://sergen-studio.lovable.app/render/pronostico?t=${refreshKey}`}
+                  title="Vista previa del gráfico adjunto"
+                  className="w-full border rounded-lg"
+                  style={{ height: "420px", background: "#fff" }}
+                  sandbox=""
+                />
+              </div>
+
               {/* iframe que muestra el HTML del correo */}
               <iframe
                 srcDoc={previewHtml}
