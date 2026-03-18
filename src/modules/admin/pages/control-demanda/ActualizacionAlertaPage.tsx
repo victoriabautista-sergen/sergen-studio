@@ -436,19 +436,23 @@ const ActualizacionAlertaPage = () => {
           <Card>
             <CardHeader>
               <CardTitle className="text-lg">Vista previa del mensaje</CardTitle>
+              <p className="text-xs text-muted-foreground">
+                Esta vista previa muestra los datos actuales que se enviarán en el correo.
+              </p>
             </CardHeader>
-            <CardContent>
-              {/* ForecastChart rendered offscreen for peak value calculation only */}
-              <div style={{ position: 'fixed', left: '-9999px', top: 0, width: 800, paddingTop: 32, paddingLeft: 16, paddingRight: 16, paddingBottom: 16, background: '#fff' }}>
+            <CardContent className="space-y-4">
+              {/* Gráfico de pronóstico con datos en tiempo real */}
+              <div className="border rounded-lg p-4 bg-white">
+                <p className="text-xs font-semibold text-muted-foreground mb-2">📊 Pronóstico de Demanda (datos actuales)</p>
                 <ForecastChart data={forecastData} onPeakValueChange={handlePeakValueChange} showPeakLabel={true} />
               </div>
 
-              {/* iframe que muestra el HTML del correo (la imagen se genera en el servidor al enviar) */}
+              {/* iframe que muestra el HTML del correo */}
               <iframe
                 srcDoc={previewHtml}
                 title="Vista previa del correo"
                 className="w-full border rounded-lg bg-white"
-                style={{ height: "800px" }}
+                style={{ height: "700px" }}
                 sandbox=""
               />
 
