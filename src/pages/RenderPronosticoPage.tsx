@@ -83,7 +83,7 @@ const RenderPronosticoPage = () => {
 
   if (loading) {
     return (
-      <div style={{ width: 800, height: 500, display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#fff' }}>
+      <div style={{ width: '100%', maxWidth: 800, height: 400, display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#fff' }}>
         <p>Cargando datos...</p>
       </div>
     );
@@ -91,14 +91,14 @@ const RenderPronosticoPage = () => {
 
   if (error || data.length === 0) {
     return (
-      <div style={{ width: 800, height: 500, display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#fff' }}>
+      <div style={{ width: '100%', maxWidth: 800, height: 400, display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#fff' }}>
         <p>{error || 'No hay datos disponibles'}</p>
       </div>
     );
   }
 
   return (
-    <div id="chart-container" style={{ width: 800, paddingTop: 32, paddingLeft: 16, paddingRight: 16, paddingBottom: 16, background: '#fff' }}>
+    <div id="chart-container" style={{ width: '100%', maxWidth: 800, paddingTop: 16, paddingLeft: 8, paddingRight: 8, paddingBottom: 8, background: '#fff' }}>
       <ForecastChart data={data} showPeakLabel={true} />
     </div>
   );
