@@ -17,16 +17,22 @@ Deno.serve(async (req) => {
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
     );
 
-    // Use Peru timezone (UTC-5) for date calculations
+    // Calculate today's date range in Peru timezone (UTC-5)
     const peruNow = new Date(new Date().toLocaleString("en-US", { timeZone: "America/Lima" }));
-    const twoDaysAgo = new Date(peruNow.getTime() - 2 * 24 * 60 * 60 * 1000);
-    twoDaysAgo.setHours(0, 0, 0, 0);
+    const year = peruNow.getFullYear();
+    const month = String(peruNow.getMonth() + 1).padStart(2, "0");
+    const day = String(peruNow.getDate()).padStart(2, "0");
 
-    // Query all data from 2 days ago onwards (no upper limit to avoid cutting off recent data)
+    // Start of today in Peru = midnight Peru time = 05:00 UTC
+    const todayStartUTC = `${year}-${month}-${day}T05:00:00.000Z`;
+
+    console.log(`[CHART-DATA] Peru date: ${year}-${month}-${day}, querying from: ${todayStartUTC}`);
+
+    // Query today's data only (from midnight Peru time onwards)
     const { data, error } = await supabase
       .from("coes_forecast")
       .select("fecha, reprogramado, pronostico, rango_inferior, rango_superior, ejecutado")
-      .gte("fecha", twoDaysAgo.toISOString())
+      .gte("fecha", todayStartUTC)
       .order("fecha", { ascending: true });
 
     if (error) {
@@ -36,6 +42,8 @@ Deno.serve(async (req) => {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
+
+    console.log(`[CHART-DATA] Registros encontrados: ${data?.length ?? 0}`);
 
     return new Response(JSON.stringify({ data: data || [] }), {
       status: 200,

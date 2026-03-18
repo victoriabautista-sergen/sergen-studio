@@ -25,7 +25,7 @@ export function generarHTMLCorreo(d: EmailTemplateData): string {
 <tr><td align="center" style="padding:0 24px 24px">
 <table cellpadding="0" cellspacing="0"><tr><td style="background:${d.riskColor};color:#fff;font-size:13px;font-weight:700;padding:8px 28px;border-radius:20px;letter-spacing:.5px">RIESGO ${d.riskLabel.toUpperCase()}</td></tr></table>
 </td></tr>
-<tr><td align="center" style="padding:12px 24px"><p style="margin:0;font-size:12px;color:#9ca3af;font-style:italic">📊 El gráfico de pronóstico se incluye en el correo enviado</p></td></tr>
+<tr><td align="center" style="padding:12px 24px"><p style="margin:0;font-size:12px;color:#9ca3af;font-style:italic">📊 El gráfico se adjunta como imagen en el correo enviado</p></td></tr>
 <tr><td style="padding:24px 24px 20px">
 <table width="100%" cellpadding="0" cellspacing="0">
 <tr><td width="50%" style="font-size:13px;font-weight:700;color:#374151;padding-bottom:12px;border-bottom:2px solid #d1d5db">Rango horario</td><td width="50%" style="font-size:13px;font-weight:700;color:#374151;padding-bottom:12px;border-bottom:2px solid #d1d5db;text-align:right">Demanda estimada</td></tr>
