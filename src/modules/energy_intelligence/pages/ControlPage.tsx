@@ -44,24 +44,7 @@ const ControlPage = () => {
     fetchLastSettingsUpdate();
   }, []);
 
-  useEffect(() => {
-    const updateForecastData = async () => {
-      try {
-        setLoading(true);
-        await supabase.functions.invoke('get-coes-forecast');
-        toast.success('Datos de pronóstico actualizados');
-      } catch (e) {
-        console.error('Error updating forecast data:', e);
-        toast.error('Error al actualizar datos de pronóstico');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    updateForecastData();
-    const interval = setInterval(updateForecastData, 15 * 60 * 1000);
-    return () => clearInterval(interval);
-  }, []);
+  // coes_forecast se actualiza automáticamente cada 15 min via pg_cron
 
   return (
     <EnergyShell>
