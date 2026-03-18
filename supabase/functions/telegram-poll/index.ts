@@ -808,7 +808,7 @@ async function executeGuardarYEnviar(
         .update({
           risk_level: riesgo,
           modulation_time: rango,
-          last_update: new Date().toISOString(),
+          last_update: peruNow().toISOString(),
         })
         .eq("id", existing.id);
       if (updateErr) {

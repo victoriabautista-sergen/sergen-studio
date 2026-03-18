@@ -200,7 +200,7 @@ const ActualizacionAlertaPage = () => {
       if (existing) {
         const { error } = await supabase
           .from("forecast_settings")
-          .update({ risk_level: riskLevel, modulation_time: timeRange, last_update: new Date().toISOString() })
+          .update({ risk_level: riskLevel, modulation_time: timeRange, last_update: toZonedTime(new Date(), "America/Lima").toISOString() })
           .eq("id", existing.id);
         if (error) throw error;
       } else {
