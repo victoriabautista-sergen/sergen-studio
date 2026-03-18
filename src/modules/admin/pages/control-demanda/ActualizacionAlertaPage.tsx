@@ -42,7 +42,8 @@ const ActualizacionAlertaPage = () => {
   const [demandaManuallyEdited, setDemandaManuallyEdited] = useState(false);
   const [mensaje, setMensaje] = useState("Solo usar equipos indispensables.");
   const computeEstatus = () => {
-    const lastDay = endOfMonth(new Date());
+    const peruNow = toZonedTime(new Date(), "America/Lima");
+    const lastDay = endOfMonth(peruNow);
     return `Activo hasta el ${format(lastDay, "d 'de' MMMM", { locale: es })}`;
   };
   const [estatus, setEstatus] = useState(computeEstatus);
@@ -199,7 +200,7 @@ const ActualizacionAlertaPage = () => {
       if (existing) {
         const { error } = await supabase
           .from("forecast_settings")
-          .update({ risk_level: riskLevel, modulation_time: timeRange, last_update: new Date().toISOString() })
+          .update({ risk_level: riskLevel, modulation_time: timeRange, last_update: toZonedTime(new Date(), "America/Lima").toISOString() })
           .eq("id", existing.id);
         if (error) throw error;
       } else {
