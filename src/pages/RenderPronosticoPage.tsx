@@ -8,16 +8,26 @@ const RenderPronosticoPage = () => {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    console.log('[RENDER] Inicio del render de la página /render/pronostico');
+    // Add no-cache meta tags for Microlink / browsers
+    const meta = document.createElement('meta');
+    meta.httpEquiv = 'Cache-Control';
+    meta.content = 'no-cache, no-store, must-revalidate';
+    document.head.appendChild(meta);
+
+    const pragma = document.createElement('meta');
+    pragma.httpEquiv = 'Pragma';
+    pragma.content = 'no-cache';
+    document.head.appendChild(pragma);
+
+    console.log('[RENDER] Inicio: /render/pronostico — timestamp:', Date.now());
 
     const fetchData = async () => {
       try {
         const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID;
         const anonKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
-        // Always bust cache to get fresh data
         const url = `https://${projectId}.supabase.co/functions/v1/get-chart-data?t=${Date.now()}`;
 
-        console.log('[RENDER] Consultando datos frescos desde:', url);
+        console.log('[RENDER] Fetching:', url);
 
         const res = await fetch(url, {
           headers: {
@@ -29,39 +39,45 @@ const RenderPronosticoPage = () => {
           },
         });
 
-        console.log('[RENDER] Respuesta HTTP:', res.status, res.statusText);
+        console.log('[RENDER] HTTP:', res.status);
 
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const json = await res.json();
 
         const records = json.data || [];
-        console.log(`[RENDER] Datos recibidos: ${records.length} registros`);
-        console.log(`[DATA] Fecha de datos: ${json.date || 'no reportada'}`);
+        console.log(`[DATA] Fecha: ${json.date || 'N/A'}, registros: ${records.length}`);
 
         if (records.length > 0) {
           console.log(`[DATA] Primer registro: ${records[0].fecha}`);
           console.log(`[DATA] Último registro: ${records[records.length - 1].fecha}`);
         }
 
+        if (json.settings) {
+          console.log(`[DATA] Settings: risk=${json.settings.risk_level}, time=${json.settings.modulation_time}`);
+        }
+
         setData(records);
       } catch (err: any) {
-        console.error('[RENDER] Error al obtener datos:', err);
+        console.error('[RENDER] Error:', err);
         setError(err.message);
       } finally {
         setLoading(false);
       }
     };
     fetchData();
+
+    return () => {
+      document.head.removeChild(meta);
+      document.head.removeChild(pragma);
+    };
   }, []);
 
   useEffect(() => {
     if (!loading && data.length > 0) {
-      console.log('[RENDER] ✅ Render del gráfico completado con', data.length, 'puntos de datos');
-      // Signal to Microlink that content is ready
+      console.log(`[RENDER] ✅ Chart Ready — ${data.length} puntos`);
       document.title = 'Chart Ready';
     } else if (!loading && data.length === 0) {
-      console.log('[RENDER] ⚠️ No hay datos disponibles para el gráfico — NO se marca Chart Ready');
-      // DO NOT set title to 'Chart Ready' — this prevents Microlink from capturing an empty chart
+      console.log('[RENDER] ⚠️ Sin datos — NO se marca Chart Ready');
     }
   }, [loading, data]);
 
