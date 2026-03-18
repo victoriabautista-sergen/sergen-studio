@@ -14,7 +14,7 @@ function buildEmailHtml({
   demandaEstimada,
   mensaje,
   estatus,
-  chartBase64,
+  hasChart,
 }: {
   fecha: string;
   riskColor: string;
@@ -23,10 +23,11 @@ function buildEmailHtml({
   demandaEstimada: string;
   mensaje: string;
   estatus: string;
-  chartBase64?: string;
+  hasChart: boolean;
 }): string {
-  const chartRow = chartBase64
-    ? `<tr><td style="padding:12px 24px"><p style="margin:0 0 8px;font-size:13px;font-weight:700;color:#374151">Pronóstico de Demanda</p><img src="data:image/png;base64,${chartBase64}" alt="Gráfico de pronóstico" width="520" style="display:block;width:100%;max-width:520px;height:auto;border-radius:8px;border:1px solid #e5e7eb" /></td></tr>`
+  // Use CID reference for inline image - Brevo uses filename as CID
+  const chartRow = hasChart
+    ? `<tr><td style="padding:12px 24px"><p style="margin:0 0 8px;font-size:13px;font-weight:700;color:#374151">Pronóstico de Demanda</p><img src="cid:chart.png" alt="Gráfico de pronóstico" width="520" style="display:block;width:100%;max-width:520px;height:auto;border-radius:8px;border:1px solid #e5e7eb" /></td></tr>`
     : "";
 
   return `<!DOCTYPE html>
@@ -67,7 +68,9 @@ ${chartRow}
 }
 
 async function captureChartAsBase64(): Promise<string | null> {
-  const captureUrl = "https://sergen-studio.lovable.app/render/pronostico";
+  // Add cache-busting timestamp to force fresh data load
+  const timestamp = Date.now();
+  const captureUrl = `https://sergen-studio.lovable.app/render/pronostico?t=${timestamp}`;
   console.log("[CHART] Capturando gráfico desde:", captureUrl);
 
   const microlinkUrl = new URL("https://api.microlink.io/");
@@ -87,7 +90,7 @@ async function captureChartAsBase64(): Promise<string | null> {
 
   const microlinkData = await microlinkRes.json();
   if (microlinkData.status !== "success" || !microlinkData.data?.screenshot?.url) {
-    console.error("[CHART] Microlink no generó screenshot");
+    console.error("[CHART] Microlink no generó screenshot:", JSON.stringify(microlinkData));
     return null;
   }
 
@@ -105,18 +108,17 @@ async function captureChartAsBase64(): Promise<string | null> {
   console.log("[CHART] Imagen descargada:", imageSize, "bytes");
 
   if (imageSize < 5000) {
-    console.error("[CHART] Imagen demasiado pequeña (probablemente vacía):", imageSize, "bytes");
+    console.error("[CHART] Imagen demasiado pequeña:", imageSize, "bytes");
     return null;
   }
 
-  // Convert to base64
   const uint8 = new Uint8Array(imageBuffer);
   let binary = "";
   for (let i = 0; i < uint8.length; i++) {
     binary += String.fromCharCode(uint8[i]);
   }
   const base64 = btoa(binary);
-  console.log("[CHART] Imagen convertida a base64, longitud:", base64.length);
+  console.log("[CHART] Base64 generado, longitud:", base64.length);
 
   return base64;
 }
@@ -168,27 +170,27 @@ Deno.serve(async (req) => {
 
     const BREVO_API_KEY = Deno.env.get("BREVO_API_KEY");
     if (!BREVO_API_KEY) {
-      return new Response(JSON.stringify({ error: "API key no configurada" }), {
+      return new Response(JSON.stringify({ error: "BREVO_API_KEY no configurada" }), {
         status: 500,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    // 1. Generar imagen del gráfico en tiempo real
-    console.log("[EMAIL] Generando imagen del dashboard en tiempo real...");
+    // 1. Generate chart image in real-time
+    console.log("[EMAIL] Generando imagen del dashboard...");
     let chartBase64: string | null = null;
     try {
       chartBase64 = await captureChartAsBase64();
       if (chartBase64) {
-        console.log("[EMAIL] ✅ Imagen generada exitosamente");
+        console.log("[EMAIL] ✅ Imagen generada:", chartBase64.length, "chars base64");
       } else {
-        console.warn("[EMAIL] ⚠️ No se pudo generar la imagen, el correo se enviará sin gráfico");
+        console.warn("[EMAIL] ⚠️ No se pudo generar imagen");
       }
     } catch (chartErr) {
       console.error("[EMAIL] Error generando imagen:", chartErr);
     }
 
-    // 2. Construir HTML con imagen embebida (base64 inline, sin URLs)
+    // 2. Build HTML with CID reference (not base64 inline)
     const htmlContent = buildEmailHtml({
       fecha: fecha || "",
       riskColor: riskColor || "#D4A017",
@@ -197,33 +199,34 @@ Deno.serve(async (req) => {
       demandaEstimada: demandaEstimada || "—",
       mensaje: mensaje || "",
       estatus: estatus || "",
-      chartBase64: chartBase64 || undefined,
+      hasChart: !!chartBase64,
     });
 
-    // 3. Validar que el HTML NO contiene URLs de imagen
-    if (htmlContent.includes('src="http') || htmlContent.includes("src='http")) {
-      console.error("[EMAIL] ❌ VALIDACIÓN FALLIDA: El HTML contiene URLs de imagen externas");
-      return new Response(JSON.stringify({ error: "El HTML contiene URLs de imagen no permitidas" }), {
-        status: 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-    console.log("[EMAIL] ✅ Validación: HTML no contiene URLs de imagen externas");
-
-    // 4. Enviar correo via Brevo
-    // Use Peru timezone for subject date
+    // 3. Build subject with Peru date
     const peruNow = new Date(new Date().toLocaleString("en-US", { timeZone: "America/Lima" }));
     const dd = String(peruNow.getDate()).padStart(2, "0");
     const mm = String(peruNow.getMonth() + 1).padStart(2, "0");
     const yy = String(peruNow.getFullYear()).slice(-2);
     const subject = `⚡ Pronóstico de potencia | ${dd}/${mm}/${yy} ⚡`;
 
+    // 4. Build Brevo payload with CID attachment
     const emailPayload: Record<string, unknown> = {
       sender: { name: "SERGEN", email: "info@sergen.pe" },
       to: emails.map((email: string) => ({ email })),
       subject,
       htmlContent,
     };
+
+    // Add chart as inline attachment (CID = filename)
+    if (chartBase64) {
+      emailPayload.attachment = [
+        {
+          content: chartBase64,
+          name: "chart.png",
+        },
+      ];
+      console.log("[EMAIL] ✅ Imagen adjunta como CID attachment (chart.png)");
+    }
 
     if (bccEmails && Array.isArray(bccEmails) && bccEmails.length > 0) {
       emailPayload.bcc = bccEmails.map((email: string) => ({ email }));
