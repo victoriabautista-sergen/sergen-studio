@@ -461,8 +461,7 @@ const ActualizacionAlertaPage = () => {
                 srcDoc={previewHtml}
                 title="Vista previa del correo"
                 className="w-full border rounded-lg bg-white"
-                style={{ height: "900px" }}
-                sandbox=""
+                style={{ height: "1100px" }}
               />
 
               {/* Send buttons */}
