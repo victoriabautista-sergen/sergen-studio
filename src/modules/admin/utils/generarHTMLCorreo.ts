@@ -6,12 +6,16 @@ export interface EmailTemplateData {
   demandaEstimada: string;
   mensaje: string;
   estatus: string;
-  chartImageUrl?: string;
+  chartPreviewUrl?: string;
 }
 
 export function generarHTMLCorreo(d: EmailTemplateData): string {
-  const chartBlock = d.chartImageUrl
-    ? `<tr><td align="center" style="padding:12px 24px"><img src="${d.chartImageUrl}" alt="Pronóstico de demanda" style="width:100%;max-width:552px;height:auto;border-radius:8px;border:1px solid #e5e7eb" /></td></tr>`
+  // En la vista previa usamos un iframe para mostrar el gráfico en vivo
+  // En el correo real, el backend reemplaza esto por una imagen CID capturada por Microlink
+  const chartBlock = d.chartPreviewUrl
+    ? `<tr><td align="center" style="padding:12px 24px">
+        <iframe src="${d.chartPreviewUrl}" style="width:100%;max-width:552px;height:380px;border:1px solid #e5e7eb;border-radius:8px;background:#fff" frameborder="0" scrolling="no"></iframe>
+       </td></tr>`
     : `<tr><td align="center" style="padding:12px 24px"><p style="margin:0;font-size:12px;color:#9ca3af;font-style:italic">📊 El gráfico se adjunta como imagen en el correo enviado</p></td></tr>`;
 
   return `<!DOCTYPE html>
