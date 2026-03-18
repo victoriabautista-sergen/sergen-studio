@@ -454,23 +454,19 @@ const ActualizacionAlertaPage = () => {
                 </div>
               )}
 
-              {/* Gráfico en vivo desde /render/pronostico */}
-              <div>
-                <p className="text-xs font-medium text-muted-foreground mb-2">Pronóstico de Demanda (vista actual)</p>
-                <iframe
-                  key={refreshKey}
-                  src={`/render/pronostico?t=${refreshKey}`}
-                  title="Gráfico de pronóstico en vivo"
-                  style={{
-                    width: "100%",
-                    height: "420px",
-                    border: "none",
-                    borderRadius: "8px",
-                    background: "#fff",
-                    marginBottom: "16px",
-                  }}
-                />
-              </div>
+              {/* Gráfico: misma URL que usa Microlink para captura */}
+              <iframe
+                key={refreshKey}
+                src={`https://sergen-studio.lovable.app/render/pronostico?t=${refreshKey}`}
+                title="Gráfico de pronóstico"
+                style={{
+                  width: "100%",
+                  height: "420px",
+                  border: "none",
+                  borderRadius: "8px",
+                  background: "#fff",
+                }}
+              />
 
               {/* iframe que muestra el HTML del correo */}
               <iframe
