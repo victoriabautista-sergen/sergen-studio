@@ -17,15 +17,16 @@ Deno.serve(async (req) => {
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
     );
 
-    const now = new Date();
-    const twoDaysAgo = new Date(now.getTime() - 2 * 24 * 60 * 60 * 1000);
+    // Use Peru timezone (UTC-5) for date calculations
+    const peruNow = new Date(new Date().toLocaleString("en-US", { timeZone: "America/Lima" }));
+    const twoDaysAgo = new Date(peruNow.getTime() - 2 * 24 * 60 * 60 * 1000);
     twoDaysAgo.setHours(0, 0, 0, 0);
 
+    // Query all data from 2 days ago onwards (no upper limit to avoid cutting off recent data)
     const { data, error } = await supabase
       .from("coes_forecast")
       .select("fecha, reprogramado, pronostico, rango_inferior, rango_superior, ejecutado")
       .gte("fecha", twoDaysAgo.toISOString())
-      .lte("fecha", now.toISOString())
       .order("fecha", { ascending: true });
 
     if (error) {
