@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -53,15 +53,11 @@ const ActualizacionAlertaPage = () => {
   const [newBccEmail, setNewBccEmail] = useState("");
   const [saving, setSaving] = useState(false);
   const [sendingEmail, setSendingEmail] = useState(false);
-  // Telegram authorized users (from profiles table)
   const [telegramUsers, setTelegramUsers] = useState<{ user_id: string; full_name: string | null; email: string | null; telegram_chat_id: string }[]>([]);
   const [loading, setLoading] = useState(true);
   const [previewHtml, setPreviewHtml] = useState("");
-  const [chartDataUrl, setChartDataUrl] = useState<string>("");
-  const [chartError, setChartError] = useState<string>("");
 
   const { data: forecastData } = useForecastData();
-  const [isCapturing, setIsCapturing] = useState(false);
 
   const breadcrumbs = [
     { label: "Configuración", href: "/admin-panel/configuracion" },
@@ -82,7 +78,6 @@ const ActualizacionAlertaPage = () => {
       setTimeRangeError("");
     } else {
       setMensaje("Solo usar equipos indispensables.");
-      // If switching from BAJO, clear the "Libre" value
       setTimeRange(prev => prev === "Libre" ? "" : prev);
     }
   }, [riskLevel]);
@@ -108,7 +103,6 @@ const ActualizacionAlertaPage = () => {
     fetchSettings();
   }, []);
 
-
   const fetchRecipients = useCallback(async () => {
     const { data, error } = await supabase
       .from("alert_recipients")
@@ -122,7 +116,6 @@ const ActualizacionAlertaPage = () => {
 
   useEffect(() => { fetchRecipients(); }, [fetchRecipients]);
 
-  // Telegram users from profiles
   const fetchTelegramUsers = useCallback(async () => {
     const { data, error } = await supabase
       .from("profiles")
@@ -141,7 +134,6 @@ const ActualizacionAlertaPage = () => {
     if (!email) return;
     if (!isValidEmail(email)) { toast.error("Formato de correo BCC inválido"); return; }
     if (bccRecipients.some(r => r.email === email)) { toast.error("Este correo BCC ya está en la lista"); return; }
-
     const { data: session } = await supabase.auth.getSession();
     const { error } = await supabase.from("alert_recipients").insert({ email, added_by: session.session?.user.id, recipient_type: "bcc" });
     if (error) { toast.error("Error al agregar correo BCC"); console.error(error); return; }
@@ -161,7 +153,6 @@ const ActualizacionAlertaPage = () => {
     if (!email) return;
     if (!isValidEmail(email)) { toast.error("Formato de correo inválido"); return; }
     if (recipients.some(r => r.email === email)) { toast.error("Este correo ya está en la lista"); return; }
-
     const { data: session } = await supabase.auth.getSession();
     const { error } = await supabase.from("alert_recipients").insert({ email, added_by: session.session?.user.id, recipient_type: "to" });
     if (error) { toast.error("Error al agregar correo"); console.error(error); return; }
@@ -210,10 +201,7 @@ const ActualizacionAlertaPage = () => {
         if (error) throw error;
       }
 
-      // Regenerar imagen del gráfico en el backend
-      toast.info("Generando imagen del dashboard...");
-      await generateChartImage();
-      toast.success("Alerta y gráfico actualizados correctamente");
+      toast.success("Configuración guardada correctamente");
     } catch (err: any) {
       console.error(err);
       toast.error("Error al guardar la configuración");
@@ -227,80 +215,8 @@ const ActualizacionAlertaPage = () => {
   const todayFormatted = todayRaw.toLowerCase();
   const isLowRisk = riskLevel === "BAJO";
 
-  // Generate chart image via server-side screenshot
-  const generateChartImage = useCallback(async (): Promise<string> => {
-    setChartError("");
-    console.log("[ALERTA] Iniciando generación de imagen del dashboard...");
-    
-    const { data, error } = await supabase.functions.invoke("generate-chart-image");
-    
-    if (error) {
-      const msg = `Error generando imagen: ${error.message}`;
-      console.error("[ALERTA]", msg);
-      setChartError(msg);
-      throw new Error(msg);
-    }
-    if (!data?.success || !data?.url) {
-      const msg = data?.error || "No se pudo generar la imagen";
-      console.error("[ALERTA]", msg);
-      setChartError(msg);
-      throw new Error(msg);
-    }
-    
-    // Verify the image URL is accessible
-    const publicUrl = data.url;
-    console.log("[ALERTA] Imagen generada:", publicUrl, "Tamaño:", data.imageSize, "bytes");
-    
-    try {
-      const testRes = await fetch(publicUrl, { method: "HEAD" });
-      if (!testRes.ok) {
-        const msg = `La imagen se generó pero no es accesible (HTTP ${testRes.status})`;
-        console.error("[ALERTA]", msg);
-        setChartError(msg);
-        throw new Error(msg);
-      }
-      console.log("[ALERTA] Imagen verificada y accesible");
-    } catch (fetchErr: any) {
-      console.warn("[ALERTA] No se pudo verificar la imagen (puede ser CORS), continuando...", fetchErr.message);
-    }
-    
-    setChartDataUrl(publicUrl);
-    return publicUrl;
-  }, []);
-
-  // Try to load existing image from storage on mount
+  // Preview HTML (sin imagen - la imagen se genera en el servidor al enviar)
   useEffect(() => {
-    const checkExistingImage = async () => {
-      const baseUrl = `https://rckytijvinsghojgqjfn.supabase.co/storage/v1/object/public/chart-images/dashboard_alerta_actual.png`;
-      try {
-        const res = await fetch(baseUrl, { method: "HEAD" });
-        if (res.ok) {
-          console.log("[ALERTA] Imagen existente encontrada en storage");
-          setChartDataUrl(`${baseUrl}?t=${Date.now()}`);
-        } else {
-          console.log("[ALERTA] No hay imagen existente en storage (HTTP", res.status, ")");
-        }
-      } catch {
-        console.log("[ALERTA] No se pudo verificar imagen existente");
-      }
-    };
-    checkExistingImage();
-  }, []);
-
-  // Generate chart when forecast data is available
-  useEffect(() => {
-    if (forecastData.length === 0) return;
-    const timer = setTimeout(() => {
-      generateChartImage().catch(err => {
-        console.warn("[ALERTA] Generación inicial falló:", err.message);
-      });
-    }, 500);
-    return () => clearTimeout(timer);
-  }, [forecastData.length > 0]);
-
-  // Regenerar preview HTML cada vez que cambian los campos del formulario o la imagen del gráfico
-  useEffect(() => {
-    console.log("[ALERTA] Dashboard image URL:", chartDataUrl || "(sin imagen)");
     const html = generarHTMLCorreo({
       fecha: todayFormatted,
       riskColor: getRiskColor(riskLevel),
@@ -309,10 +225,9 @@ const ActualizacionAlertaPage = () => {
       demandaEstimada: demandaEstimada || "—",
       mensaje,
       estatus,
-      graficoUrl: chartDataUrl || undefined,
     });
     setPreviewHtml(html);
-  }, [riskLevel, timeRange, demandaEstimada, mensaje, estatus, todayFormatted, isLowRisk, chartDataUrl]);
+  }, [riskLevel, timeRange, demandaEstimada, mensaje, estatus, todayFormatted, isLowRisk]);
 
   const handleSendEmail = async () => {
     if (recipients.length === 0) {
@@ -325,35 +240,31 @@ const ActualizacionAlertaPage = () => {
       const emails = recipients.map(r => r.email);
       const bccList = bccRecipients.map(r => r.email);
 
-      // 1. Generate chart image via backend
-      toast.info("Generando imagen del dashboard...");
-      let graficoUrl: string | undefined;
-      try {
-        graficoUrl = await generateChartImage();
-      } catch (imgErr: any) {
-        console.error("[ALERTA] No se pudo generar la imagen para el correo:", imgErr.message);
-        toast.error("No se pudo generar la imagen del dashboard. El correo se enviará sin imagen.");
-      }
+      toast.info("Generando imagen y enviando correo...");
 
-      // 2. Generar HTML con la misma URL pública usada en el preview
-      const htmlContent = generarHTMLCorreo({
-        fecha: todayFormatted,
-        riskColor: getRiskColor(riskLevel),
-        riskLabel: RISK_OPTIONS.find(o => o.value === riskLevel)?.label || riskLevel,
-        timeRange: isLowRisk ? "Uso libre de equipos" : timeRange,
-        demandaEstimada: demandaEstimada || "—",
-        mensaje,
-        estatus,
-        graficoUrl,
-      });
-
+      // El servidor genera la imagen en tiempo real y la embebe en el correo
       const { data, error } = await supabase.functions.invoke("send-email-alert", {
-        body: { emails, bccEmails: bccList, htmlContent },
+        body: {
+          emails,
+          bccEmails: bccList,
+          fecha: todayFormatted,
+          riskLevel,
+          riskLabel: RISK_OPTIONS.find(o => o.value === riskLevel)?.label || riskLevel,
+          riskColor: getRiskColor(riskLevel),
+          timeRange: isLowRisk ? "Uso libre de equipos" : timeRange,
+          demandaEstimada: demandaEstimada || "—",
+          mensaje,
+          estatus,
+        },
       });
 
       if (error) throw error;
-      if (!data?.success) throw new Error("Algunos correos no se enviaron");
-      toast.success(`Correo enviado a ${recipients.length} destinatario(s)`);
+      if (!data?.success) throw new Error("Error al enviar el correo");
+
+      const chartMsg = data.hasChart
+        ? "con gráfico embebido"
+        : "sin gráfico (la generación falló)";
+      toast.success(`Correo enviado a ${recipients.length} destinatario(s) ${chartMsg}`);
     } catch (err: any) {
       console.error("Error enviando correo:", err);
       toast.error("Error al enviar el correo");
@@ -532,7 +443,7 @@ const ActualizacionAlertaPage = () => {
                 <ForecastChart data={forecastData} onPeakValueChange={handlePeakValueChange} showPeakLabel={true} />
               </div>
 
-              {/* iframe que muestra el HTML exacto del correo (incluye la imagen del gráfico generada en backend) */}
+              {/* iframe que muestra el HTML del correo (la imagen se genera en el servidor al enviar) */}
               <iframe
                 srcDoc={previewHtml}
                 title="Vista previa del correo"
@@ -545,7 +456,7 @@ const ActualizacionAlertaPage = () => {
               <div className="flex gap-3 mt-4">
                 <Button variant="outline" className="flex-1" onClick={handleSendEmail} disabled={sendingEmail}>
                   {sendingEmail ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Mail className="h-4 w-4 mr-2" />}
-                  {sendingEmail ? "Enviando..." : "Enviar correo"}
+                  {sendingEmail ? "Generando imagen y enviando..." : "Enviar correo"}
                 </Button>
                 <Button variant="outline" className="flex-1" onClick={handleSendWhatsApp}>
                   <MessageSquare className="h-4 w-4 mr-2" />
