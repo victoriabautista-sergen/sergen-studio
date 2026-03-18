@@ -445,11 +445,12 @@ const ActualizacionAlertaPage = () => {
               </p>
             </CardHeader>
             <CardContent className="space-y-4">
-              {/* Gráfico de pronóstico con datos en tiempo real */}
-              <div className="border rounded-lg p-4 bg-white">
-                <p className="text-xs font-semibold text-muted-foreground mb-2">📊 Pronóstico de Demanda (datos actuales)</p>
-                <ForecastChart data={forecastData} onPeakValueChange={handlePeakValueChange} showPeakLabel={true} />
-              </div>
+              {/* Hidden: only used to compute peak value */}
+              {forecastData && forecastData.length > 0 && (
+                <div style={{ position: 'absolute', width: 0, height: 0, overflow: 'hidden', pointerEvents: 'none' }} aria-hidden="true">
+                  <ForecastChart data={forecastData} onPeakValueChange={handlePeakValueChange} showPeakLabel={false} />
+                </div>
+              )}
 
               {/* iframe que muestra el HTML del correo */}
               <iframe
