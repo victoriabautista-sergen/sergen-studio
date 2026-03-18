@@ -217,7 +217,8 @@ const ActualizacionAlertaPage = () => {
   const todayFormatted = todayRaw.toLowerCase();
   const isLowRisk = riskLevel === "BAJO";
 
-  // Preview HTML (sin imagen - la imagen se genera en el servidor al enviar)
+  // Preview HTML — incluye el gráfico en vivo dentro del cuerpo del correo
+  const chartPreviewUrl = `https://sergen-studio.lovable.app/render/pronostico?t=${refreshKey}`;
   useEffect(() => {
     const html = generarHTMLCorreo({
       fecha: todayFormatted,
@@ -227,9 +228,10 @@ const ActualizacionAlertaPage = () => {
       demandaEstimada: demandaEstimada || "—",
       mensaje,
       estatus,
+      chartImageUrl: chartPreviewUrl,
     });
     setPreviewHtml(html);
-  }, [riskLevel, timeRange, demandaEstimada, mensaje, estatus, todayFormatted, isLowRisk]);
+  }, [riskLevel, timeRange, demandaEstimada, mensaje, estatus, todayFormatted, isLowRisk, refreshKey]);
 
   const handleSendEmail = async () => {
     if (recipients.length === 0) {
