@@ -228,7 +228,7 @@ const ActualizacionAlertaPage = () => {
       demandaEstimada: demandaEstimada || "—",
       mensaje,
       estatus,
-      chartImageUrl: chartPreviewUrl,
+      chartPreviewUrl,
     });
     setPreviewHtml(html);
   }, [riskLevel, timeRange, demandaEstimada, mensaje, estatus, todayFormatted, isLowRisk, refreshKey]);
