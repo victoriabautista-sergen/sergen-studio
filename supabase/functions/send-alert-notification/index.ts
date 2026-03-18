@@ -33,12 +33,11 @@ function buildEmailHtml({
   <title>Pronóstico de potencia máxima</title>
 </head>
 <body style="margin:0;padding:0;background-color:#f5f5f5;font-family:Arial,sans-serif;">
-  <div style="display:none;font-size:1px;color:#f5f5f5;line-height:1px;max-height:0px;max-width:0px;opacity:0;overflow:hidden">Alerta diaria de potencia&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;</div>
+  <div style="display:none;font-size:1px;color:#f5f5f5;line-height:1px;max-height:0px;max-width:0px;opacity:0;overflow:hidden">Alerta diaria de potencia&#847;</div>
   <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#f5f5f5;padding:20px 0;">
     <tr>
       <td align="center">
         <table width="600" cellpadding="0" cellspacing="0" style="background-color:#ffffff;border-radius:8px;overflow:hidden;">
-          <!-- Header -->
           <tr>
             <td align="center" style="padding:40px 20px 20px;">
               <div style="width:64px;height:64px;border-radius:50%;border:4px solid #5BA3C9;display:inline-flex;align-items:center;justify-content:center;">
@@ -56,8 +55,6 @@ function buildEmailHtml({
               <p style="margin:0;font-size:20px;font-weight:bold;color:#1a1a1a;">${fecha}</p>
             </td>
           </tr>
-
-          <!-- Rango horario + Demanda -->
           <tr>
             <td style="padding:0 30px;">
               <table width="100%" cellpadding="0" cellspacing="0">
@@ -80,8 +77,6 @@ function buildEmailHtml({
               </table>
             </td>
           </tr>
-
-          <!-- Recuerde + Estatus -->
           <tr>
             <td style="padding:20px 30px 30px;">
               <table width="100%" cellpadding="0" cellspacing="0">
@@ -98,8 +93,6 @@ function buildEmailHtml({
               </table>
             </td>
           </tr>
-
-          <!-- Footer banner -->
           <tr>
             <td align="center" style="background-color:${accentColor};padding:16px 20px;">
               <span style="color:#ffffff;font-size:18px;font-weight:bold;letter-spacing:2px;">USUARIO ACTIVO</span>
@@ -119,17 +112,16 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
-    if (!RESEND_API_KEY) {
+    const BREVO_API_KEY = Deno.env.get("BREVO_API_KEY");
+    if (!BREVO_API_KEY) {
       throw new Error(
-        "RESEND_API_KEY no está configurada. Configura la clave API de Resend para enviar correos."
+        "BREVO_API_KEY no está configurada. Configura la clave API de Brevo para enviar correos."
       );
     }
 
     const { to, riskLevel, timeRange, demandaEstimada, mensaje, estatus, fecha } =
       await req.json();
 
-    // Support both single email string and array of emails
     const recipients: string[] = Array.isArray(to) ? to : [to];
     if (recipients.length === 0 || !recipients[0]) {
       throw new Error("El campo 'to' (correo de destino) es requerido.");
@@ -144,29 +136,35 @@ Deno.serve(async (req) => {
       fecha,
     });
 
-    const resendResponse = await fetch("https://api.resend.com/emails", {
+    const peruNow = new Date(new Date().toLocaleString("en-US", { timeZone: "America/Lima" }));
+    const dd = String(peruNow.getDate()).padStart(2, "0");
+    const mm = String(peruNow.getMonth() + 1).padStart(2, "0");
+    const yy = String(peruNow.getFullYear()).slice(-2);
+    const subject = `⚡ Pronóstico de potencia | ${dd}/${mm}/${yy} ⚡`;
+
+    const brevoResponse = await fetch("https://api.brevo.com/v3/smtp/email", {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${RESEND_API_KEY}`,
         "Content-Type": "application/json",
+        "api-key": BREVO_API_KEY,
       },
       body: JSON.stringify({
-        from: "SERGEN <alertas@sergen-studio.lovable.app>",
-        to: recipients,
-        subject: `Pronóstico de potencia máxima - ${fecha}`,
-        html,
+        sender: { name: "SERGEN", email: "info@sergen.pe" },
+        to: recipients.map((email) => ({ email })),
+        subject,
+        htmlContent: html,
       }),
     });
 
-    const resendData = await resendResponse.json();
+    const brevoData = await brevoResponse.json();
 
-    if (!resendResponse.ok) {
+    if (!brevoResponse.ok) {
       throw new Error(
-        `Error de Resend [${resendResponse.status}]: ${JSON.stringify(resendData)}`
+        `Error de Brevo [${brevoResponse.status}]: ${JSON.stringify(brevoData)}`
       );
     }
 
-    return new Response(JSON.stringify({ success: true, id: resendData.id }), {
+    return new Response(JSON.stringify({ success: true, data: brevoData }), {
       status: 200,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
