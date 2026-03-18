@@ -14,7 +14,6 @@ function buildEmailHtml({
   demandaEstimada,
   mensaje,
   estatus,
-  chartBase64,
 }: {
   fecha: string;
   riskColor: string;
@@ -23,11 +22,9 @@ function buildEmailHtml({
   demandaEstimada: string;
   mensaje: string;
   estatus: string;
-  chartBase64?: string;
 }): string {
-  const chartRow = chartBase64
-    ? `<tr><td style="padding:12px 24px"><p style="margin:0 0 8px;font-size:13px;font-weight:700;color:#374151">Pronóstico de Demanda</p><img src="data:image/png;base64,${chartBase64}" alt="Gráfico de pronóstico" width="520" style="display:block;width:100%;max-width:520px;height:auto;border-radius:8px;border:1px solid #e5e7eb" /></td></tr>`
-    : "";
+  // Chart is always a CID attachment — referenced as cid:chart.png
+  const chartRow = `<tr><td style="padding:12px 24px"><p style="margin:0 0 8px;font-size:13px;font-weight:700;color:#374151">Pronóstico de Demanda</p><img src="cid:chart.png" alt="Gráfico de pronóstico" width="520" style="display:block;width:100%;max-width:520px;height:auto;border-radius:8px;border:1px solid #e5e7eb" /></td></tr>`;
 
   return `<!DOCTYPE html>
 <html lang="es" xml:lang="es" xmlns="http://www.w3.org/1999/xhtml" dir="ltr">
@@ -67,17 +64,18 @@ ${chartRow}
 }
 
 async function captureChartAsBase64(): Promise<string | null> {
-  const captureUrl = `https://sergen-studio.lovable.app/render/pronostico?t=${Date.now()}`;
-  console.log("[CHART] Capturando gráfico desde:", captureUrl);
+  const captureUrl = `https://sergen-studio.lovable.app/render/pronostico?t=${Date.now()}&nocache=${Math.random()}`;
+  console.log("[CHART] URL de captura:", captureUrl);
 
   const microlinkUrl = new URL("https://api.microlink.io/");
   microlinkUrl.searchParams.set("url", captureUrl);
   microlinkUrl.searchParams.set("screenshot", "true");
   microlinkUrl.searchParams.set("meta", "false");
-  microlinkUrl.searchParams.set("waitForTimeout", "8000");
+  microlinkUrl.searchParams.set("waitForTimeout", "10000");
   microlinkUrl.searchParams.set("element", "#chart-container");
   microlinkUrl.searchParams.set("screenshot.type", "png");
   microlinkUrl.searchParams.set("force", "true");
+  microlinkUrl.searchParams.set("cache", "false");
 
   const microlinkRes = await fetch(microlinkUrl.toString());
   if (!microlinkRes.ok) {
@@ -87,7 +85,7 @@ async function captureChartAsBase64(): Promise<string | null> {
 
   const microlinkData = await microlinkRes.json();
   if (microlinkData.status !== "success" || !microlinkData.data?.screenshot?.url) {
-    console.error("[CHART] Microlink no generó screenshot");
+    console.error("[CHART] Microlink no generó screenshot:", JSON.stringify(microlinkData.status));
     return null;
   }
 
@@ -102,14 +100,13 @@ async function captureChartAsBase64(): Promise<string | null> {
 
   const imageBuffer = await imageRes.arrayBuffer();
   const imageSize = imageBuffer.byteLength;
-  console.log("[CHART] Imagen descargada:", imageSize, "bytes");
+  console.log("[CHART] Tamaño de imagen:", imageSize, "bytes");
 
   if (imageSize < 5000) {
     console.error("[CHART] Imagen demasiado pequeña (probablemente vacía):", imageSize, "bytes");
     return null;
   }
 
-  // Convert to base64
   const uint8 = new Uint8Array(imageBuffer);
   let binary = "";
   for (let i = 0; i < uint8.length; i++) {
@@ -178,16 +175,26 @@ Deno.serve(async (req) => {
     let chartBase64: string | null = null;
     try {
       chartBase64 = await captureChartAsBase64();
-      if (chartBase64) {
-        console.log("[EMAIL] ✅ Imagen generada exitosamente");
-      } else {
-        console.warn("[EMAIL] ⚠️ No se pudo generar la imagen, el correo se enviará sin gráfico");
-      }
     } catch (chartErr) {
       console.error("[EMAIL] Error generando imagen:", chartErr);
     }
 
-    // 2. Construir HTML con imagen embebida (base64 inline, sin URLs)
+    // 2. REGLA CRÍTICA: Si no hay imagen válida, BLOQUEAR el envío
+    if (!chartBase64) {
+      console.error("[EMAIL] ❌ ENVÍO BLOQUEADO: No hay imagen válida del gráfico. No hay datos disponibles para generar el gráfico.");
+      return new Response(JSON.stringify({
+        success: false,
+        error: "No hay datos disponibles para generar el gráfico. El correo no fue enviado.",
+        blocked: true,
+      }), {
+        status: 422,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    console.log("[EMAIL] ✅ Imagen válida generada, procediendo con envío");
+
+    // 3. Construir HTML con referencia CID
     const htmlContent = buildEmailHtml({
       fecha: fecha || "",
       riskColor: riskColor || "#D4A017",
@@ -196,21 +203,9 @@ Deno.serve(async (req) => {
       demandaEstimada: demandaEstimada || "—",
       mensaje: mensaje || "",
       estatus: estatus || "",
-      chartBase64: chartBase64 || undefined,
     });
 
-    // 3. Validar que el HTML NO contiene URLs de imagen
-    if (htmlContent.includes('src="http') || htmlContent.includes("src='http")) {
-      console.error("[EMAIL] ❌ VALIDACIÓN FALLIDA: El HTML contiene URLs de imagen externas");
-      return new Response(JSON.stringify({ error: "El HTML contiene URLs de imagen no permitidas" }), {
-        status: 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-    console.log("[EMAIL] ✅ Validación: HTML no contiene URLs de imagen externas");
-
-    // 4. Enviar correo via Brevo
-    // Use Peru timezone for subject date
+    // 4. Enviar correo via Brevo con CID attachment
     const peruNow = new Date(new Date().toLocaleString("en-US", { timeZone: "America/Lima" }));
     const dd = String(peruNow.getDate()).padStart(2, "0");
     const mm = String(peruNow.getMonth() + 1).padStart(2, "0");
@@ -222,6 +217,10 @@ Deno.serve(async (req) => {
       to: emails.map((email: string) => ({ email })),
       subject,
       htmlContent,
+      attachment: [{
+        content: chartBase64,
+        name: "chart.png",
+      }],
     };
 
     if (bccEmails && Array.isArray(bccEmails) && bccEmails.length > 0) {
@@ -247,7 +246,7 @@ Deno.serve(async (req) => {
       console.error(`[BREVO] Error:`, JSON.stringify(data));
     }
 
-    return new Response(JSON.stringify({ success, data, hasChart: !!chartBase64 }), {
+    return new Response(JSON.stringify({ success, data, hasChart: true }), {
       status: success ? 200 : 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
