@@ -42,7 +42,8 @@ const ActualizacionAlertaPage = () => {
   const [demandaManuallyEdited, setDemandaManuallyEdited] = useState(false);
   const [mensaje, setMensaje] = useState("Solo usar equipos indispensables.");
   const computeEstatus = () => {
-    const lastDay = endOfMonth(new Date());
+    const peruNow = toZonedTime(new Date(), "America/Lima");
+    const lastDay = endOfMonth(peruNow);
     return `Activo hasta el ${format(lastDay, "d 'de' MMMM", { locale: es })}`;
   };
   const [estatus, setEstatus] = useState(computeEstatus);
