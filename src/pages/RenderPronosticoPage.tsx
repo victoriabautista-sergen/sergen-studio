@@ -1,85 +1,68 @@
 import { useEffect, useState } from 'react';
-import { ForecastChart } from '@/modules/energy_intelligence/components/forecast/ForecastChart';
+import { subDays, startOfDay, endOfDay } from 'date-fns';
+import { externalSupabase } from '@/modules/energy_intelligence/lib/externalSupabase';
+import { DailyForecastChart } from '@/modules/energy_intelligence/components/forecast/DailyForecastChart';
 import type { CoesData } from '@/modules/energy_intelligence/types';
+
+declare global {
+  interface Window {
+    chartReady: boolean;
+  }
+}
 
 const RenderPronosticoPage = () => {
   const [data, setData] = useState<CoesData[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [ready, setReady] = useState(false);
 
   useEffect(() => {
-    // Add no-cache meta tags for Microlink / browsers
-    const meta = document.createElement('meta');
-    meta.httpEquiv = 'Cache-Control';
-    meta.content = 'no-cache, no-store, must-revalidate';
-    document.head.appendChild(meta);
-
-    const pragma = document.createElement('meta');
-    pragma.httpEquiv = 'Pragma';
-    pragma.content = 'no-cache';
-    document.head.appendChild(pragma);
-
-    console.log('[RENDER] Inicio: /render/pronostico — timestamp:', Date.now());
-
     const fetchData = async () => {
       try {
-        const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID;
-        const anonKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
-        const url = `https://${projectId}.supabase.co/functions/v1/get-chart-data?t=${Date.now()}`;
+        const today = new Date();
+        const twoDaysAgo = subDays(today, 2);
+        const startDate = startOfDay(twoDaysAgo).toISOString();
+        const endDate = endOfDay(today).toISOString();
 
-        console.log('[RENDER] Fetching:', url);
+        const { data: forecastData, error } = await externalSupabase
+          .from('coes_forecast')
+          .select('fecha, reprogramado, pronostico, rango_inferior, rango_superior, ejecutado')
+          .gte('fecha', startDate)
+          .lte('fecha', endDate)
+          .order('fecha', { ascending: true });
 
-        const res = await fetch(url, {
-          headers: {
-            'Content-Type': 'application/json',
-            'apikey': anonKey,
-            'Authorization': `Bearer ${anonKey}`,
-            'Cache-Control': 'no-cache, no-store, must-revalidate',
-            'Pragma': 'no-cache',
-          },
-        });
+        if (error) {
+          console.error('[ERROR]', error);
+          return;
+        }
 
-        console.log('[RENDER] HTTP:', res.status);
-
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        const json = await res.json();
-
-        const records = json.data || [];
-        console.log(`[DATA] Fecha: ${json.date || 'N/A'}, registros: ${records.length}`);
+        const records = (forecastData ?? []) as CoesData[];
+        console.log('[DATA]', records.length, 'registros');
 
         if (records.length > 0) {
-          console.log(`[DATA] Primer registro: ${records[0].fecha}`);
-          console.log(`[DATA] Último registro: ${records[records.length - 1].fecha}`);
+          setData(records);
+          setReady(true);
         }
-
-        if (json.settings) {
-          console.log(`[DATA] Settings: risk=${json.settings.risk_level}, time=${json.settings.modulation_time}`);
-        }
-
-        setData(records);
-      } catch (err: any) {
-        console.error('[RENDER] Error:', err);
-        setError(err.message);
+      } catch (err) {
+        console.error('[ERROR]', err);
       } finally {
         setLoading(false);
       }
     };
-    fetchData();
 
-    return () => {
-      document.head.removeChild(meta);
-      document.head.removeChild(pragma);
-    };
+    fetchData();
   }, []);
 
   useEffect(() => {
-    if (!loading && data.length > 0) {
-      console.log(`[RENDER] ✅ Chart Ready — ${data.length} puntos`);
-      document.title = 'Chart Ready';
-    } else if (!loading && data.length === 0) {
-      console.log('[RENDER] ⚠️ Sin datos — NO se marca Chart Ready');
+    if (ready && data.length > 0) {
+      console.log('[RENDER] chart listo');
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          console.log('[RENDER] chart listo (post-DOM)');
+          window.chartReady = false;
+        });
+      });
     }
-  }, [loading, data]);
+  }, [ready, data]);
 
   if (loading) {
     return (
@@ -89,17 +72,17 @@ const RenderPronosticoPage = () => {
     );
   }
 
-  if (error || data.length === 0) {
+  if (data.length === 0) {
     return (
       <div style={{ width: '100%', maxWidth: 800, height: 400, display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#fff' }}>
-        <p>{error || 'No hay datos disponibles'}</p>
+        <p>Sin datos disponibles</p>
       </div>
     );
   }
 
   return (
     <div id="chart-container" style={{ width: '100%', maxWidth: 800, paddingTop: 16, paddingLeft: 8, paddingRight: 8, paddingBottom: 8, background: '#fff' }}>
-      <ForecastChart data={data} showPeakLabel={true} />
+      <DailyForecastChart data={data} />
     </div>
   );
 };
