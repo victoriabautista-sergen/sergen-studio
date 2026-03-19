@@ -13,9 +13,9 @@ export function generarHTMLCorreo(d: EmailTemplateData): string {
   // En la vista previa usamos un iframe para mostrar el gráfico en vivo
   // En el correo real, el backend reemplaza esto por una imagen CID capturada por Microlink
   const chartBlock = d.chartPreviewUrl
-    ? `<tr><td style="padding:12px 24px">
-        <div style="width:100%;border:1px solid #e5e7eb;border-radius:8px;overflow:hidden;background:#fff">
-          <iframe src="${d.chartPreviewUrl}" style="width:800px;height:420px;border:none;transform:scale(0.69);transform-origin:0 0;display:block" frameborder="0" scrolling="no"></iframe>
+    ? `<tr><td style="padding:12px 0">
+        <div style="width:100%;height:368px;border:1px solid #e5e7eb;border-radius:8px;overflow:hidden;background:#fff;position:relative">
+          <iframe src="${d.chartPreviewUrl}" style="width:800px;height:420px;border:none;transform:scale(0.875);transform-origin:0 0;display:block;position:absolute;top:0;left:0" frameborder="0" scrolling="no"></iframe>
         </div>
        </td></tr>`
     : `<tr><td align="center" style="padding:12px 24px"><p style="margin:0;font-size:12px;color:#9ca3af;font-style:italic">📊 El gráfico se adjunta como imagen en el correo enviado</p></td></tr>`;
@@ -27,7 +27,7 @@ export function generarHTMLCorreo(d: EmailTemplateData): string {
 <div style="display:none;font-size:1px;color:#f4f4f7;line-height:1px;max-height:0px;max-width:0px;opacity:0;overflow:hidden">Alerta diaria de potencia&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;</div>
 <table width="100%" cellpadding="0" cellspacing="0" style="background:#f4f4f7">
 <tr><td align="center" style="padding:32px 10px">
-<table width="600" cellpadding="0" cellspacing="0" style="background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.08)">
+<table width="700" cellpadding="0" cellspacing="0" style="background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.08)">
 <tr><td align="center" style="padding:40px 24px 12px">
 <table cellpadding="0" cellspacing="0"><tr><td align="center" width="56" height="56" style="width:56px;height:56px;border-radius:50%;border:4px solid #60a5fa;text-align:center;font-size:28px;line-height:56px">&#9889;</td></tr></table>
 </td></tr>
