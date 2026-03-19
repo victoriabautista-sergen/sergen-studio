@@ -154,8 +154,8 @@ export const DailyForecastChartRender = ({ data }: DailyForecastChartRenderProps
   }
 
   return (
-    <div style={{ width: 800, height: 400, background: '#ffffff', padding: '4px 4px 0 0' }}>
-      <LineChart width={796} height={396} data={chartData} margin={{ top: 5, right: 20, left: 30, bottom: 35 }}>
+    <div style={{ width: 800, height: 420, background: '#ffffff', padding: '20px 4px 0 0' }}>
+      <LineChart width={796} height={396} data={chartData} margin={{ top: 10, right: 20, left: 30, bottom: 35 }}>
         <XAxis dataKey="time" interval={2} angle={-45} textAnchor="end" height={60} />
         <YAxis domain={[5500, 8500]} tickFormatter={v => v.toLocaleString()} />
         {chartData.map((entry, index) =>
