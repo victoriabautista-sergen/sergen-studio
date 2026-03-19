@@ -90,41 +90,56 @@ export const DailyForecastChartRender = ({ data }: DailyForecastChartRenderProps
     const { viewBox } = props;
     const x = viewBox?.x ?? 0;
     const y = viewBox?.y ?? 0;
-    const offsetX = -110;
-    const offsetY = 50;
+    const offsetX = -120;
+    const offsetY = 55;
+
+    // Format date from the peak's original fecha
+    const peakOriginal = sortedData.find(d => formatTime(d.fecha) === peakPoint.time);
+    const fechaLabel = peakOriginal
+      ? (() => {
+          const f = new Date(peakOriginal.fecha);
+          const dd = f.getUTCDate().toString().padStart(2, '0');
+          const mm = (f.getUTCMonth() + 1).toString().padStart(2, '0');
+          const yyyy = f.getUTCFullYear();
+          const hh = f.getUTCHours().toString().padStart(2, '0');
+          const min = f.getUTCMinutes().toString().padStart(2, '0');
+          return `${dd}/${mm}/${yyyy} ${hh}:${min} (UTC)`;
+        })()
+      : peakPoint.time;
 
     return (
-      <foreignObject x={x + offsetX} y={y + offsetY} width={220} height={110}>
+      <foreignObject x={x + offsetX} y={y + offsetY} width={240} height={120}>
         <div
           style={{
             background: 'rgba(255,255,255,0.96)',
             border: '1px solid #d1d5db',
             borderRadius: 6,
-            padding: '6px 10px',
+            padding: '8px 12px',
             boxShadow: '0 4px 12px rgba(0,0,0,0.12)',
-            fontSize: 11,
-            lineHeight: '16px',
+            fontSize: 12,
+            lineHeight: '18px',
+            minWidth: 220,
           }}
         >
-          <div style={{ fontWeight: 700, marginBottom: 3, color: '#374151' }}>
-            Máx. Hora Punta — {peakPoint.time}
+          <div style={{ fontWeight: 700, marginBottom: 4, color: '#374151' }}>
+            {fechaLabel}
           </div>
           <div style={{ color: SERIES_COLORS.reprogramacion }}>
-            Reprogramación: {peakPoint.reprogramacion.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} MW
+            Reprogramación : {peakPoint.reprogramacion.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} MW
           </div>
           {peakPoint.pronostico != null && (
             <div style={{ color: SERIES_COLORS.pronostico }}>
-              Pronóstico: {peakPoint.pronostico.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} MW
+              Pronóstico Diario : {peakPoint.pronostico.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} MW
             </div>
           )}
           {peakPoint.rangoInferior != null && (
             <div style={{ color: SERIES_COLORS.rangoInferior }}>
-              Rango Inf: {peakPoint.rangoInferior.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} MW
+              Rango Inferior : {peakPoint.rangoInferior.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} MW
             </div>
           )}
           {peakPoint.rangoSuperior != null && (
             <div style={{ color: SERIES_COLORS.rangoSuperior }}>
-              Rango Sup: {peakPoint.rangoSuperior.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} MW
+              Rango Superior : {peakPoint.rangoSuperior.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} MW
             </div>
           )}
         </div>
