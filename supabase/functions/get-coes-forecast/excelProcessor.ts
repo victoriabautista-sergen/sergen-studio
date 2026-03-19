@@ -1,5 +1,5 @@
 
-import * as XLSX from 'npm:xlsx@0.18.5'
+import * as XLSX from 'https://cdn.sheetjs.com/xlsx-0.20.3/package/xlsx.mjs'
 import { parseExcelDate } from './dateUtils.ts'
 import { parseNumber } from './numberUtils.ts'
 
