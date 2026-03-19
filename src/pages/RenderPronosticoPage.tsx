@@ -125,6 +125,5 @@ const RenderPronosticoPage = () => {
     </div>
   );
 };
-};
 
 export default RenderPronosticoPage;
