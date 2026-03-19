@@ -66,17 +66,40 @@ const RenderPronosticoPage = () => {
     fetchData();
   }, []);
 
-  // Signal chart ready after data renders + 500ms stabilization
-  // Adds a DOM marker (#chart-ready) that Microlink can detect via waitForSelector
+  // Signal chart ready only after SVG paths are fully rendered
+  const [svgReady, setSvgReady] = useState(false);
+
   useEffect(() => {
     if (!loading && data.length > 0) {
-      const timer = setTimeout(() => {
-        window.chartReady = true;
-        console.log('[RENDER] chart listo');
-      }, 500);
+      console.log('[RENDER] verificando contenido SVG');
+      
+      const checkSvg = () => {
+        const svg = document.querySelector('#chart-container svg');
+        const paths = svg?.querySelectorAll('path');
+        if (svg && paths && paths.length > 0) {
+          console.log('[RENDER] SVG listo,', paths.length, 'paths encontrados');
+          setSvgReady(true);
+        } else {
+          requestAnimationFrame(checkSvg);
+        }
+      };
+
+      // Start checking after initial 200ms for React/Recharts to mount
+      const timer = setTimeout(checkSvg, 200);
       return () => clearTimeout(timer);
     }
   }, [loading, data]);
+
+  // Set window.chartReady after SVG confirmed + 300ms stabilization
+  useEffect(() => {
+    if (svgReady) {
+      const timer = setTimeout(() => {
+        window.chartReady = true;
+        console.log('[RENDER] chart listo');
+      }, 300);
+      return () => clearTimeout(timer);
+    }
+  }, [svgReady]);
 
   if (loading) {
     return (
@@ -97,8 +120,8 @@ const RenderPronosticoPage = () => {
   return (
     <div id="chart-container" style={{ background: '#fff' }}>
       <DailyForecastChartRender data={data} />
-      {/* DOM marker for Microlink waitForSelector - only rendered when chart is truly ready */}
-      <div id="chart-ready" style={{ display: 'none' }} />
+      {/* DOM marker only appears after SVG paths are confirmed rendered */}
+      {svgReady && <div id="chart-ready" style={{ display: 'none' }} />}
     </div>
   );
 };
