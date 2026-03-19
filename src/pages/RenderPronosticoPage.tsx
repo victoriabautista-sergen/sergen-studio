@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { subDays, startOfDay, endOfDay } from 'date-fns';
-import { externalSupabase } from '@/modules/energy_intelligence/lib/externalSupabase';
+import { supabase } from '@/integrations/supabase/client';
 import { DailyForecastChartRender } from '@/modules/energy_intelligence/components/forecast/DailyForecastChartRender';
 
 declare global {
@@ -34,7 +34,7 @@ const RenderPronosticoPage = () => {
         const startDate = startOfDay(twoDaysAgo).toISOString();
         const endDate = endOfDay(today).toISOString();
 
-        const { data: forecastData, error: fetchError } = await externalSupabase
+        const { data: forecastData, error: fetchError } = await supabase
           .from('coes_forecast')
           .select('fecha, reprogramado, pronostico, rango_inferior, rango_superior, ejecutado')
           .gte('fecha', startDate)
