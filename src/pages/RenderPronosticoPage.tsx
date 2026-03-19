@@ -67,6 +67,7 @@ const RenderPronosticoPage = () => {
   }, []);
 
   // Signal chart ready after data renders + 500ms stabilization
+  // Adds a DOM marker (#chart-ready) that Microlink can detect via waitForSelector
   useEffect(() => {
     if (!loading && data.length > 0) {
       const timer = setTimeout(() => {
@@ -96,6 +97,8 @@ const RenderPronosticoPage = () => {
   return (
     <div id="chart-container" style={{ background: '#fff' }}>
       <DailyForecastChartRender data={data} />
+      {/* DOM marker for Microlink waitForSelector - only rendered when chart is truly ready */}
+      <div id="chart-ready" style={{ display: 'none' }} />
     </div>
   );
 };
