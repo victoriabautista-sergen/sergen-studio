@@ -1,8 +1,7 @@
 import { useEffect, useState } from 'react';
 import { subDays, startOfDay, endOfDay } from 'date-fns';
 import { externalSupabase } from '@/modules/energy_intelligence/lib/externalSupabase';
-import { DailyForecastChart } from '@/modules/energy_intelligence/components/forecast/DailyForecastChart';
-import type { CoesData } from '@/modules/energy_intelligence/types';
+import { DailyForecastChartRender } from '@/modules/energy_intelligence/components/forecast/DailyForecastChartRender';
 
 declare global {
   interface Window {
@@ -10,12 +9,24 @@ declare global {
   }
 }
 
+interface ForecastRecord {
+  fecha: string;
+  reprogramado: number | null;
+  pronostico: number | null;
+  rango_inferior: number | null;
+  rango_superior: number | null;
+  ejecutado: number | null;
+}
+
 const RenderPronosticoPage = () => {
-  const [data, setData] = useState<CoesData[]>([]);
+  const [data, setData] = useState<ForecastRecord[]>([]);
   const [loading, setLoading] = useState(true);
-  const [ready, setReady] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    window.chartReady = false;
+    console.log('[RENDER] cargando data');
+
     const fetchData = async () => {
       try {
         const today = new Date();
@@ -23,27 +34,30 @@ const RenderPronosticoPage = () => {
         const startDate = startOfDay(twoDaysAgo).toISOString();
         const endDate = endOfDay(today).toISOString();
 
-        const { data: forecastData, error } = await externalSupabase
+        const { data: forecastData, error: fetchError } = await externalSupabase
           .from('coes_forecast')
           .select('fecha, reprogramado, pronostico, rango_inferior, rango_superior, ejecutado')
           .gte('fecha', startDate)
           .lte('fecha', endDate)
           .order('fecha', { ascending: true });
 
-        if (error) {
-          console.error('[ERROR]', error);
+        if (fetchError) {
+          console.error('[RENDER][ERROR]', fetchError);
+          setError(fetchError.message);
           return;
         }
 
-        const records = (forecastData ?? []) as CoesData[];
-        console.log('[DATA]', records.length, 'registros');
+        const records = (forecastData ?? []) as ForecastRecord[];
+        console.log('[RENDER] data lista', records.length, 'registros');
 
         if (records.length > 0) {
           setData(records);
-          setReady(true);
+        } else {
+          setError('Sin datos disponibles');
         }
       } catch (err) {
-        console.error('[ERROR]', err);
+        console.error('[RENDER][ERROR]', err);
+        setError(err instanceof Error ? err.message : String(err));
       } finally {
         setLoading(false);
       }
@@ -52,37 +66,36 @@ const RenderPronosticoPage = () => {
     fetchData();
   }, []);
 
+  // Signal chart ready after data renders + 500ms stabilization
   useEffect(() => {
-    if (ready && data.length > 0) {
-      console.log('[RENDER] chart listo');
-      requestAnimationFrame(() => {
-        requestAnimationFrame(() => {
-          console.log('[RENDER] chart listo (post-DOM)');
-          window.chartReady = false;
-        });
-      });
+    if (!loading && data.length > 0) {
+      const timer = setTimeout(() => {
+        window.chartReady = true;
+        console.log('[RENDER] chart listo');
+      }, 500);
+      return () => clearTimeout(timer);
     }
-  }, [ready, data]);
+  }, [loading, data]);
 
   if (loading) {
     return (
-      <div style={{ width: '100%', maxWidth: 800, height: 400, display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#fff' }}>
+      <div style={{ width: 800, height: 400, display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#fff' }}>
         <p>Cargando datos...</p>
       </div>
     );
   }
 
-  if (data.length === 0) {
+  if (error || data.length === 0) {
     return (
-      <div style={{ width: '100%', maxWidth: 800, height: 400, display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#fff' }}>
-        <p>Sin datos disponibles</p>
+      <div style={{ width: 800, height: 400, display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#fff' }}>
+        <p>{error || 'Sin datos disponibles'}</p>
       </div>
     );
   }
 
   return (
-    <div id="chart-container" style={{ width: '100%', maxWidth: 800, paddingTop: 16, paddingLeft: 8, paddingRight: 8, paddingBottom: 8, background: '#fff' }}>
-      <DailyForecastChart data={data} />
+    <div id="chart-container" style={{ background: '#fff' }}>
+      <DailyForecastChartRender data={data} />
     </div>
   );
 };

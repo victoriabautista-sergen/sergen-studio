@@ -68,7 +68,8 @@ Deno.serve(async (req) => {
     microlinkUrl.searchParams.set("url", chartPageUrl);
     microlinkUrl.searchParams.set("screenshot", "true");
     microlinkUrl.searchParams.set("meta", "false");
-    microlinkUrl.searchParams.set("waitForTimeout", "8000");
+    microlinkUrl.searchParams.set("waitForTimeout", "10000");
+    microlinkUrl.searchParams.set("waitUntil", "networkidle0");
     microlinkUrl.searchParams.set("element", "#chart-container");
     microlinkUrl.searchParams.set("screenshot.type", "png");
     microlinkUrl.searchParams.set("force", "true");
