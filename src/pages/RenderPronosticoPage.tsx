@@ -34,7 +34,7 @@ const RenderPronosticoPage = () => {
         const startDate = startOfDay(twoDaysAgo).toISOString();
         const endDate = endOfDay(today).toISOString();
 
-        const { data: forecastData, error: fetchError } = await externalSupabase
+        const { data: forecastData, error: fetchError } = await supabase
           .from('coes_forecast')
           .select('fecha, reprogramado, pronostico, rango_inferior, rango_superior, ejecutado')
           .gte('fecha', startDate)
