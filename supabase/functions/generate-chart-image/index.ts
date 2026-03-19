@@ -102,12 +102,12 @@ Deno.serve(async (req) => {
     }
 
     // --- Download screenshot ---
+    console.log("[CAPTURE] capturando imagen...");
     const screenshotUrl = microlinkData.data.screenshot.url;
-    console.log("[CHART] Screenshot URL:", screenshotUrl);
 
     const imageRes = await fetch(screenshotUrl);
     if (!imageRes.ok) {
-      console.error("[CHART] Error descargando screenshot, status:", imageRes.status);
+      console.error("[CAPTURE][ERROR] Error descargando screenshot, status:", imageRes.status);
       return new Response(JSON.stringify({ error: "Error descargando la imagen del gráfico" }), {
         status: 500,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -116,7 +116,7 @@ Deno.serve(async (req) => {
 
     const imageBlob = await imageRes.arrayBuffer();
     const imageSize = imageBlob.byteLength;
-    console.log("[CHART] Imagen descargada:", imageSize, "bytes");
+    console.log("[CAPTURE] imagen generada:", imageSize, "bytes");
 
     // --- Validate image is not empty/too small (blank captures are ~30KB or less) ---
     if (imageSize < 5000) {
