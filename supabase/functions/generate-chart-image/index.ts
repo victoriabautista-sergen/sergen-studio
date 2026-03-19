@@ -83,7 +83,7 @@ Deno.serve(async (req) => {
 
     if (!microlinkRes.ok) {
       const errText = await microlinkRes.text();
-      console.error("[CHART] Microlink error body:", errText);
+      console.error("[CAPTURE][ERROR] Microlink error body:", errText);
       return new Response(JSON.stringify({ error: "Error generando screenshot del gráfico", details: errText }), {
         status: 500,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -91,10 +91,10 @@ Deno.serve(async (req) => {
     }
 
     const microlinkData = await microlinkRes.json();
-    console.log("[CHART] Microlink response status:", microlinkData.status);
+    console.log("[CAPTURE] chart listo, Microlink status:", microlinkData.status);
 
     if (microlinkData.status !== "success" || !microlinkData.data?.screenshot?.url) {
-      console.error("[CHART] Microlink no generó screenshot. Response:", JSON.stringify(microlinkData).substring(0, 500));
+      console.error("[CAPTURE][ERROR] chartReady no detectado o screenshot fallido. Response:", JSON.stringify(microlinkData).substring(0, 500));
       return new Response(JSON.stringify({ error: "No se pudo generar la captura del gráfico" }), {
         status: 500,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
