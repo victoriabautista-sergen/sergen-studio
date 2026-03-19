@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { subDays, startOfDay, endOfDay } from 'date-fns';
-import { externalSupabase } from '@/modules/energy_intelligence/lib/externalSupabase';
+import { supabase } from '@/integrations/supabase/client';
 import { DailyForecastChartRender } from '@/modules/energy_intelligence/components/forecast/DailyForecastChartRender';
 
 declare global {
