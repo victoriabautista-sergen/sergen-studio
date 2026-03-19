@@ -61,23 +61,25 @@ Deno.serve(async (req) => {
     const chartPageUrl = `${captureBaseUrl}/render/pronostico`;
     console.log("[CHART] URL de captura:", chartPageUrl);
 
-    // --- Microlink screenshot with longer wait for data to load ---
-    console.log("[CHART] Intentando captura vía Microlink...");
+    // --- Microlink screenshot: wait for #chart-ready DOM marker ---
+    console.log("[CAPTURE] cargando URL:", chartPageUrl);
+    console.log("[CAPTURE] esperando render (waitForSelector=#chart-ready)");
 
     const microlinkUrl = new URL("https://api.microlink.io/");
     microlinkUrl.searchParams.set("url", chartPageUrl);
     microlinkUrl.searchParams.set("screenshot", "true");
     microlinkUrl.searchParams.set("meta", "false");
-    microlinkUrl.searchParams.set("waitForTimeout", "10000");
-    microlinkUrl.searchParams.set("waitUntil", "networkidle0");
+    // Wait for the hidden #chart-ready element (added by React after 500ms post-render)
+    microlinkUrl.searchParams.set("waitForSelector", "#chart-ready");
+    microlinkUrl.searchParams.set("waitForTimeout", "15000");
     microlinkUrl.searchParams.set("element", "#chart-container");
     microlinkUrl.searchParams.set("screenshot.type", "png");
     microlinkUrl.searchParams.set("force", "true");
 
-    console.log("[CHART] Microlink request URL:", microlinkUrl.toString());
+    console.log("[CAPTURE] Microlink request URL:", microlinkUrl.toString());
 
     const microlinkRes = await fetch(microlinkUrl.toString());
-    console.log("[CHART] Microlink HTTP status:", microlinkRes.status, microlinkRes.statusText);
+    console.log("[CAPTURE] Microlink HTTP status:", microlinkRes.status, microlinkRes.statusText);
 
     if (!microlinkRes.ok) {
       const errText = await microlinkRes.text();
