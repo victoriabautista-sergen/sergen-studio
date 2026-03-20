@@ -59,7 +59,7 @@ const AdminShell = ({ children, breadcrumbs = [], fullWidth = false }: AdminShel
       )}
 
       <main className="flex-1">
-        <div className="container py-8">{children}</div>
+        <div className={`${fullWidth ? 'max-w-[1920px] mx-auto px-8' : 'container'} py-8`}>{children}</div>
       </main>
     </div>
   </PrivateRoute>
