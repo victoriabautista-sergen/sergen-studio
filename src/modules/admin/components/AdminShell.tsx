@@ -11,6 +11,7 @@ export interface BreadcrumbItem {
 interface AdminShellProps {
   children: React.ReactNode;
   breadcrumbs?: BreadcrumbItem[];
+  fullWidth?: boolean;
 }
 
 const AdminShell = ({ children, breadcrumbs = [] }: AdminShellProps) => (
