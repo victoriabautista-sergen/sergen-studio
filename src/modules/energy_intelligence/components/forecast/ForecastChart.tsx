@@ -220,58 +220,64 @@ export const ForecastChart = forwardRef<HTMLDivElement, ForecastChartProps>(({ d
               <Label content={<CustomPeakLabel />} />
             </ReferenceDot>
           )}
-          {/* Forecast peak vertical dashed line */}
-          {forecastPeakPoint && (
+          {/* Peak vertical dashed line at reprogramación peak in peak hours */}
+          {peakPoint && (
             <ReferenceLine
-              x={forecastPeakPoint.time}
+              x={peakPoint.time}
               stroke="#C00000"
               strokeDasharray="4 4"
               strokeWidth={1.5}
               strokeOpacity={0.7}
             />
           )}
-          {/* Forecast peak dot + label */}
-          {forecastPeakPoint && (
-            <ReferenceDot
-              x={forecastPeakPoint.time}
-              y={forecastPeakPoint.value}
-              r={6}
-              fill="#C00000"
-              stroke="#fff"
-              strokeWidth={2}
-              isFront
-            >
-              <Label
-                position="top"
-                offset={12}
-                content={({ viewBox }: any) => {
-                  const x = viewBox?.x ?? 0;
-                  const y = viewBox?.y ?? 0;
-                  return (
-                    <foreignObject x={x - 70} y={y - 48} width={140} height={40}>
-                      <div
-                        style={{
-                          background: 'rgba(192,0,0,0.92)',
-                          color: '#fff',
-                          borderRadius: 6,
-                          padding: '4px 10px',
-                          fontSize: 12,
-                          fontWeight: 600,
-                          textAlign: 'center',
-                          lineHeight: '16px',
-                          boxShadow: '0 2px 8px rgba(0,0,0,0.18)',
-                          whiteSpace: 'nowrap',
-                        }}
-                      >
-                        <div>{forecastPeakPoint.time}</div>
-                        <div>{forecastPeakPoint.value.toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 1 })} MW</div>
-                      </div>
-                    </foreignObject>
-                  );
-                }}
-              />
-            </ReferenceDot>
-          )}
+          {/* Forecast peak dot + label on Pronóstico Diario at the same peak hour */}
+          {forecastPeakPoint && peakPoint && (() => {
+            // Find forecast value at the reprogramación peak time
+            const forecastAtPeak = chartData.find(d => d.time === peakPoint.time);
+            const forecastVal = forecastAtPeak?.['Pronóstico Diario'];
+            if (forecastVal == null) return null;
+            return (
+              <ReferenceDot
+                x={peakPoint.time}
+                y={forecastVal}
+                r={6}
+                fill="#C00000"
+                stroke="#fff"
+                strokeWidth={2}
+                isFront
+              >
+                <Label
+                  position="top"
+                  offset={12}
+                  content={({ viewBox }: any) => {
+                    const x = viewBox?.x ?? 0;
+                    const y = viewBox?.y ?? 0;
+                    return (
+                      <foreignObject x={x - 70} y={y - 48} width={140} height={40}>
+                        <div
+                          style={{
+                            background: 'rgba(192,0,0,0.92)',
+                            color: '#fff',
+                            borderRadius: 6,
+                            padding: '4px 10px',
+                            fontSize: 12,
+                            fontWeight: 600,
+                            textAlign: 'center',
+                            lineHeight: '16px',
+                            boxShadow: '0 2px 8px rgba(0,0,0,0.18)',
+                            whiteSpace: 'nowrap',
+                          }}
+                        >
+                          <div>{peakPoint.time}</div>
+                          <div>{forecastVal.toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 1 })} MW</div>
+                        </div>
+                      </foreignObject>
+                    );
+                  }}
+                />
+              </ReferenceDot>
+            );
+          })()}
         </LineChart>
       </ResponsiveContainer>
     </div>
