@@ -6,6 +6,9 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
+const CHART_BUCKET = "chart-images";
+const CHART_FILE = "email_alert_chart.png";
+
 function buildEmailHtml({
   fecha,
   riskColor,
@@ -14,6 +17,7 @@ function buildEmailHtml({
   demandaEstimada,
   mensaje,
   estatus,
+  chartPublicUrl,
 }: {
   fecha: string;
   riskColor: string;
@@ -22,9 +26,10 @@ function buildEmailHtml({
   demandaEstimada: string;
   mensaje: string;
   estatus: string;
+  chartPublicUrl: string;
 }): string {
-  // Chart is always a CID attachment — referenced as cid:chart.png
-  const chartRow = `<tr><td style="padding:12px 0"><p style="margin:0 0 8px;padding:0 24px;font-size:13px;font-weight:700;color:#374151">Pronóstico de Demanda</p><img src="cid:chart.png" alt="Gráfico de pronóstico" width="600" style="display:block;width:100%;height:auto;border-radius:0" /></td></tr>`;
+  // Use public URL for maximum email client compatibility (Gmail, Outlook, etc.)
+  const chartRow = `<tr><td style="padding:12px 0"><p style="margin:0 0 8px;padding:0 24px;font-size:13px;font-weight:700;color:#374151">Pronóstico de Demanda</p><img src="${chartPublicUrl}" alt="Gráfico de pronóstico" width="700" style="display:block;width:100%;max-width:700px;height:auto;border-radius:0" /></td></tr>`;
 
   return `<!DOCTYPE html>
 <html lang="es" xml:lang="es" xmlns="http://www.w3.org/1999/xhtml" dir="ltr">
