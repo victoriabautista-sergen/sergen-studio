@@ -29,7 +29,7 @@ function buildEmailHtml({
   chartPublicUrl: string;
 }): string {
   // Use public URL for maximum email client compatibility (Gmail, Outlook, etc.)
-  const chartRow = `<tr><td style="padding:12px 0"><p style="margin:0 0 8px;padding:0 24px;font-size:13px;font-weight:700;color:#374151">Pronóstico de Demanda</p><img src="${chartPublicUrl}" alt="Gráfico de pronóstico" width="600" style="display:block;width:600px;max-width:100%;height:auto;border-radius:0" /></td></tr>`;
+  const chartRow = `<tr><td style="padding:12px 0 0"><p style="margin:0 0 8px;padding:0 24px;font-size:13px;font-weight:700;color:#374151">Pronóstico de Demanda</p><table width="100%" cellpadding="0" cellspacing="0" role="presentation"><tr><td style="padding:0"><div style="width:100%;border:1px solid #e5e7eb;border-radius:8px;overflow:hidden;background:#ffffff"><img src="${chartPublicUrl}" alt="Gráfico de pronóstico" width="600" style="display:block;width:100%;height:auto;border:0;outline:none;text-decoration:none" /></div></td></tr></table></td></tr>`;
 
   return `<!DOCTYPE html>
 <html lang="es" xml:lang="es" xmlns="http://www.w3.org/1999/xhtml" dir="ltr">
@@ -76,8 +76,13 @@ async function captureChartAsBase64(): Promise<string | null> {
   microlinkUrl.searchParams.set("url", captureUrl);
   microlinkUrl.searchParams.set("screenshot", "true");
   microlinkUrl.searchParams.set("meta", "false");
-  microlinkUrl.searchParams.set("waitForTimeout", "10000");
+  microlinkUrl.searchParams.set("waitForSelector", "#chart-ready");
+  microlinkUrl.searchParams.set("waitForTimeout", "15000");
   microlinkUrl.searchParams.set("element", "#chart-container");
+  microlinkUrl.searchParams.set("viewport.width", "800");
+  microlinkUrl.searchParams.set("viewport.height", "420");
+  microlinkUrl.searchParams.set("screenshot.width", "800");
+  microlinkUrl.searchParams.set("screenshot.height", "420");
   microlinkUrl.searchParams.set("screenshot.type", "png");
   microlinkUrl.searchParams.set("force", "true");
   microlinkUrl.searchParams.set("cache", "false");
