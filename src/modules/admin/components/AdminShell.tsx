@@ -14,7 +14,7 @@ interface AdminShellProps {
   fullWidth?: boolean;
 }
 
-const AdminShell = ({ children, breadcrumbs = [] }: AdminShellProps) => (
+const AdminShell = ({ children, breadcrumbs = [], fullWidth = false }: AdminShellProps) => (
   <PrivateRoute allowedRoles={["super_admin"]}>
     <div className="min-h-screen bg-background flex flex-col">
       <header className="border-b bg-card shrink-0">
