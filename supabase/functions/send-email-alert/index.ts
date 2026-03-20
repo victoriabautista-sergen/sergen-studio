@@ -29,7 +29,7 @@ function buildEmailHtml({
   chartPublicUrl: string;
 }): string {
   // Use public URL for maximum email client compatibility (Gmail, Outlook, etc.)
-  const chartRow = `<tr><td style="padding:12px 0"><p style="margin:0 0 8px;padding:0 24px;font-size:13px;font-weight:700;color:#374151">Pronóstico de Demanda</p><img src="${chartPublicUrl}" alt="Gráfico de pronóstico" width="700" style="display:block;width:100%;max-width:700px;height:auto;border-radius:0" /></td></tr>`;
+  const chartRow = `<tr><td style="padding:12px 0"><p style="margin:0 0 8px;padding:0 24px;font-size:13px;font-weight:700;color:#374151">Pronóstico de Demanda</p><img src="${chartPublicUrl}" alt="Gráfico de pronóstico" width="600" style="display:block;width:600px;max-width:100%;height:auto;border-radius:0" /></td></tr>`;
 
   return `<!DOCTYPE html>
 <html lang="es" xml:lang="es" xmlns="http://www.w3.org/1999/xhtml" dir="ltr">
