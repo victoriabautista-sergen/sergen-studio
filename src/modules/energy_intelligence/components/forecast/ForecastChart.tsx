@@ -208,19 +208,31 @@ export const ForecastChart = forwardRef<HTMLDivElement, ForecastChartProps>(({ d
           <Line type="monotone" dataKey="Rango Inferior" stroke={SERIES_COLORS.rangoInferior} strokeWidth={1} strokeDasharray="5 5" dot={false} connectNulls />
           <Line type="monotone" dataKey="Rango Superior" stroke={SERIES_COLORS.rangoSuperior} strokeWidth={1} strokeDasharray="5 5" dot={false} connectNulls />
           <Line type="monotone" dataKey="Demanda Real" stroke={SERIES_COLORS.demandaReal} strokeWidth={2} dot={false} connectNulls />
+          {/* Reprogramación peak dot - always visible */}
+          {peakPoint && (
+            <ReferenceDot
+              x={peakPoint.time}
+              y={peakPoint.reprogramacion}
+              r={6}
+              fill={SERIES_COLORS.reprogramacion}
+              stroke="#fff"
+              strokeWidth={2}
+              isFront
+            />
+          )}
+          {/* Peak tooltip below the series */}
           {showPeakLabel && peakPoint && (
             <ReferenceDot
               x={peakPoint.time}
               y={peakPoint.reprogramacion}
-              r={5}
-              fill={SERIES_COLORS.reprogramacion}
-              stroke="#fff"
-              strokeWidth={2}
+              r={0}
+              fill="none"
+              stroke="none"
             >
               <Label content={<CustomPeakLabel />} />
             </ReferenceDot>
           )}
-          {/* Peak vertical dashed line at reprogramación peak in peak hours */}
+          {/* Peak vertical dashed line */}
           {peakPoint && (
             <ReferenceLine
               x={peakPoint.time}
@@ -230,9 +242,8 @@ export const ForecastChart = forwardRef<HTMLDivElement, ForecastChartProps>(({ d
               strokeOpacity={0.7}
             />
           )}
-          {/* Forecast peak dot + label on Pronóstico Diario at the same peak hour */}
-          {forecastPeakPoint && peakPoint && (() => {
-            // Find forecast value at the reprogramación peak time
+          {/* Forecast peak dot + label on Pronóstico Diario at peak hour */}
+          {peakPoint && (() => {
             const forecastAtPeak = chartData.find(d => d.time === peakPoint.time);
             const forecastVal = forecastAtPeak?.['Pronóstico Diario'];
             if (forecastVal == null) return null;
@@ -247,13 +258,13 @@ export const ForecastChart = forwardRef<HTMLDivElement, ForecastChartProps>(({ d
                 isFront
               >
                 <Label
-                  position="top"
+                  position="bottom"
                   offset={12}
                   content={({ viewBox }: any) => {
                     const x = viewBox?.x ?? 0;
                     const y = viewBox?.y ?? 0;
                     return (
-                      <foreignObject x={x - 70} y={y - 48} width={140} height={40}>
+                      <foreignObject x={x - 70} y={y + 14} width={140} height={40}>
                         <div
                           style={{
                             background: 'rgba(192,0,0,0.92)',
