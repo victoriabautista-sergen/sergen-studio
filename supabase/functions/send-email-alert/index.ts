@@ -29,7 +29,7 @@ function buildEmailHtml({
   chartPublicUrl: string;
 }): string {
   // Use public URL for maximum email client compatibility (Gmail, Outlook, etc.)
-  const chartRow = `<tr><td style="padding:12px 0"><p style="margin:0 0 8px;padding:0 24px;font-size:13px;font-weight:700;color:#374151">Pronóstico de Demanda</p><img src="${chartPublicUrl}" alt="Gráfico de pronóstico" width="700" style="display:block;width:100%;max-width:700px;height:auto;border-radius:0" /></td></tr>`;
+  const chartRow = `<tr><td style="padding:12px 0"><p style="margin:0 0 8px;padding:0 24px;font-size:13px;font-weight:700;color:#374151">Pronóstico de Demanda</p><img src="${chartPublicUrl}" alt="Gráfico de pronóstico" width="600" style="display:block;width:600px;max-width:100%;height:auto;border-radius:0" /></td></tr>`;
 
   return `<!DOCTYPE html>
 <html lang="es" xml:lang="es" xmlns="http://www.w3.org/1999/xhtml" dir="ltr">
@@ -38,7 +38,7 @@ function buildEmailHtml({
 <div style="display:none;font-size:1px;color:#f4f4f7;line-height:1px;max-height:0px;max-width:0px;opacity:0;overflow:hidden">Alerta diaria de potencia&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;</div>
 <table width="100%" cellpadding="0" cellspacing="0" style="background:#f4f4f7">
 <tr><td align="center" style="padding:32px 10px">
-<table width="700" cellpadding="0" cellspacing="0" style="background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.08)">
+<table width="600" cellpadding="0" cellspacing="0" style="background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.08)">
 <tr><td align="center" style="padding:40px 24px 12px">
 <table cellpadding="0" cellspacing="0"><tr><td align="center" width="56" height="56" style="width:56px;height:56px;border-radius:50%;border:4px solid #60a5fa;text-align:center;font-size:28px;line-height:56px">&#9889;</td></tr></table>
 </td></tr>
