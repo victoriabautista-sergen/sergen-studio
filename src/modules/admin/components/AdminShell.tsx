@@ -11,9 +11,10 @@ export interface BreadcrumbItem {
 interface AdminShellProps {
   children: React.ReactNode;
   breadcrumbs?: BreadcrumbItem[];
+  fullWidth?: boolean;
 }
 
-const AdminShell = ({ children, breadcrumbs = [] }: AdminShellProps) => (
+const AdminShell = ({ children, breadcrumbs = [], fullWidth = false }: AdminShellProps) => (
   <PrivateRoute allowedRoles={["super_admin"]}>
     <div className="min-h-screen bg-background flex flex-col">
       <header className="border-b bg-card shrink-0">
@@ -58,7 +59,7 @@ const AdminShell = ({ children, breadcrumbs = [] }: AdminShellProps) => (
       )}
 
       <main className="flex-1">
-        <div className="container py-8">{children}</div>
+        <div className={`${fullWidth ? 'max-w-[1920px] mx-auto px-8' : 'container'} py-8`}>{children}</div>
       </main>
     </div>
   </PrivateRoute>
