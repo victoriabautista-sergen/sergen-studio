@@ -208,7 +208,7 @@ export const ForecastChart = forwardRef<HTMLDivElement, ForecastChartProps>(({ d
           <Line type="monotone" dataKey="Rango Inferior" stroke={SERIES_COLORS.rangoInferior} strokeWidth={1} strokeDasharray="5 5" dot={false} connectNulls />
           <Line type="monotone" dataKey="Rango Superior" stroke={SERIES_COLORS.rangoSuperior} strokeWidth={1} strokeDasharray="5 5" dot={false} connectNulls />
           <Line type="monotone" dataKey="Demanda Real" stroke={SERIES_COLORS.demandaReal} strokeWidth={2} dot={false} connectNulls />
-          {/* Reprogramación peak dot - always visible */}
+          {/* Reprogramación peak dot + hour label below */}
           {peakPoint && (
             <ReferenceDot
               x={peakPoint.time}
@@ -218,7 +218,37 @@ export const ForecastChart = forwardRef<HTMLDivElement, ForecastChartProps>(({ d
               stroke="#fff"
               strokeWidth={2}
               isFront
-            />
+            >
+              <Label
+                position="bottom"
+                offset={8}
+                content={({ viewBox }: any) => {
+                  const x = viewBox?.x ?? 0;
+                  const y = viewBox?.y ?? 0;
+                  return (
+                    <foreignObject x={x - 50} y={y + 12} width={100} height={40}>
+                      <div
+                        style={{
+                          background: 'rgba(192,0,0,0.92)',
+                          color: '#fff',
+                          borderRadius: 5,
+                          padding: '3px 8px',
+                          fontSize: 11,
+                          fontWeight: 700,
+                          textAlign: 'center',
+                          lineHeight: '15px',
+                          boxShadow: '0 2px 6px rgba(0,0,0,0.15)',
+                          whiteSpace: 'nowrap',
+                        }}
+                      >
+                        <div>{peakPoint.time}</div>
+                        <div>{peakPoint.reprogramacion.toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 1 })} MW</div>
+                      </div>
+                    </foreignObject>
+                  );
+                }}
+              />
+            </ReferenceDot>
           )}
           {/* Peak tooltip below the series */}
           {showPeakLabel && peakPoint && (
