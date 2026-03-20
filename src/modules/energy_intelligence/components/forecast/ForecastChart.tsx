@@ -1,5 +1,5 @@
 import React, { forwardRef, useEffect, useMemo } from 'react';
-import { LineChart, Line, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer, ReferenceArea, ReferenceDot, Label } from 'recharts';
+import { LineChart, Line, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer, ReferenceArea, ReferenceDot, ReferenceLine, Label } from 'recharts';
 import { CoesData } from '../../types/forecast';
 
 interface ForecastChartProps {
