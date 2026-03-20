@@ -309,7 +309,7 @@ const ActualizacionAlertaPage = () => {
           </p>
         </div>
 
-        <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_minmax(0,3fr)] lg:grid-cols-[minmax(0,1fr)_minmax(0,2fr)]">
+        <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_minmax(0,2fr)] lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
           {/* Panel de edición */}
           <Card>
             <CardHeader>
