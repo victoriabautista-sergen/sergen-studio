@@ -186,7 +186,7 @@ Deno.serve(async (req) => {
 
     // 2. REGLA CRÍTICA: Si no hay imagen válida, BLOQUEAR el envío
     if (!chartBase64) {
-      console.error("[EMAIL] ❌ ENVÍO BLOQUEADO: No hay imagen válida del gráfico. No hay datos disponibles para generar el gráfico.");
+      console.error("[EMAIL] ❌ ENVÍO BLOQUEADO: No hay imagen válida del gráfico.");
       return new Response(JSON.stringify({
         success: false,
         error: "No hay datos disponibles para generar el gráfico. El correo no fue enviado.",
@@ -197,9 +197,28 @@ Deno.serve(async (req) => {
       });
     }
 
-    console.log("[EMAIL] ✅ Imagen válida generada, procediendo con envío");
+    console.log("[EMAIL] ✅ Imagen válida generada, subiendo a storage...");
 
-    // 3. Construir HTML con referencia CID
+    // 3. Upload chart to Supabase Storage for public URL (most reliable for email clients)
+    const supabase = createClient(
+      Deno.env.get("SUPABASE_URL") ?? "",
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
+    );
+
+    const chartBytes = Uint8Array.from(atob(chartBase64), c => c.charCodeAt(0));
+    const { error: uploadError } = await supabase.storage
+      .from(CHART_BUCKET)
+      .upload(CHART_FILE, chartBytes, { contentType: "image/png", upsert: true });
+
+    if (uploadError) {
+      console.error("[EMAIL] Error subiendo imagen a storage:", uploadError.message);
+    }
+
+    const { data: urlData } = supabase.storage.from(CHART_BUCKET).getPublicUrl(CHART_FILE);
+    const chartPublicUrl = `${urlData.publicUrl}?t=${Date.now()}`;
+    console.log("[EMAIL] Chart public URL:", chartPublicUrl);
+
+    // 4. Construir HTML con URL pública de la imagen
     const htmlContent = buildEmailHtml({
       fecha: fecha || "",
       riskColor: riskColor || "#D4A017",
@@ -208,9 +227,10 @@ Deno.serve(async (req) => {
       demandaEstimada: demandaEstimada || "—",
       mensaje: mensaje || "",
       estatus: estatus || "",
+      chartPublicUrl,
     });
 
-    // 4. Enviar correo via Brevo con CID attachment
+    // 5. Enviar correo via Brevo (sin attachment CID, usando URL pública)
     const peruNow = new Date(new Date().toLocaleString("en-US", { timeZone: "America/Lima" }));
     const dd = String(peruNow.getDate()).padStart(2, "0");
     const mm = String(peruNow.getMonth() + 1).padStart(2, "0");
@@ -222,10 +242,6 @@ Deno.serve(async (req) => {
       to: emails.map((email: string) => ({ email })),
       subject,
       htmlContent,
-      attachment: [{
-        content: chartBase64,
-        name: "chart.png",
-      }],
     };
 
     if (bccEmails && Array.isArray(bccEmails) && bccEmails.length > 0) {
