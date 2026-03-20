@@ -24,6 +24,37 @@ const RenderPronosticoPage = () => {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    const html = document.documentElement;
+    const body = document.body;
+
+    html.style.margin = '0';
+    html.style.padding = '0';
+    html.style.background = '#ffffff';
+    html.style.width = '800px';
+    html.style.overflow = 'hidden';
+
+    body.style.margin = '0';
+    body.style.padding = '0';
+    body.style.background = '#ffffff';
+    body.style.width = '800px';
+    body.style.overflow = 'hidden';
+
+    return () => {
+      html.style.margin = '';
+      html.style.padding = '';
+      html.style.background = '';
+      html.style.width = '';
+      html.style.overflow = '';
+
+      body.style.margin = '';
+      body.style.padding = '';
+      body.style.background = '';
+      body.style.width = '';
+      body.style.overflow = '';
+    };
+  }, []);
+
+  useEffect(() => {
     window.chartReady = false;
     console.log('[RENDER] cargando data');
 
@@ -103,7 +134,7 @@ const RenderPronosticoPage = () => {
 
   if (loading) {
     return (
-      <div style={{ width: 800, height: 400, display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#fff' }}>
+      <div style={{ width: 800, height: 420, display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#fff', overflow: 'hidden' }}>
         <p>Cargando datos...</p>
       </div>
     );
@@ -111,14 +142,25 @@ const RenderPronosticoPage = () => {
 
   if (error || data.length === 0) {
     return (
-      <div style={{ width: 800, height: 400, display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#fff' }}>
+      <div style={{ width: 800, height: 420, display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#fff', overflow: 'hidden' }}>
         <p>{error || 'Sin datos disponibles'}</p>
       </div>
     );
   }
 
   return (
-    <div id="chart-container" style={{ background: '#fff' }}>
+    <div
+      id="chart-container"
+      style={{
+        background: '#fff',
+        width: 800,
+        height: 420,
+        overflow: 'hidden',
+        display: 'inline-block',
+        margin: 0,
+        padding: 0,
+      }}
+    >
       <DailyForecastChartRender data={data} />
       {/* DOM marker only appears after SVG paths are confirmed rendered */}
       {svgReady && <div id="chart-ready" style={{ display: 'none' }} />}
