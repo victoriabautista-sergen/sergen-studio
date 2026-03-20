@@ -6,6 +6,9 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
+const CHART_BUCKET = "chart-images";
+const CHART_FILE = "email_alert_chart.png";
+
 function buildEmailHtml({
   fecha,
   riskColor,
@@ -14,6 +17,7 @@ function buildEmailHtml({
   demandaEstimada,
   mensaje,
   estatus,
+  chartPublicUrl,
 }: {
   fecha: string;
   riskColor: string;
@@ -22,9 +26,10 @@ function buildEmailHtml({
   demandaEstimada: string;
   mensaje: string;
   estatus: string;
+  chartPublicUrl: string;
 }): string {
-  // Chart is always a CID attachment — referenced as cid:chart.png
-  const chartRow = `<tr><td style="padding:12px 0"><p style="margin:0 0 8px;padding:0 24px;font-size:13px;font-weight:700;color:#374151">Pronóstico de Demanda</p><img src="cid:chart.png" alt="Gráfico de pronóstico" width="600" style="display:block;width:100%;height:auto;border-radius:0" /></td></tr>`;
+  // Use public URL for maximum email client compatibility (Gmail, Outlook, etc.)
+  const chartRow = `<tr><td style="padding:12px 0"><p style="margin:0 0 8px;padding:0 24px;font-size:13px;font-weight:700;color:#374151">Pronóstico de Demanda</p><img src="${chartPublicUrl}" alt="Gráfico de pronóstico" width="700" style="display:block;width:100%;max-width:700px;height:auto;border-radius:0" /></td></tr>`;
 
   return `<!DOCTYPE html>
 <html lang="es" xml:lang="es" xmlns="http://www.w3.org/1999/xhtml" dir="ltr">
@@ -33,7 +38,7 @@ function buildEmailHtml({
 <div style="display:none;font-size:1px;color:#f4f4f7;line-height:1px;max-height:0px;max-width:0px;opacity:0;overflow:hidden">Alerta diaria de potencia&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;</div>
 <table width="100%" cellpadding="0" cellspacing="0" style="background:#f4f4f7">
 <tr><td align="center" style="padding:32px 10px">
-<table width="600" cellpadding="0" cellspacing="0" style="background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.08)">
+<table width="700" cellpadding="0" cellspacing="0" style="background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.08)">
 <tr><td align="center" style="padding:40px 24px 12px">
 <table cellpadding="0" cellspacing="0"><tr><td align="center" width="56" height="56" style="width:56px;height:56px;border-radius:50%;border:4px solid #60a5fa;text-align:center;font-size:28px;line-height:56px">&#9889;</td></tr></table>
 </td></tr>
@@ -181,7 +186,7 @@ Deno.serve(async (req) => {
 
     // 2. REGLA CRÍTICA: Si no hay imagen válida, BLOQUEAR el envío
     if (!chartBase64) {
-      console.error("[EMAIL] ❌ ENVÍO BLOQUEADO: No hay imagen válida del gráfico. No hay datos disponibles para generar el gráfico.");
+      console.error("[EMAIL] ❌ ENVÍO BLOQUEADO: No hay imagen válida del gráfico.");
       return new Response(JSON.stringify({
         success: false,
         error: "No hay datos disponibles para generar el gráfico. El correo no fue enviado.",
@@ -192,9 +197,28 @@ Deno.serve(async (req) => {
       });
     }
 
-    console.log("[EMAIL] ✅ Imagen válida generada, procediendo con envío");
+    console.log("[EMAIL] ✅ Imagen válida generada, subiendo a storage...");
 
-    // 3. Construir HTML con referencia CID
+    // 3. Upload chart to Supabase Storage for public URL (most reliable for email clients)
+    const supabase = createClient(
+      Deno.env.get("SUPABASE_URL") ?? "",
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
+    );
+
+    const chartBytes = Uint8Array.from(atob(chartBase64), c => c.charCodeAt(0));
+    const { error: uploadError } = await supabase.storage
+      .from(CHART_BUCKET)
+      .upload(CHART_FILE, chartBytes, { contentType: "image/png", upsert: true });
+
+    if (uploadError) {
+      console.error("[EMAIL] Error subiendo imagen a storage:", uploadError.message);
+    }
+
+    const { data: urlData } = supabase.storage.from(CHART_BUCKET).getPublicUrl(CHART_FILE);
+    const chartPublicUrl = `${urlData.publicUrl}?t=${Date.now()}`;
+    console.log("[EMAIL] Chart public URL:", chartPublicUrl);
+
+    // 4. Construir HTML con URL pública de la imagen
     const htmlContent = buildEmailHtml({
       fecha: fecha || "",
       riskColor: riskColor || "#D4A017",
@@ -203,9 +227,10 @@ Deno.serve(async (req) => {
       demandaEstimada: demandaEstimada || "—",
       mensaje: mensaje || "",
       estatus: estatus || "",
+      chartPublicUrl,
     });
 
-    // 4. Enviar correo via Brevo con CID attachment
+    // 5. Enviar correo via Brevo (sin attachment CID, usando URL pública)
     const peruNow = new Date(new Date().toLocaleString("en-US", { timeZone: "America/Lima" }));
     const dd = String(peruNow.getDate()).padStart(2, "0");
     const mm = String(peruNow.getMonth() + 1).padStart(2, "0");
@@ -217,10 +242,6 @@ Deno.serve(async (req) => {
       to: emails.map((email: string) => ({ email })),
       subject,
       htmlContent,
-      attachment: [{
-        content: chartBase64,
-        name: "chart.png",
-      }],
     };
 
     if (bccEmails && Array.isArray(bccEmails) && bccEmails.length > 0) {
