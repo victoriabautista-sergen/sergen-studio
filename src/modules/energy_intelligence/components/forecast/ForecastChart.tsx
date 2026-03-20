@@ -136,6 +136,26 @@ export const ForecastChart = forwardRef<HTMLDivElement, ForecastChartProps>(({ d
     };
   }, [chartData]);
 
+  // Find peak "Pronóstico Diario" across all data
+  const forecastPeakPoint = useMemo(() => {
+    let maxVal = -Infinity;
+    let maxIdx = -1;
+    chartData.forEach((d, i) => {
+      const val = d['Pronóstico Diario'];
+      if (val != null && val > maxVal) {
+        maxVal = val;
+        maxIdx = i;
+      }
+    });
+    if (maxIdx === -1) return null;
+    const d = chartData[maxIdx];
+    return {
+      time: d.time,
+      value: d['Pronóstico Diario']!,
+      fechaLabel: d.fecha_completa,
+    };
+  }, [chartData]);
+
   // Notify parent of peak value
   useEffect(() => {
     onPeakValueChange?.(peakPoint?.reprogramacion ?? null);
