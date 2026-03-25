@@ -367,7 +367,7 @@ const ActualizacionAlertaPage = () => {
             <CardContent className="space-y-5">
               <div className="space-y-2">
                 <Label>Riesgo de coincidencia</Label>
-                <Select value={riskLevel} onValueChange={setRiskLevel}>
+                <Select value={riskLevel} onValueChange={setRiskLevel} disabled={alertSentToday}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
                     {RISK_OPTIONS.map((opt) => (
