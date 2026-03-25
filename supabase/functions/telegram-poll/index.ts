@@ -863,25 +863,11 @@ async function executeGuardarYEnviar(
         console.log(`[CHART] Generated new chart image: ${graficoUrl}`);
       } else {
         console.error(`[CHART] Failed to generate chart:`, JSON.stringify(chartData));
-        // Fallback: use last valid chart from storage
-        const { data: urlData } = supabase.storage.from("chart-images").getPublicUrl("dashboard_alerta_actual.png");
-        if (urlData?.publicUrl) {
-          graficoUrl = `${urlData.publicUrl}?t=${Date.now()}`;
-          console.log(`[CHART] Using existing chart from storage: ${graficoUrl}`);
-        } else {
-          console.log(`[CHART] No fallback chart available`);
-        }
+        console.log(`[CHART] Continuing without chart image`);
       }
     } catch (chartErr) {
       console.error(`[CHART] Error calling generate-chart-image:`, chartErr);
-      // Fallback: use last valid chart from storage
-      const { data: urlData } = supabase.storage.from("chart-images").getPublicUrl("dashboard_alerta_actual.png");
-      if (urlData?.publicUrl) {
-        graficoUrl = `${urlData.publicUrl}?t=${Date.now()}`;
-        console.log(`[CHART] Using existing chart from storage: ${graficoUrl}`);
-      } else {
-        console.log(`[CHART] No fallback chart available`);
-      }
+      console.log(`[CHART] Continuing without chart image`);
     }
 
     // ── STEP 3: Get demand estimate (max reprogramado in peak hours 18-23 Peru time) ──
