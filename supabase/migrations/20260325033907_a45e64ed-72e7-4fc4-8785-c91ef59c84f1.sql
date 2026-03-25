@@ -1,0 +1,1 @@
+ALTER TABLE public.forecast_settings ADD COLUMN IF NOT EXISTS last_sent_recipients jsonb DEFAULT '[]'::jsonb;
