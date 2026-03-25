@@ -776,6 +776,37 @@ async function executeGuardarYEnviar(
   supabase: any,
   send: (text: string, buttons?: any[][]) => Promise<void>
 ) {
+  // ── Global check: alert already sent today? ──
+  const { data: fSettings } = await supabase
+    .from("forecast_settings")
+    .select("alert_sent_at")
+    .order("last_update", { ascending: false })
+    .limit(1)
+    .single();
+
+  if (fSettings?.alert_sent_at) {
+    const sentDate = new Date(fSettings.alert_sent_at);
+    const nowPeru = peruNow();
+    const sentDay = `${sentDate.getFullYear()}-${sentDate.getMonth()}-${sentDate.getDate()}`;
+    const todayDay = `${nowPeru.getFullYear()}-${nowPeru.getMonth()}-${nowPeru.getDate()}`;
+    if (sentDay === todayDay) {
+      console.log(`[FLOW] ❌ Alert already sent today at ${fSettings.alert_sent_at}`);
+      await releaseLock(chatId, supabase);
+      await supabase.from("telegram_bot_state").update({
+        correo_enviado: true,
+        alerta_enviada_hoy: true,
+        estado_conversacion: "idle",
+        riesgo_actual: null,
+        rango_actual: null,
+        modo_conversacion: null,
+        last_interaction: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      }).eq("chat_id", chatId);
+      await send("✅ La alerta de potencia del día ya fue enviada. No se puede enviar nuevamente.");
+      return;
+    }
+  }
+
   // Load recipients from the SAME table used by the web UI
   const { toEmails, bccEmails } = await loadRecipients(supabase);
 
