@@ -295,6 +295,7 @@ export type Database = {
         Row: {
           alert_sent_at: string | null
           id: string
+          last_sent_recipients: Json | null
           last_update: string | null
           modulation_time: string | null
           risk_level: string | null
@@ -302,6 +303,7 @@ export type Database = {
         Insert: {
           alert_sent_at?: string | null
           id?: string
+          last_sent_recipients?: Json | null
           last_update?: string | null
           modulation_time?: string | null
           risk_level?: string | null
@@ -309,6 +311,7 @@ export type Database = {
         Update: {
           alert_sent_at?: string | null
           id?: string
+          last_sent_recipients?: Json | null
           last_update?: string | null
           modulation_time?: string | null
           risk_level?: string | null
