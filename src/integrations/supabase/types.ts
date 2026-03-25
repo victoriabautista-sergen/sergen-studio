@@ -293,18 +293,21 @@ export type Database = {
       }
       forecast_settings: {
         Row: {
+          alert_sent_at: string | null
           id: string
           last_update: string | null
           modulation_time: string | null
           risk_level: string | null
         }
         Insert: {
+          alert_sent_at?: string | null
           id?: string
           last_update?: string | null
           modulation_time?: string | null
           risk_level?: string | null
         }
         Update: {
+          alert_sent_at?: string | null
           id?: string
           last_update?: string | null
           modulation_time?: string | null

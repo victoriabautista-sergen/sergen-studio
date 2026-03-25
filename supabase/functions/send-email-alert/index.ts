@@ -160,7 +160,7 @@ Deno.serve(async (req) => {
     }
 
     const body = await req.json();
-    const { emails, bccEmails, fecha, riskLevel, riskLabel, riskColor, timeRange, demandaEstimada: demandaFromRequest, mensaje, estatus, htmlContent: prebuiltHtml } =
+    const { emails, bccEmails, fecha, riskLevel, riskLabel, riskColor, timeRange, demandaEstimada: demandaFromRequest, mensaje, estatus, htmlContent: prebuiltHtml, skipSentCheck } =
       body;
 
     console.log(`[EMAIL] Destinatarios TO: ${emails?.length}, BCC: ${bccEmails?.length ?? 0}`);
@@ -171,6 +171,41 @@ Deno.serve(async (req) => {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
+    }
+
+    // ── CHECK: Alert already sent today? ──
+    if (!skipSentCheck) {
+      const supabaseCheck = createClient(
+        Deno.env.get("SUPABASE_URL") ?? "",
+        Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
+      );
+
+      const { data: settings } = await supabaseCheck
+        .from("forecast_settings")
+        .select("alert_sent_at")
+        .order("last_update", { ascending: false })
+        .limit(1)
+        .single();
+
+      if (settings?.alert_sent_at) {
+        const sentDate = new Date(settings.alert_sent_at);
+        const peruNowDate = new Date(new Date().toLocaleString("en-US", { timeZone: "America/Lima" }));
+        const sentDay = `${sentDate.getFullYear()}-${sentDate.getMonth()}-${sentDate.getDate()}`;
+        const todayDay = `${peruNowDate.getFullYear()}-${peruNowDate.getMonth()}-${peruNowDate.getDate()}`;
+
+        if (sentDay === todayDay) {
+          console.log(`[EMAIL] ❌ BLOQUEADO: Alerta ya enviada hoy a las ${settings.alert_sent_at}`);
+          return new Response(JSON.stringify({
+            success: false,
+            error: "La alerta de hoy ya fue enviada. No se puede enviar nuevamente.",
+            alreadySent: true,
+            sentAt: settings.alert_sent_at,
+          }), {
+            status: 409,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          });
+        }
+      }
     }
 
     const BREVO_API_KEY = Deno.env.get("BREVO_API_KEY");
@@ -346,6 +381,39 @@ Deno.serve(async (req) => {
     console.log(`[BREVO] Response: ${res.status}, success: ${success}`);
     if (!success) {
       console.error(`[BREVO] Error:`, JSON.stringify(data));
+    }
+
+    // ── Mark alert as sent today ──
+    if (success) {
+      const supabaseAdmin = createClient(
+        Deno.env.get("SUPABASE_URL") ?? "",
+        Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
+      );
+      const { data: latestSettings } = await supabaseAdmin
+        .from("forecast_settings")
+        .select("id")
+        .order("last_update", { ascending: false })
+        .limit(1)
+        .single();
+
+      if (latestSettings) {
+        await supabaseAdmin
+          .from("forecast_settings")
+          .update({ alert_sent_at: new Date().toISOString() })
+          .eq("id", latestSettings.id);
+        console.log(`[EMAIL] ✅ alert_sent_at marcado para hoy`);
+      }
+
+      // Also update all telegram_bot_state rows
+      await supabaseAdmin
+        .from("telegram_bot_state")
+        .update({
+          correo_enviado: true,
+          alerta_enviada_hoy: true,
+          updated_at: new Date().toISOString(),
+        })
+        .gte("chat_id", -999999999999);
+      console.log(`[EMAIL] ✅ telegram_bot_state actualizado: correo_enviado=true`);
     }
 
     return new Response(JSON.stringify({ success, data, hasChart: true }), {

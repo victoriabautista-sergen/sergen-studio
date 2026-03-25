@@ -57,6 +57,8 @@ const ActualizacionAlertaPage = () => {
   const [loading, setLoading] = useState(true);
   const [refreshKey, setRefreshKey] = useState(Date.now());
   const [previewHtml, setPreviewHtml] = useState("");
+  const [alertSentToday, setAlertSentToday] = useState(false);
+  const [alertSentAt, setAlertSentAt] = useState<string | null>(null);
 
   const { data: forecastData } = useForecastData();
 
@@ -88,7 +90,7 @@ const ActualizacionAlertaPage = () => {
       try {
         const { data, error } = await supabase
           .from("forecast_settings")
-          .select("risk_level, modulation_time")
+          .select("risk_level, modulation_time, alert_sent_at")
           .order("last_update", { ascending: false })
           .limit(1)
           .single();
@@ -97,6 +99,20 @@ const ActualizacionAlertaPage = () => {
         if (data) {
           setRiskLevel(data.risk_level || "MEDIO");
           setTimeRange(data.modulation_time || "18:00 - 23:00");
+
+          // Check if alert was sent today
+          if (data.alert_sent_at) {
+            const sentDate = new Date(data.alert_sent_at);
+            const peruNow = toZonedTime(new Date(), "America/Lima");
+            if (
+              sentDate.getFullYear() === peruNow.getFullYear() &&
+              sentDate.getMonth() === peruNow.getMonth() &&
+              sentDate.getDate() === peruNow.getDate()
+            ) {
+              setAlertSentToday(true);
+              setAlertSentAt(data.alert_sent_at);
+            }
+          }
         }
       } catch (err) { console.error(err); }
       finally { setLoading(false); }
@@ -169,6 +185,10 @@ const ActualizacionAlertaPage = () => {
   };
 
   const handleSave = async () => {
+    if (alertSentToday) {
+      toast.error("La alerta de hoy ya fue enviada. No se pueden modificar los datos.");
+      return;
+    }
     if (riskLevel === "ALTO") {
       if (!timeRange.trim()) {
         toast.error("El rango horario es obligatorio cuando el riesgo es ALTO");
@@ -238,6 +258,10 @@ const ActualizacionAlertaPage = () => {
   }, [riskLevel, timeRange, demandaEstimada, mensaje, estatus, todayFormatted, isLowRisk, chartPreviewUrl]);
 
   const handleSendEmail = async () => {
+    if (alertSentToday) {
+      toast.error("La alerta de hoy ya fue enviada. No se puede enviar nuevamente.");
+      return;
+    }
     if (recipients.length === 0) {
       toast.error("Debe ingresar al menos un correo de destino");
       return;
@@ -268,6 +292,14 @@ const ActualizacionAlertaPage = () => {
 
       if (error) throw error;
 
+      // Backend blocks if already sent today
+      if (data?.alreadySent) {
+        setAlertSentToday(true);
+        setAlertSentAt(data.sentAt);
+        toast.error(data.error || "La alerta de hoy ya fue enviada.");
+        return;
+      }
+
       // Backend blocks email if chart capture failed
       if (data?.blocked) {
         toast.error(data.error || "No hay datos disponibles para generar el gráfico. El correo no fue enviado.");
@@ -276,6 +308,8 @@ const ActualizacionAlertaPage = () => {
 
       if (!data?.success) throw new Error("Error al enviar el correo");
 
+      setAlertSentToday(true);
+      setAlertSentAt(new Date().toISOString());
       toast.success(`Correo enviado a ${recipients.length} destinatario(s) con gráfico embebido`);
     } catch (err: any) {
       console.error("Error enviando correo:", err);
@@ -302,6 +336,25 @@ const ActualizacionAlertaPage = () => {
   return (
     <AdminShell breadcrumbs={breadcrumbs} fullWidth>
       <div className="space-y-6">
+        {alertSentToday && (
+          <div className="flex items-center gap-3 rounded-lg border border-green-200 bg-green-50 p-4 dark:border-green-800 dark:bg-green-950">
+            <span className="text-green-600 dark:text-green-400 text-lg">✅</span>
+            <div>
+              <p className="text-sm font-medium text-green-800 dark:text-green-200">
+                La alerta de hoy ya fue enviada.
+              </p>
+              {alertSentAt && (
+                <p className="text-xs text-green-600 dark:text-green-400">
+                  Enviada el {format(new Date(alertSentAt), "dd/MM/yyyy 'a las' HH:mm", { locale: es })}
+                </p>
+              )}
+              <p className="text-xs text-green-600 dark:text-green-400 mt-1">
+                No se puede modificar ni reenviar hasta mañana.
+              </p>
+            </div>
+          </div>
+        )}
+
         <div>
           <h2 className="text-2xl font-semibold">Actualización de Alerta</h2>
           <p className="text-sm text-muted-foreground mt-1">
@@ -318,7 +371,7 @@ const ActualizacionAlertaPage = () => {
             <CardContent className="space-y-5">
               <div className="space-y-2">
                 <Label>Riesgo de coincidencia</Label>
-                <Select value={riskLevel} onValueChange={setRiskLevel}>
+                <Select value={riskLevel} onValueChange={setRiskLevel} disabled={alertSentToday}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
                     {RISK_OPTIONS.map((opt) => (
@@ -347,8 +400,8 @@ const ActualizacionAlertaPage = () => {
                     }
                   }}
                   placeholder="6:00 PM - 8:30 PM"
-                  readOnly={isLowRisk}
-                  className={isLowRisk ? "bg-muted cursor-not-allowed" : ""}
+                  readOnly={isLowRisk || alertSentToday}
+                  className={isLowRisk || alertSentToday ? "bg-muted cursor-not-allowed" : ""}
                 />
                 {timeRangeError && (
                   <p className="text-xs text-destructive">{timeRangeError}</p>
@@ -362,7 +415,7 @@ const ActualizacionAlertaPage = () => {
 
               <div className="space-y-2">
                 <Label htmlFor="demanda">Demanda estimada (MW)</Label>
-                <Input id="demanda" value={demandaEstimada} onChange={(e) => { setDemandaEstimada(e.target.value); setDemandaManuallyEdited(true); }} placeholder="8173.83" />
+                <Input id="demanda" value={demandaEstimada} onChange={(e) => { setDemandaEstimada(e.target.value); setDemandaManuallyEdited(true); }} placeholder="8173.83" readOnly={alertSentToday} className={alertSentToday ? "bg-muted cursor-not-allowed" : ""} />
               </div>
 
               {/* Mensaje y Estatus se generan automáticamente y no se muestran en el panel */}
@@ -437,9 +490,9 @@ const ActualizacionAlertaPage = () => {
                 )}
               </div>
 
-              <Button onClick={handleSave} disabled={saving} className="w-full">
+              <Button onClick={handleSave} disabled={saving || alertSentToday} className="w-full">
                 <Save className="h-4 w-4 mr-2" />
-                {saving ? "Guardando..." : "Guardar cambios en Vista General"}
+                {alertSentToday ? "Alerta ya enviada hoy" : saving ? "Guardando..." : "Guardar cambios en Vista General"}
               </Button>
             </CardContent>
           </Card>
@@ -470,9 +523,9 @@ const ActualizacionAlertaPage = () => {
 
               {/* Send buttons */}
               <div className="flex gap-3 mt-4">
-                <Button variant="outline" className="flex-1" onClick={handleSendEmail} disabled={sendingEmail}>
+                <Button variant="outline" className="flex-1" onClick={handleSendEmail} disabled={sendingEmail || alertSentToday}>
                   {sendingEmail ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Mail className="h-4 w-4 mr-2" />}
-                  {sendingEmail ? "Generando imagen y enviando..." : "Enviar correo"}
+                  {alertSentToday ? "Alerta ya enviada" : sendingEmail ? "Generando imagen y enviando..." : "Enviar correo"}
                 </Button>
                 <Button variant="outline" className="flex-1" onClick={handleSendWhatsApp}>
                   <MessageSquare className="h-4 w-4 mr-2" />
