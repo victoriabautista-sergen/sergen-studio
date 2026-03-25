@@ -185,6 +185,10 @@ const ActualizacionAlertaPage = () => {
   };
 
   const handleSave = async () => {
+    if (alertSentToday) {
+      toast.error("La alerta de hoy ya fue enviada. No se pueden modificar los datos.");
+      return;
+    }
     if (riskLevel === "ALTO") {
       if (!timeRange.trim()) {
         toast.error("El rango horario es obligatorio cuando el riesgo es ALTO");
