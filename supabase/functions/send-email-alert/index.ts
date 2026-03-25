@@ -160,62 +160,11 @@ Deno.serve(async (req) => {
     }
 
     const body = await req.json();
-    const { emails, bccEmails, fecha, riskLevel, riskLabel, riskColor, timeRange, demandaEstimada: demandaFromRequest, mensaje, estatus } =
+    const { emails, bccEmails, fecha, riskLevel, riskLabel, riskColor, timeRange, demandaEstimada: demandaFromRequest, mensaje, estatus, htmlContent: prebuiltHtml } =
       body;
 
     console.log(`[EMAIL] Destinatarios TO: ${emails?.length}, BCC: ${bccEmails?.length ?? 0}`);
-
-    // Resolver demandaEstimada: prioridad al request, fallback a coes_forecast (misma lógica que Control de Demanda)
-    let demandaEstimada = demandaFromRequest;
-    let demandaSource = "request";
-
-    if (!demandaEstimada || demandaEstimada === "—" || demandaEstimada === "") {
-      console.log("[EMAIL] demandaEstimada no viene en el request, consultando coes_forecast...");
-      try {
-        const supabaseAdmin = createClient(
-          Deno.env.get("SUPABASE_URL") ?? "",
-          Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
-        );
-
-        // Fecha actual en hora Perú (igual que el módulo Control de Demanda)
-        const peruNow = new Date(new Date().toLocaleString("en-US", { timeZone: "America/Lima" }));
-        const year = peruNow.getFullYear();
-        const month = String(peruNow.getMonth() + 1).padStart(2, "0");
-        const day = String(peruNow.getDate()).padStart(2, "0");
-        const peruDateStr = `${year}-${month}-${day}`;
-
-        // Misma consulta que useMaxPower: reprogramado entre 18:00-24:00
-        const { data: forecastData, error: forecastError } = await supabaseAdmin
-          .from("coes_forecast")
-          .select("fecha, reprogramado")
-          .gte("fecha", `${peruDateStr}T18:00:00`)
-          .lt("fecha", `${peruDateStr}T24:00:00`);
-
-        if (forecastError) {
-          console.error("[EMAIL] Error consultando coes_forecast:", forecastError.message);
-        } else if (forecastData && forecastData.length > 0) {
-          let maxValue = 0;
-          forecastData.forEach((record: any) => {
-            if (record.reprogramado && record.reprogramado > maxValue) {
-              maxValue = record.reprogramado;
-            }
-          });
-          if (maxValue > 0) {
-            demandaEstimada = maxValue.toFixed(2);
-            demandaSource = "coes_forecast (hora punta 18-24h)";
-            console.log(`[EMAIL] ✅ Demanda estimada obtenida de BD: ${demandaEstimada} MW`);
-          } else {
-            console.error("[EMAIL] ⚠️ No se encontraron valores de reprogramado > 0 en hora punta");
-          }
-        } else {
-          console.error("[EMAIL] ⚠️ No hay registros en coes_forecast para hora punta del día actual");
-        }
-      } catch (dbErr) {
-        console.error("[EMAIL] Error al consultar demanda estimada:", dbErr);
-      }
-    }
-
-    console.log(`[EMAIL] Demanda estimada final: ${demandaEstimada ?? "—"} MW (fuente: ${demandaSource})`);
+    console.log(`[EMAIL] Flujo: ${prebuiltHtml ? "Telegram (HTML pre-construido)" : "Web (construir HTML)"}`);
 
     if (!emails || !Array.isArray(emails) || emails.length === 0) {
       return new Response(JSON.stringify({ error: "No se proporcionaron correos" }), {
@@ -232,62 +181,115 @@ Deno.serve(async (req) => {
       });
     }
 
-    // 1. Generar imagen del gráfico en tiempo real
-    console.log("[EMAIL] Generando imagen del dashboard en tiempo real...");
-    let chartBase64: string | null = null;
-    try {
-      chartBase64 = await captureChartAsBase64();
-    } catch (chartErr) {
-      console.error("[EMAIL] Error generando imagen:", chartErr);
-    }
+    let finalHtmlContent: string;
 
-    // 2. REGLA CRÍTICA: Si no hay imagen válida, BLOQUEAR el envío
-    if (!chartBase64) {
-      console.error("[EMAIL] ❌ ENVÍO BLOQUEADO: No hay imagen válida del gráfico.");
-      return new Response(JSON.stringify({
-        success: false,
-        error: "No hay datos disponibles para generar el gráfico. El correo no fue enviado.",
-        blocked: true,
-      }), {
-        status: 422,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
+    if (prebuiltHtml) {
+      // ── Flujo Telegram: usar HTML pre-construido (ya tiene chart, riesgo y rango correctos) ──
+      console.log(`[EMAIL] Usando HTML pre-construido desde Telegram (${prebuiltHtml.length} chars)`);
+      finalHtmlContent = prebuiltHtml;
+    } else {
+      // ── Flujo Web (Admin Panel): construir HTML internamente ──
+
+      // Resolver demandaEstimada: prioridad al request, fallback a coes_forecast
+      let demandaEstimada = demandaFromRequest;
+      let demandaSource = "request";
+
+      if (!demandaEstimada || demandaEstimada === "—" || demandaEstimada === "") {
+        console.log("[EMAIL] demandaEstimada no viene en el request, consultando coes_forecast...");
+        try {
+          const supabaseAdmin = createClient(
+            Deno.env.get("SUPABASE_URL") ?? "",
+            Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
+          );
+
+          const peruNow = new Date(new Date().toLocaleString("en-US", { timeZone: "America/Lima" }));
+          const year = peruNow.getFullYear();
+          const month = String(peruNow.getMonth() + 1).padStart(2, "0");
+          const day = String(peruNow.getDate()).padStart(2, "0");
+          const peruDateStr = `${year}-${month}-${day}`;
+
+          const { data: forecastData, error: forecastError } = await supabaseAdmin
+            .from("coes_forecast")
+            .select("fecha, reprogramado")
+            .gte("fecha", `${peruDateStr}T18:00:00`)
+            .lt("fecha", `${peruDateStr}T24:00:00`);
+
+          if (forecastError) {
+            console.error("[EMAIL] Error consultando coes_forecast:", forecastError.message);
+          } else if (forecastData && forecastData.length > 0) {
+            let maxValue = 0;
+            forecastData.forEach((record: any) => {
+              if (record.reprogramado && record.reprogramado > maxValue) {
+                maxValue = record.reprogramado;
+              }
+            });
+            if (maxValue > 0) {
+              demandaEstimada = maxValue.toFixed(2);
+              demandaSource = "coes_forecast (hora punta 18-24h)";
+              console.log(`[EMAIL] ✅ Demanda estimada obtenida de BD: ${demandaEstimada} MW`);
+            }
+          }
+        } catch (dbErr) {
+          console.error("[EMAIL] Error al consultar demanda estimada:", dbErr);
+        }
+      }
+
+      console.log(`[EMAIL] Demanda estimada final: ${demandaEstimada ?? "—"} MW (fuente: ${demandaSource})`);
+
+      // Generar imagen del gráfico en tiempo real
+      console.log("[EMAIL] Generando imagen del dashboard en tiempo real...");
+      let chartBase64: string | null = null;
+      try {
+        chartBase64 = await captureChartAsBase64();
+      } catch (chartErr) {
+        console.error("[EMAIL] Error generando imagen:", chartErr);
+      }
+
+      if (!chartBase64) {
+        console.error("[EMAIL] ❌ ENVÍO BLOQUEADO: No hay imagen válida del gráfico.");
+        return new Response(JSON.stringify({
+          success: false,
+          error: "No hay datos disponibles para generar el gráfico. El correo no fue enviado.",
+          blocked: true,
+        }), {
+          status: 422,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      console.log("[EMAIL] ✅ Imagen válida generada, subiendo a storage...");
+
+      const supabase = createClient(
+        Deno.env.get("SUPABASE_URL") ?? "",
+        Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
+      );
+
+      const chartBytes = Uint8Array.from(atob(chartBase64), c => c.charCodeAt(0));
+      const { error: uploadError } = await supabase.storage
+        .from(CHART_BUCKET)
+        .upload(CHART_FILE, chartBytes, { contentType: "image/png", upsert: true });
+
+      if (uploadError) {
+        console.error("[EMAIL] Error subiendo imagen a storage:", uploadError.message);
+      }
+
+      const { data: urlData } = supabase.storage.from(CHART_BUCKET).getPublicUrl(CHART_FILE);
+      const chartPublicUrl = `${urlData.publicUrl}?t=${Date.now()}`;
+      console.log("[EMAIL] Chart public URL:", chartPublicUrl);
+
+      finalHtmlContent = buildEmailHtml({
+        fecha: fecha || "",
+        riskColor: riskColor || "#D4A017",
+        riskLabel: riskLabel || riskLevel || "MEDIO",
+        timeRange: timeRange || "",
+        demandaEstimada: demandaEstimada || "—",
+        mensaje: mensaje || "",
+        estatus: estatus || "",
+        chartPublicUrl,
       });
     }
 
-    console.log("[EMAIL] ✅ Imagen válida generada, subiendo a storage...");
-
-    // 3. Upload chart to Supabase Storage for public URL (most reliable for email clients)
-    const supabase = createClient(
-      Deno.env.get("SUPABASE_URL") ?? "",
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
-    );
-
-    const chartBytes = Uint8Array.from(atob(chartBase64), c => c.charCodeAt(0));
-    const { error: uploadError } = await supabase.storage
-      .from(CHART_BUCKET)
-      .upload(CHART_FILE, chartBytes, { contentType: "image/png", upsert: true });
-
-    if (uploadError) {
-      console.error("[EMAIL] Error subiendo imagen a storage:", uploadError.message);
-    }
-
-    const { data: urlData } = supabase.storage.from(CHART_BUCKET).getPublicUrl(CHART_FILE);
-    const chartPublicUrl = `${urlData.publicUrl}?t=${Date.now()}`;
-    console.log("[EMAIL] Chart public URL:", chartPublicUrl);
-
-    // 4. Construir HTML con URL pública de la imagen
-    const htmlContent = buildEmailHtml({
-      fecha: fecha || "",
-      riskColor: riskColor || "#D4A017",
-      riskLabel: riskLabel || riskLevel || "MEDIO",
-      timeRange: timeRange || "",
-      demandaEstimada: demandaEstimada || "—",
-      mensaje: mensaje || "",
-      estatus: estatus || "",
-      chartPublicUrl,
-    });
-
-    // 5. Enviar correo via Brevo (sin attachment CID, usando URL pública)
+    // Enviar correo via Brevo
     const peruNow = new Date(new Date().toLocaleString("en-US", { timeZone: "America/Lima" }));
     const dd = String(peruNow.getDate()).padStart(2, "0");
     const mm = String(peruNow.getMonth() + 1).padStart(2, "0");
@@ -298,7 +300,7 @@ Deno.serve(async (req) => {
       sender: { name: "SERGEN", email: "info@sergen.pe" },
       to: emails.map((email: string) => ({ email })),
       subject,
-      htmlContent,
+      htmlContent: finalHtmlContent,
     };
 
     if (bccEmails && Array.isArray(bccEmails) && bccEmails.length > 0) {
