@@ -486,9 +486,9 @@ const ActualizacionAlertaPage = () => {
                 )}
               </div>
 
-              <Button onClick={handleSave} disabled={saving} className="w-full">
+              <Button onClick={handleSave} disabled={saving || alertSentToday} className="w-full">
                 <Save className="h-4 w-4 mr-2" />
-                {saving ? "Guardando..." : "Guardar cambios en Vista General"}
+                {alertSentToday ? "Alerta ya enviada hoy" : saving ? "Guardando..." : "Guardar cambios en Vista General"}
               </Button>
             </CardContent>
           </Card>
