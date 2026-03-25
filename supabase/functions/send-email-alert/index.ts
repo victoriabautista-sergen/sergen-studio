@@ -160,10 +160,62 @@ Deno.serve(async (req) => {
     }
 
     const body = await req.json();
-    const { emails, bccEmails, fecha, riskLevel, riskLabel, riskColor, timeRange, demandaEstimada, mensaje, estatus } =
+    const { emails, bccEmails, fecha, riskLevel, riskLabel, riskColor, timeRange, demandaEstimada: demandaFromRequest, mensaje, estatus } =
       body;
 
     console.log(`[EMAIL] Destinatarios TO: ${emails?.length}, BCC: ${bccEmails?.length ?? 0}`);
+
+    // Resolver demandaEstimada: prioridad al request, fallback a coes_forecast (misma lógica que Control de Demanda)
+    let demandaEstimada = demandaFromRequest;
+    let demandaSource = "request";
+
+    if (!demandaEstimada || demandaEstimada === "—" || demandaEstimada === "") {
+      console.log("[EMAIL] demandaEstimada no viene en el request, consultando coes_forecast...");
+      try {
+        const supabaseAdmin = createClient(
+          Deno.env.get("SUPABASE_URL") ?? "",
+          Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
+        );
+
+        // Fecha actual en hora Perú (igual que el módulo Control de Demanda)
+        const peruNow = new Date(new Date().toLocaleString("en-US", { timeZone: "America/Lima" }));
+        const year = peruNow.getFullYear();
+        const month = String(peruNow.getMonth() + 1).padStart(2, "0");
+        const day = String(peruNow.getDate()).padStart(2, "0");
+        const peruDateStr = `${year}-${month}-${day}`;
+
+        // Misma consulta que useMaxPower: reprogramado entre 18:00-24:00
+        const { data: forecastData, error: forecastError } = await supabaseAdmin
+          .from("coes_forecast")
+          .select("fecha, reprogramado")
+          .gte("fecha", `${peruDateStr}T18:00:00`)
+          .lt("fecha", `${peruDateStr}T24:00:00`);
+
+        if (forecastError) {
+          console.error("[EMAIL] Error consultando coes_forecast:", forecastError.message);
+        } else if (forecastData && forecastData.length > 0) {
+          let maxValue = 0;
+          forecastData.forEach((record: any) => {
+            if (record.reprogramado && record.reprogramado > maxValue) {
+              maxValue = record.reprogramado;
+            }
+          });
+          if (maxValue > 0) {
+            demandaEstimada = maxValue.toFixed(2);
+            demandaSource = "coes_forecast (hora punta 18-24h)";
+            console.log(`[EMAIL] ✅ Demanda estimada obtenida de BD: ${demandaEstimada} MW`);
+          } else {
+            console.error("[EMAIL] ⚠️ No se encontraron valores de reprogramado > 0 en hora punta");
+          }
+        } else {
+          console.error("[EMAIL] ⚠️ No hay registros en coes_forecast para hora punta del día actual");
+        }
+      } catch (dbErr) {
+        console.error("[EMAIL] Error al consultar demanda estimada:", dbErr);
+      }
+    }
+
+    console.log(`[EMAIL] Demanda estimada final: ${demandaEstimada ?? "—"} MW (fuente: ${demandaSource})`);
 
     if (!emails || !Array.isArray(emails) || emails.length === 0) {
       return new Response(JSON.stringify({ error: "No se proporcionaron correos" }), {
