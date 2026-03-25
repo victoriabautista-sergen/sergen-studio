@@ -60,6 +60,22 @@ Deno.serve(async (req) => {
         .update(resetFields)
         .lt("chat_id", 0);
 
+      // Also reset alert_sent_at in forecast_settings
+      const { data: latestSettings } = await supabase
+        .from("forecast_settings")
+        .select("id")
+        .order("last_update", { ascending: false })
+        .limit(1)
+        .single();
+
+      if (latestSettings) {
+        await supabase
+          .from("forecast_settings")
+          .update({ alert_sent_at: null })
+          .eq("id", latestSettings.id);
+        console.log("[DAILY_RESET] alert_sent_at cleared");
+      }
+
       return new Response(
         JSON.stringify({ ok: true, action: "daily_reset" }),
         { headers: { ...corsHeaders, "Content-Type": "application/json" } }
