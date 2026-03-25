@@ -90,7 +90,7 @@ const ActualizacionAlertaPage = () => {
       try {
         const { data, error } = await supabase
           .from("forecast_settings")
-          .select("risk_level, modulation_time")
+          .select("risk_level, modulation_time, alert_sent_at")
           .order("last_update", { ascending: false })
           .limit(1)
           .single();
@@ -99,6 +99,20 @@ const ActualizacionAlertaPage = () => {
         if (data) {
           setRiskLevel(data.risk_level || "MEDIO");
           setTimeRange(data.modulation_time || "18:00 - 23:00");
+
+          // Check if alert was sent today
+          if (data.alert_sent_at) {
+            const sentDate = new Date(data.alert_sent_at);
+            const peruNow = toZonedTime(new Date(), "America/Lima");
+            if (
+              sentDate.getFullYear() === peruNow.getFullYear() &&
+              sentDate.getMonth() === peruNow.getMonth() &&
+              sentDate.getDate() === peruNow.getDate()
+            ) {
+              setAlertSentToday(true);
+              setAlertSentAt(data.alert_sent_at);
+            }
+          }
         }
       } catch (err) { console.error(err); }
       finally { setLoading(false); }
