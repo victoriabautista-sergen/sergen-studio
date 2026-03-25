@@ -32,14 +32,13 @@ export const processMaximumData = (data: PowerData[]): ChartData[] => {
     .sort((a, b) => new Date(a.fullDate).getTime() - new Date(b.fullDate).getTime());
 
   if (formattedData.length > 0) {
-    const sortedByValue = [...formattedData].sort((a, b) => b.value - a.value);
-    formattedData.forEach(item => {
-      if (sortedByValue.length > 0 && item.value === sortedByValue[0].value) {
-        item.color = '#D9001B';
-      } else if (sortedByValue.length > 1 && item.value === sortedByValue[1].value) {
-        item.color = '#F97316';
+    let maxIdx = 0;
+    for (let i = 1; i < formattedData.length; i++) {
+      if (formattedData[i].value > formattedData[maxIdx].value) {
+        maxIdx = i;
       }
-    });
+    }
+    formattedData[maxIdx].color = '#8B0000';
   }
 
   return formattedData;
