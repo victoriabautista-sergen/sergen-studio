@@ -202,32 +202,54 @@ Deno.serve(async (req) => {
             Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
           );
 
-          const peruNow = new Date(new Date().toLocaleString("en-US", { timeZone: "America/Lima" }));
-          const year = peruNow.getFullYear();
-          const month = String(peruNow.getMonth() + 1).padStart(2, "0");
-          const day = String(peruNow.getDate()).padStart(2, "0");
-          const peruDateStr = `${year}-${month}-${day}`;
+          // Replicar la misma lógica que ForecastChart + useForecastData:
+          // Obtener datos de los últimos 2 días y buscar el máximo reprogramado en hora punta (18:00-22:59 UTC)
+          const now = new Date();
+          const twoDaysAgo = new Date(now.getTime() - 2 * 24 * 60 * 60 * 1000);
+          const startDate = new Date(Date.UTC(
+            twoDaysAgo.getUTCFullYear(), twoDaysAgo.getUTCMonth(), twoDaysAgo.getUTCDate(), 0, 0, 0
+          )).toISOString();
+          const endDate = new Date(Date.UTC(
+            now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), 23, 59, 59
+          )).toISOString();
+
+          console.log(`[EMAIL] Consultando coes_forecast desde ${startDate} hasta ${endDate}`);
 
           const { data: forecastData, error: forecastError } = await supabaseAdmin
             .from("coes_forecast")
             .select("fecha, reprogramado")
-            .gte("fecha", `${peruDateStr}T18:00:00`)
-            .lt("fecha", `${peruDateStr}T24:00:00`);
+            .gte("fecha", startDate)
+            .lte("fecha", endDate)
+            .order("fecha", { ascending: true });
 
           if (forecastError) {
             console.error("[EMAIL] Error consultando coes_forecast:", forecastError.message);
           } else if (forecastData && forecastData.length > 0) {
+            console.log(`[EMAIL] Registros obtenidos: ${forecastData.length}`);
+
+            // Filtrar hora punta: horas 18-22 UTC (PEAK_START=18, PEAK_END=23, < 23)
+            // Esto replica exactamente la lógica de ForecastChart líneas 120-125
             let maxValue = 0;
+            let maxFecha = "";
             forecastData.forEach((record: any) => {
-              if (record.reprogramado && record.reprogramado > maxValue) {
-                maxValue = record.reprogramado;
+              if (record.reprogramado && record.fecha) {
+                const hora = new Date(record.fecha).getUTCHours();
+                if (hora >= 18 && hora < 23 && record.reprogramado > maxValue) {
+                  maxValue = record.reprogramado;
+                  maxFecha = record.fecha;
+                }
               }
             });
+
             if (maxValue > 0) {
               demandaEstimada = maxValue.toFixed(2);
-              demandaSource = "coes_forecast (hora punta 18-24h)";
-              console.log(`[EMAIL] ✅ Demanda estimada obtenida de BD: ${demandaEstimada} MW`);
+              demandaSource = `coes_forecast pico hora punta (${maxFecha})`;
+              console.log(`[EMAIL] ✅ Demanda estimada: ${demandaEstimada} MW en ${maxFecha}`);
+            } else {
+              console.error("[EMAIL] ⚠️ No se encontraron datos en hora punta (18:00-23:00) en los últimos 2 días");
             }
+          } else {
+            console.error("[EMAIL] ⚠️ No hay registros en coes_forecast para los últimos 2 días");
           }
         } catch (dbErr) {
           console.error("[EMAIL] Error al consultar demanda estimada:", dbErr);
