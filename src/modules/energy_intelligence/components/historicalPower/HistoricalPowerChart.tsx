@@ -24,12 +24,12 @@ export const HistoricalPowerChart = ({ data, showTime = true }: HistoricalPowerC
     return index === maxIdx ? "#8B0000" : "#156082";
   };
 
-  const chartData = data.map((item) => ({
+  const chartData = data.map((item, index) => ({
     date: formatDate(item.fecha),
     value: item.ejecutado,
     hora: item.hora,
     minuto: item.minuto,
-    color: getColor(item.ejecutado),
+    color: getColor(index),
   }));
 
   const calculateInterval = () => {
