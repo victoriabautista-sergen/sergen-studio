@@ -519,9 +519,9 @@ const ActualizacionAlertaPage = () => {
 
               {/* Send buttons */}
               <div className="flex gap-3 mt-4">
-                <Button variant="outline" className="flex-1" onClick={handleSendEmail} disabled={sendingEmail}>
+                <Button variant="outline" className="flex-1" onClick={handleSendEmail} disabled={sendingEmail || alertSentToday}>
                   {sendingEmail ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Mail className="h-4 w-4 mr-2" />}
-                  {sendingEmail ? "Generando imagen y enviando..." : "Enviar correo"}
+                  {alertSentToday ? "Alerta ya enviada" : sendingEmail ? "Generando imagen y enviando..." : "Enviar correo"}
                 </Button>
                 <Button variant="outline" className="flex-1" onClick={handleSendWhatsApp}>
                   <MessageSquare className="h-4 w-4 mr-2" />
