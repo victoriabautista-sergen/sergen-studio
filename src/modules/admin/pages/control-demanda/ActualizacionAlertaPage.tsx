@@ -254,6 +254,10 @@ const ActualizacionAlertaPage = () => {
   }, [riskLevel, timeRange, demandaEstimada, mensaje, estatus, todayFormatted, isLowRisk, chartPreviewUrl]);
 
   const handleSendEmail = async () => {
+    if (alertSentToday) {
+      toast.error("La alerta de hoy ya fue enviada. No se puede enviar nuevamente.");
+      return;
+    }
     if (recipients.length === 0) {
       toast.error("Debe ingresar al menos un correo de destino");
       return;
