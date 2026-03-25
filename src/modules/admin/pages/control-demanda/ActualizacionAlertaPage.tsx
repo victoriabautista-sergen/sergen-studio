@@ -57,6 +57,8 @@ const ActualizacionAlertaPage = () => {
   const [loading, setLoading] = useState(true);
   const [refreshKey, setRefreshKey] = useState(Date.now());
   const [previewHtml, setPreviewHtml] = useState("");
+  const [alertSentToday, setAlertSentToday] = useState(false);
+  const [alertSentAt, setAlertSentAt] = useState<string | null>(null);
 
   const { data: forecastData } = useForecastData();
 
