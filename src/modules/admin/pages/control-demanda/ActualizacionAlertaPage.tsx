@@ -411,7 +411,7 @@ const ActualizacionAlertaPage = () => {
 
               <div className="space-y-2">
                 <Label htmlFor="demanda">Demanda estimada (MW)</Label>
-                <Input id="demanda" value={demandaEstimada} onChange={(e) => { setDemandaEstimada(e.target.value); setDemandaManuallyEdited(true); }} placeholder="8173.83" />
+                <Input id="demanda" value={demandaEstimada} onChange={(e) => { setDemandaEstimada(e.target.value); setDemandaManuallyEdited(true); }} placeholder="8173.83" readOnly={alertSentToday} className={alertSentToday ? "bg-muted cursor-not-allowed" : ""} />
               </div>
 
               {/* Mensaje y Estatus se generan automáticamente y no se muestran en el panel */}
