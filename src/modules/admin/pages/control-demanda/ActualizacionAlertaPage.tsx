@@ -396,8 +396,8 @@ const ActualizacionAlertaPage = () => {
                     }
                   }}
                   placeholder="6:00 PM - 8:30 PM"
-                  readOnly={isLowRisk}
-                  className={isLowRisk ? "bg-muted cursor-not-allowed" : ""}
+                  readOnly={isLowRisk || alertSentToday}
+                  className={isLowRisk || alertSentToday ? "bg-muted cursor-not-allowed" : ""}
                 />
                 {timeRangeError && (
                   <p className="text-xs text-destructive">{timeRangeError}</p>
