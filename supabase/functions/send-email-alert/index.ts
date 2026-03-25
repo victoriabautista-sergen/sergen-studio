@@ -160,7 +160,7 @@ Deno.serve(async (req) => {
     }
 
     const body = await req.json();
-    const { emails, bccEmails, fecha, riskLevel, riskLabel, riskColor, timeRange, demandaEstimada: demandaFromRequest, mensaje, estatus, htmlContent: prebuiltHtml, skipSentCheck } =
+    const { emails, bccEmails, fecha, riskLevel, riskLabel, riskColor, timeRange, demandaEstimada: demandaFromRequest, mensaje, estatus, htmlContent: prebuiltHtml, skipSentCheck, allRecipients } =
       body;
 
     console.log(`[EMAIL] Destinatarios TO: ${emails?.length}, BCC: ${bccEmails?.length ?? 0}`);
