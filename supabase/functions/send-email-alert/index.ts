@@ -397,11 +397,19 @@ Deno.serve(async (req) => {
         .single();
 
       if (latestSettings) {
+        // Build the full list of recipients that have been sent to
+        const sentRecipientsList = allRecipients && Array.isArray(allRecipients)
+          ? allRecipients
+          : [...(emails || []), ...(bccEmails || [])];
+
         await supabaseAdmin
           .from("forecast_settings")
-          .update({ alert_sent_at: new Date().toISOString() })
+          .update({
+            alert_sent_at: new Date().toISOString(),
+            last_sent_recipients: sentRecipientsList,
+          })
           .eq("id", latestSettings.id);
-        console.log(`[EMAIL] ✅ alert_sent_at marcado para hoy`);
+        console.log(`[EMAIL] ✅ alert_sent_at marcado, last_sent_recipients: ${sentRecipientsList.length} correos`);
       }
 
       // Also update all telegram_bot_state rows
