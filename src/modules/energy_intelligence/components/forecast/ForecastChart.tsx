@@ -29,43 +29,37 @@ interface PeakPoint {
   fechaLabel: string;
 }
 
-const PeakTooltipContent = ({ point }: { point: PeakPoint }) => (
-  <div
-    style={{
-      background: 'rgba(255,255,255,0.96)',
-      border: '1px solid #d1d5db',
-      borderRadius: 6,
-      padding: '8px 12px',
-      boxShadow: '0 4px 12px rgba(0,0,0,0.12)',
-      fontSize: 12,
-      lineHeight: '18px',
-      minWidth: 220,
-      pointerEvents: 'none',
-    }}
-  >
-    <div style={{ fontWeight: 700, marginBottom: 4, color: '#374151' }}>
-      {point.fechaLabel}
+// Custom tooltip – single, hover-only, positioned above cursor
+const CustomTooltip = ({ active, payload, label }: any) => {
+  if (!active || !payload?.length) return null;
+  const entry = payload[0]?.payload;
+  return (
+    <div
+      style={{
+        background: 'rgba(255,255,255,0.97)',
+        border: '1px solid #d1d5db',
+        borderRadius: 6,
+        padding: '8px 12px',
+        boxShadow: '0 4px 12px rgba(0,0,0,0.12)',
+        fontSize: 12,
+        lineHeight: '18px',
+        minWidth: 200,
+        pointerEvents: 'none',
+      }}
+    >
+      <div style={{ fontWeight: 700, marginBottom: 4, color: '#374151' }}>
+        {entry?.fecha_label || label}
+      </div>
+      {payload.map((p: any) => (
+        p.value != null && (
+          <div key={p.dataKey} style={{ color: p.color }}>
+            {p.name}: {Number(p.value).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} MW
+          </div>
+        )
+      ))}
     </div>
-    <div style={{ color: SERIES_COLORS.reprogramacion }}>
-      Reprogramación : {point.reprogramacion.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} MW
-    </div>
-    {point.pronostico != null && (
-      <div style={{ color: SERIES_COLORS.pronostico }}>
-        Pronóstico Diario : {point.pronostico.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} MW
-      </div>
-    )}
-    {point.rangoInferior != null && (
-      <div style={{ color: SERIES_COLORS.rangoInferior }}>
-        Rango Inferior : {point.rangoInferior.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} MW
-      </div>
-    )}
-    {point.rangoSuperior != null && (
-      <div style={{ color: SERIES_COLORS.rangoSuperior }}>
-        Rango Superior : {point.rangoSuperior.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} MW
-      </div>
-    )}
-  </div>
-);
+  );
+};
 
 export const ForecastChart = forwardRef<HTMLDivElement, ForecastChartProps>(({ data, showPeakLabel = true, onPeakValueChange }, ref) => {
   const formatTime = (isoString: string): string => {
@@ -136,46 +130,10 @@ export const ForecastChart = forwardRef<HTMLDivElement, ForecastChartProps>(({ d
     };
   }, [chartData]);
 
-  // Find peak "Pronóstico Diario" across all data
-  const forecastPeakPoint = useMemo(() => {
-    let maxVal = -Infinity;
-    let maxIdx = -1;
-    chartData.forEach((d, i) => {
-      const val = d['Pronóstico Diario'];
-      if (val != null && val > maxVal) {
-        maxVal = val;
-        maxIdx = i;
-      }
-    });
-    if (maxIdx === -1) return null;
-    const d = chartData[maxIdx];
-    return {
-      time: d.time,
-      value: d['Pronóstico Diario']!,
-      fechaLabel: d.fecha_completa,
-    };
-  }, [chartData]);
-
   // Notify parent of peak value
   useEffect(() => {
     onPeakValueChange?.(peakPoint?.reprogramacion ?? null);
   }, [peakPoint, onPeakValueChange]);
-
-  const CustomPeakLabel = (props: any) => {
-    if (!peakPoint) return null;
-    const { viewBox } = props;
-    const x = viewBox?.x ?? 0;
-    const y = viewBox?.y ?? 0;
-    // Place below the peak point to avoid covering the chart lines
-    const offsetX = -120; // center the 240px-wide box
-    const offsetY = 60;
-
-    return (
-      <foreignObject x={x + offsetX} y={y + offsetY} width={240} height={120}>
-        <PeakTooltipContent point={peakPoint} />
-      </foreignObject>
-    );
-  };
 
   return (
     <div ref={ref}>
@@ -184,12 +142,11 @@ export const ForecastChart = forwardRef<HTMLDivElement, ForecastChartProps>(({ d
           <XAxis dataKey="time" interval={2} angle={-45} textAnchor="end" height={60} />
           <YAxis domain={[5500, 8500]} tickFormatter={v => v.toLocaleString()} />
           <Tooltip
-            formatter={(value: any, name: string) =>
-              value ? [`${value.toLocaleString()} MW`, name] : ['No disponible', name]
-            }
-            labelFormatter={(_label, payload) =>
-              payload?.[0] ? payload[0].payload.fecha_completa : _label
-            }
+            content={<CustomTooltip />}
+            cursor={{ stroke: '#9ca3af', strokeWidth: 1, strokeDasharray: '4 4' }}
+            isAnimationActive={false}
+            offset={20}
+            position={undefined}
           />
           <Legend verticalAlign="bottom" height={36} />
           {chartData.map((entry, index) =>
@@ -208,7 +165,7 @@ export const ForecastChart = forwardRef<HTMLDivElement, ForecastChartProps>(({ d
           <Line type="monotone" dataKey="Rango Inferior" stroke={SERIES_COLORS.rangoInferior} strokeWidth={1} strokeDasharray="5 5" dot={false} connectNulls />
           <Line type="monotone" dataKey="Rango Superior" stroke={SERIES_COLORS.rangoSuperior} strokeWidth={1} strokeDasharray="5 5" dot={false} connectNulls />
           <Line type="monotone" dataKey="Demanda Real" stroke={SERIES_COLORS.demandaReal} strokeWidth={2} dot={false} connectNulls />
-          {/* Reprogramación peak dot + hour label below */}
+          {/* Peak dot on Reprogramación */}
           {peakPoint && (
             <ReferenceDot
               x={peakPoint.time}
@@ -250,18 +207,6 @@ export const ForecastChart = forwardRef<HTMLDivElement, ForecastChartProps>(({ d
               />
             </ReferenceDot>
           )}
-          {/* Peak tooltip below the series */}
-          {showPeakLabel && peakPoint && (
-            <ReferenceDot
-              x={peakPoint.time}
-              y={peakPoint.reprogramacion}
-              r={0}
-              fill="none"
-              stroke="none"
-            >
-              <Label content={<CustomPeakLabel />} />
-            </ReferenceDot>
-          )}
           {/* Peak vertical dashed line */}
           {peakPoint && (
             <ReferenceLine
@@ -272,53 +217,6 @@ export const ForecastChart = forwardRef<HTMLDivElement, ForecastChartProps>(({ d
               strokeOpacity={0.7}
             />
           )}
-          {/* Forecast peak dot + label on Pronóstico Diario at peak hour */}
-          {peakPoint && (() => {
-            const forecastAtPeak = chartData.find(d => d.time === peakPoint.time);
-            const forecastVal = forecastAtPeak?.['Pronóstico Diario'];
-            if (forecastVal == null) return null;
-            return (
-              <ReferenceDot
-                x={peakPoint.time}
-                y={forecastVal}
-                r={6}
-                fill="#C00000"
-                stroke="#fff"
-                strokeWidth={2}
-                isFront
-              >
-                <Label
-                  position="bottom"
-                  offset={12}
-                  content={({ viewBox }: any) => {
-                    const x = viewBox?.x ?? 0;
-                    const y = viewBox?.y ?? 0;
-                    return (
-                      <foreignObject x={x - 70} y={y + 14} width={140} height={40}>
-                        <div
-                          style={{
-                            background: 'rgba(192,0,0,0.92)',
-                            color: '#fff',
-                            borderRadius: 6,
-                            padding: '4px 10px',
-                            fontSize: 12,
-                            fontWeight: 600,
-                            textAlign: 'center',
-                            lineHeight: '16px',
-                            boxShadow: '0 2px 8px rgba(0,0,0,0.18)',
-                            whiteSpace: 'nowrap',
-                          }}
-                        >
-                          <div>{peakPoint.time}</div>
-                          <div>{forecastVal.toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 1 })} MW</div>
-                        </div>
-                      </foreignObject>
-                    );
-                  }}
-                />
-              </ReferenceDot>
-            );
-          })()}
         </LineChart>
       </ResponsiveContainer>
     </div>
