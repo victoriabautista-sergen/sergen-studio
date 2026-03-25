@@ -288,6 +288,14 @@ const ActualizacionAlertaPage = () => {
 
       if (error) throw error;
 
+      // Backend blocks if already sent today
+      if (data?.alreadySent) {
+        setAlertSentToday(true);
+        setAlertSentAt(data.sentAt);
+        toast.error(data.error || "La alerta de hoy ya fue enviada.");
+        return;
+      }
+
       // Backend blocks email if chart capture failed
       if (data?.blocked) {
         toast.error(data.error || "No hay datos disponibles para generar el gráfico. El correo no fue enviado.");
@@ -296,6 +304,8 @@ const ActualizacionAlertaPage = () => {
 
       if (!data?.success) throw new Error("Error al enviar el correo");
 
+      setAlertSentToday(true);
+      setAlertSentAt(new Date().toISOString());
       toast.success(`Correo enviado a ${recipients.length} destinatario(s) con gráfico embebido`);
     } catch (err: any) {
       console.error("Error enviando correo:", err);
