@@ -870,17 +870,38 @@ async function executeGuardarYEnviar(
       console.log(`[CHART] Continuing without chart image`);
     }
 
-    // ── STEP 3: Get demand estimate ──
-    const { data: forecastData } = await supabase
-      .from("coes_forecast")
-      .select("pronostico")
-      .order("fecha", { ascending: false })
-      .limit(1)
-      .single();
+    // ── STEP 3: Get demand estimate (max reprogramado in peak hours 18-23 Peru time) ──
+    const now = peruNow();
+    const peruDateStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
+    console.log(`[DATA] Querying coes_forecast for peak hours on ${peruDateStr}`);
 
-    const demandaEstimada = forecastData?.pronostico
-      ? Number(forecastData.pronostico).toFixed(2)
-      : "—";
+    const { data: peakData, error: peakError } = await supabase
+      .from("coes_forecast")
+      .select("fecha, reprogramado")
+      .gte("fecha", `${peruDateStr}T18:00:00`)
+      .lt("fecha", `${peruDateStr}T24:00:00`);
+
+    let demandaEstimada = "—";
+    if (peakError) {
+      console.error("[DATA] Error querying coes_forecast:", peakError.message);
+    } else if (peakData && peakData.length > 0) {
+      let maxValue = 0;
+      let maxFecha = "";
+      for (const record of peakData) {
+        if (record.reprogramado && record.reprogramado > maxValue) {
+          maxValue = record.reprogramado;
+          maxFecha = record.fecha;
+        }
+      }
+      if (maxValue > 0) {
+        demandaEstimada = maxValue.toFixed(2);
+        console.log(`[DATA] ✅ Peak demand: ${demandaEstimada} MW at ${maxFecha}`);
+      } else {
+        console.error("[DATA] ⚠️ No reprogramado values > 0 in peak hours");
+      }
+    } else {
+      console.error(`[DATA] ⚠️ No records found in peak hours for ${peruDateStr}`);
+    }
     console.log(`[DATA] demandaEstimada: ${demandaEstimada}`);
 
     // ── STEP 4: Generate email HTML ──
