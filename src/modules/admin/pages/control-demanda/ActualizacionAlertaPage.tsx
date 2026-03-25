@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
-import { Mail, MessageSquare, Save, Loader2, X, Plus, Bot } from "lucide-react";
+import { Mail, MessageSquare, Save, Loader2, X, Plus, Bot, RefreshCw, UserPlus } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -59,6 +59,9 @@ const ActualizacionAlertaPage = () => {
   const [previewHtml, setPreviewHtml] = useState("");
   const [alertSentToday, setAlertSentToday] = useState(false);
   const [alertSentAt, setAlertSentAt] = useState<string | null>(null);
+  const [lastSentRecipients, setLastSentRecipients] = useState<string[]>([]);
+  // Resend mode: null = no resend, "new" = send to new only, "modify" = modify & resend all
+  const [resendMode, setResendMode] = useState<"new" | "modify" | null>(null);
 
   const { data: forecastData } = useForecastData();
 
@@ -100,7 +103,6 @@ const ActualizacionAlertaPage = () => {
           setRiskLevel(data.risk_level || "MEDIO");
           setTimeRange(data.modulation_time || "18:00 - 23:00");
 
-          // Check if alert was sent today
           if (data.alert_sent_at) {
             const sentDate = new Date(data.alert_sent_at);
             const peruNow = toZonedTime(new Date(), "America/Lima");
@@ -119,6 +121,24 @@ const ActualizacionAlertaPage = () => {
     };
     fetchSettings();
   }, []);
+
+  // Fetch last sent recipients separately (column may not be in types yet)
+  useEffect(() => {
+    const fetchLastSent = async () => {
+      try {
+        const { data } = await supabase
+          .from("forecast_settings")
+          .select("last_sent_recipients")
+          .order("last_update", { ascending: false })
+          .limit(1)
+          .single();
+        if (data && (data as any).last_sent_recipients) {
+          setLastSentRecipients((data as any).last_sent_recipients as string[]);
+        }
+      } catch {}
+    };
+    fetchLastSent();
+  }, [alertSentToday]);
 
   const fetchRecipients = useCallback(async () => {
     const { data, error } = await supabase
@@ -185,7 +205,7 @@ const ActualizacionAlertaPage = () => {
   };
 
   const handleSave = async () => {
-    if (alertSentToday) {
+    if (alertSentToday && resendMode !== "modify") {
       toast.error("La alerta de hoy ya fue enviada. No se pueden modificar los datos.");
       return;
     }
@@ -237,7 +257,6 @@ const ActualizacionAlertaPage = () => {
   const todayFormatted = todayRaw.toLowerCase();
   const isLowRisk = riskLevel === "BAJO";
 
-  // La vista previa del panel debe usar el entorno actual para no depender del sitio publicado
   const chartPreviewBaseUrl = typeof window !== "undefined"
     ? window.location.origin
     : "https://sergen-studio.lovable.app";
@@ -257,9 +276,18 @@ const ActualizacionAlertaPage = () => {
     setPreviewHtml(html);
   }, [riskLevel, timeRange, demandaEstimada, mensaje, estatus, todayFormatted, isLowRisk, chartPreviewUrl]);
 
-  const handleSendEmail = async () => {
-    if (alertSentToday) {
-      toast.error("La alerta de hoy ya fue enviada. No se puede enviar nuevamente.");
+  // Compute new recipients that haven't received the last send
+  const newRecipientEmails = recipients
+    .map(r => r.email)
+    .filter(e => !lastSentRecipients.includes(e));
+  const newBccEmails = bccRecipients
+    .map(r => r.email)
+    .filter(e => !lastSentRecipients.includes(e));
+  const hasNewRecipients = newRecipientEmails.length > 0 || newBccEmails.length > 0;
+
+  const handleSendEmail = async (mode: "initial" | "new" | "resendAll") => {
+    if (mode === "initial" && alertSentToday) {
+      toast.error("La alerta de hoy ya fue enviada.");
       return;
     }
     if (recipients.length === 0) {
@@ -269,12 +297,26 @@ const ActualizacionAlertaPage = () => {
 
     setSendingEmail(true);
     try {
-      const emails = recipients.map(r => r.email);
-      const bccList = bccRecipients.map(r => r.email);
+      let emails: string[];
+      let bccList: string[];
+
+      if (mode === "new") {
+        // Only send to recipients not in last send
+        emails = newRecipientEmails;
+        bccList = newBccEmails;
+        if (emails.length === 0 && bccList.length === 0) {
+          toast.info("No hay nuevos destinatarios para enviar.");
+          setSendingEmail(false);
+          return;
+        }
+      } else {
+        // Send to all
+        emails = recipients.map(r => r.email);
+        bccList = bccRecipients.map(r => r.email);
+      }
 
       toast.info("Generando imagen y enviando correo...");
 
-      // El servidor genera la imagen en tiempo real y la embebe en el correo
       const { data, error } = await supabase.functions.invoke("send-email-alert", {
         body: {
           emails,
@@ -287,20 +329,22 @@ const ActualizacionAlertaPage = () => {
           demandaEstimada: demandaEstimada || "—",
           mensaje,
           estatus,
+          // Tell backend this is a resend so it skips the "already sent" check
+          skipSentCheck: mode === "new" || mode === "resendAll",
+          // Send full recipient list so backend can record it
+          allRecipients: [...recipients.map(r => r.email), ...bccRecipients.map(r => r.email)],
         },
       });
 
       if (error) throw error;
 
-      // Backend blocks if already sent today
-      if (data?.alreadySent) {
+      if (data?.alreadySent && mode === "initial") {
         setAlertSentToday(true);
         setAlertSentAt(data.sentAt);
         toast.error(data.error || "La alerta de hoy ya fue enviada.");
         return;
       }
 
-      // Backend blocks email if chart capture failed
       if (data?.blocked) {
         toast.error(data.error || "No hay datos disponibles para generar el gráfico. El correo no fue enviado.");
         return;
@@ -310,7 +354,15 @@ const ActualizacionAlertaPage = () => {
 
       setAlertSentToday(true);
       setAlertSentAt(new Date().toISOString());
-      toast.success(`Correo enviado a ${recipients.length} destinatario(s) con gráfico embebido`);
+      // Update local last sent recipients
+      const allSent = [...new Set([...lastSentRecipients, ...emails, ...bccList])];
+      setLastSentRecipients(allSent);
+      setResendMode(null);
+
+      const countMsg = mode === "new"
+        ? `Correo enviado a ${emails.length} nuevo(s) destinatario(s)`
+        : `Correo enviado a ${emails.length} destinatario(s)`;
+      toast.success(countMsg);
     } catch (err: any) {
       console.error("Error enviando correo:", err);
       toast.error("Error al enviar el correo");
@@ -322,6 +374,9 @@ const ActualizacionAlertaPage = () => {
   const handleSendWhatsApp = () => {
     toast.info("Funcionalidad de envío por WhatsApp próximamente");
   };
+
+  // Whether inputs should be editable
+  const inputsLocked = alertSentToday && resendMode !== "modify";
 
   if (loading) {
     return (
@@ -336,21 +391,83 @@ const ActualizacionAlertaPage = () => {
   return (
     <AdminShell breadcrumbs={breadcrumbs} fullWidth>
       <div className="space-y-6">
-        {alertSentToday && (
-          <div className="flex items-center gap-3 rounded-lg border border-green-200 bg-green-50 p-4 dark:border-green-800 dark:bg-green-950">
-            <span className="text-green-600 dark:text-green-400 text-lg">✅</span>
-            <div>
-              <p className="text-sm font-medium text-green-800 dark:text-green-200">
-                La alerta de hoy ya fue enviada.
-              </p>
-              {alertSentAt && (
-                <p className="text-xs text-green-600 dark:text-green-400">
-                  Enviada el {format(new Date(alertSentAt), "dd/MM/yyyy 'a las' HH:mm", { locale: es })}
+        {alertSentToday && !resendMode && (
+          <div className="rounded-lg border border-green-200 bg-green-50 p-4 dark:border-green-800 dark:bg-green-950 space-y-3">
+            <div className="flex items-center gap-3">
+              <span className="text-green-600 dark:text-green-400 text-lg">✅</span>
+              <div>
+                <p className="text-sm font-medium text-green-800 dark:text-green-200">
+                  La alerta de hoy ya fue enviada.
                 </p>
-              )}
-              <p className="text-xs text-green-600 dark:text-green-400 mt-1">
-                No se puede modificar ni reenviar hasta mañana.
+                {alertSentAt && (
+                  <p className="text-xs text-green-600 dark:text-green-400">
+                    Enviada el {format(new Date(alertSentAt), "dd/MM/yyyy 'a las' HH:mm", { locale: es })}
+                  </p>
+                )}
+              </div>
+            </div>
+            <Separator className="bg-green-200 dark:bg-green-800" />
+            <div className="flex flex-col sm:flex-row gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                className="flex-1 border-green-300 text-green-800 hover:bg-green-100 dark:border-green-700 dark:text-green-200 dark:hover:bg-green-900"
+                onClick={() => setResendMode("new")}
+                disabled={!hasNewRecipients}
+              >
+                <UserPlus className="h-4 w-4 mr-2" />
+                Enviar a nuevos destinatarios ({newRecipientEmails.length + newBccEmails.length})
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                className="flex-1 border-amber-300 text-amber-800 hover:bg-amber-100 dark:border-amber-700 dark:text-amber-200 dark:hover:bg-amber-900"
+                onClick={() => setResendMode("modify")}
+              >
+                <RefreshCw className="h-4 w-4 mr-2" />
+                Modificar alerta y reenviar a todos
+              </Button>
+            </div>
+            {!hasNewRecipients && (
+              <p className="text-xs text-green-600 dark:text-green-400">
+                No hay nuevos destinatarios. Agregue correos para habilitar el envío parcial.
               </p>
+            )}
+          </div>
+        )}
+
+        {resendMode === "new" && (
+          <div className="rounded-lg border border-blue-200 bg-blue-50 p-4 dark:border-blue-800 dark:bg-blue-950 space-y-2">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-blue-800 dark:text-blue-200">
+                  Modo: Enviar a nuevos destinatarios
+                </p>
+                <p className="text-xs text-blue-600 dark:text-blue-400">
+                  Se enviará el correo solo a los {newRecipientEmails.length + newBccEmails.length} destinatario(s) que no recibieron el envío anterior. Los datos de la alerta no se pueden modificar.
+                </p>
+              </div>
+              <Button variant="ghost" size="sm" onClick={() => setResendMode(null)}>
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+        )}
+
+        {resendMode === "modify" && (
+          <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 dark:border-amber-800 dark:bg-amber-950 space-y-2">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-amber-800 dark:text-amber-200">
+                  Modo: Modificar alerta y reenviar a todos
+                </p>
+                <p className="text-xs text-amber-600 dark:text-amber-400">
+                  Puede editar riesgo y rango horario. Al enviar, el correo llegará a todos los destinatarios.
+                </p>
+              </div>
+              <Button variant="ghost" size="sm" onClick={() => setResendMode(null)}>
+                <X className="h-4 w-4" />
+              </Button>
             </div>
           </div>
         )}
@@ -371,7 +488,7 @@ const ActualizacionAlertaPage = () => {
             <CardContent className="space-y-5">
               <div className="space-y-2">
                 <Label>Riesgo de coincidencia</Label>
-                <Select value={riskLevel} onValueChange={setRiskLevel} disabled={alertSentToday}>
+                <Select value={riskLevel} onValueChange={setRiskLevel} disabled={inputsLocked}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
                     {RISK_OPTIONS.map((opt) => (
@@ -400,8 +517,8 @@ const ActualizacionAlertaPage = () => {
                     }
                   }}
                   placeholder="6:00 PM - 8:30 PM"
-                  readOnly={isLowRisk || alertSentToday}
-                  className={isLowRisk || alertSentToday ? "bg-muted cursor-not-allowed" : ""}
+                  readOnly={isLowRisk || inputsLocked}
+                  className={isLowRisk || inputsLocked ? "bg-muted cursor-not-allowed" : ""}
                 />
                 {timeRangeError && (
                   <p className="text-xs text-destructive">{timeRangeError}</p>
@@ -415,10 +532,8 @@ const ActualizacionAlertaPage = () => {
 
               <div className="space-y-2">
                 <Label htmlFor="demanda">Demanda estimada (MW)</Label>
-                <Input id="demanda" value={demandaEstimada} onChange={(e) => { setDemandaEstimada(e.target.value); setDemandaManuallyEdited(true); }} placeholder="8173.83" readOnly={alertSentToday} className={alertSentToday ? "bg-muted cursor-not-allowed" : ""} />
+                <Input id="demanda" value={demandaEstimada} onChange={(e) => { setDemandaEstimada(e.target.value); setDemandaManuallyEdited(true); }} placeholder="8173.83" readOnly={inputsLocked} className={inputsLocked ? "bg-muted cursor-not-allowed" : ""} />
               </div>
-
-              {/* Mensaje y Estatus se generan automáticamente y no se muestran en el panel */}
 
               <Separator />
 
@@ -430,14 +545,18 @@ const ActualizacionAlertaPage = () => {
                 </div>
                 {recipients.length > 0 && (
                   <div className="flex flex-wrap gap-2">
-                    {recipients.map((r) => (
-                      <Badge key={r.id} variant="secondary" className="gap-1 pl-3 pr-1 py-1.5 text-xs">
-                        {r.email}
-                        <button type="button" onClick={() => handleRemoveRecipient(r.id)} className="ml-1 rounded-full p-0.5 hover:bg-muted-foreground/20 transition-colors">
-                          <X className="h-3 w-3" />
-                        </button>
-                      </Badge>
-                    ))}
+                    {recipients.map((r) => {
+                      const isNew = alertSentToday && !lastSentRecipients.includes(r.email);
+                      return (
+                        <Badge key={r.id} variant="secondary" className={`gap-1 pl-3 pr-1 py-1.5 text-xs ${isNew ? "border-blue-400 bg-blue-50 dark:bg-blue-950" : ""}`}>
+                          {r.email}
+                          {isNew && <span className="text-blue-600 text-[10px] ml-1">NUEVO</span>}
+                          <button type="button" onClick={() => handleRemoveRecipient(r.id)} className="ml-1 rounded-full p-0.5 hover:bg-muted-foreground/20 transition-colors">
+                            <X className="h-3 w-3" />
+                          </button>
+                        </Badge>
+                      );
+                    })}
                   </div>
                 )}
                 {recipients.length === 0 && <p className="text-xs text-muted-foreground">No hay correos guardados.</p>}
@@ -453,14 +572,18 @@ const ActualizacionAlertaPage = () => {
                 </div>
                 {bccRecipients.length > 0 && (
                   <div className="flex flex-wrap gap-2">
-                    {bccRecipients.map((r) => (
-                      <Badge key={r.id} variant="secondary" className="gap-1 pl-3 pr-1 py-1.5 text-xs">
-                        {r.email}
-                        <button type="button" onClick={() => handleRemoveBcc(r.id)} className="ml-1 rounded-full p-0.5 hover:bg-muted-foreground/20 transition-colors">
-                          <X className="h-3 w-3" />
-                        </button>
-                      </Badge>
-                    ))}
+                    {bccRecipients.map((r) => {
+                      const isNew = alertSentToday && !lastSentRecipients.includes(r.email);
+                      return (
+                        <Badge key={r.id} variant="secondary" className={`gap-1 pl-3 pr-1 py-1.5 text-xs ${isNew ? "border-blue-400 bg-blue-50 dark:bg-blue-950" : ""}`}>
+                          {r.email}
+                          {isNew && <span className="text-blue-600 text-[10px] ml-1">NUEVO</span>}
+                          <button type="button" onClick={() => handleRemoveBcc(r.id)} className="ml-1 rounded-full p-0.5 hover:bg-muted-foreground/20 transition-colors">
+                            <X className="h-3 w-3" />
+                          </button>
+                        </Badge>
+                      );
+                    })}
                   </div>
                 )}
                 {bccRecipients.length === 0 && <p className="text-xs text-muted-foreground">No hay correos BCC guardados.</p>}
@@ -490,10 +613,24 @@ const ActualizacionAlertaPage = () => {
                 )}
               </div>
 
-              <Button onClick={handleSave} disabled={saving || alertSentToday} className="w-full">
-                <Save className="h-4 w-4 mr-2" />
-                {alertSentToday ? "Alerta ya enviada hoy" : saving ? "Guardando..." : "Guardar cambios en Vista General"}
-              </Button>
+              {resendMode === "modify" && (
+                <Button onClick={handleSave} disabled={saving} className="w-full">
+                  <Save className="h-4 w-4 mr-2" />
+                  {saving ? "Guardando..." : "Guardar cambios"}
+                </Button>
+              )}
+              {!alertSentToday && (
+                <Button onClick={handleSave} disabled={saving} className="w-full">
+                  <Save className="h-4 w-4 mr-2" />
+                  {saving ? "Guardando..." : "Guardar cambios en Vista General"}
+                </Button>
+              )}
+              {alertSentToday && !resendMode && (
+                <Button disabled className="w-full">
+                  <Save className="h-4 w-4 mr-2" />
+                  Alerta ya enviada hoy
+                </Button>
+              )}
             </CardContent>
           </Card>
 
@@ -506,14 +643,12 @@ const ActualizacionAlertaPage = () => {
               </p>
             </CardHeader>
             <CardContent className="space-y-4">
-              {/* Hidden: only used to compute peak value */}
               {forecastData && forecastData.length > 0 && (
                 <div style={{ position: 'absolute', width: 0, height: 0, overflow: 'hidden', pointerEvents: 'none' }} aria-hidden="true">
                   <ForecastChart data={forecastData} onPeakValueChange={handlePeakValueChange} showPeakLabel={false} />
                 </div>
               )}
 
-              {/* iframe que muestra el HTML del correo con gráfico embebido */}
               <iframe
                 srcDoc={previewHtml}
                 title="Vista previa del correo"
@@ -523,10 +658,30 @@ const ActualizacionAlertaPage = () => {
 
               {/* Send buttons */}
               <div className="flex gap-3 mt-4">
-                <Button variant="outline" className="flex-1" onClick={handleSendEmail} disabled={sendingEmail || alertSentToday}>
-                  {sendingEmail ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Mail className="h-4 w-4 mr-2" />}
-                  {alertSentToday ? "Alerta ya enviada" : sendingEmail ? "Generando imagen y enviando..." : "Enviar correo"}
-                </Button>
+                {!alertSentToday && (
+                  <Button variant="outline" className="flex-1" onClick={() => handleSendEmail("initial")} disabled={sendingEmail}>
+                    {sendingEmail ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Mail className="h-4 w-4 mr-2" />}
+                    {sendingEmail ? "Generando imagen y enviando..." : "Enviar correo"}
+                  </Button>
+                )}
+                {resendMode === "new" && (
+                  <Button variant="outline" className="flex-1 border-blue-300 text-blue-700 hover:bg-blue-50" onClick={() => handleSendEmail("new")} disabled={sendingEmail}>
+                    {sendingEmail ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <UserPlus className="h-4 w-4 mr-2" />}
+                    {sendingEmail ? "Enviando..." : `Enviar a ${newRecipientEmails.length + newBccEmails.length} nuevo(s)`}
+                  </Button>
+                )}
+                {resendMode === "modify" && (
+                  <Button variant="outline" className="flex-1 border-amber-300 text-amber-700 hover:bg-amber-50" onClick={() => handleSendEmail("resendAll")} disabled={sendingEmail}>
+                    {sendingEmail ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <RefreshCw className="h-4 w-4 mr-2" />}
+                    {sendingEmail ? "Enviando..." : "Reenviar a todos"}
+                  </Button>
+                )}
+                {alertSentToday && !resendMode && (
+                  <Button variant="outline" className="flex-1" disabled>
+                    <Mail className="h-4 w-4 mr-2" />
+                    Alerta ya enviada
+                  </Button>
+                )}
                 <Button variant="outline" className="flex-1" onClick={handleSendWhatsApp}>
                   <MessageSquare className="h-4 w-4 mr-2" />
                   Enviar WhatsApp
