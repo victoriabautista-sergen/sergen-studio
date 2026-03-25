@@ -72,6 +72,27 @@ Deno.serve(async (req) => {
     );
     const hour = peruNow.getHours();
 
+    // ── Check if alert was already sent today (global check) ──
+    const { data: fSettings } = await supabase
+      .from("forecast_settings")
+      .select("alert_sent_at")
+      .order("last_update", { ascending: false })
+      .limit(1)
+      .single();
+
+    if (fSettings?.alert_sent_at) {
+      const sentDate = new Date(fSettings.alert_sent_at);
+      const sentDay = `${sentDate.getFullYear()}-${sentDate.getMonth()}-${sentDate.getDate()}`;
+      const todayDay = `${peruNow.getFullYear()}-${peruNow.getMonth()}-${peruNow.getDate()}`;
+      if (sentDay === todayDay) {
+        console.log(`[REMINDER] Alerta ya enviada hoy (${fSettings.alert_sent_at}). Omitiendo recordatorios.`);
+        return new Response(
+          JSON.stringify({ ok: true, message: "Alert already sent today, skipping reminders" }),
+          { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+    }
+
     // Get authorized users from profiles table
     const { data: authorizedProfiles } = await supabase
       .from("profiles")
@@ -92,7 +113,7 @@ Deno.serve(async (req) => {
 
     let sent = 0;
     for (const chatId of authorizedChatIds) {
-      // Check if correo already sent today
+      // Check if correo already sent today (per-chat backup check)
       const { data: state } = await supabase
         .from("telegram_bot_state")
         .select("correo_enviado, alerta_enviada_hoy")
