@@ -7,29 +7,29 @@ const PortadaPage = ({ data }: { data: ReportData }) => {
 
   return (
     <div
-      className="flex flex-col"
-      style={{ minHeight: "700px", fontFamily: "sans-serif" }}
+      className="flex flex-col items-center"
+      style={{ minHeight: "700px", fontFamily: "'Segoe UI', 'Helvetica Neue', Arial, sans-serif" }}
     >
-      {/* Logo top-left area, centered horizontally */}
+      {/* Logo centered */}
       <div className="flex justify-center pt-10">
         <img
           src={sergenLogo}
           alt="Sergen Logo"
-          style={{ width: "200px", objectFit: "contain" }}
+          style={{ width: "280px", objectFit: "contain" }}
         />
       </div>
 
       {/* Spacer */}
-      <div style={{ flex: "1 1 0", minHeight: "120px" }} />
+      <div style={{ flex: "1 1 0", minHeight: "100px" }} />
 
-      {/* Title block - centered */}
-      <div className="flex flex-col items-center" style={{ gap: "16px" }}>
+      {/* Title block */}
+      <div className="flex flex-col items-center" style={{ gap: "14px" }}>
         <h1
           style={{
-            fontSize: "22px",
-            fontWeight: 800,
+            fontSize: "20px",
+            fontWeight: 600,
             color: "#1a2744",
-            letterSpacing: "0.02em",
+            letterSpacing: "0.01em",
             margin: 0,
           }}
         >
@@ -37,8 +37,8 @@ const PortadaPage = ({ data }: { data: ReportData }) => {
         </h1>
         <p
           style={{
-            fontSize: "15px",
-            fontWeight: 700,
+            fontSize: "14px",
+            fontWeight: 600,
             color: "#1a2744",
             margin: 0,
           }}
@@ -47,34 +47,33 @@ const PortadaPage = ({ data }: { data: ReportData }) => {
         </p>
         <p
           style={{
-            fontSize: "12px",
+            fontSize: "11px",
             fontWeight: 400,
-            color: "#888",
+            color: "#999",
             margin: 0,
-            marginTop: "8px",
+            marginTop: "6px",
           }}
         >
           {codigoInforme}
         </p>
       </div>
 
-      {/* Large spacer to push footer down */}
-      <div style={{ flex: "2 1 0", minHeight: "200px" }} />
+      {/* Large spacer */}
+      <div style={{ flex: "2.5 1 0", minHeight: "220px" }} />
 
       {/* Footer */}
-      <div className="flex justify-center pb-8">
-        <p
-          style={{
-            fontSize: "13px",
-            fontWeight: 600,
-            color: "#1a2744",
-            letterSpacing: "0.08em",
-            margin: 0,
-          }}
-        >
-          LIMA-{data.anio}
-        </p>
-      </div>
+      <p
+        style={{
+          fontSize: "12px",
+          fontWeight: 600,
+          color: "#1a2744",
+          letterSpacing: "0.06em",
+          margin: 0,
+          paddingBottom: "24px",
+        }}
+      >
+        LIMA-{data.anio}
+      </p>
     </div>
   );
 };
