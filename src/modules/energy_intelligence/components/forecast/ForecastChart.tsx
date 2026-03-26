@@ -183,7 +183,7 @@ export const ForecastChart = forwardRef<HTMLDivElement, ForecastChartProps>(({ d
                   const x = viewBox?.x ?? 0;
                   const y = viewBox?.y ?? 0;
                   return (
-                    <foreignObject x={x - 50} y={y + 65} width={100} height={40}>
+                    <foreignObject x={x - 50} y={y + 120} width={100} height={40}>
                       <div
                         style={{
                           background: 'rgba(192,0,0,0.92)',
