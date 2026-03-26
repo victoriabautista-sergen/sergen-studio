@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useReportContext } from "../context/ReportContext";
 import { MESES } from "../types";
@@ -45,13 +44,11 @@ const Hoja1DatosGenerales = () => {
 
   return (
     <div className="space-y-4">
-      <h3 className="font-semibold text-foreground">Datos Generales</h3>
-
-      <div className="space-y-3">
-        <div>
-          <Label>Cliente</Label>
+      <div className="space-y-4">
+        <div className="flex items-center gap-4">
+          <span className="text-sm font-medium text-foreground w-28 shrink-0">Cliente</span>
           <Select value={dg.client_id} onValueChange={v => update("client_id", v)}>
-            <SelectTrigger><SelectValue placeholder="Seleccionar cliente" /></SelectTrigger>
+            <SelectTrigger className="flex-1"><SelectValue placeholder="Seleccionar o buscar cl..." /></SelectTrigger>
             <SelectContent>
               {clients.map(c => (
                 <SelectItem key={c.id} value={c.id}>{c.company_name}</SelectItem>
@@ -60,32 +57,38 @@ const Hoja1DatosGenerales = () => {
           </Select>
         </div>
 
-        <div>
-          <Label>Concesionaria</Label>
-          <Input value={dg.concesionaria} onChange={e => update("concesionaria", e.target.value)} placeholder="Ej: Luz del Sur" />
+        <div className="flex items-center gap-4">
+          <span className="text-sm font-medium text-foreground w-28 shrink-0">Concesionaria</span>
+          <Select value={dg.concesionaria} onValueChange={v => update("concesionaria", v)}>
+            <SelectTrigger className="flex-1"><SelectValue placeholder="Seleccionar concesiona..." /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="Luz del Sur">Luz del Sur</SelectItem>
+              <SelectItem value="Enel">Enel</SelectItem>
+              <SelectItem value="Electrocentro">Electrocentro</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
 
-        <div>
-          <Label>Número de Informe</Label>
-          <Input value={dg.numero_informe} onChange={e => update("numero_informe", e.target.value)} placeholder="Ej: INF-001-2026" />
+        <div className="flex items-center gap-4">
+          <span className="text-sm font-medium text-foreground w-28 shrink-0">N° de Informe</span>
+          <Input value={dg.numero_informe} onChange={e => update("numero_informe", e.target.value)} placeholder="01" className="flex-1" />
         </div>
 
-        <div className="grid grid-cols-2 gap-3">
-          <div>
-            <Label>Mes</Label>
-            <Select value={dg.mes} onValueChange={v => update("mes", v)}>
-              <SelectTrigger><SelectValue /></SelectTrigger>
-              <SelectContent>
-                {MESES.map(m => (
-                  <SelectItem key={m} value={m}>{m}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          <div>
-            <Label>Año</Label>
-            <Input value={dg.anio} onChange={e => update("anio", e.target.value)} placeholder="2026" />
-          </div>
+        <div className="flex items-center gap-4">
+          <span className="text-sm font-medium text-foreground w-28 shrink-0">Mes</span>
+          <Select value={dg.mes} onValueChange={v => update("mes", v)}>
+            <SelectTrigger className="flex-1"><SelectValue /></SelectTrigger>
+            <SelectContent>
+              {MESES.map(m => (
+                <SelectItem key={m} value={m}>{m}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div className="flex items-center gap-4">
+          <span className="text-sm font-medium text-foreground w-28 shrink-0">Año</span>
+          <Input value={dg.anio} onChange={e => update("anio", e.target.value)} placeholder="2026" className="flex-1" />
         </div>
       </div>
     </div>
