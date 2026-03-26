@@ -19,14 +19,14 @@ const PortadaPage = ({ data }: { data: ReportData }) => {
         />
       </div>
 
-      {/* Spacer */}
-      <div style={{ flex: "1 1 0", minHeight: "100px" }} />
+      {/* Spacer - bigger to push content down */}
+      <div style={{ flex: "1.3 1 0", minHeight: "130px" }} />
 
       {/* Title block */}
       <div className="flex flex-col items-center" style={{ gap: "14px" }}>
         <h1
           style={{
-            fontSize: "20px",
+            fontSize: "23px",
             fontWeight: 600,
             color: "#1a2744",
             letterSpacing: "0.01em",
@@ -37,7 +37,7 @@ const PortadaPage = ({ data }: { data: ReportData }) => {
         </h1>
         <p
           style={{
-            fontSize: "14px",
+            fontSize: "23px",
             fontWeight: 600,
             color: "#1a2744",
             margin: 0,
@@ -59,7 +59,7 @@ const PortadaPage = ({ data }: { data: ReportData }) => {
       </div>
 
       {/* Large spacer */}
-      <div style={{ flex: "2.5 1 0", minHeight: "220px" }} />
+      <div style={{ flex: "2.2 1 0", minHeight: "200px" }} />
 
       {/* Footer */}
       <p
