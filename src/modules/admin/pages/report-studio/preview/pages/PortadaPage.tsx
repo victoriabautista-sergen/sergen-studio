@@ -35,16 +35,17 @@ const PortadaPage = ({ data }: { data: ReportData }) => {
         >
           ANÁLISIS DE FACTURACIÓN
         </h1>
-        <p
+        <h2
           style={{
             fontSize: "23px",
             fontWeight: 600,
             color: "#1a2744",
+            letterSpacing: "0.01em",
             margin: 0,
           }}
         >
           {dg.client_name || "CLIENTE"}
-        </p>
+        </h2>
         <p
           style={{
             fontSize: "11px",
