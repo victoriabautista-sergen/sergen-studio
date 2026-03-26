@@ -128,7 +128,7 @@ const SearchableCombobox = ({
             ) : (
               <button
                 onClick={() => setCreating(true)}
-                className="flex items-center gap-2 w-full px-2 py-1.5 text-sm rounded-sm hover:bg-accent text-primary cursor-pointer"
+                className="flex items-center gap-2 w-full px-2 py-1.5 text-sm rounded-sm hover:bg-primary/10 text-primary cursor-pointer"
               >
                 <Plus className="h-3.5 w-3.5" />
                 {createLabel}
