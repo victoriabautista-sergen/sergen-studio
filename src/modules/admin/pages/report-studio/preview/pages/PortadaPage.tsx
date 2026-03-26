@@ -48,7 +48,7 @@ const PortadaPage = ({ data }: { data: ReportData }) => {
         </h2>
         <p
           style={{
-            fontSize: "11px",
+            fontSize: "14px",
             fontWeight: 400,
             color: "#999",
             margin: 0,
