@@ -582,6 +582,57 @@ export type Database = {
         }
         Relationships: []
       }
+      reportes_control_demanda: {
+        Row: {
+          anio: number
+          client_id: string
+          created_at: string
+          created_by: string | null
+          datos_generales: Json | null
+          hoja2_data: Json | null
+          hoja3_data: Json | null
+          hoja4_data: Json | null
+          hoja5_data: Json | null
+          hoja6_data: Json | null
+          hoja7_data: Json | null
+          id: string
+          mes: number
+          updated_at: string
+        }
+        Insert: {
+          anio: number
+          client_id: string
+          created_at?: string
+          created_by?: string | null
+          datos_generales?: Json | null
+          hoja2_data?: Json | null
+          hoja3_data?: Json | null
+          hoja4_data?: Json | null
+          hoja5_data?: Json | null
+          hoja6_data?: Json | null
+          hoja7_data?: Json | null
+          id?: string
+          mes: number
+          updated_at?: string
+        }
+        Update: {
+          anio?: number
+          client_id?: string
+          created_at?: string
+          created_by?: string | null
+          datos_generales?: Json | null
+          hoja2_data?: Json | null
+          hoja3_data?: Json | null
+          hoja4_data?: Json | null
+          hoja5_data?: Json | null
+          hoja6_data?: Json | null
+          hoja7_data?: Json | null
+          id?: string
+          mes?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       reports: {
         Row: {
           client_id: string

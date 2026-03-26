@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { CalendarDays, Settings, Bell, Cpu, AlertTriangle } from "lucide-react";
+import { CalendarDays, Settings, Bell, Cpu, AlertTriangle, FileText } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import AdminShell from "../components/AdminShell";
 
@@ -18,6 +18,14 @@ const SUB_MODULES = [
     description: "Actualizar rango horario y riesgo de coincidencia. Enviar notificaciones.",
     icon: AlertTriangle,
     href: "/admin-panel/modulos/energy-intelligence/alerta",
+    available: true,
+  },
+  {
+    key: "report-studio",
+    label: "Generar Reporte",
+    description: "Report Studio para generar informes de análisis de facturación.",
+    icon: FileText,
+    href: "/admin-panel/modulos/energy-intelligence/report-studio",
     available: true,
   },
   {
