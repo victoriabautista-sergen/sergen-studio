@@ -32,7 +32,7 @@ const AdminShell = ({ children, breadcrumbs = [], fullWidth = false }: AdminShel
 
       {breadcrumbs.length > 0 && (
         <nav className="border-b bg-muted/30 shrink-0">
-          <div className="container flex items-center h-10 gap-1.5 text-sm">
+          <div className="container flex items-center h-11 gap-2 text-base">
             <Link
               to="/admin-panel"
               className="text-muted-foreground hover:text-foreground transition-colors"
@@ -40,8 +40,8 @@ const AdminShell = ({ children, breadcrumbs = [], fullWidth = false }: AdminShel
               Admin Panel
             </Link>
             {breadcrumbs.map((item, i) => (
-              <span key={i} className="flex items-center gap-1.5">
-                <ChevronRight className="h-3.5 w-3.5 text-muted-foreground" />
+              <span key={i} className="flex items-center gap-2">
+                <ChevronRight className="h-4 w-4 text-muted-foreground" />
                 {item.href ? (
                   <Link
                     to={item.href}

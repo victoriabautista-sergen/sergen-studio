@@ -55,12 +55,12 @@ const ReportStudioContent = () => {
             </div>
 
             <div className="px-5 pb-3">
-              <div className="flex flex-wrap gap-1.5">
+            <div className="flex flex-wrap gap-2">
                 {SHEETS.map(s => (
                   <button
                     key={s.id}
                     onClick={() => setActiveSheet(s.id)}
-                    className={`px-3 py-2 text-sm rounded-md transition-colors font-medium ${
+                    className={`px-4 py-2 text-base rounded-md transition-colors font-medium ${
                       activeSheet === s.id
                         ? "bg-[#1a2744] text-white"
                         : "text-muted-foreground hover:bg-muted hover:text-foreground"
@@ -97,14 +97,14 @@ const ReportStudioContent = () => {
             <div className="border-b bg-card px-4 py-2 flex items-center justify-between shrink-0">
               <ReportPreview.Navigation />
               <div className="flex items-center gap-2">
-                <Button variant="outline" size="sm" className="gap-1">
-                  <ZoomIn className="h-3.5 w-3.5" />
+                <Button variant="outline" size="default" className="gap-1">
+                  <ZoomIn className="h-4 w-4" />
                 </Button>
-                <Button variant="outline" size="sm" className="gap-1">
-                  <ZoomOut className="h-3.5 w-3.5" />
+                <Button variant="outline" size="default" className="gap-1">
+                  <ZoomOut className="h-4 w-4" />
                 </Button>
-                <Button variant="outline" size="sm">Reset</Button>
-                <Button size="sm" onClick={handleDownloadPDF} className="gap-2 bg-[#E8792B] hover:bg-[#d06a22] text-white">
+                <Button variant="outline" size="default">Reset</Button>
+                <Button size="default" onClick={handleDownloadPDF} className="gap-2 bg-[#E8792B] hover:bg-[#d06a22] text-white">
                   <Download className="h-4 w-4" /> Descargar PDF
                 </Button>
               </div>
