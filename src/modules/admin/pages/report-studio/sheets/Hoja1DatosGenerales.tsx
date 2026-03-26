@@ -123,7 +123,7 @@ const Hoja1DatosGenerales = () => {
 
   return (
     <div className="space-y-4 min-w-0 overflow-hidden">
-      <div className="space-y-4 min-w-0">
+      <div className="space-y-4 min-w-0" style={{ maxWidth: "420px" }}>
         <div className="flex items-center gap-4 min-w-0">
           <span className="text-sm font-medium text-foreground w-28 shrink-0">Cliente</span>
           <div className="flex-1 min-w-0">
