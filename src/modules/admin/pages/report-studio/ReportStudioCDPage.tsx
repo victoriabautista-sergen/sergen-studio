@@ -47,7 +47,7 @@ const ReportStudioContent = () => {
     <div className="h-[calc(100vh-8rem)] overflow-hidden bg-muted/30 rounded-lg">
       <ResizablePanelGroup direction="horizontal" className="h-full">
         {/* Left panel - Editor */}
-        <ResizablePanel defaultSize={32} minSize={25} maxSize={50}>
+        <ResizablePanel defaultSize={32} minSize={30} maxSize={50}>
           <div className="flex flex-col h-full bg-card">
             <div className="px-5 pt-5 pb-3">
               <h2 className="text-xl font-bold text-foreground">Generador de Reporte</h2>
