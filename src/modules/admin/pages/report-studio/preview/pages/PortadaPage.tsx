@@ -1,40 +1,39 @@
 import { ReportData } from "../../types";
+import sergenLogo from "@/assets/sergen-logo.png";
 
 const PortadaPage = ({ data }: { data: ReportData }) => {
   const dg = data.datos_generales;
+  const codigoInforme = `CS ${dg.numero_informe || "001"}-${String(data.mes).padStart(2, "0")}-${data.anio}`;
 
   return (
-    <div className="flex flex-col items-center justify-center text-center" style={{ minHeight: "700px" }}>
-      {/* Logo placeholder */}
-      <div
-        className="mb-8 flex items-center justify-center"
-        style={{ width: "180px", height: "60px" }}
-      >
-        <span className="text-3xl font-bold" style={{ color: "#E8792B" }}>SERGEN</span>
-      </div>
+    <div className="flex flex-col items-center justify-between text-center" style={{ minHeight: "700px" }}>
+      {/* Top spacer */}
+      <div />
 
-      <div className="w-full max-w-[380px] mx-auto space-y-6">
-        <div className="border-t-2 border-b-2 py-6" style={{ borderColor: "#E8792B" }}>
-          <h1 className="text-lg font-bold text-gray-800 tracking-wide uppercase">
+      {/* Logo */}
+      <div className="flex flex-col items-center gap-16">
+        <img src={sergenLogo} alt="Sergen Logo" style={{ width: "280px" }} />
+
+        {/* Title block */}
+        <div className="space-y-3">
+          <h1 className="text-xl font-bold tracking-wide" style={{ color: "#1a2744" }}>
             ANÁLISIS DE FACTURACIÓN
           </h1>
-          <p className="text-sm text-gray-500 mt-1">Control de Demanda</p>
+          <p className="text-base font-semibold" style={{ color: "#1a2744" }}>
+            {dg.client_name || "CLIENTE"}
+          </p>
         </div>
 
-        <div className="space-y-2">
-          <p className="text-base font-semibold text-gray-700">{dg.client_name || "—"}</p>
-          <p className="text-sm text-gray-500">{dg.concesionaria || "—"}</p>
-        </div>
-
-        <div className="space-y-1 text-sm text-gray-500">
-          <p>{dg.numero_informe || "INF-000"}</p>
-          <p className="uppercase">LIMA — {dg.mes} {dg.anio}</p>
-        </div>
+        {/* Report code */}
+        <p className="text-sm" style={{ color: "#E8792B" }}>
+          {codigoInforme}
+        </p>
       </div>
 
-      <div className="mt-12 text-[10px] text-gray-400">
-        Sergen Eficiencia Energética S.A.C.
-      </div>
+      {/* Bottom: Location + Year */}
+      <p className="text-sm font-medium pb-4" style={{ color: "#1a2744" }}>
+        LIMA-{data.anio}
+      </p>
     </div>
   );
 };
