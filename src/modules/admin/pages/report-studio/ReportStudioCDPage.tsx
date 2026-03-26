@@ -48,8 +48,8 @@ const ReportStudioContent = () => {
       <div className="w-[380px] min-w-[340px] flex flex-col bg-card border-r">
         {/* Header */}
         <div className="px-5 pt-5 pb-3">
-          <h2 className="text-lg font-bold text-foreground">SERGEN Report Studio</h2>
-          <p className="text-xs text-muted-foreground">Editor de informes profesionales</p>
+          <h2 className="text-lg font-bold text-foreground">Generador de Reporte</h2>
+          <p className="text-xs text-muted-foreground">Informes de análisis de facturación</p>
         </div>
 
         {/* Sheet tabs - 2 rows like reference */}
