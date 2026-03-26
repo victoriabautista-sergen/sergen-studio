@@ -60,17 +60,17 @@ const PortadaPage = ({ data }: { data: ReportData }) => {
       </div>
 
       {/* Large spacer */}
-      <div style={{ flex: "2.2 1 0", minHeight: "200px" }} />
+      <div style={{ flex: "2.5 1 0", minHeight: "220px" }} />
 
       {/* Footer */}
       <p
         style={{
-          fontSize: "12px",
+          fontSize: "16px",
           fontWeight: 600,
           color: "#1a2744",
           letterSpacing: "0.06em",
           margin: 0,
-          paddingBottom: "24px",
+          paddingBottom: "16px",
         }}
       >
         LIMA-{data.anio}
