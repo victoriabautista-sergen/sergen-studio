@@ -60,7 +60,7 @@ const PortadaPage = ({ data }: { data: ReportData }) => {
       </div>
 
       {/* Large spacer */}
-      <div style={{ flex: "3 1 0", minHeight: "280px" }} />
+      <div style={{ flex: "4 1 0", minHeight: "350px" }} />
 
       {/* Footer */}
       <p
