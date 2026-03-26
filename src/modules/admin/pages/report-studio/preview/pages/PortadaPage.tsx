@@ -7,83 +7,74 @@ const PortadaPage = ({ data }: { data: ReportData }) => {
 
   return (
     <div
-      className="relative flex flex-col items-center justify-between"
-      style={{
-        minHeight: "700px",
-        background: "linear-gradient(180deg, #ffffff 0%, #f8f9fc 100%)",
-      }}
+      className="flex flex-col"
+      style={{ minHeight: "700px", fontFamily: "sans-serif" }}
     >
-      {/* Top spacer */}
-      <div className="flex-1" />
-
-      {/* Logo */}
-      <div className="flex flex-col items-center">
-        <div
-          className="flex items-center justify-center"
-          style={{
-            width: "220px",
-            height: "220px",
-            borderRadius: "50%",
-            background: "radial-gradient(circle, rgba(232,121,43,0.08) 0%, transparent 70%)",
-          }}
-        >
-          <img
-            src={sergenLogo}
-            alt="Sergen Logo"
-            style={{ width: "160px", objectFit: "contain" }}
-          />
-        </div>
+      {/* Logo top-left area, centered horizontally */}
+      <div className="flex justify-center pt-10">
+        <img
+          src={sergenLogo}
+          alt="Sergen Logo"
+          style={{ width: "200px", objectFit: "contain" }}
+        />
       </div>
 
-      {/* Title block */}
-      <div className="flex flex-col items-center mt-12" style={{ gap: "12px" }}>
-        <div
-          style={{
-            width: "60px",
-            height: "3px",
-            background: "#E8792B",
-            borderRadius: "2px",
-          }}
-        />
+      {/* Spacer */}
+      <div style={{ flex: "1 1 0", minHeight: "120px" }} />
+
+      {/* Title block - centered */}
+      <div className="flex flex-col items-center" style={{ gap: "16px" }}>
         <h1
-          className="text-2xl font-bold tracking-widest"
           style={{
+            fontSize: "22px",
+            fontWeight: 800,
             color: "#1a2744",
-            letterSpacing: "0.15em",
+            letterSpacing: "0.02em",
+            margin: 0,
           }}
         >
           ANÁLISIS DE FACTURACIÓN
         </h1>
         <p
-          className="text-lg font-semibold tracking-wide"
-          style={{ color: "#1a2744" }}
+          style={{
+            fontSize: "15px",
+            fontWeight: 700,
+            color: "#1a2744",
+            margin: 0,
+          }}
         >
           {dg.client_name || "CLIENTE"}
         </p>
-      </div>
-
-      {/* Report code in orange */}
-      <div className="mt-10">
-        <span
-          className="text-sm font-bold tracking-wider"
+        <p
           style={{
-            color: "#E8792B",
-            letterSpacing: "0.2em",
+            fontSize: "12px",
+            fontWeight: 400,
+            color: "#888",
+            margin: 0,
+            marginTop: "8px",
           }}
         >
           {codigoInforme}
-        </span>
+        </p>
       </div>
 
-      <div className="flex-1" />
+      {/* Large spacer to push footer down */}
+      <div style={{ flex: "2 1 0", minHeight: "200px" }} />
 
-      {/* Footer: Location + Year */}
-      <p
-        className="text-sm font-medium pb-6 tracking-wide"
-        style={{ color: "#1a2744" }}
-      >
-        LIMA-{data.anio}
-      </p>
+      {/* Footer */}
+      <div className="flex justify-center pb-8">
+        <p
+          style={{
+            fontSize: "13px",
+            fontWeight: 600,
+            color: "#1a2744",
+            letterSpacing: "0.08em",
+            margin: 0,
+          }}
+        >
+          LIMA-{data.anio}
+        </p>
+      </div>
     </div>
   );
 };
