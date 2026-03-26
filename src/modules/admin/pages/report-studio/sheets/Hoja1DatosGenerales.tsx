@@ -146,7 +146,7 @@ const Hoja1DatosGenerales = () => {
               value={dg.concesionaria}
               onSelect={(v) => update("concesionaria", v)}
               onCreate={handleCreateConcesionaria}
-              placeholder="Seleccionar concesionaria..."
+              placeholder="Seleccionar"
               createLabel="Crear concesionaria"
             />
           </div>
