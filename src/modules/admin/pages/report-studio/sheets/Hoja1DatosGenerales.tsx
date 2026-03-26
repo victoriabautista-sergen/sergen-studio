@@ -124,28 +124,32 @@ const Hoja1DatosGenerales = () => {
   return (
     <div className="space-y-4">
       <div className="space-y-4">
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-4 min-w-0">
           <span className="text-sm font-medium text-foreground w-28 shrink-0">Cliente</span>
-          <SearchableCombobox
-            options={clientOptions}
-            value={dg.client_id}
-            onSelect={handleClientChange}
-            onCreate={handleCreateClient}
-            placeholder="Seleccionar cliente..."
-            createLabel="Crear cliente"
-          />
+          <div className="flex-1 min-w-0">
+            <SearchableCombobox
+              options={clientOptions}
+              value={dg.client_id}
+              onSelect={handleClientChange}
+              onCreate={handleCreateClient}
+              placeholder="Seleccionar cliente..."
+              createLabel="Crear cliente"
+            />
+          </div>
         </div>
 
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-4 min-w-0">
           <span className="text-sm font-medium text-foreground w-28 shrink-0">Concesionaria</span>
-          <SearchableCombobox
-            options={concesionariaOptions}
-            value={dg.concesionaria}
-            onSelect={(v) => update("concesionaria", v)}
-            onCreate={handleCreateConcesionaria}
-            placeholder="Seleccionar concesionaria..."
-            createLabel="Crear concesionaria"
-          />
+          <div className="flex-1 min-w-0">
+            <SearchableCombobox
+              options={concesionariaOptions}
+              value={dg.concesionaria}
+              onSelect={(v) => update("concesionaria", v)}
+              onCreate={handleCreateConcesionaria}
+              placeholder="Seleccionar concesionaria..."
+              createLabel="Crear concesionaria"
+            />
+          </div>
         </div>
 
         <div className="flex items-center gap-4">
