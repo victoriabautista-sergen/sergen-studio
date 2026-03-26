@@ -122,7 +122,7 @@ const ReportStudioCDPage = () => {
   const breadcrumbs = [
     { label: "Configuración", href: "/admin-panel/configuracion" },
     { label: "Control de Demanda", href: "/admin-panel/modulos/energy-intelligence" },
-    { label: "Report Studio" },
+    { label: "Generador de Reporte" },
   ];
 
   return (
