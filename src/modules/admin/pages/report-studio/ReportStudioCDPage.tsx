@@ -1,6 +1,7 @@
 import { useState } from "react";
-import { Download, ZoomIn, ZoomOut, RotateCcw, Loader2 } from "lucide-react";
+import { Download, ZoomIn, ZoomOut, RotateCcw, Loader2, GripVertical } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
 import AdminShell from "../../components/AdminShell";
 import { ReportProvider, useReportContext } from "./context/ReportContext";
 import ReportPreview from "./preview/ReportPreview";
