@@ -25,15 +25,15 @@ const Navigation = () => {
   _getPage = () => page;
 
   return (
-    <div className="flex items-center gap-2">
-      <Button variant="outline" size="sm" onClick={() => setPage(p => Math.max(1, p - 1) as any)} disabled={page === 1} className="gap-1">
-        <ChevronLeft className="h-3.5 w-3.5" /> Anterior
+    <div className="flex items-center gap-3">
+      <Button variant="outline" size="default" onClick={() => setPage(p => Math.max(1, p - 1) as any)} disabled={page === 1} className="gap-1">
+        <ChevronLeft className="h-4 w-4" /> Anterior
       </Button>
-      <span className="text-xs text-muted-foreground whitespace-nowrap">
+      <span className="text-sm text-muted-foreground whitespace-nowrap">
         Página {page} de {TOTAL_PAGES}
       </span>
-      <Button variant="outline" size="sm" onClick={() => setPage(p => Math.min(TOTAL_PAGES, p + 1) as any)} disabled={page === TOTAL_PAGES} className="gap-1">
-        Siguiente <ChevronRight className="h-3.5 w-3.5" />
+      <Button variant="outline" size="default" onClick={() => setPage(p => Math.min(TOTAL_PAGES, p + 1) as any)} disabled={page === TOTAL_PAGES} className="gap-1">
+        Siguiente <ChevronRight className="h-4 w-4" />
       </Button>
     </div>
   );

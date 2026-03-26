@@ -97,14 +97,14 @@ const ReportStudioContent = () => {
             <div className="border-b bg-card px-4 py-2 flex items-center justify-between shrink-0">
               <ReportPreview.Navigation />
               <div className="flex items-center gap-2">
-                <Button variant="outline" size="sm" className="gap-1">
-                  <ZoomIn className="h-3.5 w-3.5" />
+                <Button variant="outline" size="default" className="gap-1">
+                  <ZoomIn className="h-4 w-4" />
                 </Button>
-                <Button variant="outline" size="sm" className="gap-1">
-                  <ZoomOut className="h-3.5 w-3.5" />
+                <Button variant="outline" size="default" className="gap-1">
+                  <ZoomOut className="h-4 w-4" />
                 </Button>
-                <Button variant="outline" size="sm">Reset</Button>
-                <Button size="sm" onClick={handleDownloadPDF} className="gap-2 bg-[#E8792B] hover:bg-[#d06a22] text-white">
+                <Button variant="outline" size="default">Reset</Button>
+                <Button size="default" onClick={handleDownloadPDF} className="gap-2 bg-[#E8792B] hover:bg-[#d06a22] text-white">
                   <Download className="h-4 w-4" /> Descargar PDF
                 </Button>
               </div>
