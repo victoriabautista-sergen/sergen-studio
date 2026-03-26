@@ -44,77 +44,78 @@ const ReportStudioContent = () => {
   const currentSheet = SHEETS.find(s => s.id === activeSheet);
 
   return (
-    <div className="flex h-[calc(100vh-8rem)] gap-0 overflow-hidden bg-muted/30 rounded-lg">
-      {/* Left panel - Editor */}
-      <div className="w-[380px] min-w-[340px] flex flex-col bg-card border-r">
-        {/* Header */}
-        <div className="px-5 pt-5 pb-3">
-          <h2 className="text-lg font-bold text-foreground">Generador de Reporte</h2>
-          <p className="text-xs text-muted-foreground">Informes de análisis de facturación</p>
-        </div>
+    <div className="h-[calc(100vh-8rem)] overflow-hidden bg-muted/30 rounded-lg">
+      <ResizablePanelGroup direction="horizontal" className="h-full">
+        {/* Left panel - Editor */}
+        <ResizablePanel defaultSize={32} minSize={25} maxSize={50}>
+          <div className="flex flex-col h-full bg-card">
+            <div className="px-5 pt-5 pb-3">
+              <h2 className="text-xl font-bold text-foreground">Generador de Reporte</h2>
+              <p className="text-sm text-muted-foreground">Informes de análisis de facturación</p>
+            </div>
 
-        {/* Sheet tabs - 2 rows like reference */}
-        <div className="px-5 pb-3">
-          <div className="flex flex-wrap gap-1.5">
-            {SHEETS.map(s => (
-              <button
-                key={s.id}
-                onClick={() => setActiveSheet(s.id)}
-                className={`px-3 py-1.5 text-xs rounded-md transition-colors font-medium ${
-                  activeSheet === s.id
-                    ? "bg-[#1a2744] text-white"
-                    : "text-muted-foreground hover:bg-muted hover:text-foreground"
-                }`}
-              >
-                {s.label}
-              </button>
-            ))}
+            <div className="px-5 pb-3">
+              <div className="flex flex-wrap gap-1.5">
+                {SHEETS.map(s => (
+                  <button
+                    key={s.id}
+                    onClick={() => setActiveSheet(s.id)}
+                    className={`px-3 py-2 text-sm rounded-md transition-colors font-medium ${
+                      activeSheet === s.id
+                        ? "bg-[#1a2744] text-white"
+                        : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                    }`}
+                  >
+                    {s.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="px-5 pb-2 flex items-center gap-2">
+              <span className="text-lg">{currentSheet?.icon}</span>
+              <span className="text-base font-semibold text-foreground">{currentSheet?.title}</span>
+              {saving && (
+                <span className="flex items-center gap-1 text-xs text-muted-foreground ml-auto">
+                  <Loader2 className="h-3 w-3 animate-spin" /> Guardando...
+                </span>
+              )}
+            </div>
+
+            <div className="flex-1 overflow-y-auto px-5 pb-5">
+              <div className="bg-white rounded-lg border p-4">
+                <ActiveComponent />
+              </div>
+            </div>
           </div>
-        </div>
+        </ResizablePanel>
 
-        {/* Sheet title */}
-        <div className="px-5 pb-2 flex items-center gap-2">
-          <span className="text-base">{currentSheet?.icon}</span>
-          <span className="text-sm font-semibold text-foreground">{currentSheet?.title}</span>
-          {saving && (
-            <span className="flex items-center gap-1 text-[10px] text-muted-foreground ml-auto">
-              <Loader2 className="h-3 w-3 animate-spin" /> Guardando...
-            </span>
-          )}
-        </div>
+        <ResizableHandle withHandle />
 
-        {/* Sheet content */}
-        <div className="flex-1 overflow-y-auto px-5 pb-5">
-          <div className="bg-white rounded-lg border p-4">
-            <ActiveComponent />
+        <ResizablePanel defaultSize={68} minSize={40}>
+          <div className="flex flex-col h-full bg-muted/20">
+            <div className="border-b bg-card px-4 py-2 flex items-center justify-between shrink-0">
+              <ReportPreview.Navigation />
+              <div className="flex items-center gap-2">
+                <Button variant="outline" size="sm" className="gap-1">
+                  <ZoomIn className="h-3.5 w-3.5" />
+                </Button>
+                <Button variant="outline" size="sm" className="gap-1">
+                  <ZoomOut className="h-3.5 w-3.5" />
+                </Button>
+                <Button variant="outline" size="sm">Reset</Button>
+                <Button size="sm" onClick={handleDownloadPDF} className="gap-2 bg-[#E8792B] hover:bg-[#d06a22] text-white">
+                  <Download className="h-4 w-4" /> Descargar PDF
+                </Button>
+              </div>
+            </div>
+
+            <div className="flex-1 overflow-hidden">
+              <ReportPreview />
+            </div>
           </div>
-        </div>
-      </div>
-
-      {/* Right panel - Preview */}
-      <div className="flex-1 flex flex-col bg-muted/20">
-        {/* Toolbar matching reference */}
-        <div className="border-b bg-card px-4 py-2 flex items-center justify-between shrink-0">
-          <ReportPreview.Navigation />
-          <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm" className="gap-1">
-              <ZoomIn className="h-3.5 w-3.5" />
-            </Button>
-            <Button variant="outline" size="sm" className="gap-1">
-              <ZoomOut className="h-3.5 w-3.5" />
-            </Button>
-            <Button variant="outline" size="sm">Reset</Button>
-            <Button size="sm" onClick={handleDownloadPDF} className="gap-2 bg-[#E8792B] hover:bg-[#d06a22] text-white">
-              <Download className="h-4 w-4" /> Descargar PDF
-            </Button>
-          </div>
-        </div>
-
-        {/* Preview area */}
-        <div className="flex-1 overflow-hidden">
-          <ReportPreview />
-        </div>
-      </div>
+        </ResizablePanel>
+      </ResizablePanelGroup>
     </div>
   );
 };
