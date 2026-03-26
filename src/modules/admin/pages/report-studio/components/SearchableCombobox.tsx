@@ -65,7 +65,7 @@ const SearchableCombobox = ({
           variant="outline"
           role="combobox"
           aria-expanded={open}
-          className="flex-1 justify-between font-normal min-w-0 overflow-hidden"
+          className="w-full justify-between font-normal min-w-0 overflow-hidden h-10"
         >
           <span className="truncate">
             {selectedLabel || placeholder}
