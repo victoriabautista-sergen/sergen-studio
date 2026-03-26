@@ -132,7 +132,7 @@ const Hoja1DatosGenerales = () => {
               value={dg.client_id}
               onSelect={handleClientChange}
               onCreate={handleCreateClient}
-              placeholder="Seleccionar cliente..."
+              placeholder="Seleccionar"
               createLabel="Crear cliente"
             />
           </div>
