@@ -24,6 +24,7 @@ export const adminRoutes: RouteObject[] = [
   { path: "/admin-panel/modulos/energy-intelligence", element: <ControlDemandaConfigPage /> },
   { path: "/admin-panel/modulos/energy-intelligence/modulacion", element: <ModulacionPage /> },
   { path: "/admin-panel/modulos/energy-intelligence/alerta", element: <ActualizacionAlertaPage /> },
+  { path: "/admin-panel/modulos/energy-intelligence/report-studio", element: <ReportStudioCDPage /> },
   { path: "/admin-panel/modulos/:slug", element: <ModuloDetailPage /> },
   { path: "/admin-empresa", element: <CompanyAdminPage /> },
 ];

@@ -21,6 +21,14 @@ const SUB_MODULES = [
     available: true,
   },
   {
+    key: "report-studio",
+    label: "Generar Reporte",
+    description: "Report Studio para generar informes de análisis de facturación.",
+    icon: FileText,
+    href: "/admin-panel/modulos/energy-intelligence/report-studio",
+    available: true,
+  },
+  {
     key: "parametros",
     label: "Parámetros de control",
     description: "Definir umbrales y parámetros de demanda.",
