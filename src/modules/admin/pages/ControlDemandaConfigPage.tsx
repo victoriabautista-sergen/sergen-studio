@@ -22,8 +22,8 @@ const SUB_MODULES = [
   },
   {
     key: "report-studio",
-    label: "Generar Reporte",
-    description: "Report Studio para generar informes de análisis de facturación.",
+    label: "Generador de Reporte",
+    description: "Generador de informes de análisis de facturación.",
     icon: FileText,
     href: "/admin-panel/modulos/energy-intelligence/report-studio",
     available: true,
