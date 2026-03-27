@@ -9,6 +9,10 @@ const PreciosPage = ({ data }: { data: ReportData }) => {
   const mesNombre = dg.mes || "—";
   const anio = dg.anio || "—";
 
+  const meses = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
+  const mesIndex = meses.indexOf(mesNombre);
+  const mesAnterior = mesIndex > 0 ? meses[mesIndex - 1] : mesIndex === 0 ? "Diciembre" : mesNombre;
+
   return (
     <div className="flex flex-col h-full text-[10px] leading-relaxed" style={{ fontFamily: "'Inter', sans-serif", color: "#1B3A5C" }}>
       {/* Content */}
@@ -26,8 +30,8 @@ const PreciosPage = ({ data }: { data: ReportData }) => {
         <h2 className="text-[11px] font-bold mb-1" style={{ color: "#1B3A5C" }}>1. Contexto</h2>
         <p className="mb-4 text-[10px] leading-relaxed text-gray-700">
           El presente informe tiene como objetivo analizar la actualización del precio contractual del servicio prestado,
-          conforme a las cláusulas de reajuste establecidas en el contrato vigente entre <strong>[{concesionaria}]</strong> y <strong>[{cliente}]</strong>.
-          Se utilizan las variables económicas y los índices de referencia aplicables al periodo {anio}.
+          conforme a las cláusulas de reajuste establecidas en el contrato vigente entre <strong>{concesionaria}</strong> y <strong>{cliente}</strong>.
+          Se utilizan las variables económicas y los índices de referencia aplicables al periodo {mesAnterior} del {anio}.
         </p>
 
         {/* 2. Variables utilizadas */}
