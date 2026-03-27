@@ -42,8 +42,8 @@ export async function generateCotizacionPDF(
       margin: 0;
       padding: 0;
       width: 100%;
-      max-height: 273mm;
-      overflow: hidden;
+      height: 100%;
+      background: #ffffff;
     }
   </style>
 </head>
