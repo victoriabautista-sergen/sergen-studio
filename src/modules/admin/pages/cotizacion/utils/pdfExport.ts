@@ -38,10 +38,11 @@ export async function generateCotizacionPDF(
     }
     html, body {
       margin: 0;
-      padding: 0;
+      padding: 12mm;
       width: 210mm;
       height: 297mm;
       overflow: hidden;
+      box-sizing: border-box;
     }
   </style>
 </head>
