@@ -111,15 +111,17 @@ const ReportPreview = () => {
   return (
     <div className="flex items-start justify-center h-full overflow-auto p-6 relative">
       <div
-        className="bg-white shadow-xl border rounded-sm"
+        className="bg-white shadow-xl border rounded-sm flex-shrink-0"
         style={{
           width: "595px",
-          minHeight: "842px",
+          minWidth: "595px",
+          height: "842px",
           fontFamily: "'Inter', sans-serif",
           position: "relative",
+          overflow: "hidden",
         }}
       >
-        <div className="px-10 py-8" style={{ minHeight: "800px" }}>
+        <div className="px-10 py-8" style={{ height: "100%" }}>
           <PageComponent data={data} />
         </div>
       </div>
