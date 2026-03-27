@@ -9,6 +9,10 @@ const PreciosPage = ({ data }: { data: ReportData }) => {
   const mesNombre = dg.mes || "—";
   const anio = dg.anio || "—";
 
+  const meses = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
+  const mesIndex = meses.indexOf(mesNombre);
+  const mesAnterior = mesIndex > 0 ? meses[mesIndex - 1] : mesIndex === 0 ? "Diciembre" : mesNombre;
+
   return (
     <div className="flex flex-col h-full text-[10px] leading-relaxed" style={{ fontFamily: "'Inter', sans-serif", color: "#1B3A5C" }}>
       {/* Content */}
