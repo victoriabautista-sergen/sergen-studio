@@ -49,8 +49,8 @@ export const BRAND_CONFIG: Record<CotizacionMarca, { razon_social: string; cuent
   },
   incoser: {
     razon_social: "INCOSER S.A.C.",
-    cuenta_bancaria: "BCP SOLES: 194-2654871-0-15",
-    cci: "CCI BCP SOLES: 00219400265487101595",
+    cuenta_bancaria: "BCP SOLES: 194-1053206-0-43",
+    cci: "CCI BCP SOLES: 00219400105320604390",
     direccion: "Platinium Plaza - San Isidro - Lima",
   },
 };
