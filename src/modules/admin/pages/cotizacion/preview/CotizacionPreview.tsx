@@ -59,11 +59,13 @@ const CotizacionPreviewContent = () => {
           padding: "0 6px",
           marginBottom: "4px",
           height: "20px",
-          lineHeight: "20px",
           boxSizing: "border-box",
+          display: "block",
         }}
       >
-        CLIENTE
+        <span style={{ display: "block", paddingTop: "3px", lineHeight: 1 }}>
+          CLIENTE
+        </span>
       </div>
       <table style={{ fontSize: "7px", marginBottom: "12px" }}>
         <tbody>
@@ -77,12 +79,12 @@ const CotizacionPreviewContent = () => {
       <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "7px", marginBottom: "4px" }}>
         <thead>
           <tr style={{ backgroundColor: "#E8792B", color: "#fff" }}>
-            <th style={{ padding: "0 4px", height: "22px", lineHeight: "22px", textAlign: "left", fontWeight: 600, boxSizing: "border-box" }}>Descripción</th>
-            <th style={{ padding: "0 4px", height: "22px", lineHeight: "22px", textAlign: "center", fontWeight: 600, width: "50px", boxSizing: "border-box" }}>Código</th>
-            <th style={{ padding: "0 4px", height: "22px", lineHeight: "22px", textAlign: "center", fontWeight: 600, width: "60px", boxSizing: "border-box" }}>Precio Unit</th>
-            <th style={{ padding: "0 4px", height: "22px", lineHeight: "22px", textAlign: "center", fontWeight: 600, width: "30px", boxSizing: "border-box" }}>Cant.</th>
-            <th style={{ padding: "0 4px", height: "22px", lineHeight: "22px", textAlign: "center", fontWeight: 600, width: "55px", boxSizing: "border-box" }}>P.venta</th>
-            <th style={{ padding: "0 4px", height: "22px", lineHeight: "22px", textAlign: "center", fontWeight: 600, width: "55px", boxSizing: "border-box" }}>Total</th>
+            <th style={{ padding: "0 4px", height: "22px", textAlign: "left", fontWeight: 600, boxSizing: "border-box" }}><span style={{ display: "block", paddingTop: "4px", lineHeight: 1 }}>Descripción</span></th>
+            <th style={{ padding: "0 4px", height: "22px", textAlign: "center", fontWeight: 600, width: "50px", boxSizing: "border-box" }}><span style={{ display: "block", paddingTop: "4px", lineHeight: 1 }}>Código</span></th>
+            <th style={{ padding: "0 4px", height: "22px", textAlign: "center", fontWeight: 600, width: "60px", boxSizing: "border-box" }}><span style={{ display: "block", paddingTop: "4px", lineHeight: 1 }}>Precio Unit</span></th>
+            <th style={{ padding: "0 4px", height: "22px", textAlign: "center", fontWeight: 600, width: "30px", boxSizing: "border-box" }}><span style={{ display: "block", paddingTop: "4px", lineHeight: 1 }}>Cant.</span></th>
+            <th style={{ padding: "0 4px", height: "22px", textAlign: "center", fontWeight: 600, width: "55px", boxSizing: "border-box" }}><span style={{ display: "block", paddingTop: "4px", lineHeight: 1 }}>P.venta</span></th>
+            <th style={{ padding: "0 4px", height: "22px", textAlign: "center", fontWeight: 600, width: "55px", boxSizing: "border-box" }}><span style={{ display: "block", paddingTop: "4px", lineHeight: 1 }}>Total</span></th>
           </tr>
         </thead>
         <tbody>
@@ -112,11 +114,13 @@ const CotizacionPreviewContent = () => {
               marginBottom: "4px",
               fontSize: "7px",
               height: "18px",
-              lineHeight: "18px",
               boxSizing: "border-box",
+              display: "block",
             }}
           >
-            TÉRMINOS Y CONDICIONES
+            <span style={{ display: "block", paddingTop: "4px", lineHeight: 1 }}>
+              TÉRMINOS Y CONDICIONES
+            </span>
           </div>
           {data.terminos_items.map((term, idx) => (
             <div key={idx} style={{ marginBottom: "3px", whiteSpace: "pre-wrap", lineHeight: 1.5 }}>
