@@ -12,6 +12,7 @@ import ControlDemandaConfigPage from "./pages/ControlDemandaConfigPage";
 import ModulacionPage from "./pages/control-demanda/ModulacionPage";
 import ActualizacionAlertaPage from "./pages/control-demanda/ActualizacionAlertaPage";
 import ReportStudioCDPage from "./pages/report-studio/ReportStudioCDPage";
+import CotizacionPage from "./pages/cotizacion/CotizacionPage";
 
 export const adminRoutes: RouteObject[] = [
   { path: "/admin-panel", element: <AdminPanelHomePage /> },
