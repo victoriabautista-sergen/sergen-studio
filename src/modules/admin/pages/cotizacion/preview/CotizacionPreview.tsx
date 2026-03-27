@@ -22,10 +22,7 @@ const CotizacionPreviewContent = () => {
       {/* Header */}
       <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "12px" }}>
         <div>
-          <img src={logo} alt={brandName} style={{ height: "48px", objectFit: "contain", marginBottom: "2px" }} />
-          <div style={{ fontSize: "7px", color: "#E8792B", fontStyle: "italic" }}>
-            {slogan}
-          </div>
+          <img src={logo} alt={brandName} style={{ height: isIncoser ? "60px" : "48px", objectFit: "contain" }} />
         </div>
         <div style={{ textAlign: "right" }}>
           <div style={{ fontSize: "16px", fontWeight: 700, color: "#E8792B", marginBottom: "4px" }}>COTIZACIÓN</div>
