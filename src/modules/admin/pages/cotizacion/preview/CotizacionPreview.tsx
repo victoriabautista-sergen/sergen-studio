@@ -11,8 +11,6 @@ import logoOrazul from "@/assets/partners/orazul.jpeg";
 import logoLaVirgen from "@/assets/partners/lavirgen.jpeg";
 import logoElectroDunas from "@/assets/partners/electrodunas.png";
 
-let _triggerExport: (() => Promise<void>) | null = null;
-
 const fmt = (n: number) => n.toFixed(2);
 
 const CotizacionPreviewContent = () => {
