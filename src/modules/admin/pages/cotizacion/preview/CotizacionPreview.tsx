@@ -30,7 +30,7 @@ const CotizacionPreviewContent = () => {
           <img src={logo} alt={brandName} style={{ height: isIncoser ? "64px" : "48px", objectFit: "contain" }} />
         </div>
         <div style={{ textAlign: "right" }}>
-          <table style={{ fontSize: "7px", marginLeft: "auto" }}>
+          <table style={{ fontSize: "9px", marginLeft: "auto" }}>
             <tbody>
               <tr><td colSpan={2} style={{ textAlign: "center", fontSize: "12px", fontWeight: 700, color: "#F58220", paddingBottom: "4px" }}>COTIZACIÓN</td></tr>
               <tr><td style={{ paddingRight: "4px", color: "#666", textAlign: "left" }}>Fecha :</td><td style={{ fontWeight: 500, textAlign: "left", paddingLeft: "6px" }}>{data.fecha}</td></tr>
