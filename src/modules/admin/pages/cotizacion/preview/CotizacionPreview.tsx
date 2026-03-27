@@ -12,7 +12,10 @@ import logoElectroDunas from "@/assets/partners/electrodunas.png";
 
 const fmt = (n: number) => n.toFixed(2);
 const ORANGE = "#F58220";
-const OB = `0.2px solid ${ORANGE}`;
+const OB_THIN = `1px solid ${ORANGE}`;
+const CELL_BORDER = { borderRight: `1px solid rgba(245,130,32,0.3)`, borderBottom: `1px solid rgba(245,130,32,0.3)` };
+const CELL_BORDER_LAST = { borderBottom: `1px solid rgba(245,130,32,0.3)` };
+const OB = `1px solid rgba(245,130,32,0.35)`;
 
 const CotizacionPreviewContent = () => {
   const { data } = useCotizacionContext();
