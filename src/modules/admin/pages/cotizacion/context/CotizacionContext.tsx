@@ -1,5 +1,6 @@
-import React, { createContext, useContext, useState, useCallback } from "react";
-import { CotizacionData, defaultCotizacionData } from "../types";
+import React, { createContext, useContext, useState, useCallback, useEffect } from "react";
+import { CotizacionData, defaultCotizacionData, BRAND_CONFIG } from "../types";
+import { supabase } from "@/integrations/supabase/client";
 
 interface CotizacionContextType {
   data: CotizacionData;
@@ -16,12 +17,49 @@ export const useCotizacionContext = () => {
   return ctx;
 };
 
+// Generate default validity: 15 days from today
+const getDefaultValidez = () => {
+  const d = new Date();
+  d.setDate(d.getDate() + 15);
+  return d.toLocaleDateString("es-PE");
+};
+
+// Generate next correlative number: COT-YYYYMM-NNN
+const generateCorrelativeNumber = async (): Promise<string> => {
+  const now = new Date();
+  const prefix = `COT-${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, "0")}`;
+  
+  // For now, use timestamp-based. Could be improved with DB sequence.
+  const count = String(Math.floor(Math.random() * 900) + 100);
+  return `${prefix}-${count}`;
+};
+
 export const CotizacionProvider = ({ children }: { children: React.ReactNode }) => {
-  const [data, setData] = useState<CotizacionData>(defaultCotizacionData);
+  const [data, setData] = useState<CotizacionData>({
+    ...defaultCotizacionData,
+    validez: getDefaultValidez(),
+  });
+
+  // Generate correlative number on mount
+  useEffect(() => {
+    generateCorrelativeNumber().then(num => {
+      setData(prev => ({ ...prev, numero_cotizacion: num }));
+    });
+  }, []);
 
   const updateData = useCallback(<K extends keyof CotizacionData>(key: K, value: CotizacionData[K]) => {
     setData(prev => {
       const next = { ...prev, [key]: value };
+
+      // When brand changes, update bank info and direccion
+      if (key === "marca") {
+        const marca = value as CotizacionData["marca"];
+        const config = BRAND_CONFIG[marca];
+        next.cuenta_bancaria = config.cuenta_bancaria;
+        next.cci = config.cci;
+        next.direccion = config.direccion;
+      }
+
       // Recalculate totals when items change
       if (key === "items" || key === "impuesto_pct" || key === "otros") {
         const items = key === "items" ? (value as CotizacionData["items"]) : next.items;
@@ -38,7 +76,13 @@ export const CotizacionProvider = ({ children }: { children: React.ReactNode }) 
   }, []);
 
   const resetData = useCallback(() => {
-    setData(defaultCotizacionData);
+    setData({
+      ...defaultCotizacionData,
+      validez: getDefaultValidez(),
+    });
+    generateCorrelativeNumber().then(num => {
+      setData(prev => ({ ...prev, numero_cotizacion: num }));
+    });
   }, []);
 
   return (

@@ -1,18 +1,68 @@
+import { useEffect, useState } from "react";
 import { useCotizacionContext } from "../context/CotizacionContext";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Plus, Trash2 } from "lucide-react";
-import { CotizacionItem } from "../types";
+import { CotizacionItem, CotizacionMarca } from "../types";
+import { supabase } from "@/integrations/supabase/client";
+
+interface SergenUser {
+  user_id: string;
+  full_name: string;
+  email: string;
+  phone: string | null;
+}
 
 const CotizacionEditor = () => {
   const { data, updateData, setData } = useCotizacionContext();
+  const [sergenUsers, setSergenUsers] = useState<SergenUser[]>([]);
+
+  // Fetch Sergen users (super_admin + technical_user)
+  useEffect(() => {
+    const fetchUsers = async () => {
+      const { data: roles } = await supabase
+        .from("user_roles")
+        .select("user_id, role")
+        .in("role", ["super_admin", "technical_user"]);
+
+      if (!roles?.length) return;
+
+      const userIds = roles.map(r => r.user_id);
+      const { data: profiles } = await supabase
+        .from("profiles")
+        .select("user_id, full_name, email, phone")
+        .in("user_id", userIds)
+        .eq("is_active", true);
+
+      if (profiles) {
+        setSergenUsers(profiles as SergenUser[]);
+      }
+    };
+    fetchUsers();
+  }, []);
+
+  const handleAsesorChange = (userId: string) => {
+    const user = sergenUsers.find(u => u.user_id === userId);
+    if (user) {
+      setData(prev => ({
+        ...prev,
+        asesor: user.full_name || "",
+        correo: user.email || "",
+        telefono: user.phone || "",
+      }));
+    }
+  };
+
+  const handleMarcaChange = (marca: CotizacionMarca) => {
+    updateData("marca", marca);
+  };
 
   const updateItem = (index: number, field: keyof CotizacionItem, value: string | number) => {
     const newItems = [...data.items];
     const item = { ...newItems[index], [field]: value };
-    // Recalculate item total
     item.total = item.precio_unitario * item.cantidad;
     item.precio_venta = item.precio_unitario;
     newItems[index] = item;
@@ -28,12 +78,25 @@ const CotizacionEditor = () => {
 
   const removeItem = (index: number) => {
     if (data.items.length <= 1) return;
-    const newItems = data.items.filter((_, i) => i !== index);
-    updateData("items", newItems);
+    updateData("items", data.items.filter((_, i) => i !== index));
   };
 
   return (
     <div className="space-y-6">
+      {/* Marca / Logo */}
+      <div>
+        <h3 className="text-sm font-semibold text-foreground mb-3">Marca</h3>
+        <Select value={data.marca} onValueChange={(v) => handleMarcaChange(v as CotizacionMarca)}>
+          <SelectTrigger className="h-8 text-xs">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="sergen">SERGEN</SelectItem>
+            <SelectItem value="incoser">INCOSER</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
       {/* Datos de Cotización */}
       <div>
         <h3 className="text-sm font-semibold text-foreground mb-3">Datos de Cotización</h3>
@@ -44,7 +107,7 @@ const CotizacionEditor = () => {
           </div>
           <div>
             <Label className="text-xs">N° Cotización</Label>
-            <Input value={data.numero_cotizacion} onChange={e => updateData("numero_cotizacion", e.target.value)} className="h-8 text-xs" />
+            <Input value={data.numero_cotizacion} readOnly className="h-8 text-xs bg-muted" />
           </div>
           <div>
             <Label className="text-xs">Validez</Label>
@@ -61,15 +124,26 @@ const CotizacionEditor = () => {
             <Label className="text-xs">Dirección</Label>
             <Input value={data.direccion} onChange={e => updateData("direccion", e.target.value)} className="h-8 text-xs" />
           </div>
-          <div>
+          <div className="col-span-2">
             <Label className="text-xs">Asesor</Label>
-            <Input value={data.asesor} onChange={e => updateData("asesor", e.target.value)} className="h-8 text-xs" />
+            <Select onValueChange={handleAsesorChange}>
+              <SelectTrigger className="h-8 text-xs">
+                <SelectValue placeholder="Seleccionar asesor" />
+              </SelectTrigger>
+              <SelectContent>
+                {sergenUsers.map(user => (
+                  <SelectItem key={user.user_id} value={user.user_id}>
+                    {user.full_name || user.email}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
           <div>
             <Label className="text-xs">Teléfono</Label>
             <Input value={data.telefono} onChange={e => updateData("telefono", e.target.value)} className="h-8 text-xs" />
           </div>
-          <div className="col-span-2">
+          <div>
             <Label className="text-xs">Correo</Label>
             <Input value={data.correo} onChange={e => updateData("correo", e.target.value)} className="h-8 text-xs" />
           </div>
@@ -107,22 +181,13 @@ const CotizacionEditor = () => {
           {data.items.map((item, idx) => (
             <div key={idx} className="border rounded-md p-3 space-y-2 relative">
               {data.items.length > 1 && (
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="absolute top-2 right-2 h-6 w-6"
-                  onClick={() => removeItem(idx)}
-                >
+                <Button variant="ghost" size="icon" className="absolute top-2 right-2 h-6 w-6" onClick={() => removeItem(idx)}>
                   <Trash2 className="h-3 w-3 text-destructive" />
                 </Button>
               )}
               <div>
                 <Label className="text-xs">Descripción</Label>
-                <Textarea
-                  value={item.descripcion}
-                  onChange={e => updateItem(idx, "descripcion", e.target.value)}
-                  className="text-xs min-h-[60px]"
-                />
+                <Textarea value={item.descripcion} onChange={e => updateItem(idx, "descripcion", e.target.value)} className="text-xs min-h-[60px]" />
               </div>
               <div className="grid grid-cols-3 gap-2">
                 <div>
@@ -161,16 +226,13 @@ const CotizacionEditor = () => {
       {/* Términos */}
       <div>
         <h3 className="text-sm font-semibold text-foreground mb-3">Términos y Condiciones</h3>
-        <Textarea
-          value={data.terminos}
-          onChange={e => updateData("terminos", e.target.value)}
-          className="text-xs min-h-[100px]"
-        />
+        <Textarea value={data.terminos} onChange={e => updateData("terminos", e.target.value)} className="text-xs min-h-[100px]" />
       </div>
 
       {/* Cuentas bancarias */}
       <div>
         <h3 className="text-sm font-semibold text-foreground mb-3">Datos Bancarios</h3>
+        <p className="text-xs text-muted-foreground mb-2">Se actualizan automáticamente según la marca seleccionada.</p>
         <div className="space-y-3">
           <div>
             <Label className="text-xs">Cuenta Bancaria</Label>
