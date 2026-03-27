@@ -4,6 +4,11 @@ import React, { useRef, useCallback } from "react";
 import { generateCotizacionPDF } from "../utils/pdfExport";
 import logoSergen from "@/assets/sergen-logo.png";
 import logoIncoser from "@/assets/logo_incoser.png";
+import logoCvc from "@/assets/partners/cvcenergia.png";
+import logoKallpa from "@/assets/partners/kallpa.jpg";
+import logoFenix from "@/assets/partners/fenix.jpg";
+import logoOrazul from "@/assets/partners/orazul.jpeg";
+import logoLaVirgen from "@/assets/partners/lavirgen.jpeg";
 
 let _triggerExport: (() => Promise<void>) | null = null;
 
