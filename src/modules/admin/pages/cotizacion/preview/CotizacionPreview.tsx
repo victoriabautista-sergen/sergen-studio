@@ -165,7 +165,7 @@ const CotizacionPreviewContent = () => {
 
       {/* Footer */}
       <div style={{ textAlign: "center", marginTop: "10px", fontSize: "9px", color: "#666" }}>
-        Si usted tiene alguna pregunta sobre esta cotización, por favor, póngase en contacto con nosotros
+        Si usted tiene alguna consulta sobre esta cotización, por favor, póngase en contacto con nosotros
       </div>
       <div style={{ textAlign: "center", marginTop: "4px", fontSize: "11px", fontStyle: "italic", fontWeight: 600 }}>
         ¡Gracias por su preferencia!
