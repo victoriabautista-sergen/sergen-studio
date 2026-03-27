@@ -5,7 +5,8 @@ import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/componen
 import AdminShell from "../../components/AdminShell";
 import { CotizacionProvider } from "./context/CotizacionContext";
 import CotizacionEditor from "./editor/CotizacionEditor";
-import CotizacionPreview, { triggerCotizacionExport } from "./preview/CotizacionPreview";
+import CotizacionPreview from "./preview/CotizacionPreview";
+import { generateCotizacionPDF } from "./utils/pdfExport";
 
 const ZOOM_STEPS = [50, 60, 70, 80, 90, 100, 110, 120, 130, 150];
 
@@ -16,9 +17,11 @@ const CotizacionContent = () => {
   const previewRef = useRef<HTMLDivElement>(null);
 
   const handleDownloadPDF = async () => {
+    if (!previewRef.current) return;
+
     setDownloading(true);
     try {
-      await triggerCotizacionExport();
+      await generateCotizacionPDF(previewRef.current, previewRef.current.dataset.filename || "cotizacion.pdf");
     } finally {
       setDownloading(false);
     }

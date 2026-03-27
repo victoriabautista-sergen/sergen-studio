@@ -1,7 +1,6 @@
 import { useCotizacionContext } from "../context/CotizacionContext";
 import { BRAND_CONFIG } from "../types";
-import React, { useRef, useCallback } from "react";
-import { generateCotizacionPDF } from "../utils/pdfExport";
+import React, { useRef } from "react";
 import logoSergen from "@/assets/sergen-logo.png";
 import logoIncoser from "@/assets/logo_incoser.png";
 import logoCvc from "@/assets/partners/cvcenergia.png";
@@ -10,8 +9,6 @@ import logoFenix from "@/assets/partners/fenix.jpg";
 import logoOrazul from "@/assets/partners/orazul.jpeg";
 import logoLaVirgen from "@/assets/partners/lavirgen.jpeg";
 import logoElectroDunas from "@/assets/partners/electrodunas.png";
-
-let _triggerExport: (() => Promise<void>) | null = null;
 
 const fmt = (n: number) => n.toFixed(2);
 
@@ -168,18 +165,12 @@ const CotizacionPreview = React.forwardRef<HTMLDivElement>((_, ref) => {
   const internalRef = useRef<HTMLDivElement>(null);
   const containerRef = (ref as React.RefObject<HTMLDivElement>) || internalRef;
 
-  const handleExport = useCallback(async () => {
-    if (!containerRef.current) return;
-    const filename = `Cotizacion_${data.empresa_cliente || "doc"}_${data.numero_cotizacion || "sin_numero"}.pdf`.replace(/\s+/g, "_");
-    await generateCotizacionPDF(containerRef.current, filename);
-  }, [data, containerRef]);
-
-  _triggerExport = handleExport;
 
   return (
     <div
       ref={containerRef}
       data-pdf-page="1"
+      data-filename={`Cotizacion_${data.empresa_cliente || "doc"}_${data.numero_cotizacion || "sin_numero"}.pdf`.replace(/\s+/g, "_")}
       style={{
         width: "595px",
         height: "842px",
@@ -198,6 +189,6 @@ const CotizacionPreview = React.forwardRef<HTMLDivElement>((_, ref) => {
 
 CotizacionPreview.displayName = "CotizacionPreview";
 
-export const triggerCotizacionExport = () => _triggerExport?.();
+
 
 export default CotizacionPreview;
