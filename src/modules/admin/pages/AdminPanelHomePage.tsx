@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Building2, Inbox, Settings, Users } from "lucide-react";
+import { Building2, FileText, Inbox, Settings, Users } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import AdminShell from "../components/AdminShell";
@@ -30,6 +30,12 @@ const NAV_CARDS = [
     title: "Solicitudes de Planes",
     description: "Solicitudes comerciales de nuevos clientes",
     icon: Inbox,
+  },
+  {
+    href: "/admin-panel/cotizacion",
+    title: "Cotización",
+    description: "Generador de cotizaciones para clientes",
+    icon: FileText,
   },
 ] as const;
 
