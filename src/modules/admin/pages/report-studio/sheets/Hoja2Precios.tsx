@@ -95,7 +95,10 @@ const Hoja2Precios = () => {
         </div>
 
         <p className="text-xs font-medium text-muted-foreground uppercase mt-3">Cálculo</p>
-        {numField("Factor de Pérdida", "factor_perdida", h2.factor_perdida)}
+        <div className="grid grid-cols-2 gap-2">
+          {numField("Factor E", "factor_e", h2.factor_e)}
+          {numField("Factor de Pérdida", "factor_perdida", h2.factor_perdida)}
+        </div>
 
         <div>
           <Label className="text-xs">Fórmula</Label>
@@ -115,6 +118,14 @@ const Hoja2Precios = () => {
           <div className="flex justify-between text-sm">
             <span>Precio Actualizado HFP:</span>
             <span className="font-semibold text-primary">{monedaSymbol} {h2.precio_actualizado_hfp.toFixed(4)}</span>
+          </div>
+          <div className="flex justify-between text-sm">
+            <span>Precio Calculado HP:</span>
+            <span className="font-semibold text-primary">{monedaSymbol} {h2.precio_calculado_hp?.toFixed(5) || "0.00000"}</span>
+          </div>
+          <div className="flex justify-between text-sm">
+            <span>Precio Calculado HFP:</span>
+            <span className="font-semibold text-primary">{monedaSymbol} {h2.precio_calculado_hfp?.toFixed(5) || "0.00000"}</span>
           </div>
         </div>
       </div>
