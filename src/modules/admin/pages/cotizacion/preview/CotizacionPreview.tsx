@@ -90,7 +90,7 @@ const CotizacionPreviewContent = () => {
         <tbody>
           {data.items.map((item, idx) => (
             <tr key={idx} style={{ borderBottom: "1px solid #e5e5e5" }}>
-              <td style={{ padding: "4px", verticalAlign: "top" }}>{item.descripcion}</td>
+              <td style={{ padding: "4px", verticalAlign: "top", whiteSpace: "pre-wrap" }}>{item.descripcion}</td>
               <td style={{ padding: "4px", textAlign: "center" }}>{item.codigo}</td>
               <td style={{ padding: "4px", textAlign: "right" }}>S/ {fmt(item.precio_unitario)}</td>
               <td style={{ padding: "4px", textAlign: "center" }}>{item.cantidad}</td>
