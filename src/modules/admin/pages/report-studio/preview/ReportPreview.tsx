@@ -1,5 +1,4 @@
 import { useReportContext } from "../context/ReportContext";
-import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import PortadaPage from "./pages/PortadaPage";
@@ -9,30 +8,32 @@ import ComparacionPage from "./pages/ComparacionPage";
 import PotenciaPage from "./pages/PotenciaPage";
 import ProyeccionPage from "./pages/ProyeccionPage";
 import ConclusionesPage from "./pages/ConclusionesPage";
+import React from "react";
 
 const TOTAL_PAGES = 7;
 
-// Shared state for navigation between toolbar and preview
-let _setPageExternal: ((fn: (p: number) => number) => void) | null = null;
-let _getPage: (() => number) | null = null;
+const pageComponents: Record<number, React.FC<{ data: any }>> = {
+  1: PortadaPage,
+  2: PreciosPage,
+  3: FacturaPage,
+  4: ComparacionPage,
+  5: PotenciaPage,
+  6: ProyeccionPage,
+  7: ConclusionesPage,
+};
 
 const Navigation = () => {
-  // This is rendered in the toolbar; it communicates with the preview via shared ref
-  const [page, setPage] = useState(1);
-
-  // Sync with preview
-  _setPageExternal = setPage as any;
-  _getPage = () => page;
+  const { activeSheet, setActiveSheet } = useReportContext();
 
   return (
     <div className="flex items-center gap-3">
-      <Button variant="outline" size="default" onClick={() => setPage(p => Math.max(1, p - 1) as any)} disabled={page === 1} className="gap-1">
+      <Button variant="outline" size="default" onClick={() => setActiveSheet(Math.max(1, activeSheet - 1))} disabled={activeSheet === 1} className="gap-1">
         <ChevronLeft className="h-4 w-4" /> Anterior
       </Button>
       <span className="text-sm text-muted-foreground whitespace-nowrap">
-        Página {page} de {TOTAL_PAGES}
+        Página {activeSheet} de {TOTAL_PAGES}
       </span>
-      <Button variant="outline" size="default" onClick={() => setPage(p => Math.min(TOTAL_PAGES, p + 1) as any)} disabled={page === TOTAL_PAGES} className="gap-1">
+      <Button variant="outline" size="default" onClick={() => setActiveSheet(Math.min(TOTAL_PAGES, activeSheet + 1))} disabled={activeSheet === TOTAL_PAGES} className="gap-1">
         Siguiente <ChevronRight className="h-4 w-4" />
       </Button>
     </div>
@@ -40,18 +41,8 @@ const Navigation = () => {
 };
 
 const ReportPreview = () => {
-  const { data } = useReportContext();
-  const page = _getPage ? _getPage() : 1;
-
-  const pages = [
-    <PortadaPage key={1} data={data} />,
-    <PreciosPage key={2} data={data} />,
-    <FacturaPage key={3} data={data} />,
-    <ComparacionPage key={4} data={data} />,
-    <PotenciaPage key={5} data={data} />,
-    <ProyeccionPage key={6} data={data} />,
-    <ConclusionesPage key={7} data={data} />,
-  ];
+  const { data, activeSheet } = useReportContext();
+  const PageComponent = pageComponents[activeSheet];
 
   return (
     <div className="flex items-start justify-center h-full overflow-auto p-6">
@@ -64,9 +55,8 @@ const ReportPreview = () => {
           position: "relative",
         }}
       >
-        {/* Content */}
         <div className="px-10 py-8" style={{ minHeight: "800px" }}>
-          {pages[page - 1]}
+          <PageComponent data={data} />
         </div>
       </div>
     </div>
