@@ -23,7 +23,7 @@ const CotizacionPreviewContent = () => {
   const brandConfig = BRAND_CONFIG[data.marca];
 
   return (
-    <div style={{ fontFamily: "'Inter', sans-serif", fontSize: "10px", color: "#333", lineHeight: 1.4 }}>
+    <div style={{ fontFamily: "'Inter', sans-serif", fontSize: "10px", color: "#000", lineHeight: 1.4 }}>
       {/* Header */}
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "12px" }}>
         <div>
@@ -33,9 +33,9 @@ const CotizacionPreviewContent = () => {
           <table style={{ fontSize: "9px", marginLeft: "auto" }}>
             <tbody>
               <tr><td colSpan={2} style={{ textAlign: "center", fontSize: "14px", fontWeight: 700, color: "#F58220", paddingBottom: "4px" }}>COTIZACIÓN</td></tr>
-              <tr><td style={{ paddingRight: "4px", color: "#666", textAlign: "left" }}>Fecha :</td><td style={{ fontWeight: 500, textAlign: "left", paddingLeft: "6px" }}>{data.fecha}</td></tr>
-              <tr><td style={{ paddingRight: "4px", color: "#666", textAlign: "left" }}>Cotización :</td><td style={{ fontWeight: 500, textAlign: "left", paddingLeft: "6px" }}>{data.numero_cotizacion || "—"}</td></tr>
-              <tr><td style={{ paddingRight: "4px", color: "#666", textAlign: "left" }}>Validez :</td><td style={{ fontWeight: 500, textAlign: "left", paddingLeft: "6px" }}>{data.validez || "—"}</td></tr>
+              <tr><td style={{ paddingRight: "4px", color: "#555", textAlign: "left" }}>Fecha :</td><td style={{ fontWeight: 500, textAlign: "left", paddingLeft: "6px" }}>{data.fecha}</td></tr>
+              <tr><td style={{ paddingRight: "4px", color: "#555", textAlign: "left" }}>Cotización :</td><td style={{ fontWeight: 500, textAlign: "left", paddingLeft: "6px" }}>{data.numero_cotizacion || "—"}</td></tr>
+              <tr><td style={{ paddingRight: "4px", color: "#555", textAlign: "left" }}>Validez :</td><td style={{ fontWeight: 500, textAlign: "left", paddingLeft: "6px" }}>{data.validez || "—"}</td></tr>
             </tbody>
           </table>
         </div>
@@ -45,10 +45,10 @@ const CotizacionPreviewContent = () => {
       {/* Company info */}
       <table style={{ fontSize: "11px", marginBottom: "10px" }}>
         <tbody>
-          <tr><td style={{ paddingRight: "8px", color: "#666", width: "55px" }}>Dirección</td><td><strong>:</strong> {data.direccion}</td></tr>
-          <tr><td style={{ color: "#666" }}>Asesor</td><td><strong>:</strong> {data.asesor}</td></tr>
-          <tr><td style={{ color: "#666" }}>Teléfono</td><td><strong>:</strong> {data.telefono}</td></tr>
-          <tr><td style={{ color: "#666" }}>Correo</td><td><strong>:</strong> {data.correo}</td></tr>
+          <tr><td style={{ paddingRight: "8px", color: "#555", width: "55px" }}>Dirección</td><td><strong>:</strong> {data.direccion}</td></tr>
+          <tr><td style={{ color: "#555" }}>Asesor</td><td><strong>:</strong> {data.asesor}</td></tr>
+          <tr><td style={{ color: "#555" }}>Teléfono</td><td><strong>:</strong> {data.telefono}</td></tr>
+          <tr><td style={{ color: "#555" }}>Correo</td><td><strong>:</strong> {data.correo}</td></tr>
         </tbody>
       </table>
 
@@ -72,9 +72,9 @@ const CotizacionPreviewContent = () => {
       </div>
       <table style={{ fontSize: "11px", marginBottom: "12px" }}>
         <tbody>
-          <tr><td style={{ paddingRight: "8px", color: "#666", width: "55px" }}>Empresa</td><td><strong>:</strong> {data.empresa_cliente}</td></tr>
-          <tr><td style={{ color: "#666" }}>Contacto</td><td><strong>:</strong> {data.contacto_cliente}</td></tr>
-          <tr><td style={{ color: "#666" }}>Ubicación</td><td><strong>:</strong> {data.ubicacion_cliente}</td></tr>
+          <tr><td style={{ paddingRight: "8px", color: "#555", width: "55px" }}>Empresa</td><td><strong>:</strong> {data.empresa_cliente}</td></tr>
+          <tr><td style={{ color: "#555" }}>Contacto</td><td><strong>:</strong> {data.contacto_cliente}</td></tr>
+          <tr><td style={{ color: "#555" }}>Ubicación</td><td><strong>:</strong> {data.ubicacion_cliente}</td></tr>
         </tbody>
       </table>
 
@@ -142,7 +142,7 @@ const CotizacionPreviewContent = () => {
 
           {/* Signature inside terms box */}
           <div style={{ textAlign: "center", marginTop: "36px", paddingTop: "8px", fontSize: "9px" }}>
-            <div style={{ borderTop: "0.5px solid #666", width: "200px", margin: "0 auto", paddingTop: "4px" }}>
+            <div style={{ borderTop: "0.5px solid #555", width: "200px", margin: "0 auto", paddingTop: "4px" }}>
               Gerente General de {data.empresa_cliente || "_______________"}
             </div>
           </div>
@@ -157,14 +157,14 @@ const CotizacionPreviewContent = () => {
               <tr><td>Impuesto %</td><td style={{ textAlign: "right" }}>{data.impuesto_pct}%</td></tr>
               <tr><td>Total Impuesto</td><td style={{ textAlign: "right" }}>S/ {fmt(data.total_impuesto)}</td></tr>
               <tr><td>Otros</td><td style={{ textAlign: "right" }}>S/ {fmt(data.otros)}</td></tr>
-              <tr style={{ borderTop: "0.5px solid #666", fontWeight: 700 }}><td style={{ paddingTop: "4px" }}>TOTAL</td><td style={{ textAlign: "right", paddingTop: "4px" }}>S/ {fmt(data.total)}</td></tr>
+              <tr style={{ borderTop: "0.5px solid #555", fontWeight: 700 }}><td style={{ paddingTop: "4px" }}>TOTAL</td><td style={{ textAlign: "right", paddingTop: "4px" }}>S/ {fmt(data.total)}</td></tr>
             </tbody>
           </table>
         </div>
       </div>
 
       {/* Footer */}
-      <div style={{ textAlign: "center", marginTop: "10px", fontSize: "9px", color: "#666" }}>
+      <div style={{ textAlign: "center", marginTop: "10px", fontSize: "9px", color: "#555" }}>
         Si usted tiene alguna consulta sobre esta cotización, por favor, póngase en contacto con nosotros
       </div>
       <div style={{ textAlign: "center", marginTop: "4px", fontSize: "11px", fontStyle: "italic", fontWeight: 600 }}>
