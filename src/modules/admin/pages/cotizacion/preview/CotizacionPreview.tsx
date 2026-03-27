@@ -58,7 +58,7 @@ const CotizacionPreviewContent = () => {
           backgroundColor: ORANGE,
           color: "#fff",
           fontWeight: 700,
-          fontSize: "8px",
+          fontSize: "10px",
           marginBottom: "6px",
           display: "flex",
           alignItems: "center",
