@@ -1,5 +1,5 @@
 import { useState, useRef, useCallback, useEffect } from "react";
-import { Download, Loader2 } from "lucide-react";
+import { Download, Loader2, ZoomIn, ZoomOut, RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
 import AdminShell from "../../components/AdminShell";
@@ -10,30 +10,55 @@ import { generateCotizacionPDF } from "./utils/pdfExport";
 
 const A4_W = 595;
 const A4_H = 842;
-const PAD = 48; // px padding around the sheet
+const PAD = 32;
 
 const CotizacionContent = () => {
   const { advanceCorrelative } = useCotizacionContext();
   const [downloading, setDownloading] = useState(false);
   const [scale, setScale] = useState(1);
+  const [autoScale, setAutoScale] = useState(1);
+  const [manualOffset, setManualOffset] = useState(0);
   const previewRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const computeScale = useCallback(() => {
+  const computeAutoScale = useCallback(() => {
     const container = containerRef.current;
     if (!container) return;
     const availW = container.clientWidth - PAD * 2;
     const availH = container.clientHeight - PAD * 2;
-    const s = Math.min(availW / A4_W, availH / A4_H, 1.6);
-    setScale(Math.max(s, 0.4));
-  }, []);
+    const s = Math.min(availW / A4_W, availH / A4_H, 1.8);
+    const clamped = Math.max(s, 0.4);
+    setAutoScale(clamped);
+    setScale(clamped + manualOffset);
+  }, [manualOffset]);
 
   useEffect(() => {
-    computeScale();
-    const ro = new ResizeObserver(computeScale);
+    computeAutoScale();
+    const ro = new ResizeObserver(computeAutoScale);
     if (containerRef.current) ro.observe(containerRef.current);
     return () => ro.disconnect();
-  }, [computeScale]);
+  }, [computeAutoScale]);
+
+  const handleZoomIn = () => {
+    setManualOffset(prev => {
+      const next = prev + 0.1;
+      setScale(autoScale + next);
+      return next;
+    });
+  };
+
+  const handleZoomOut = () => {
+    setManualOffset(prev => {
+      const next = Math.max(prev - 0.1, -(autoScale - 0.3));
+      setScale(autoScale + next);
+      return next;
+    });
+  };
+
+  const handleReset = () => {
+    setManualOffset(0);
+    setScale(autoScale);
+  };
 
   const handleDownloadPDF = async () => {
     if (!previewRef.current) return;
@@ -72,7 +97,18 @@ const CotizacionContent = () => {
           <div className="flex flex-col h-full bg-muted/20">
             {/* Toolbar */}
             <div className="border-b bg-card px-4 py-2 flex items-center justify-between shrink-0">
-              <span className="text-xs text-muted-foreground">{Math.round(scale * 100)}%</span>
+              <div className="flex items-center gap-1">
+                <Button variant="ghost" size="icon" className="h-7 w-7" onClick={handleZoomOut}>
+                  <ZoomOut className="h-3.5 w-3.5" />
+                </Button>
+                <span className="text-xs text-muted-foreground w-10 text-center">{Math.round(scale * 100)}%</span>
+                <Button variant="ghost" size="icon" className="h-7 w-7" onClick={handleZoomIn}>
+                  <ZoomIn className="h-3.5 w-3.5" />
+                </Button>
+                <Button variant="ghost" size="icon" className="h-7 w-7" onClick={handleReset}>
+                  <RotateCcw className="h-3.5 w-3.5" />
+                </Button>
+              </div>
               <Button
                 size="sm"
                 onClick={handleDownloadPDF}
