@@ -225,8 +225,36 @@ const CotizacionEditor = () => {
 
       {/* Términos */}
       <div>
-        <h3 className="text-sm font-semibold text-foreground mb-3">Términos y Condiciones</h3>
-        <Textarea value={data.terminos} onChange={e => updateData("terminos", e.target.value)} className="text-xs min-h-[100px]" />
+        <div className="flex items-center justify-between mb-3">
+          <h3 className="text-sm font-semibold text-foreground">Términos y Condiciones</h3>
+          <Button variant="outline" size="sm" onClick={() => updateData("terminos_items", [...data.terminos_items, ""])} className="h-7 text-xs gap-1">
+            <Plus className="h-3 w-3" /> Agregar
+          </Button>
+        </div>
+        <div className="space-y-2">
+          {data.terminos_items.map((term, idx) => (
+            <div key={idx} className="flex gap-2 items-start">
+              <span className="text-xs font-medium mt-2 min-w-[20px]">{idx + 1}.</span>
+              <Textarea
+                value={term}
+                onChange={e => {
+                  const newItems = [...data.terminos_items];
+                  newItems[idx] = e.target.value;
+                  updateData("terminos_items", newItems);
+                }}
+                className="text-xs min-h-[50px] flex-1"
+              />
+              {data.terminos_items.length > 1 && (
+                <Button variant="ghost" size="icon" className="h-6 w-6 mt-1" onClick={() => {
+                  const newItems = data.terminos_items.filter((_, i) => i !== idx);
+                  updateData("terminos_items", newItems);
+                }}>
+                  <Trash2 className="h-3 w-3 text-destructive" />
+                </Button>
+              )}
+            </div>
+          ))}
+        </div>
       </div>
 
       {/* Cuentas bancarias */}

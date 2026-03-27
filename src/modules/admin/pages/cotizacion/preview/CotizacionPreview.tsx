@@ -91,9 +91,13 @@ const CotizacionPreviewContent = () => {
           <div style={{ backgroundColor: "#E8792B", color: "#fff", fontWeight: 700, padding: "2px 4px", marginBottom: "4px", fontSize: "7px" }}>
             TÉRMINOS Y CONDICIONES
           </div>
-          <div style={{ whiteSpace: "pre-wrap", lineHeight: 1.5 }}>{data.terminos}</div>
-          <div style={{ marginTop: "6px" }}>
-            3. N° Cta. Corriente soles BCP a nombre de {brandConfig.razon_social}:
+          {data.terminos_items.map((term, idx) => (
+            <div key={idx} style={{ marginBottom: "3px", whiteSpace: "pre-wrap", lineHeight: 1.5 }}>
+              {idx + 1}. {term}
+            </div>
+          ))}
+          <div style={{ marginTop: "3px" }}>
+            {data.terminos_items.length + 1}. N° Cta. Corriente soles BCP a nombre de {brandConfig.razon_social}:
           </div>
           <div style={{ marginLeft: "12px", marginTop: "2px" }}>
             {data.cuenta_bancaria}
