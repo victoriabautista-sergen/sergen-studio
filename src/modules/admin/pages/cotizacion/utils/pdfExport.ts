@@ -10,11 +10,12 @@ export async function generateCotizacionPDF(
   clone.style.transformOrigin = "top left";
   clone.style.position = "relative";
   clone.style.width = "100%";
-  clone.style.height = "100%";
-  clone.style.maxHeight = "273mm";
-  clone.style.overflow = "hidden";
+  clone.style.minHeight = "100%";
+  clone.style.height = "auto";
+  clone.style.overflow = "visible";
   clone.style.padding = "0";
   clone.style.boxSizing = "border-box";
+  clone.style.backgroundColor = "#ffffff";
 
   // Collect all stylesheets from the parent document
   const styleSheets = Array.from(document.querySelectorAll('link[rel="stylesheet"], style'));
@@ -41,8 +42,8 @@ export async function generateCotizacionPDF(
       margin: 0;
       padding: 0;
       width: 100%;
-      max-height: 273mm;
-      overflow: hidden;
+      height: 100%;
+      background: #ffffff;
     }
   </style>
 </head>
