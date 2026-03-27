@@ -9,6 +9,7 @@ import logoKallpa from "@/assets/partners/kallpa.jpg";
 import logoFenix from "@/assets/partners/fenix.jpg";
 import logoOrazul from "@/assets/partners/orazul.jpeg";
 import logoLaVirgen from "@/assets/partners/lavirgen.jpeg";
+import logoElectroDunas from "@/assets/partners/electrodunas.png";
 
 let _triggerExport: (() => Promise<void>) | null = null;
 
