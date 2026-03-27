@@ -135,16 +135,16 @@ const CotizacionPreviewContent = () => {
       </div>
 
       {/* Strategic Partners */}
-      <div style={{ marginTop: "16px", textAlign: "center" }}>
-        <div style={{ fontSize: "7px", fontWeight: 700, color: "#E8792B", marginBottom: "6px", textTransform: "uppercase" }}>
-          Socios Estratégicos
+      <div style={{ marginTop: "16px" }}>
+        <div style={{ fontSize: "7px", fontWeight: 700, color: "#1a2744", marginBottom: "8px", textTransform: "uppercase" }}>
+          Socios Estratégicos:
         </div>
-        <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: "12px", flexWrap: "wrap" }}>
-          <img src={logoCvc} alt="CVC Energía" style={{ height: "24px", objectFit: "contain" }} />
-          <img src={logoKallpa} alt="Kallpa" style={{ height: "28px", objectFit: "contain" }} />
-          <img src={logoFenix} alt="Fenix" style={{ height: "24px", objectFit: "contain" }} />
-          <img src={logoOrazul} alt="Orazul Energy" style={{ height: "22px", objectFit: "contain" }} />
-          <img src={logoLaVirgen} alt="La Virgen" style={{ height: "26px", objectFit: "contain" }} />
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "8px 16px" }}>
+          <img src={logoKallpa} alt="Kallpa" style={{ height: "32px", objectFit: "contain" }} />
+          <img src={logoCvc} alt="CVC Energía" style={{ height: "28px", objectFit: "contain" }} />
+          <img src={logoFenix} alt="Fenix" style={{ height: "34px", objectFit: "contain" }} />
+          <img src={logoLaVirgen} alt="La Virgen" style={{ height: "30px", objectFit: "contain" }} />
+          <img src={logoOrazul} alt="Orazul Energy" style={{ height: "32px", objectFit: "contain" }} />
         </div>
       </div>
 
