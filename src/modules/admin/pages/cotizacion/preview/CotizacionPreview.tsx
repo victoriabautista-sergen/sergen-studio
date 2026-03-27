@@ -110,6 +110,13 @@ const CotizacionPreviewContent = () => {
           <div style={{ marginLeft: "12px" }}>
             {data.cci}
           </div>
+
+          {/* Signature inside terms box */}
+          <div style={{ textAlign: "center", marginTop: "20px", paddingTop: "8px", fontSize: "7px" }}>
+            <div style={{ borderTop: "1px solid #333", width: "200px", margin: "0 auto", paddingTop: "4px" }}>
+              Gerente General de {data.empresa_cliente || "_______________"}
+            </div>
+          </div>
         </div>
 
         {/* Totals */}
@@ -124,13 +131,6 @@ const CotizacionPreviewContent = () => {
               <tr style={{ borderTop: "2px solid #333", fontWeight: 700 }}><td>TOTAL</td><td style={{ textAlign: "right" }}>S/ {fmt(data.total)}</td></tr>
             </tbody>
           </table>
-        </div>
-      </div>
-
-      {/* Signature */}
-      <div style={{ textAlign: "center", marginTop: "24px", fontSize: "7px" }}>
-        <div style={{ borderTop: "1px solid #333", width: "200px", margin: "0 auto", paddingTop: "4px" }}>
-          Gerente General de {data.empresa_cliente || "_______________"}
         </div>
       </div>
 
