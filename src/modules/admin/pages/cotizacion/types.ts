@@ -43,8 +43,8 @@ export interface CotizacionData {
 export const BRAND_CONFIG: Record<CotizacionMarca, { razon_social: string; cuenta_bancaria: string; cci: string; direccion: string }> = {
   sergen: {
     razon_social: "Ingeniería y consultoría SERGEN",
-    cuenta_bancaria: "BCP SOLES: 194-1053206-0-43",
-    cci: "CCI BCP SOLES: 00219400105320604390",
+    cuenta_bancaria: "BCP SOLES: 191-7330708-0-53",
+    cci: "CCI BCP SOLES: 00219100733070805358",
     direccion: "Platinium Plaza - San Isidro - Lima",
   },
   incoser: {
