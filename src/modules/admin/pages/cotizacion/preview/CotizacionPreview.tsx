@@ -151,10 +151,10 @@ const CotizacionPreviewContent = () => {
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "6px" }}>
           <img src={logoKallpa} alt="Kallpa" style={{ height: "52px", objectFit: "contain", marginLeft: "20px" }} />
           <img src={logoElectroDunas} alt="ElectroDunas" style={{ height: "44px", objectFit: "contain" }} />
-          <img src={logoFenix} alt="Fenix" style={{ height: "62px", objectFit: "contain" }} />
-          <img src={logoLaVirgen} alt="La Virgen" style={{ height: "58px", objectFit: "contain", marginRight: "8px" }} />
+          <img src={logoFenix} alt="Fenix" style={{ height: "76px", objectFit: "contain" }} />
+          <img src={logoLaVirgen} alt="La Virgen" style={{ height: "72px", objectFit: "contain", marginRight: "8px" }} />
         </div>
-        <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: "40px", marginTop: "6px" }}>
+        <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: "40px", marginTop: "10px" }}>
           <img src={logoCvc} alt="CVC Energía" style={{ height: "36px", objectFit: "contain" }} />
           <img src={logoOrazul} alt="Orazul Energy" style={{ height: "32px", objectFit: "contain" }} />
         </div>
