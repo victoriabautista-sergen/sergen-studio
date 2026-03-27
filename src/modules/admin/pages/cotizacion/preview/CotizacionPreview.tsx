@@ -141,7 +141,7 @@ const CotizacionPreviewContent = () => {
           </div>
 
           {/* Signature inside terms box */}
-          <div style={{ textAlign: "center", marginTop: "36px", paddingTop: "8px", fontSize: "7px" }}>
+          <div style={{ textAlign: "center", marginTop: "36px", paddingTop: "8px", fontSize: "9px" }}>
             <div style={{ borderTop: "0.5px solid #666", width: "200px", margin: "0 auto", paddingTop: "4px" }}>
               Gerente General de {data.empresa_cliente || "_______________"}
             </div>
