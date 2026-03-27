@@ -35,7 +35,7 @@ export interface CotizacionData {
   otros: number;
   total: number;
   // Terms
-  terminos: string;
+  terminos_items: string[];
   cuenta_bancaria: string;
   cci: string;
 }
