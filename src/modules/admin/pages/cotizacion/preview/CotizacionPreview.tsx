@@ -56,14 +56,14 @@ const CotizacionPreviewContent = () => {
           color: "#fff",
           fontWeight: 700,
           fontSize: "8px",
-          padding: "0 6px",
           marginBottom: "4px",
-          height: "20px",
+          height: "16px",
+          display: "table",
+          width: "100%",
           boxSizing: "border-box",
-          display: "block",
         }}
       >
-        <span style={{ display: "block", paddingTop: "3px", lineHeight: 1 }}>
+        <span style={{ display: "table-cell", verticalAlign: "middle", paddingLeft: "6px" }}>
           CLIENTE
         </span>
       </div>
