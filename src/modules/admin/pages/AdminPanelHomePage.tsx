@@ -31,6 +31,12 @@ const NAV_CARDS = [
     description: "Solicitudes comerciales de nuevos clientes",
     icon: Inbox,
   },
+  {
+    href: "/admin-panel/cotizacion",
+    title: "Cotización",
+    description: "Generador de cotizaciones para clientes",
+    icon: FileText,
+  },
 ] as const;
 
 const AdminPanelHomePage = () => (
