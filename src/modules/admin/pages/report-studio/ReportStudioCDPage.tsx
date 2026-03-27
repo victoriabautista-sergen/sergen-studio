@@ -37,8 +37,15 @@ const ReportStudioContent = () => {
   const { activeSheet, setActiveSheet, saving } = useReportContext();
   const ActiveComponent = sheetComponents[activeSheet];
 
-  const handleDownloadPDF = () => {
-    window.print();
+  const [downloading, setDownloading] = useState(false);
+
+  const handleDownloadPDF = async () => {
+    setDownloading(true);
+    try {
+      await triggerPDFExport();
+    } finally {
+      setDownloading(false);
+    }
   };
 
   const currentSheet = SHEETS.find(s => s.id === activeSheet);
