@@ -155,9 +155,9 @@ const CotizacionPreviewContent = () => {
               <tr><td>Subtotal</td><td style={{ textAlign: "right" }}>S/ {fmt(data.subtotal)}</td></tr>
               <tr><td>Imponible</td><td style={{ textAlign: "right" }}>S/ {fmt(data.imponible)}</td></tr>
               <tr><td>Impuesto %</td><td style={{ textAlign: "right" }}>{data.impuesto_pct}%</td></tr>
-              <tr><td style={{ paddingBottom: "4px" }}>Total Impuesto</td><td style={{ textAlign: "right", paddingBottom: "4px" }}>S/ {fmt(data.total_impuesto)}</td></tr>
-              <tr style={{ borderTop: "0.5px solid #ccc" }}><td style={{ paddingTop: "6px" }}>Otros</td><td style={{ textAlign: "right", paddingTop: "6px" }}>S/ {data.otros > 0 ? fmt(data.otros) : "-"}</td></tr>
-              <tr style={{ borderTop: "0.75px solid #333", fontWeight: 700 }}><td>TOTAL</td><td style={{ textAlign: "right" }}>S/ {fmt(data.total)}</td></tr>
+              <tr><td>Total Impuesto</td><td style={{ textAlign: "right" }}>S/ {fmt(data.total_impuesto)}</td></tr>
+              <tr><td>Otros</td><td style={{ textAlign: "right" }}>S/ {fmt(data.otros)}</td></tr>
+              <tr style={{ borderTop: "1px solid #333", fontWeight: 700 }}><td style={{ paddingTop: "4px" }}>TOTAL</td><td style={{ textAlign: "right", paddingTop: "4px" }}>S/ {fmt(data.total)}</td></tr>
             </tbody>
           </table>
         </div>
