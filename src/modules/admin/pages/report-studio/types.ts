@@ -10,6 +10,8 @@ export interface DatosGenerales {
 export interface Hoja2Data {
   precio_base_hp: number;
   precio_base_hfp: number;
+  precio_potencia: number;
+  moneda: "PEN" | "USD";
   pngo: number;
   tco: number;
   ippo: number;
