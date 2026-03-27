@@ -115,6 +115,8 @@ export const defaultReportData: ReportData = {
   hoja2_data: {
     precio_base_hp: 0,
     precio_base_hfp: 0,
+    precio_potencia: 0,
+    moneda: "PEN",
     pngo: 0,
     tco: 0,
     ippo: 0,

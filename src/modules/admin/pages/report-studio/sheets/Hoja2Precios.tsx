@@ -1,5 +1,6 @@
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useReportContext } from "../context/ReportContext";
 import { useEffect } from "react";
 
@@ -10,6 +11,8 @@ const Hoja2Precios = () => {
   const update = (field: string, value: number | string) => {
     updateSheet("hoja2_data", { ...h2, [field]: value });
   };
+
+  const monedaSymbol = h2.moneda === "USD" ? "$" : "S/";
 
   // Auto-calculate prices
   useEffect(() => {
@@ -27,16 +30,21 @@ const Hoja2Precios = () => {
     }
   }, [h2.precio_base_hp, h2.precio_base_hfp, h2.pngo, h2.tco, h2.ippo, h2.png_actual, h2.tc_actual, h2.ipp_actual, h2.factor_perdida]);
 
-  const numField = (label: string, field: string, val: number) => (
+  const numField = (label: string, field: string, val: number, prefix?: string) => (
     <div>
       <Label className="text-xs">{label}</Label>
-      <Input
-        type="number"
-        step="any"
-        value={val || ""}
-        onChange={e => update(field, parseFloat(e.target.value) || 0)}
-        className="h-8 text-sm"
-      />
+      <div className="relative">
+        {prefix && (
+          <span className="absolute left-2 top-1/2 -translate-y-1/2 text-xs text-muted-foreground font-medium">{prefix}</span>
+        )}
+        <Input
+          type="number"
+          step="any"
+          value={val || ""}
+          onChange={e => update(field, parseFloat(e.target.value) || 0)}
+          className={`h-8 text-sm ${prefix ? "pl-8" : ""}`}
+        />
+      </div>
     </div>
   );
 
@@ -45,10 +53,28 @@ const Hoja2Precios = () => {
       <h3 className="font-semibold text-foreground">Actualización de Precio</h3>
 
       <div className="space-y-3">
+        {/* Currency selector */}
+        <div>
+          <Label className="text-xs">Moneda</Label>
+          <Select value={h2.moneda} onValueChange={(v) => update("moneda", v)}>
+            <SelectTrigger className="h-8 text-sm">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="PEN">S/ Soles</SelectItem>
+              <SelectItem value="USD">$ Dólares</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
         <p className="text-xs font-medium text-muted-foreground uppercase">Valores Base</p>
         <div className="grid grid-cols-2 gap-2">
-          {numField("Precio Base HP", "precio_base_hp", h2.precio_base_hp)}
-          {numField("Precio Base HFP", "precio_base_hfp", h2.precio_base_hfp)}
+          {numField("Precio Base HP", "precio_base_hp", h2.precio_base_hp, monedaSymbol)}
+          {numField("Precio Base HFP", "precio_base_hfp", h2.precio_base_hfp, monedaSymbol)}
+          {numField("Precio Potencia", "precio_potencia", h2.precio_potencia, monedaSymbol)}
+        </div>
+
+        <div className="grid grid-cols-2 gap-2">
           {numField("PNGo", "pngo", h2.pngo)}
           {numField("TCo", "tco", h2.tco)}
           {numField("IPPo", "ippo", h2.ippo)}
@@ -74,14 +100,14 @@ const Hoja2Precios = () => {
         </div>
 
         <div className="bg-muted/50 rounded-lg p-3 space-y-1">
-          <p className="text-xs font-medium text-muted-foreground">Resultados</p>
+          <p className="text-xs font-medium text-muted-foreground">Resultados ({monedaSymbol})</p>
           <div className="flex justify-between text-sm">
             <span>Precio Actualizado HP:</span>
-            <span className="font-semibold text-primary">{h2.precio_actualizado_hp.toFixed(4)}</span>
+            <span className="font-semibold text-primary">{monedaSymbol} {h2.precio_actualizado_hp.toFixed(4)}</span>
           </div>
           <div className="flex justify-between text-sm">
             <span>Precio Actualizado HFP:</span>
-            <span className="font-semibold text-primary">{h2.precio_actualizado_hfp.toFixed(4)}</span>
+            <span className="font-semibold text-primary">{monedaSymbol} {h2.precio_actualizado_hfp.toFixed(4)}</span>
           </div>
         </div>
       </div>
