@@ -11,11 +11,9 @@ import logoLaVirgen from "@/assets/partners/lavirgen.jpeg";
 import logoElectroDunas from "@/assets/partners/electrodunas.png";
 
 const fmt = (n: number) => n.toFixed(2);
-const ORANGE = "hsl(28 91% 54%)";
-const TABLE_OUTER_BORDER = "0.5px solid hsl(28 91% 54% / 0.55)";
-const TABLE_INNER_BORDER = "0.5px solid hsl(28 91% 54% / 0.22)";
-const HEADER_DIVIDER = "0.5px solid hsl(0 0% 100% / 0.45)";
-const OB = `0.2px solid ${ORANGE}`;
+const ORANGE = "#F58220";
+const B = "0.5px solid #F5822050";
+const OB = B;
 
 const CotizacionPreviewContent = () => {
   const { data } = useCotizacionContext();
