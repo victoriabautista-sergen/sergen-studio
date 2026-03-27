@@ -49,9 +49,9 @@ const PreciosPage = ({ data }: { data: ReportData }) => {
             ["Precio de energía base HP por kWh", h2.precio_base_hp],
             ["Precio de energía base HFP por kWh", h2.precio_base_hfp],
           ].map(([label, val], i) => (
-            <tr key={i} className={i % 2 === 0 ? "bg-white" : "bg-gray-50"}>
-              <td className="p-1.5 border border-gray-200 text-gray-700">{String(label)}</td>
-              <td className="p-1.5 border border-gray-200 text-right font-mono">
+            <tr key={i} className="bg-white">
+              <td className="px-1.5 py-1 border border-gray-200" style={{ color: "#1B3A5C" }}>{String(label)}</td>
+              <td className="px-1.5 py-1 border border-gray-200 text-right font-mono" style={{ color: "#1B3A5C" }}>
                 {val ? Number(val).toFixed(4) : "—"}
               </td>
             </tr>
