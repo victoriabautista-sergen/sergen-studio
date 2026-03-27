@@ -12,10 +12,11 @@ const PreciosPage = ({ data }: { data: ReportData }) => {
   return (
     <div className="text-[10px] leading-relaxed text-gray-800" style={{ fontFamily: "'Inter', sans-serif" }}>
       {/* Header */}
-      <p className="text-xs font-bold mb-6" style={{ color: "#1B3A5C" }}>Sergen Eficiencia Energética</p>
+      <p className="text-xs font-bold" style={{ color: "#1B3A5C" }}>Sergen Eficiencia Energética</p>
+      <hr className="border-t border-gray-300 my-2" />
 
       {/* Title */}
-      <h1 className="text-lg font-semibold mb-5" style={{ color: "#1B3A5C" }}>
+      <h1 className="text-sm font-semibold mb-4" style={{ color: "#1B3A5C" }}>
         I. ACTUALIZACIÓN DE PRECIO
       </h1>
 
