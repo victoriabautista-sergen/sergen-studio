@@ -7,6 +7,7 @@ interface CotizacionContextType {
   updateData: <K extends keyof CotizacionData>(key: K, value: CotizacionData[K]) => void;
   setData: React.Dispatch<React.SetStateAction<CotizacionData>>;
   resetData: () => void;
+  advanceCorrelative: () => Promise<void>;
 }
 
 const CotizacionContext = createContext<CotizacionContextType | null>(null);
@@ -24,12 +25,76 @@ const getDefaultValidez = () => {
   return d.toLocaleDateString("es-PE");
 };
 
-// Generate next correlative number: COT-YYYYMM-NNN
-const generateCorrelativeNumber = async (): Promise<string> => {
+const CORRELATIVE_STORAGE_KEY = "cotizacion_correlative_sequence";
+
+interface CorrelativeSequence {
+  period: string;
+  nextNumber: number;
+}
+
+const getCurrentPeriod = () => {
   const now = new Date();
-  const month = String(now.getMonth() + 1).padStart(2, "0");
-  const count = String(Math.floor(Math.random() * 900) + 100);
-  return `COT-${month}-${count}`;
+  return `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, "0")}`;
+};
+
+const formatCorrelativeNumber = (period: string, nextNumber: number) => {
+  return `COT-${period}-${String(nextNumber).padStart(3, "0")}`;
+};
+
+const readCorrelativeSequence = (): CorrelativeSequence => {
+  const currentPeriod = getCurrentPeriod();
+
+  if (typeof window === "undefined") {
+    return { period: currentPeriod, nextNumber: 1 };
+  }
+
+  try {
+    const storedValue = window.localStorage.getItem(CORRELATIVE_STORAGE_KEY);
+
+    if (!storedValue) {
+      return { period: currentPeriod, nextNumber: 1 };
+    }
+
+    const parsed = JSON.parse(storedValue) as Partial<CorrelativeSequence>;
+
+    if (parsed.period === currentPeriod && typeof parsed.nextNumber === "number" && parsed.nextNumber > 0) {
+      return {
+        period: parsed.period,
+        nextNumber: parsed.nextNumber,
+      };
+    }
+  } catch {
+    // Fallback to a new monthly sequence when localStorage is unavailable or invalid.
+  }
+
+  return { period: currentPeriod, nextNumber: 1 };
+};
+
+const writeCorrelativeSequence = (sequence: CorrelativeSequence) => {
+  if (typeof window === "undefined") return;
+
+  try {
+    window.localStorage.setItem(CORRELATIVE_STORAGE_KEY, JSON.stringify(sequence));
+  } catch {
+    // Ignore storage write failures and keep runtime state functional.
+  }
+};
+
+const generateCorrelativeNumber = async (): Promise<string> => {
+  const sequence = readCorrelativeSequence();
+  return formatCorrelativeNumber(sequence.period, sequence.nextNumber);
+};
+
+const reserveNextCorrelativeNumber = async (): Promise<string> => {
+  const currentSequence = readCorrelativeSequence();
+  const nextSequence = {
+    period: currentSequence.period,
+    nextNumber: currentSequence.nextNumber + 1,
+  };
+
+  writeCorrelativeSequence(nextSequence);
+
+  return formatCorrelativeNumber(nextSequence.period, nextSequence.nextNumber);
 };
 
 export const CotizacionProvider = ({ children }: { children: React.ReactNode }) => {
@@ -38,12 +103,15 @@ export const CotizacionProvider = ({ children }: { children: React.ReactNode }) 
     validez: getDefaultValidez(),
   });
 
+  const loadCurrentCorrelative = useCallback(async () => {
+    const numero = await generateCorrelativeNumber();
+    setData(prev => ({ ...prev, numero_cotizacion: numero }));
+  }, []);
+
   // Generate correlative number on mount
   useEffect(() => {
-    generateCorrelativeNumber().then(num => {
-      setData(prev => ({ ...prev, numero_cotizacion: num }));
-    });
-  }, []);
+    void loadCurrentCorrelative();
+  }, [loadCurrentCorrelative]);
 
   const updateData = useCallback(<K extends keyof CotizacionData>(key: K, value: CotizacionData[K]) => {
     setData(prev => {
@@ -73,18 +141,22 @@ export const CotizacionProvider = ({ children }: { children: React.ReactNode }) 
     });
   }, []);
 
+  const advanceCorrelative = useCallback(async () => {
+    const numero = await reserveNextCorrelativeNumber();
+    setData(prev => ({ ...prev, numero_cotizacion: numero }));
+  }, []);
+
   const resetData = useCallback(() => {
     setData({
       ...defaultCotizacionData,
       validez: getDefaultValidez(),
+      numero_cotizacion: "",
     });
-    generateCorrelativeNumber().then(num => {
-      setData(prev => ({ ...prev, numero_cotizacion: num }));
-    });
-  }, []);
+    void loadCurrentCorrelative();
+  }, [loadCurrentCorrelative]);
 
   return (
-    <CotizacionContext.Provider value={{ data, updateData, setData, resetData }}>
+    <CotizacionContext.Provider value={{ data, updateData, setData, resetData, advanceCorrelative }}>
       {children}
     </CotizacionContext.Provider>
   );

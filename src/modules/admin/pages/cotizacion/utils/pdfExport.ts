@@ -16,7 +16,7 @@ export async function generateCotizacionPDF(
   }
 
   const canvas = await html2canvas(pageEl, {
-    scale: 3,
+    scale: 2.25,
     useCORS: true,
     allowTaint: true,
     logging: false,
@@ -30,17 +30,21 @@ export async function generateCotizacionPDF(
       if (!el) return;
       
       el.querySelectorAll<HTMLElement>('[data-pdf-band]').forEach(band => {
+        const bandHeight = band.getAttribute('data-pdf-band') === 'cliente' ? '14px' : '12px';
+        band.style.display = 'flex';
+        band.style.alignItems = 'center';
+        band.style.height = bandHeight;
         band.style.overflow = 'hidden';
       });
 
       el.querySelectorAll<HTMLElement>('[data-pdf-band-label="true"]').forEach(span => {
-        span.style.display = 'table-cell';
-        span.style.verticalAlign = 'middle';
-        span.style.lineHeight = '1';
+        const parentHeight = (span.parentElement as HTMLElement | null)?.style.height || '14px';
+        span.style.display = 'block';
+        span.style.lineHeight = parentHeight;
         span.style.paddingTop = '0';
         span.style.paddingBottom = '0';
-        span.style.position = 'relative';
-        span.style.top = '-1px';
+        span.style.transform = 'translateY(-1.5px)';
+        span.style.position = 'static';
       });
       
       el.querySelectorAll<HTMLElement>('[data-pdf-table-head="true"]').forEach(th => {
@@ -50,6 +54,14 @@ export async function generateCotizacionPDF(
         th.style.paddingBottom = '0';
         th.style.position = 'relative';
         th.style.top = '-1px';
+      });
+
+      el.querySelectorAll<HTMLElement>('[data-pdf-items-border="true"]').forEach(cell => {
+        cell.style.border = '0.35px solid #E8792B';
+      });
+
+      el.querySelectorAll<HTMLElement>('[data-pdf-thin-border="true"], [data-pdf-items-table="true"]').forEach(node => {
+        node.style.border = '0.35px solid #E8792B';
       });
     },
   });

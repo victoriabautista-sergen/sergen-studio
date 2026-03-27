@@ -12,7 +12,7 @@ import logoElectroDunas from "@/assets/partners/electrodunas.png";
 
 const fmt = (n: number) => n.toFixed(2);
 const ORANGE = "#E8792B";
-const ORANGE_BORDER = `0.5px solid ${ORANGE}`;
+const ORANGE_BORDER = `0.35px solid ${ORANGE}`;
 const BAND_LABEL_STYLE: React.CSSProperties = {
   display: "table-cell",
   verticalAlign: "middle",
@@ -21,7 +21,7 @@ const BAND_LABEL_STYLE: React.CSSProperties = {
   paddingTop: 0,
   paddingBottom: 0,
   position: "relative",
-  top: "-1px",
+  top: "-2px",
 };
 
 const CotizacionPreviewContent = () => {
@@ -89,26 +89,26 @@ const CotizacionPreviewContent = () => {
       </table>
 
       {/* Items table */}
-      <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "7px", marginBottom: "4px", border: ORANGE_BORDER }}>
+      <table data-pdf-items-table="true" style={{ width: "100%", borderCollapse: "collapse", fontSize: "7px", marginBottom: "4px", border: ORANGE_BORDER }}>
         <thead>
           <tr style={{ backgroundColor: ORANGE, color: "#fff", height: "14px" }}>
-            <th data-pdf-table-head="true" style={{ padding: "0 4px 0 6px", textAlign: "left", fontWeight: 600, verticalAlign: "middle", lineHeight: 1, border: ORANGE_BORDER }}>Descripción</th>
-            <th data-pdf-table-head="true" style={{ padding: "0 4px", textAlign: "center", fontWeight: 600, width: "50px", verticalAlign: "middle", lineHeight: 1, border: ORANGE_BORDER }}>Código</th>
-            <th data-pdf-table-head="true" style={{ padding: "0 4px", textAlign: "center", fontWeight: 600, width: "60px", verticalAlign: "middle", lineHeight: 1, border: ORANGE_BORDER }}>Precio Unit</th>
-            <th data-pdf-table-head="true" style={{ padding: "0 4px", textAlign: "center", fontWeight: 600, width: "30px", verticalAlign: "middle", lineHeight: 1, border: ORANGE_BORDER }}>Cant.</th>
-            <th data-pdf-table-head="true" style={{ padding: "0 4px", textAlign: "center", fontWeight: 600, width: "55px", verticalAlign: "middle", lineHeight: 1, border: ORANGE_BORDER }}>P.venta</th>
-            <th data-pdf-table-head="true" style={{ padding: "0 4px", textAlign: "center", fontWeight: 600, width: "55px", verticalAlign: "middle", lineHeight: 1, border: ORANGE_BORDER }}>Total</th>
+            <th data-pdf-table-head="true" data-pdf-items-border="true" style={{ padding: "0 4px 0 6px", textAlign: "left", fontWeight: 600, verticalAlign: "middle", lineHeight: 1, border: ORANGE_BORDER }}>Descripción</th>
+            <th data-pdf-table-head="true" data-pdf-items-border="true" style={{ padding: "0 4px", textAlign: "center", fontWeight: 600, width: "50px", verticalAlign: "middle", lineHeight: 1, border: ORANGE_BORDER }}>Código</th>
+            <th data-pdf-table-head="true" data-pdf-items-border="true" style={{ padding: "0 4px", textAlign: "center", fontWeight: 600, width: "60px", verticalAlign: "middle", lineHeight: 1, border: ORANGE_BORDER }}>Precio Unit</th>
+            <th data-pdf-table-head="true" data-pdf-items-border="true" style={{ padding: "0 4px", textAlign: "center", fontWeight: 600, width: "30px", verticalAlign: "middle", lineHeight: 1, border: ORANGE_BORDER }}>Cant.</th>
+            <th data-pdf-table-head="true" data-pdf-items-border="true" style={{ padding: "0 4px", textAlign: "center", fontWeight: 600, width: "55px", verticalAlign: "middle", lineHeight: 1, border: ORANGE_BORDER }}>P.venta</th>
+            <th data-pdf-table-head="true" data-pdf-items-border="true" style={{ padding: "0 4px", textAlign: "center", fontWeight: 600, width: "55px", verticalAlign: "middle", lineHeight: 1, border: ORANGE_BORDER }}>Total</th>
           </tr>
         </thead>
         <tbody>
           {data.items.map((item, idx) => (
             <tr key={idx}>
-              <td style={{ padding: "4px 6px", verticalAlign: "top", whiteSpace: "pre-wrap", border: ORANGE_BORDER }}>{item.descripcion}</td>
-              <td style={{ padding: "4px", textAlign: "center", verticalAlign: "middle", border: ORANGE_BORDER }}>{item.codigo}</td>
-              <td style={{ padding: "4px", textAlign: "right", verticalAlign: "middle", border: ORANGE_BORDER }}>S/ {fmt(item.precio_unitario)}</td>
-              <td style={{ padding: "4px", textAlign: "center", verticalAlign: "middle", border: ORANGE_BORDER }}>{item.cantidad}</td>
-              <td style={{ padding: "4px", textAlign: "right", verticalAlign: "middle", border: ORANGE_BORDER }}>S/ {fmt(item.precio_venta)}</td>
-              <td style={{ padding: "4px", textAlign: "right", verticalAlign: "middle", border: ORANGE_BORDER }}>S/ {fmt(item.total)}</td>
+              <td data-pdf-items-border="true" style={{ padding: "4px 6px", verticalAlign: "top", whiteSpace: "pre-wrap", border: ORANGE_BORDER }}>{item.descripcion}</td>
+              <td data-pdf-items-border="true" style={{ padding: "4px", textAlign: "center", verticalAlign: "middle", border: ORANGE_BORDER }}>{item.codigo}</td>
+              <td data-pdf-items-border="true" style={{ padding: "4px", textAlign: "right", verticalAlign: "middle", border: ORANGE_BORDER }}>S/ {fmt(item.precio_unitario)}</td>
+              <td data-pdf-items-border="true" style={{ padding: "4px", textAlign: "center", verticalAlign: "middle", border: ORANGE_BORDER }}>{item.cantidad}</td>
+              <td data-pdf-items-border="true" style={{ padding: "4px", textAlign: "right", verticalAlign: "middle", border: ORANGE_BORDER }}>S/ {fmt(item.precio_venta)}</td>
+              <td data-pdf-items-border="true" style={{ padding: "4px", textAlign: "right", verticalAlign: "middle", border: ORANGE_BORDER }}>S/ {fmt(item.total)}</td>
             </tr>
           ))}
         </tbody>
@@ -117,7 +117,7 @@ const CotizacionPreviewContent = () => {
       {/* Totals + Terms side by side */}
       <div style={{ display: "flex", gap: "8px", marginBottom: "12px" }}>
         {/* Terms */}
-        <div style={{ flex: 1, border: ORANGE_BORDER, padding: "6px", fontSize: "7px" }}>
+        <div data-pdf-thin-border="true" style={{ flex: 1, border: ORANGE_BORDER, padding: "6px", fontSize: "7px" }}>
           <div
             style={{
               backgroundColor: ORANGE,
