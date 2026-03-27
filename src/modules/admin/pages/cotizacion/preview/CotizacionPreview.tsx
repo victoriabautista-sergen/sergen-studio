@@ -27,9 +27,9 @@ const CotizacionPreviewContent = () => {
           <div style={{ fontSize: "16px", fontWeight: 700, color: "#E8792B", marginBottom: "4px", fontStyle: "italic" }}>COTIZACIÓN</div>
           <table style={{ fontSize: "7px", marginLeft: "auto" }}>
             <tbody>
-              <tr><td style={{ paddingRight: "4px", color: "#666", textAlign: "right" }}>Fecha :</td><td style={{ fontWeight: 500, textAlign: "left", paddingLeft: "6px" }}>{data.fecha}</td></tr>
-              <tr><td style={{ paddingRight: "4px", color: "#666", textAlign: "right" }}>Cotización :</td><td style={{ fontWeight: 500, textAlign: "left", paddingLeft: "6px" }}>{data.numero_cotizacion || "—"}</td></tr>
-              <tr><td style={{ paddingRight: "4px", color: "#666", textAlign: "right" }}>Validez :</td><td style={{ fontWeight: 500, textAlign: "left", paddingLeft: "6px" }}>{data.validez || "—"}</td></tr>
+              <tr><td style={{ paddingRight: "4px", color: "#666", textAlign: "left" }}>Fecha :</td><td style={{ fontWeight: 500, textAlign: "left", paddingLeft: "6px" }}>{data.fecha}</td></tr>
+              <tr><td style={{ paddingRight: "4px", color: "#666", textAlign: "left" }}>Cotización :</td><td style={{ fontWeight: 500, textAlign: "left", paddingLeft: "6px" }}>{data.numero_cotizacion || "—"}</td></tr>
+              <tr><td style={{ paddingRight: "4px", color: "#666", textAlign: "left" }}>Validez :</td><td style={{ fontWeight: 500, textAlign: "left", paddingLeft: "6px" }}>{data.validez || "—"}</td></tr>
             </tbody>
           </table>
         </div>
