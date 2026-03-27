@@ -18,10 +18,13 @@ export interface Hoja2Data {
   png_actual: number;
   tc_actual: number;
   ipp_actual: number;
+  factor_e: number;
   factor_perdida: number;
   formula: string;
   precio_actualizado_hp: number;
   precio_actualizado_hfp: number;
+  precio_calculado_hp: number;
+  precio_calculado_hfp: number;
 }
 
 export interface Hoja3Data {
