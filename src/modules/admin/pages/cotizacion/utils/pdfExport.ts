@@ -1,84 +1,99 @@
-import { jsPDF } from "jspdf";
-import html2canvas from "html2canvas";
-
 export async function generateCotizacionPDF(
   pageEl: HTMLDivElement,
   filename: string = "cotizacion.pdf"
 ): Promise<void> {
-  // Temporarily reset any CSS transform on the element or its parents
-  const scrollParent = pageEl.closest('[style*="transform"]') as HTMLElement | null;
-  const origTransform = scrollParent?.style.transform || "";
-  const origTransformOrigin = scrollParent?.style.transformOrigin || "";
-  
-  if (scrollParent) {
-    scrollParent.style.transform = "none";
-    scrollParent.style.transformOrigin = "top left";
+  // Clone the preview element
+  const clone = pageEl.cloneNode(true) as HTMLDivElement;
+
+  // Reset any transforms on the clone
+  clone.style.transform = "none";
+  clone.style.transformOrigin = "top left";
+  clone.style.position = "relative";
+
+  // Collect all stylesheets from the parent document
+  const styleSheets = Array.from(document.querySelectorAll('link[rel="stylesheet"], style'));
+  const styleHTML = styleSheets.map(el => el.outerHTML).join("\n");
+
+  // Build a full HTML document for printing
+  const htmlContent = `<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>${filename}</title>
+  ${styleHTML}
+  <style>
+    @page {
+      size: A4 portrait;
+      margin: 0;
+    }
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 210mm;
+      height: 297mm;
+      overflow: hidden;
+      -webkit-print-color-adjust: exact !important;
+      print-color-adjust: exact !important;
+      color-adjust: exact !important;
+    }
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+    }
+    @media print {
+      html, body {
+        width: 210mm;
+        height: 297mm;
+      }
+    }
+  </style>
+</head>
+<body>${clone.outerHTML}</body>
+</html>`;
+
+  // Create a hidden iframe
+  const iframe = document.createElement("iframe");
+  iframe.style.position = "fixed";
+  iframe.style.top = "-10000px";
+  iframe.style.left = "-10000px";
+  iframe.style.width = "210mm";
+  iframe.style.height = "297mm";
+  iframe.style.border = "none";
+  document.body.appendChild(iframe);
+
+  const iframeDoc = iframe.contentDocument || iframe.contentWindow?.document;
+  if (!iframeDoc) {
+    document.body.removeChild(iframe);
+    throw new Error("Could not access iframe document");
   }
 
-  const canvas = await html2canvas(pageEl, {
-    scale: 2.25,
-    useCORS: true,
-    allowTaint: true,
-    logging: false,
-    backgroundColor: "#ffffff",
-    width: 595,
-    height: 842,
-    windowWidth: 595,
-    windowHeight: 842,
-    onclone: (clonedDoc) => {
-      const el = clonedDoc.querySelector('[data-pdf-page="1"]') as HTMLElement;
-      if (!el) return;
-      
-      el.querySelectorAll<HTMLElement>('[data-pdf-band]').forEach(band => {
-        const bandHeight = band.getAttribute('data-pdf-band') === 'cliente' ? '14px' : '12px';
-        band.style.display = 'flex';
-        band.style.alignItems = 'center';
-        band.style.height = bandHeight;
-        band.style.overflow = 'hidden';
-      });
+  iframeDoc.open();
+  iframeDoc.write(htmlContent);
+  iframeDoc.close();
 
-      el.querySelectorAll<HTMLElement>('[data-pdf-band-label="true"]').forEach(span => {
-        const parentHeight = (span.parentElement as HTMLElement | null)?.style.height || '14px';
-        span.style.display = 'block';
-        span.style.lineHeight = parentHeight;
-        span.style.paddingTop = '0';
-        span.style.paddingBottom = '0';
-        span.style.transform = 'translateY(-2.5px)';
-        span.style.position = 'static';
-      });
-      
-      el.querySelectorAll<HTMLElement>('[data-pdf-table-head="true"]').forEach(th => {
-        th.style.verticalAlign = 'middle';
-        th.style.lineHeight = '1';
-        th.style.paddingTop = '0';
-        th.style.paddingBottom = '0';
-        th.style.position = 'relative';
-        th.style.top = '-1px';
-      });
+  // Wait for images to load then print
+  return new Promise<void>((resolve) => {
+    const images = Array.from(iframeDoc.querySelectorAll("img"));
+    const imagePromises = images.map(
+      (img) =>
+        new Promise<void>((res) => {
+          if (img.complete) return res();
+          img.onload = () => res();
+          img.onerror = () => res();
+        })
+    );
 
-      el.querySelectorAll<HTMLElement>('[data-pdf-items-border="true"]').forEach(cell => {
-        cell.style.border = 'none';
-        cell.style.boxShadow = 'inset 0 0 0 0.4px #E8792B';
-      });
-
-      el.querySelectorAll<HTMLElement>('[data-pdf-thin-border="true"], [data-pdf-items-table="true"]').forEach(node => {
-        node.style.border = 'none';
-        node.style.boxShadow = 'inset 0 0 0 0.4px #E8792B';
-      });
-    },
+    Promise.all(imagePromises).then(() => {
+      // Small delay to ensure rendering is complete
+      setTimeout(() => {
+        iframe.contentWindow?.print();
+        // Cleanup after print dialog closes
+        setTimeout(() => {
+          document.body.removeChild(iframe);
+          resolve();
+        }, 1000);
+      }, 500);
+    });
   });
-
-  // Restore transform
-  if (scrollParent) {
-    scrollParent.style.transform = origTransform;
-    scrollParent.style.transformOrigin = origTransformOrigin;
-  }
-
-  const pdf = new jsPDF("p", "mm", "a4");
-  const pdfWidth = 210;
-  const pdfHeight = 297;
-
-  const imgData = canvas.toDataURL("image/png");
-  pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
-  pdf.save(filename);
 }

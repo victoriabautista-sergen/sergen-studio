@@ -12,15 +12,7 @@ import logoElectroDunas from "@/assets/partners/electrodunas.png";
 
 const fmt = (n: number) => n.toFixed(2);
 const ORANGE = "#E8792B";
-const ORANGE_BORDER = `1px solid ${ORANGE}`;
-const BAND_LABEL_STYLE: React.CSSProperties = {
-  display: "table-cell",
-  verticalAlign: "middle",
-  paddingLeft: "6px",
-  lineHeight: 1,
-  paddingTop: 0,
-  paddingBottom: 0,
-};
+const OB = `0.5px solid ${ORANGE}`;
 
 const CotizacionPreviewContent = () => {
   const { data } = useCotizacionContext();
@@ -67,16 +59,15 @@ const CotizacionPreviewContent = () => {
           fontWeight: 700,
           fontSize: "8px",
           marginBottom: "6px",
-          height: "14px",
-          display: "table",
+          display: "flex",
+          alignItems: "center",
+          height: "16px",
           width: "100%",
           boxSizing: "border-box",
+          paddingLeft: "6px",
         }}
-        data-pdf-band="cliente"
       >
-        <span data-pdf-band-label="true" style={BAND_LABEL_STYLE}>
-          CLIENTE
-        </span>
+        CLIENTE
       </div>
       <table style={{ fontSize: "7px", marginBottom: "12px" }}>
         <tbody>
@@ -87,26 +78,26 @@ const CotizacionPreviewContent = () => {
       </table>
 
       {/* Items table */}
-      <table data-pdf-items-table="true" style={{ width: "100%", borderCollapse: "collapse", fontSize: "7px", marginBottom: "4px", border: ORANGE_BORDER }}>
+      <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "7px", marginBottom: "4px", border: OB }}>
         <thead>
-          <tr style={{ backgroundColor: ORANGE, color: "#fff", height: "14px" }}>
-            <th data-pdf-table-head="true" data-pdf-items-border="true" style={{ padding: "0 4px 0 6px", textAlign: "left", fontWeight: 600, verticalAlign: "middle", lineHeight: 1, border: ORANGE_BORDER }}>Descripción</th>
-            <th data-pdf-table-head="true" data-pdf-items-border="true" style={{ padding: "0 4px", textAlign: "center", fontWeight: 600, width: "50px", verticalAlign: "middle", lineHeight: 1, border: ORANGE_BORDER }}>Código</th>
-            <th data-pdf-table-head="true" data-pdf-items-border="true" style={{ padding: "0 4px", textAlign: "center", fontWeight: 600, width: "60px", verticalAlign: "middle", lineHeight: 1, border: ORANGE_BORDER }}>Precio Unit</th>
-            <th data-pdf-table-head="true" data-pdf-items-border="true" style={{ padding: "0 4px", textAlign: "center", fontWeight: 600, width: "30px", verticalAlign: "middle", lineHeight: 1, border: ORANGE_BORDER }}>Cant.</th>
-            <th data-pdf-table-head="true" data-pdf-items-border="true" style={{ padding: "0 4px", textAlign: "center", fontWeight: 600, width: "55px", verticalAlign: "middle", lineHeight: 1, border: ORANGE_BORDER }}>P.venta</th>
-            <th data-pdf-table-head="true" data-pdf-items-border="true" style={{ padding: "0 4px", textAlign: "center", fontWeight: 600, width: "55px", verticalAlign: "middle", lineHeight: 1, border: ORANGE_BORDER }}>Total</th>
+          <tr style={{ backgroundColor: ORANGE, color: "#fff", height: "16px" }}>
+            <th style={{ padding: "0 4px 0 6px", textAlign: "left", fontWeight: 600, verticalAlign: "middle", lineHeight: 1, border: OB }}>Descripción</th>
+            <th style={{ padding: "0 4px", textAlign: "center", fontWeight: 600, width: "50px", verticalAlign: "middle", lineHeight: 1, border: OB }}>Código</th>
+            <th style={{ padding: "0 4px", textAlign: "center", fontWeight: 600, width: "60px", verticalAlign: "middle", lineHeight: 1, border: OB }}>Precio Unit</th>
+            <th style={{ padding: "0 4px", textAlign: "center", fontWeight: 600, width: "30px", verticalAlign: "middle", lineHeight: 1, border: OB }}>Cant.</th>
+            <th style={{ padding: "0 4px", textAlign: "center", fontWeight: 600, width: "55px", verticalAlign: "middle", lineHeight: 1, border: OB }}>P.venta</th>
+            <th style={{ padding: "0 4px", textAlign: "center", fontWeight: 600, width: "55px", verticalAlign: "middle", lineHeight: 1, border: OB }}>Total</th>
           </tr>
         </thead>
         <tbody>
           {data.items.map((item, idx) => (
             <tr key={idx}>
-              <td data-pdf-items-border="true" style={{ padding: "4px 6px", verticalAlign: "top", whiteSpace: "pre-wrap", border: ORANGE_BORDER }}>{item.descripcion}</td>
-              <td data-pdf-items-border="true" style={{ padding: "4px", textAlign: "center", verticalAlign: "middle", border: ORANGE_BORDER }}>{item.codigo}</td>
-              <td data-pdf-items-border="true" style={{ padding: "4px", textAlign: "right", verticalAlign: "middle", border: ORANGE_BORDER }}>S/ {fmt(item.precio_unitario)}</td>
-              <td data-pdf-items-border="true" style={{ padding: "4px", textAlign: "center", verticalAlign: "middle", border: ORANGE_BORDER }}>{item.cantidad}</td>
-              <td data-pdf-items-border="true" style={{ padding: "4px", textAlign: "right", verticalAlign: "middle", border: ORANGE_BORDER }}>S/ {fmt(item.precio_venta)}</td>
-              <td data-pdf-items-border="true" style={{ padding: "4px", textAlign: "right", verticalAlign: "middle", border: ORANGE_BORDER }}>S/ {fmt(item.total)}</td>
+              <td style={{ padding: "4px 6px", verticalAlign: "top", whiteSpace: "pre-wrap", border: OB }}>{item.descripcion}</td>
+              <td style={{ padding: "4px", textAlign: "center", verticalAlign: "middle", border: OB }}>{item.codigo}</td>
+              <td style={{ padding: "4px", textAlign: "right", verticalAlign: "middle", border: OB }}>S/ {fmt(item.precio_unitario)}</td>
+              <td style={{ padding: "4px", textAlign: "center", verticalAlign: "middle", border: OB }}>{item.cantidad}</td>
+              <td style={{ padding: "4px", textAlign: "right", verticalAlign: "middle", border: OB }}>S/ {fmt(item.precio_venta)}</td>
+              <td style={{ padding: "4px", textAlign: "right", verticalAlign: "middle", border: OB }}>S/ {fmt(item.total)}</td>
             </tr>
           ))}
         </tbody>
@@ -115,7 +106,7 @@ const CotizacionPreviewContent = () => {
       {/* Totals + Terms side by side */}
       <div style={{ display: "flex", gap: "8px", marginBottom: "12px" }}>
         {/* Terms */}
-        <div data-pdf-thin-border="true" style={{ flex: 1, border: ORANGE_BORDER, padding: "6px", fontSize: "7px" }}>
+        <div style={{ flex: 1, border: OB, padding: "6px", fontSize: "7px" }}>
           <div
             style={{
               backgroundColor: ORANGE,
@@ -123,16 +114,15 @@ const CotizacionPreviewContent = () => {
               fontWeight: 700,
               marginBottom: "8px",
               fontSize: "7px",
-              height: "12px",
-              display: "table",
+              display: "flex",
+              alignItems: "center",
+              height: "14px",
               width: "100%",
               boxSizing: "border-box",
+              paddingLeft: "6px",
             }}
-            data-pdf-band="terminos"
           >
-            <span data-pdf-band-label="true" style={BAND_LABEL_STYLE}>
-              TÉRMINOS Y CONDICIONES
-            </span>
+            TÉRMINOS Y CONDICIONES
           </div>
           {data.terminos_items.map((term, idx) => (
             <div key={idx} style={{ marginBottom: "3px", whiteSpace: "pre-wrap", lineHeight: 1.5 }}>
