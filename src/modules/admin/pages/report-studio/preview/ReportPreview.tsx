@@ -8,7 +8,8 @@ import ComparacionPage from "./pages/ComparacionPage";
 import PotenciaPage from "./pages/PotenciaPage";
 import ProyeccionPage from "./pages/ProyeccionPage";
 import ConclusionesPage from "./pages/ConclusionesPage";
-import React from "react";
+import React, { useRef, useCallback, useState } from "react";
+import { generateReportPDF } from "../utils/pdfExport";
 
 const TOTAL_PAGES = 7;
 
@@ -22,8 +23,16 @@ const pageComponents: Record<number, React.FC<{ data: any }>> = {
   7: ConclusionesPage,
 };
 
+// Store the export function so the toolbar can call it
+let _triggerExport: (() => Promise<void>) | null = null;
+let _isExporting = false;
+let _setExportingExternal: ((v: boolean) => void) | null = null;
+
 const Navigation = () => {
   const { activeSheet, setActiveSheet } = useReportContext();
+  const [exporting, setExporting] = useState(false);
+
+  _setExportingExternal = setExporting;
 
   return (
     <div className="flex items-center gap-3">
@@ -40,12 +49,67 @@ const Navigation = () => {
   );
 };
 
+// Hidden component that renders ALL pages for PDF export
+const AllPagesForExport = React.forwardRef<HTMLDivElement, { data: any }>(({ data }, ref) => {
+  return (
+    <div
+      ref={ref}
+      style={{
+        position: "absolute",
+        left: "-9999px",
+        top: 0,
+        zIndex: -1,
+        pointerEvents: "none",
+      }}
+    >
+      {Object.entries(pageComponents).map(([pageNum, Component]) => (
+        <div
+          key={pageNum}
+          data-pdf-page={pageNum}
+          style={{
+            width: "595px",
+            height: "842px",
+            backgroundColor: "#ffffff",
+            fontFamily: "'Inter', sans-serif",
+            overflow: "hidden",
+            position: "relative",
+          }}
+        >
+          <div style={{ padding: "32px 40px", minHeight: "800px" }}>
+            <Component data={data} />
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+});
+AllPagesForExport.displayName = "AllPagesForExport";
+
 const ReportPreview = () => {
   const { data, activeSheet } = useReportContext();
   const PageComponent = pageComponents[activeSheet];
+  const allPagesRef = useRef<HTMLDivElement>(null);
+
+  const handleExport = useCallback(async () => {
+    if (!allPagesRef.current || _isExporting) return;
+    _isExporting = true;
+    _setExportingExternal?.(true);
+    try {
+      const clientName = data.datos_generales?.client_name || "reporte";
+      const mes = data.datos_generales?.mes || "";
+      const anio = data.datos_generales?.anio || "";
+      const filename = `Reporte_${clientName}_${mes}_${anio}.pdf`.replace(/\s+/g, "_");
+      await generateReportPDF(allPagesRef.current, filename);
+    } finally {
+      _isExporting = false;
+      _setExportingExternal?.(false);
+    }
+  }, [data]);
+
+  _triggerExport = handleExport;
 
   return (
-    <div className="flex items-start justify-center h-full overflow-auto p-6">
+    <div className="flex items-start justify-center h-full overflow-auto p-6 relative">
       <div
         className="bg-white shadow-xl border rounded-sm"
         style={{
@@ -59,10 +123,15 @@ const ReportPreview = () => {
           <PageComponent data={data} />
         </div>
       </div>
+
+      {/* Hidden: all pages rendered for PDF export */}
+      <AllPagesForExport ref={allPagesRef} data={data} />
     </div>
   );
 };
 
 ReportPreview.Navigation = Navigation;
+
+export const triggerPDFExport = () => _triggerExport?.();
 
 export default ReportPreview;

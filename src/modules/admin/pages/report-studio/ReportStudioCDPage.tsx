@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
 import AdminShell from "../../components/AdminShell";
 import { ReportProvider, useReportContext } from "./context/ReportContext";
-import ReportPreview from "./preview/ReportPreview";
+import ReportPreview, { triggerPDFExport } from "./preview/ReportPreview";
 import Hoja1DatosGenerales from "./sheets/Hoja1DatosGenerales";
 import Hoja2Precios from "./sheets/Hoja2Precios";
 import Hoja3Factura from "./sheets/Hoja3Factura";
@@ -37,8 +37,15 @@ const ReportStudioContent = () => {
   const { activeSheet, setActiveSheet, saving } = useReportContext();
   const ActiveComponent = sheetComponents[activeSheet];
 
-  const handleDownloadPDF = () => {
-    window.print();
+  const [downloading, setDownloading] = useState(false);
+
+  const handleDownloadPDF = async () => {
+    setDownloading(true);
+    try {
+      await triggerPDFExport();
+    } finally {
+      setDownloading(false);
+    }
   };
 
   const currentSheet = SHEETS.find(s => s.id === activeSheet);
@@ -104,8 +111,9 @@ const ReportStudioContent = () => {
                   <ZoomOut className="h-4 w-4" />
                 </Button>
                 <Button variant="outline" size="default">Reset</Button>
-                <Button size="default" onClick={handleDownloadPDF} className="gap-2 bg-[#E8792B] hover:bg-[#d06a22] text-white">
-                  <Download className="h-4 w-4" /> Descargar PDF
+                <Button size="default" onClick={handleDownloadPDF} disabled={downloading} className="gap-2 bg-[#E8792B] hover:bg-[#d06a22] text-white">
+                  {downloading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
+                  {downloading ? "Generando..." : "Descargar PDF"}
                 </Button>
               </div>
             </div>
