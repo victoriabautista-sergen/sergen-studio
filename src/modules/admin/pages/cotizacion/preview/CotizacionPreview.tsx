@@ -14,7 +14,6 @@ const CotizacionPreviewContent = () => {
   const isIncoser = data.marca === "incoser";
   const logo = isIncoser ? logoIncoser : logoSergen;
   const brandName = isIncoser ? "INCOSER" : "SERGEN";
-  const slogan = isIncoser ? "Mantenemos tu energía fluyendo" : "Ingeniería y Consultoría en Gestión Energética";
   const brandConfig = BRAND_CONFIG[data.marca];
 
   return (
