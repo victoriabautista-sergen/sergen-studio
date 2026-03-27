@@ -45,10 +45,10 @@ const CotizacionPreviewContent = () => {
       {/* Company info */}
       <table style={{ fontSize: "11px", marginBottom: "10px" }}>
         <tbody>
-          <tr><td style={{ paddingRight: "8px", color: "#666", width: "55px" }}>Dirección</td><td><strong>:</strong> {data.direccion}</td></tr>
-          <tr><td style={{ color: "#666" }}>Asesor</td><td><strong>:</strong> {data.asesor}</td></tr>
-          <tr><td style={{ color: "#666" }}>Teléfono</td><td><strong>:</strong> {data.telefono}</td></tr>
-          <tr><td style={{ color: "#666" }}>Correo</td><td><strong>:</strong> {data.correo}</td></tr>
+          <tr><td style={{ paddingRight: "8px", color: "#555", width: "55px" }}>Dirección</td><td><strong>:</strong> {data.direccion}</td></tr>
+          <tr><td style={{ color: "#555" }}>Asesor</td><td><strong>:</strong> {data.asesor}</td></tr>
+          <tr><td style={{ color: "#555" }}>Teléfono</td><td><strong>:</strong> {data.telefono}</td></tr>
+          <tr><td style={{ color: "#555" }}>Correo</td><td><strong>:</strong> {data.correo}</td></tr>
         </tbody>
       </table>
 
