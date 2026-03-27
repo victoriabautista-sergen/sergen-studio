@@ -173,7 +173,7 @@ const CotizacionPreviewContent = () => {
 
       {/* Strategic Partners */}
       <div style={{ marginTop: "12px" }}>
-        <div style={{ fontSize: "7px", fontWeight: 700, color: "#1a2744", marginBottom: "8px", textTransform: "uppercase" }}>
+        <div style={{ fontSize: "9px", fontWeight: 700, color: "#1a2744", marginBottom: "8px", textTransform: "uppercase" }}>
           Socios Estratégicos:
         </div>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "6px" }}>
