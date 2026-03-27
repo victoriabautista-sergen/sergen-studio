@@ -25,76 +25,55 @@ const getDefaultValidez = () => {
   return d.toLocaleDateString("es-PE");
 };
 
-const CORRELATIVE_STORAGE_KEY = "cotizacion_correlative_sequence";
+const CORRELATIVE_STORAGE_KEY = "cotizacion_correlative_v2";
 
 interface CorrelativeSequence {
-  period: string;
   nextNumber: number;
 }
 
-const getCurrentPeriod = () => {
-  const now = new Date();
-  return `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, "0")}`;
-};
-
-const formatCorrelativeNumber = (_period: string, nextNumber: number) => {
-  return `COT-${String(nextNumber).padStart(4, "0")}`;
+const formatCorrelativeNumber = (nextNumber: number) => {
+  return `COT-${String(nextNumber).padStart(3, "0")}`;
 };
 
 const readCorrelativeSequence = (): CorrelativeSequence => {
-  const currentPeriod = getCurrentPeriod();
-
   if (typeof window === "undefined") {
-    return { period: currentPeriod, nextNumber: 1 };
+    return { nextNumber: 1 };
   }
 
   try {
     const storedValue = window.localStorage.getItem(CORRELATIVE_STORAGE_KEY);
-
-    if (!storedValue) {
-      return { period: currentPeriod, nextNumber: 1 };
-    }
+    if (!storedValue) return { nextNumber: 1 };
 
     const parsed = JSON.parse(storedValue) as Partial<CorrelativeSequence>;
-
-    if (parsed.period === currentPeriod && typeof parsed.nextNumber === "number" && parsed.nextNumber > 0) {
-      return {
-        period: parsed.period,
-        nextNumber: parsed.nextNumber,
-      };
+    if (typeof parsed.nextNumber === "number" && parsed.nextNumber > 0) {
+      return { nextNumber: parsed.nextNumber };
     }
   } catch {
-    // Fallback to a new monthly sequence when localStorage is unavailable or invalid.
+    // Fallback
   }
 
-  return { period: currentPeriod, nextNumber: 1 };
+  return { nextNumber: 1 };
 };
 
 const writeCorrelativeSequence = (sequence: CorrelativeSequence) => {
   if (typeof window === "undefined") return;
-
   try {
     window.localStorage.setItem(CORRELATIVE_STORAGE_KEY, JSON.stringify(sequence));
-  } catch {
-    // Ignore storage write failures and keep runtime state functional.
-  }
+  } catch {}
 };
 
 const generateCorrelativeNumber = async (): Promise<string> => {
   const sequence = readCorrelativeSequence();
-  return formatCorrelativeNumber(sequence.period, sequence.nextNumber);
+  return formatCorrelativeNumber(sequence.nextNumber);
 };
 
 const reserveNextCorrelativeNumber = async (): Promise<string> => {
   const currentSequence = readCorrelativeSequence();
-  const nextSequence = {
-    period: currentSequence.period,
+  const nextSequence: CorrelativeSequence = {
     nextNumber: currentSequence.nextNumber + 1,
   };
-
   writeCorrelativeSequence(nextSequence);
-
-  return formatCorrelativeNumber(nextSequence.period, nextSequence.nextNumber);
+  return formatCorrelativeNumber(nextSequence.nextNumber);
 };
 
 export const CotizacionProvider = ({ children }: { children: React.ReactNode }) => {

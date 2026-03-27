@@ -11,8 +11,8 @@ import logoLaVirgen from "@/assets/partners/lavirgen.jpeg";
 import logoElectroDunas from "@/assets/partners/electrodunas.png";
 
 const fmt = (n: number) => n.toFixed(2);
-const ORANGE = "#E8792B";
-const OB = `0.3px solid ${ORANGE}`;
+const ORANGE = "#F58220";
+const OB = `0.2px solid ${ORANGE}`;
 
 const CotizacionPreviewContent = () => {
   const { data } = useCotizacionContext();
