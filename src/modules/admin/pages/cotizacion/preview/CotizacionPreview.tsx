@@ -19,24 +19,22 @@ const CotizacionPreviewContent = () => {
   return (
     <div style={{ fontFamily: "'Inter', sans-serif", fontSize: "8px", color: "#333", lineHeight: 1.4 }}>
       {/* Header */}
-      <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "12px" }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "12px" }}>
         <div>
-          <img src={logo} alt={brandName} style={{ height: isIncoser ? "60px" : "48px", objectFit: "contain" }} />
+          <img src={logo} alt={brandName} style={{ height: "48px", objectFit: "contain" }} />
         </div>
         <div style={{ textAlign: "right" }}>
-          <div style={{ fontSize: "16px", fontWeight: 700, color: "#E8792B", marginBottom: "4px" }}>COTIZACIÓN</div>
+          <div style={{ fontSize: "16px", fontWeight: 700, color: "#E8792B", marginBottom: "4px", fontStyle: "italic" }}>COTIZACIÓN</div>
           <table style={{ fontSize: "7px", marginLeft: "auto" }}>
             <tbody>
-              <tr><td style={{ paddingRight: "8px", color: "#666" }}>Fecha</td><td style={{ fontWeight: 500 }}>{data.fecha}</td></tr>
-              <tr><td style={{ paddingRight: "8px", color: "#666" }}>Cotización</td><td style={{ fontWeight: 500 }}>{data.numero_cotizacion || "—"}</td></tr>
-              <tr><td style={{ paddingRight: "8px", color: "#666" }}>Validez</td><td style={{ fontWeight: 500 }}>{data.validez || "—"}</td></tr>
+              <tr><td style={{ paddingRight: "4px", color: "#666", textAlign: "right" }}>Fecha :</td><td style={{ fontWeight: 500, textAlign: "left", paddingLeft: "6px" }}>{data.fecha}</td></tr>
+              <tr><td style={{ paddingRight: "4px", color: "#666", textAlign: "right" }}>Cotización :</td><td style={{ fontWeight: 500, textAlign: "left", paddingLeft: "6px" }}>{data.numero_cotizacion || "—"}</td></tr>
+              <tr><td style={{ paddingRight: "4px", color: "#666", textAlign: "right" }}>Validez :</td><td style={{ fontWeight: 500, textAlign: "left", paddingLeft: "6px" }}>{data.validez || "—"}</td></tr>
             </tbody>
           </table>
         </div>
       </div>
 
-      {/* Separator */}
-      <div style={{ borderBottom: "2px solid #E8792B", marginBottom: "8px" }} />
 
       {/* Company info */}
       <table style={{ fontSize: "7px", marginBottom: "10px" }}>
