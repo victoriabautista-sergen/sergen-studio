@@ -1,27 +1,30 @@
 import { useCotizacionContext } from "../context/CotizacionContext";
+import { BRAND_CONFIG } from "../types";
 import React, { useRef, useCallback } from "react";
 import { generateCotizacionPDF } from "../utils/pdfExport";
+import logoSergen from "@/assets/sergen-logo.png";
+import logoIncoser from "@/assets/logo_incoser.png";
 
-// Store the export function so the page can call it
 let _triggerExport: (() => Promise<void>) | null = null;
 
 const fmt = (n: number) => n.toFixed(2);
 
 const CotizacionPreviewContent = () => {
   const { data } = useCotizacionContext();
+  const isIncoser = data.marca === "incoser";
+  const logo = isIncoser ? logoIncoser : logoSergen;
+  const brandName = isIncoser ? "INCOSER" : "SERGEN";
+  const slogan = isIncoser ? "Mantenemos tu energía fluyendo" : "Ingeniería y Consultoría en Gestión Energética";
+  const brandConfig = BRAND_CONFIG[data.marca];
 
   return (
     <div style={{ fontFamily: "'Inter', sans-serif", fontSize: "8px", color: "#333", lineHeight: 1.4 }}>
       {/* Header */}
       <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "12px" }}>
         <div>
-          <div style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "2px" }}>
-            <span style={{ fontSize: "24px", fontWeight: 800, color: "#1B3A5C", letterSpacing: "-0.5px" }}>
-              ⚡ INCOSER
-            </span>
-          </div>
+          <img src={logo} alt={brandName} style={{ height: "48px", objectFit: "contain", marginBottom: "2px" }} />
           <div style={{ fontSize: "7px", color: "#E8792B", fontStyle: "italic" }}>
-            Mantenemos tu energía fluyendo
+            {slogan}
           </div>
         </div>
         <div style={{ textAlign: "right" }}>
@@ -96,7 +99,7 @@ const CotizacionPreviewContent = () => {
           </div>
           <div style={{ whiteSpace: "pre-wrap", lineHeight: 1.5 }}>{data.terminos}</div>
           <div style={{ marginTop: "6px" }}>
-            3. N° Cta. Corriente soles BCP a nombre de Ingeniería y consultoría SERGEN:
+            3. N° Cta. Corriente soles BCP a nombre de {brandConfig.razon_social}:
           </div>
           <div style={{ marginLeft: "12px", marginTop: "2px" }}>
             {data.cuenta_bancaria}
