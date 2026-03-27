@@ -25,20 +25,14 @@ const getDefaultValidez = () => {
   return d.toLocaleDateString("es-PE");
 };
 
-const CORRELATIVE_STORAGE_KEY = "cotizacion_correlative_sequence";
+const CORRELATIVE_STORAGE_KEY = "cotizacion_correlative_v2";
 
 interface CorrelativeSequence {
-  period: string;
   nextNumber: number;
 }
 
-const getCurrentPeriod = () => {
-  const now = new Date();
-  return `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, "0")}`;
-};
-
-const formatCorrelativeNumber = (_period: string, nextNumber: number) => {
-  return `COT-${String(nextNumber).padStart(4, "0")}`;
+const formatCorrelativeNumber = (nextNumber: number) => {
+  return `COT-${String(nextNumber).padStart(3, "0")}`;
 };
 
 const readCorrelativeSequence = (): CorrelativeSequence => {
