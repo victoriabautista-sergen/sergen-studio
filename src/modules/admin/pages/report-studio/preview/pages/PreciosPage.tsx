@@ -22,7 +22,7 @@ const PreciosPage = ({ data }: { data: ReportData }) => {
         <hr className="border-t border-gray-300 my-2" />
 
         {/* Title */}
-        <h1 className="text-xs font-semibold my-3 text-center" style={{ color: "#1B3A5C" }}>
+        <h1 className="text-xs font-semibold my-3" style={{ color: "#1B3A5C" }}>
           I. ACTUALIZACIÓN DE PRECIO
         </h1>
 
