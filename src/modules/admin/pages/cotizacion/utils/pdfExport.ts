@@ -6,7 +6,6 @@ export async function generateCotizacionPDF(
   filename: string = "cotizacion.pdf"
 ): Promise<void> {
   // Temporarily reset any CSS transform on the element or its parents
-  // so html2canvas captures at 1:1 scale matching the preview
   const scrollParent = pageEl.closest('[style*="transform"]') as HTMLElement | null;
   const origTransform = scrollParent?.style.transform || "";
   const origTransformOrigin = scrollParent?.style.transformOrigin || "";
@@ -26,6 +25,24 @@ export async function generateCotizacionPDF(
     height: 842,
     windowWidth: 595,
     windowHeight: 842,
+    onclone: (clonedDoc) => {
+      // Force vertical centering on orange band elements in the cloned DOM
+      // html2canvas renders from this clone, so styles here fix PDF output
+      const el = clonedDoc.querySelector('[data-pdf-page="1"]') as HTMLElement;
+      if (!el) return;
+      
+      // Fix all table-cell spans used for vertical centering
+      el.querySelectorAll<HTMLElement>('span[style*="table-cell"]').forEach(span => {
+        span.style.verticalAlign = 'middle';
+        span.style.lineHeight = '1';
+      });
+      
+      // Fix table header cells  
+      el.querySelectorAll<HTMLElement>('th').forEach(th => {
+        th.style.verticalAlign = 'middle';
+        th.style.lineHeight = '1.1';
+      });
+    },
   });
 
   // Restore transform
