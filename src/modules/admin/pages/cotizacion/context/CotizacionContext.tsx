@@ -12,9 +12,11 @@ interface CotizacionContextType {
 
 const CotizacionContext = createContext<CotizacionContextType | null>(null);
 
-export const useCotizacionContext = () => {
+export const useCotizacionContext = (): CotizacionContextType => {
   const ctx = useContext(CotizacionContext);
-  if (!ctx) throw new Error("useCotizacionContext must be used within CotizacionProvider");
+  if (!ctx) {
+    throw new Error("useCotizacionContext must be used within CotizacionProvider");
+  }
   return ctx;
 };
 
