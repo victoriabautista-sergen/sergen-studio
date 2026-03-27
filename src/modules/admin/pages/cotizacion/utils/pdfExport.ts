@@ -5,15 +5,16 @@ export async function generateCotizacionPDF(
   // Clone the preview element
   const clone = pageEl.cloneNode(true) as HTMLDivElement;
 
-  // Reset any transforms and make it fill the page
+  // Reset any transforms and make it fill exactly one A4 page
   clone.style.transform = "none";
   clone.style.transformOrigin = "top left";
   clone.style.position = "relative";
-  clone.style.width = "210mm";
-  clone.style.height = "297mm";
-  clone.style.padding = "12mm";
+  clone.style.width = "186mm";   // 210mm - 2*12mm margins
+  clone.style.height = "273mm";  // 297mm - 2*12mm margins
+  clone.style.maxHeight = "273mm";
+  clone.style.overflow = "hidden";
+  clone.style.padding = "0";
   clone.style.boxSizing = "border-box";
-
   // Collect all stylesheets from the parent document
   const styleSheets = Array.from(document.querySelectorAll('link[rel="stylesheet"], style'));
   const styleHTML = styleSheets.map(el => el.outerHTML).join("\n");
@@ -37,10 +38,11 @@ export async function generateCotizacionPDF(
     }
     html, body {
       margin: 0;
-      padding: 0;
+      padding: 12mm;
       width: 210mm;
       height: 297mm;
       overflow: hidden;
+      box-sizing: border-box;
     }
   </style>
 </head>
