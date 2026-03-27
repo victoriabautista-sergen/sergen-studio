@@ -151,7 +151,7 @@ const CotizacionPreviewContent = () => {
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "6px" }}>
           <img src={logoKallpa} alt="Kallpa" style={{ height: "52px", objectFit: "contain", marginLeft: "20px" }} />
           <img src={logoElectroDunas} alt="ElectroDunas" style={{ height: "44px", objectFit: "contain" }} />
-          <img src={logoFenix} alt="Fenix" style={{ height: "88px", objectFit: "contain" }} />
+          <img src={logoFenix} alt="Fenix" style={{ height: "94px", objectFit: "contain" }} />
           <img src={logoLaVirgen} alt="La Virgen" style={{ height: "86px", objectFit: "contain", marginRight: "20px" }} />
         </div>
         <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: "40px", marginTop: "10px" }}>

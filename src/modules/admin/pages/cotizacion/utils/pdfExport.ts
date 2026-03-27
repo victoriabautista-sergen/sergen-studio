@@ -12,13 +12,14 @@ export async function generateCotizacionPDF(
   const canvas = await html2canvas(pageEl, {
     scale: 2,
     useCORS: true,
+    allowTaint: true,
     logging: false,
     backgroundColor: "#ffffff",
-    width: 595,
-    height: 842,
+    width: pageEl.scrollWidth,
+    height: pageEl.scrollHeight,
   });
 
-  const imgData = canvas.toDataURL("image/png");
-  pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
+  const imgData = canvas.toDataURL("image/jpeg", 0.95);
+  pdf.addImage(imgData, "JPEG", 0, 0, pdfWidth, pdfHeight);
   pdf.save(filename);
 }
