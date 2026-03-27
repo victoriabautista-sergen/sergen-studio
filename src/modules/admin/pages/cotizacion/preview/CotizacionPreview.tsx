@@ -147,13 +147,13 @@ const CotizacionPreviewContent = () => {
 
         {/* Totals */}
         <div style={{ width: "160px", fontSize: "7px" }}>
-          <table style={{ width: "100%" }}>
+          <table style={{ width: "100%", borderCollapse: "separate", borderSpacing: "0 3px" }}>
             <tbody>
               <tr><td>Subtotal</td><td style={{ textAlign: "right" }}>S/ {fmt(data.subtotal)}</td></tr>
               <tr><td>Imponible</td><td style={{ textAlign: "right" }}>S/ {fmt(data.imponible)}</td></tr>
               <tr><td>Impuesto %</td><td style={{ textAlign: "right" }}>{data.impuesto_pct}%</td></tr>
-              <tr><td>Total Impuesto</td><td style={{ textAlign: "right" }}>S/ {fmt(data.total_impuesto)}</td></tr>
-              <tr style={{ borderTop: "1px solid #ccc" }}><td>Otros</td><td style={{ textAlign: "right" }}>S/ {data.otros > 0 ? fmt(data.otros) : "-"}</td></tr>
+              <tr><td style={{ paddingBottom: "4px" }}>Total Impuesto</td><td style={{ textAlign: "right", paddingBottom: "4px" }}>S/ {fmt(data.total_impuesto)}</td></tr>
+              <tr style={{ borderTop: "1px solid #ccc" }}><td style={{ paddingTop: "6px" }}>Otros</td><td style={{ textAlign: "right", paddingTop: "6px" }}>S/ {data.otros > 0 ? fmt(data.otros) : "-"}</td></tr>
               <tr style={{ borderTop: "2px solid #333", fontWeight: 700 }}><td>TOTAL</td><td style={{ textAlign: "right" }}>S/ {fmt(data.total)}</td></tr>
             </tbody>
           </table>
