@@ -32,7 +32,7 @@ const CotizacionPreviewContent = () => {
         <div style={{ textAlign: "right" }}>
           <table style={{ fontSize: "9px", marginLeft: "auto" }}>
             <tbody>
-              <tr><td colSpan={2} style={{ textAlign: "center", fontSize: "12px", fontWeight: 700, color: "#F58220", paddingBottom: "4px" }}>COTIZACIÓN</td></tr>
+              <tr><td colSpan={2} style={{ textAlign: "center", fontSize: "14px", fontWeight: 700, color: "#F58220", paddingBottom: "4px" }}>COTIZACIÓN</td></tr>
               <tr><td style={{ paddingRight: "4px", color: "#666", textAlign: "left" }}>Fecha :</td><td style={{ fontWeight: 500, textAlign: "left", paddingLeft: "6px" }}>{data.fecha}</td></tr>
               <tr><td style={{ paddingRight: "4px", color: "#666", textAlign: "left" }}>Cotización :</td><td style={{ fontWeight: 500, textAlign: "left", paddingLeft: "6px" }}>{data.numero_cotizacion || "—"}</td></tr>
               <tr><td style={{ paddingRight: "4px", color: "#666", textAlign: "left" }}>Validez :</td><td style={{ fontWeight: 500, textAlign: "left", paddingLeft: "6px" }}>{data.validez || "—"}</td></tr>
