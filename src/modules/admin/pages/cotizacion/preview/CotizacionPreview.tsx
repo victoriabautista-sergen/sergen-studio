@@ -12,7 +12,7 @@ import logoElectroDunas from "@/assets/partners/electrodunas.png";
 
 const fmt = (n: number) => n.toFixed(2);
 const ORANGE = "#E8792B";
-const ORANGE_BORDER = `0.35px solid ${ORANGE}`;
+const ORANGE_BORDER = `1px solid ${ORANGE}`;
 const BAND_LABEL_STYLE: React.CSSProperties = {
   display: "table-cell",
   verticalAlign: "middle",
@@ -20,8 +20,6 @@ const BAND_LABEL_STYLE: React.CSSProperties = {
   lineHeight: 1,
   paddingTop: 0,
   paddingBottom: 0,
-  position: "relative",
-  top: "-2px",
 };
 
 const CotizacionPreviewContent = () => {

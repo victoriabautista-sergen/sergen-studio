@@ -43,7 +43,7 @@ export async function generateCotizacionPDF(
         span.style.lineHeight = parentHeight;
         span.style.paddingTop = '0';
         span.style.paddingBottom = '0';
-        span.style.transform = 'translateY(-1.5px)';
+        span.style.transform = 'translateY(-2.5px)';
         span.style.position = 'static';
       });
       
@@ -57,11 +57,13 @@ export async function generateCotizacionPDF(
       });
 
       el.querySelectorAll<HTMLElement>('[data-pdf-items-border="true"]').forEach(cell => {
-        cell.style.border = '0.35px solid #E8792B';
+        cell.style.border = 'none';
+        cell.style.boxShadow = 'inset 0 0 0 0.4px #E8792B';
       });
 
       el.querySelectorAll<HTMLElement>('[data-pdf-thin-border="true"], [data-pdf-items-table="true"]').forEach(node => {
-        node.style.border = '0.35px solid #E8792B';
+        node.style.border = 'none';
+        node.style.boxShadow = 'inset 0 0 0 0.4px #E8792B';
       });
     },
   });
