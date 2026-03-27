@@ -11,11 +11,11 @@ import logoLaVirgen from "@/assets/partners/lavirgen.jpeg";
 import logoElectroDunas from "@/assets/partners/electrodunas.png";
 
 const fmt = (n: number) => n.toFixed(2);
-const ORANGE = "#F58220";
-const OB_THIN = `1px solid ${ORANGE}`;
-const CELL_BORDER = { borderRight: `1px solid rgba(245,130,32,0.3)`, borderBottom: `1px solid rgba(245,130,32,0.3)` };
-const CELL_BORDER_LAST = { borderBottom: `1px solid rgba(245,130,32,0.3)` };
-const OB = `1px solid rgba(245,130,32,0.35)`;
+const ORANGE = "hsl(28 91% 54%)";
+const TABLE_OUTER_BORDER = "0.5px solid hsl(28 91% 54% / 0.55)";
+const TABLE_INNER_BORDER = "0.5px solid hsl(28 91% 54% / 0.22)";
+const HEADER_DIVIDER = "0.5px solid hsl(0 0% 100% / 0.45)";
+const OB = `0.2px solid ${ORANGE}`;
 
 const CotizacionPreviewContent = () => {
   const { data } = useCotizacionContext();
