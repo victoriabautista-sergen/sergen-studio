@@ -70,7 +70,7 @@ const CotizacionPreviewContent = () => {
       >
         CLIENTE
       </div>
-      <table style={{ fontSize: "7px", marginBottom: "12px" }}>
+      <table style={{ fontSize: "9px", marginBottom: "12px" }}>
         <tbody>
           <tr><td style={{ paddingRight: "8px", color: "#666", width: "55px" }}>Empresa</td><td><strong>:</strong> {data.empresa_cliente}</td></tr>
           <tr><td style={{ color: "#666" }}>Contacto</td><td><strong>:</strong> {data.contacto_cliente}</td></tr>
