@@ -5,10 +5,14 @@ export async function generateCotizacionPDF(
   // Clone the preview element
   const clone = pageEl.cloneNode(true) as HTMLDivElement;
 
-  // Reset any transforms on the clone
+  // Reset any transforms and make it fill the page
   clone.style.transform = "none";
   clone.style.transformOrigin = "top left";
   clone.style.position = "relative";
+  clone.style.width = "210mm";
+  clone.style.height = "297mm";
+  clone.style.padding = "12mm";
+  clone.style.boxSizing = "border-box";
 
   // Collect all stylesheets from the parent document
   const styleSheets = Array.from(document.querySelectorAll('link[rel="stylesheet"], style'));
@@ -26,32 +30,22 @@ export async function generateCotizacionPDF(
       size: A4 portrait;
       margin: 0;
     }
+    * {
+      -webkit-print-color-adjust: exact !important;
+      print-color-adjust: exact !important;
+      color-adjust: exact !important;
+    }
     html, body {
       margin: 0;
       padding: 0;
       width: 210mm;
       height: 297mm;
       overflow: hidden;
-      -webkit-print-color-adjust: exact !important;
-      print-color-adjust: exact !important;
-      color-adjust: exact !important;
-    }
-    body {
-      display: flex;
-      justify-content: center;
-      align-items: flex-start;
-    }
-    @media print {
-      html, body {
-        width: 210mm;
-        height: 297mm;
-      }
     }
   </style>
 </head>
 <body>${clone.outerHTML}</body>
 </html>`;
-
   // Create a hidden iframe
   const iframe = document.createElement("iframe");
   iframe.style.position = "fixed";
