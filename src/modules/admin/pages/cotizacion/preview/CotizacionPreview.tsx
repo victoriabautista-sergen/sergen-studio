@@ -149,10 +149,10 @@ const CotizacionPreviewContent = () => {
           Socios Estratégicos:
         </div>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "6px" }}>
-          <img src={logoKallpa} alt="Kallpa" style={{ height: "32px", objectFit: "contain" }} />
+          <img src={logoKallpa} alt="Kallpa" style={{ height: "42px", objectFit: "contain", marginLeft: "8px" }} />
           <img src={logoElectroDunas} alt="ElectroDunas" style={{ height: "44px", objectFit: "contain" }} />
-          <img src={logoFenix} alt="Fenix" style={{ height: "46px", objectFit: "contain" }} />
-          <img src={logoLaVirgen} alt="La Virgen" style={{ height: "42px", objectFit: "contain" }} />
+          <img src={logoFenix} alt="Fenix" style={{ height: "52px", objectFit: "contain" }} />
+          <img src={logoLaVirgen} alt="La Virgen" style={{ height: "48px", objectFit: "contain", marginRight: "8px" }} />
         </div>
         <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: "40px" }}>
           <img src={logoCvc} alt="CVC Energía" style={{ height: "36px", objectFit: "contain" }} />
