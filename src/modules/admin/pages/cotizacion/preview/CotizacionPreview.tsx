@@ -24,7 +24,7 @@ const CotizacionPreviewContent = () => {
           <img src={logo} alt={brandName} style={{ height: isIncoser ? "64px" : "48px", objectFit: "contain" }} />
         </div>
         <div style={{ textAlign: "right" }}>
-          <div style={{ fontSize: "16px", fontWeight: 700, color: "#E8792B", marginBottom: "4px" }}>COTIZACIÓN</div>
+          <div style={{ fontSize: "12px", fontWeight: 700, color: "#E8792B", marginBottom: "4px" }}>COTIZACIÓN</div>
           <table style={{ fontSize: "7px", marginLeft: "auto" }}>
             <tbody>
               <tr><td style={{ paddingRight: "4px", color: "#666", textAlign: "left" }}>Fecha :</td><td style={{ fontWeight: 500, textAlign: "left", paddingLeft: "6px" }}>{data.fecha}</td></tr>
@@ -91,9 +91,13 @@ const CotizacionPreviewContent = () => {
           <div style={{ backgroundColor: "#E8792B", color: "#fff", fontWeight: 700, padding: "2px 4px", marginBottom: "4px", fontSize: "7px" }}>
             TÉRMINOS Y CONDICIONES
           </div>
-          <div style={{ whiteSpace: "pre-wrap", lineHeight: 1.5 }}>{data.terminos}</div>
-          <div style={{ marginTop: "6px" }}>
-            3. N° Cta. Corriente soles BCP a nombre de {brandConfig.razon_social}:
+          {data.terminos_items.map((term, idx) => (
+            <div key={idx} style={{ marginBottom: "3px", whiteSpace: "pre-wrap", lineHeight: 1.5 }}>
+              {idx + 1}. {term}
+            </div>
+          ))}
+          <div style={{ marginTop: "3px" }}>
+            {data.terminos_items.length + 1}. N° Cta. Corriente soles BCP a nombre de {brandConfig.razon_social}:
           </div>
           <div style={{ marginLeft: "12px", marginTop: "2px" }}>
             {data.cuenta_bancaria}

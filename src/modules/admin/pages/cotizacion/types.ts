@@ -35,7 +35,7 @@ export interface CotizacionData {
   otros: number;
   total: number;
   // Terms
-  terminos: string;
+  terminos_items: string[];
   cuenta_bancaria: string;
   cci: string;
 }
@@ -83,7 +83,10 @@ export const defaultCotizacionData: CotizacionData = {
   total_impuesto: 0,
   otros: 0,
   total: 0,
-  terminos: `1. Forma de pago:\n   a) 50% al finalizar el servicio.\n   b) 50% finalizando el servicio.\n2. Los pagos a la concesionaria y/o trámites municipales serán asumidos y gestionados por el cliente.`,
+  terminos_items: [
+    "Forma de pago:\n   a) 50% al finalizar el servicio.\n   b) 50% finalizando el servicio.",
+    "Los pagos a la concesionaria y/o trámites municipales serán asumidos y gestionados por el cliente.",
+  ],
   cuenta_bancaria: BRAND_CONFIG.sergen.cuenta_bancaria,
   cci: BRAND_CONFIG.sergen.cci,
 };
