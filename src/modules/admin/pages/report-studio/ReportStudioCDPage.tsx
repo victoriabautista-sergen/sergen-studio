@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
 import AdminShell from "../../components/AdminShell";
 import { ReportProvider, useReportContext } from "./context/ReportContext";
-import ReportPreview from "./preview/ReportPreview";
+import ReportPreview, { triggerPDFExport } from "./preview/ReportPreview";
 import Hoja1DatosGenerales from "./sheets/Hoja1DatosGenerales";
 import Hoja2Precios from "./sheets/Hoja2Precios";
 import Hoja3Factura from "./sheets/Hoja3Factura";
