@@ -110,15 +110,15 @@ const CotizacionPreviewContent = () => {
               backgroundColor: "#E8792B",
               color: "#fff",
               fontWeight: 700,
-              marginBottom: "4px",
+              marginBottom: "8px",
               fontSize: "7px",
-              height: "14px",
+              height: "18px",
               display: "table",
               width: "100%",
               boxSizing: "border-box",
             }}
           >
-            <span style={{ display: "table-cell", verticalAlign: "middle", paddingLeft: "4px" }}>
+            <span style={{ display: "table-cell", verticalAlign: "middle", paddingLeft: "8px", paddingTop: "1px" }}>
               TÉRMINOS Y CONDICIONES
             </span>
           </div>
