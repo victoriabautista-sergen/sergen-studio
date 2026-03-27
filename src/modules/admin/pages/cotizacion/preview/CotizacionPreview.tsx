@@ -9,6 +9,7 @@ import logoKallpa from "@/assets/partners/kallpa.jpg";
 import logoFenix from "@/assets/partners/fenix.jpg";
 import logoOrazul from "@/assets/partners/orazul.jpeg";
 import logoLaVirgen from "@/assets/partners/lavirgen.jpeg";
+import logoElectroDunas from "@/assets/partners/electrodunas.png";
 
 let _triggerExport: (() => Promise<void>) | null = null;
 
@@ -134,26 +135,29 @@ const CotizacionPreviewContent = () => {
         </div>
       </div>
 
-      {/* Strategic Partners */}
-      <div style={{ marginTop: "16px" }}>
-        <div style={{ fontSize: "7px", fontWeight: 700, color: "#1a2744", marginBottom: "8px", textTransform: "uppercase" }}>
-          Socios Estratégicos:
-        </div>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "8px 16px" }}>
-          <img src={logoKallpa} alt="Kallpa" style={{ height: "32px", objectFit: "contain" }} />
-          <img src={logoCvc} alt="CVC Energía" style={{ height: "28px", objectFit: "contain" }} />
-          <img src={logoFenix} alt="Fenix" style={{ height: "34px", objectFit: "contain" }} />
-          <img src={logoLaVirgen} alt="La Virgen" style={{ height: "30px", objectFit: "contain" }} />
-          <img src={logoOrazul} alt="Orazul Energy" style={{ height: "32px", objectFit: "contain" }} />
-        </div>
-      </div>
-
       {/* Footer */}
       <div style={{ textAlign: "center", marginTop: "10px", fontSize: "7px", color: "#666" }}>
         Si usted tiene alguna pregunta sobre esta cotización, por favor, póngase en contacto con nosotros
       </div>
       <div style={{ textAlign: "center", marginTop: "4px", fontSize: "9px", fontStyle: "italic", fontWeight: 600 }}>
         ¡Gracias por su preferencia!
+      </div>
+
+      {/* Strategic Partners */}
+      <div style={{ marginTop: "12px" }}>
+        <div style={{ fontSize: "7px", fontWeight: 700, color: "#1a2744", marginBottom: "8px", textTransform: "uppercase" }}>
+          Socios Estratégicos:
+        </div>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "6px" }}>
+          <img src={logoKallpa} alt="Kallpa" style={{ height: "32px", objectFit: "contain" }} />
+          <img src={logoElectroDunas} alt="ElectroDunas" style={{ height: "32px", objectFit: "contain" }} />
+          <img src={logoFenix} alt="Fenix" style={{ height: "34px", objectFit: "contain" }} />
+          <img src={logoLaVirgen} alt="La Virgen" style={{ height: "30px", objectFit: "contain" }} />
+        </div>
+        <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: "40px" }}>
+          <img src={logoCvc} alt="CVC Energía" style={{ height: "28px", objectFit: "contain" }} />
+          <img src={logoOrazul} alt="Orazul Energy" style={{ height: "32px", objectFit: "contain" }} />
+        </div>
       </div>
     </div>
   );
