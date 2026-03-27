@@ -166,13 +166,6 @@ const CotizacionPreview = React.forwardRef<HTMLDivElement>((_, ref) => {
   const internalRef = useRef<HTMLDivElement>(null);
   const containerRef = (ref as React.RefObject<HTMLDivElement>) || internalRef;
 
-  const handleExport = useCallback(async () => {
-    if (!containerRef.current) return;
-    const filename = `Cotizacion_${data.empresa_cliente || "doc"}_${data.numero_cotizacion || "sin_numero"}.pdf`.replace(/\s+/g, "_");
-    await generateCotizacionPDF(containerRef.current, filename);
-  }, [data, containerRef]);
-
-  _triggerExport = handleExport;
 
   return (
     <div
