@@ -1,5 +1,5 @@
-import { useState, useRef } from "react";
-import { Download, ZoomIn, ZoomOut, Loader2 } from "lucide-react";
+import { useState, useRef, useCallback, useEffect } from "react";
+import { Download, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
 import AdminShell from "../../components/AdminShell";
@@ -8,14 +8,32 @@ import CotizacionEditor from "./editor/CotizacionEditor";
 import CotizacionPreview from "./preview/CotizacionPreview";
 import { generateCotizacionPDF } from "./utils/pdfExport";
 
-const ZOOM_STEPS = [50, 60, 70, 80, 90, 100, 110, 120, 130, 150];
+const A4_W = 595;
+const A4_H = 842;
+const PAD = 48; // px padding around the sheet
 
 const CotizacionContent = () => {
   const { advanceCorrelative } = useCotizacionContext();
   const [downloading, setDownloading] = useState(false);
-  const [zoomIndex, setZoomIndex] = useState(3); // 80% default
-  const zoom = ZOOM_STEPS[zoomIndex];
+  const [scale, setScale] = useState(1);
   const previewRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  const computeScale = useCallback(() => {
+    const container = containerRef.current;
+    if (!container) return;
+    const availW = container.clientWidth - PAD * 2;
+    const availH = container.clientHeight - PAD * 2;
+    const s = Math.min(availW / A4_W, availH / A4_H, 1.6);
+    setScale(Math.max(s, 0.4));
+  }, []);
+
+  useEffect(() => {
+    computeScale();
+    const ro = new ResizeObserver(computeScale);
+    if (containerRef.current) ro.observe(containerRef.current);
+    return () => ro.disconnect();
+  }, [computeScale]);
 
   const handleDownloadPDF = async () => {
     if (!previewRef.current) return;
@@ -28,10 +46,6 @@ const CotizacionContent = () => {
       setDownloading(false);
     }
   };
-
-  const zoomIn = () => setZoomIndex(prev => Math.min(prev + 1, ZOOM_STEPS.length - 1));
-  const zoomOut = () => setZoomIndex(prev => Math.max(prev - 1, 0));
-  const zoomReset = () => setZoomIndex(3);
 
   return (
     <div className="h-[calc(100vh-8rem)] overflow-hidden bg-muted/30 rounded-lg">
@@ -58,16 +72,7 @@ const CotizacionContent = () => {
           <div className="flex flex-col h-full bg-muted/20">
             {/* Toolbar */}
             <div className="border-b bg-card px-4 py-2 flex items-center justify-between shrink-0">
-              <div className="flex items-center gap-2">
-                <Button variant="outline" size="sm" onClick={zoomOut} disabled={zoomIndex === 0}>
-                  <ZoomOut className="h-4 w-4" />
-                </Button>
-                <span className="text-sm text-muted-foreground w-12 text-center">{zoom}%</span>
-                <Button variant="outline" size="sm" onClick={zoomIn} disabled={zoomIndex === ZOOM_STEPS.length - 1}>
-                  <ZoomIn className="h-4 w-4" />
-                </Button>
-                <Button variant="outline" size="sm" onClick={zoomReset}>Reset</Button>
-              </div>
+              <span className="text-xs text-muted-foreground">{Math.round(scale * 100)}%</span>
               <Button
                 size="sm"
                 onClick={handleDownloadPDF}
@@ -80,10 +85,10 @@ const CotizacionContent = () => {
             </div>
 
             {/* Preview area */}
-            <div className="flex-1 overflow-auto flex items-start justify-center p-6">
+            <div ref={containerRef} className="flex-1 overflow-auto flex items-start justify-center" style={{ padding: `${PAD}px` }}>
               <div
                 style={{
-                  transform: `scale(${zoom / 100})`,
+                  transform: `scale(${scale})`,
                   transformOrigin: "top center",
                   transition: "transform 0.2s ease",
                 }}
