@@ -11,11 +11,9 @@ import logoLaVirgen from "@/assets/partners/lavirgen.jpeg";
 import logoElectroDunas from "@/assets/partners/electrodunas.png";
 
 const fmt = (n: number) => n.toFixed(2);
-const ORANGE = "hsl(28 91% 54%)";
-const TABLE_OUTER_BORDER = "0.5px solid hsl(28 91% 54% / 0.55)";
-const TABLE_INNER_BORDER = "0.5px solid hsl(28 91% 54% / 0.22)";
-const HEADER_DIVIDER = "0.5px solid hsl(0 0% 100% / 0.45)";
-const OB = `0.2px solid ${ORANGE}`;
+const ORANGE = "#F58220";
+const B = "0.5px solid #F5822050";
+const OB = B;
 
 const CotizacionPreviewContent = () => {
   const { data } = useCotizacionContext();
@@ -81,26 +79,26 @@ const CotizacionPreviewContent = () => {
       </table>
 
       {/* Items table */}
-      <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "7px", marginBottom: "4px", borderTop: TABLE_OUTER_BORDER, borderBottom: TABLE_OUTER_BORDER, borderLeft: TABLE_INNER_BORDER, borderRight: TABLE_INNER_BORDER }}>
+      <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "7px", marginBottom: "4px", border: B }}>
         <thead>
           <tr style={{ backgroundColor: ORANGE, color: "#fff", height: "16px" }}>
-            <th style={{ padding: "0 4px 0 6px", textAlign: "left", fontWeight: 600, verticalAlign: "middle", lineHeight: 1, borderRight: HEADER_DIVIDER }}>Descripción</th>
-            <th style={{ padding: "0 4px", textAlign: "center", fontWeight: 600, width: "50px", verticalAlign: "middle", lineHeight: 1, borderRight: HEADER_DIVIDER }}>Código</th>
-            <th style={{ padding: "0 4px", textAlign: "center", fontWeight: 600, width: "60px", verticalAlign: "middle", lineHeight: 1, borderRight: HEADER_DIVIDER }}>Precio Unit</th>
-            <th style={{ padding: "0 4px", textAlign: "center", fontWeight: 600, width: "30px", verticalAlign: "middle", lineHeight: 1, borderRight: HEADER_DIVIDER }}>Cant.</th>
-            <th style={{ padding: "0 4px", textAlign: "center", fontWeight: 600, width: "55px", verticalAlign: "middle", lineHeight: 1, borderRight: HEADER_DIVIDER }}>P.venta</th>
-            <th style={{ padding: "0 4px", textAlign: "center", fontWeight: 600, width: "55px", verticalAlign: "middle", lineHeight: 1 }}>Total</th>
+            <th style={{ padding: "0 4px 0 6px", textAlign: "left", fontWeight: 600, verticalAlign: "middle", lineHeight: 1, border: B }}>Descripción</th>
+            <th style={{ padding: "0 4px", textAlign: "center", fontWeight: 600, width: "50px", verticalAlign: "middle", lineHeight: 1, border: B }}>Código</th>
+            <th style={{ padding: "0 4px", textAlign: "center", fontWeight: 600, width: "60px", verticalAlign: "middle", lineHeight: 1, border: B }}>Precio Unit</th>
+            <th style={{ padding: "0 4px", textAlign: "center", fontWeight: 600, width: "30px", verticalAlign: "middle", lineHeight: 1, border: B }}>Cant.</th>
+            <th style={{ padding: "0 4px", textAlign: "center", fontWeight: 600, width: "55px", verticalAlign: "middle", lineHeight: 1, border: B }}>P.venta</th>
+            <th style={{ padding: "0 4px", textAlign: "center", fontWeight: 600, width: "55px", verticalAlign: "middle", lineHeight: 1, border: B }}>Total</th>
           </tr>
         </thead>
         <tbody>
           {data.items.map((item, idx) => (
             <tr key={idx}>
-              <td style={{ padding: "4px 6px", verticalAlign: "top", whiteSpace: "pre-wrap", borderRight: TABLE_INNER_BORDER, borderBottom: TABLE_INNER_BORDER }}>{item.descripcion}</td>
-              <td style={{ padding: "4px", textAlign: "center", verticalAlign: "middle", borderRight: TABLE_INNER_BORDER, borderBottom: TABLE_INNER_BORDER }}>{item.codigo}</td>
-              <td style={{ padding: "4px", textAlign: "right", verticalAlign: "middle", borderRight: TABLE_INNER_BORDER, borderBottom: TABLE_INNER_BORDER }}>S/ {fmt(item.precio_unitario)}</td>
-              <td style={{ padding: "4px", textAlign: "center", verticalAlign: "middle", borderRight: TABLE_INNER_BORDER, borderBottom: TABLE_INNER_BORDER }}>{item.cantidad}</td>
-              <td style={{ padding: "4px", textAlign: "right", verticalAlign: "middle", borderRight: TABLE_INNER_BORDER, borderBottom: TABLE_INNER_BORDER }}>S/ {fmt(item.precio_venta)}</td>
-              <td style={{ padding: "4px", textAlign: "right", verticalAlign: "middle", borderBottom: TABLE_INNER_BORDER }}>S/ {fmt(item.total)}</td>
+              <td style={{ padding: "4px 6px", verticalAlign: "top", whiteSpace: "pre-wrap", border: B }}>{item.descripcion}</td>
+              <td style={{ padding: "4px", textAlign: "center", verticalAlign: "middle", border: B }}>{item.codigo}</td>
+              <td style={{ padding: "4px", textAlign: "right", verticalAlign: "middle", border: B }}>S/ {fmt(item.precio_unitario)}</td>
+              <td style={{ padding: "4px", textAlign: "center", verticalAlign: "middle", border: B }}>{item.cantidad}</td>
+              <td style={{ padding: "4px", textAlign: "right", verticalAlign: "middle", border: B }}>S/ {fmt(item.precio_venta)}</td>
+              <td style={{ padding: "4px", textAlign: "right", verticalAlign: "middle", border: B }}>S/ {fmt(item.total)}</td>
             </tr>
           ))}
         </tbody>
