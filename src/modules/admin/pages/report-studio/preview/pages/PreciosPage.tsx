@@ -82,9 +82,9 @@ const PreciosPage = ({ data }: { data: ReportData }) => {
       <table className="w-full text-[10px] border-collapse mb-1">
         <thead>
           <tr style={{ backgroundColor: "#E8792B" }}>
-            <th className="p-1.5 text-left text-white font-semibold border border-orange-400">Concepto</th>
-            <th className="p-1.5 text-center text-white font-semibold border border-orange-400 w-24">Valor</th>
-            <th className="p-1.5 text-center text-white font-semibold border border-orange-400 w-20">Unidad</th>
+            <th className="px-1.5 py-0.5 text-left text-white font-semibold border border-orange-400">Concepto</th>
+            <th className="px-1.5 py-0.5 text-center text-white font-semibold border border-orange-400 w-24">Valor</th>
+            <th className="px-1.5 py-0.5 text-center text-white font-semibold border border-orange-400 w-20">Unidad</th>
           </tr>
         </thead>
         <tbody>
