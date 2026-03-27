@@ -43,7 +43,7 @@ const CotizacionPreviewContent = () => {
 
 
       {/* Company info */}
-      <table style={{ fontSize: "9px", marginBottom: "10px" }}>
+      <table style={{ fontSize: "11px", marginBottom: "10px" }}>
         <tbody>
           <tr><td style={{ paddingRight: "8px", color: "#666", width: "55px" }}>Dirección</td><td><strong>:</strong> {data.direccion}</td></tr>
           <tr><td style={{ color: "#666" }}>Asesor</td><td><strong>:</strong> {data.asesor}</td></tr>
@@ -70,7 +70,7 @@ const CotizacionPreviewContent = () => {
       >
         CLIENTE
       </div>
-      <table style={{ fontSize: "9px", marginBottom: "12px" }}>
+      <table style={{ fontSize: "11px", marginBottom: "12px" }}>
         <tbody>
           <tr><td style={{ paddingRight: "8px", color: "#666", width: "55px" }}>Empresa</td><td><strong>:</strong> {data.empresa_cliente}</td></tr>
           <tr><td style={{ color: "#666" }}>Contacto</td><td><strong>:</strong> {data.contacto_cliente}</td></tr>
