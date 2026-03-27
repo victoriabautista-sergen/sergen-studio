@@ -18,10 +18,13 @@ export interface Hoja2Data {
   png_actual: number;
   tc_actual: number;
   ipp_actual: number;
+  factor_e: number;
   factor_perdida: number;
   formula: string;
   precio_actualizado_hp: number;
   precio_actualizado_hfp: number;
+  precio_calculado_hp: number;
+  precio_calculado_hfp: number;
 }
 
 export interface Hoja3Data {
@@ -123,10 +126,13 @@ export const defaultReportData: ReportData = {
     png_actual: 0,
     tc_actual: 0,
     ipp_actual: 0,
+    factor_e: 0,
     factor_perdida: 1.0,
     formula: "PB × (PNG/PNGo) × (TC/TCo) × (IPP/IPPo) × FP",
     precio_actualizado_hp: 0,
     precio_actualizado_hfp: 0,
+    precio_calculado_hp: 0,
+    precio_calculado_hfp: 0,
   },
   hoja3_data: {
     nombre_hp: "Energía Hora Punta",

@@ -17,14 +17,21 @@ const Hoja2Precios = () => {
   // Auto-calculate prices
   useEffect(() => {
     if (h2.pngo > 0 && h2.tco > 0 && h2.ippo > 0) {
-      const factor = (h2.png_actual / h2.pngo) * (h2.tc_actual / h2.tco) * (h2.ipp_actual / h2.ippo) * h2.factor_perdida;
+      const factorE = (h2.png_actual / h2.pngo) * (h2.tc_actual / h2.tco) * (h2.ipp_actual / h2.ippo);
+      const factor = factorE * h2.factor_perdida;
       const hp = +(h2.precio_base_hp * factor).toFixed(4);
       const hfp = +(h2.precio_base_hfp * factor).toFixed(4);
-      if (hp !== h2.precio_actualizado_hp || hfp !== h2.precio_actualizado_hfp) {
+      const calcHp = +(hp / 1000).toFixed(5);
+      const calcHfp = +(hfp / 1000).toFixed(5);
+      const fe = +factorE.toFixed(4);
+      if (hp !== h2.precio_actualizado_hp || hfp !== h2.precio_actualizado_hfp || fe !== h2.factor_e || calcHp !== h2.precio_calculado_hp || calcHfp !== h2.precio_calculado_hfp) {
         updateSheet("hoja2_data", {
           ...h2,
+          factor_e: fe,
           precio_actualizado_hp: hp,
           precio_actualizado_hfp: hfp,
+          precio_calculado_hp: calcHp,
+          precio_calculado_hfp: calcHfp,
         });
       }
     }
@@ -88,7 +95,10 @@ const Hoja2Precios = () => {
         </div>
 
         <p className="text-xs font-medium text-muted-foreground uppercase mt-3">Cálculo</p>
-        {numField("Factor de Pérdida", "factor_perdida", h2.factor_perdida)}
+        <div className="grid grid-cols-2 gap-2">
+          {numField("Factor E", "factor_e", h2.factor_e)}
+          {numField("Factor de Pérdida", "factor_perdida", h2.factor_perdida)}
+        </div>
 
         <div>
           <Label className="text-xs">Fórmula</Label>
@@ -108,6 +118,14 @@ const Hoja2Precios = () => {
           <div className="flex justify-between text-sm">
             <span>Precio Actualizado HFP:</span>
             <span className="font-semibold text-primary">{monedaSymbol} {h2.precio_actualizado_hfp.toFixed(4)}</span>
+          </div>
+          <div className="flex justify-between text-sm">
+            <span>Precio Calculado HP:</span>
+            <span className="font-semibold text-primary">{monedaSymbol} {h2.precio_calculado_hp?.toFixed(5) || "0.00000"}</span>
+          </div>
+          <div className="flex justify-between text-sm">
+            <span>Precio Calculado HFP:</span>
+            <span className="font-semibold text-primary">{monedaSymbol} {h2.precio_calculado_hfp?.toFixed(5) || "0.00000"}</span>
           </div>
         </div>
       </div>
