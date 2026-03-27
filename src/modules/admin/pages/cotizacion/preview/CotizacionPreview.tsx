@@ -12,7 +12,7 @@ import logoElectroDunas from "@/assets/partners/electrodunas.png";
 
 const fmt = (n: number) => n.toFixed(2);
 const ORANGE = "#E8792B";
-const OB = `0.5px solid ${ORANGE}`;
+const OB = `0.3px solid ${ORANGE}`;
 
 const CotizacionPreviewContent = () => {
   const { data } = useCotizacionContext();
@@ -28,12 +28,12 @@ const CotizacionPreviewContent = () => {
         <div>
           <img src={logo} alt={brandName} style={{ height: isIncoser ? "64px" : "48px", objectFit: "contain" }} />
         </div>
-        <div style={{ textAlign: "right" }}>
+        <div style={{ textAlign: "left" }}>
           <div style={{ fontSize: "12px", fontWeight: 700, color: "#E8792B", marginBottom: "4px" }}>COTIZACIÓN</div>
-          <table style={{ fontSize: "7px", marginLeft: "auto" }}>
+          <table style={{ fontSize: "7px" }}>
             <tbody>
               <tr><td style={{ paddingRight: "4px", color: "#666", textAlign: "left" }}>Fecha :</td><td style={{ fontWeight: 500, textAlign: "left", paddingLeft: "6px" }}>{data.fecha}</td></tr>
-              <tr><td style={{ paddingRight: "4px", color: "#666", textAlign: "left" }}>Cotización :</td><td style={{ fontWeight: 500, textAlign: "left", paddingLeft: "6px" }}>{data.numero_cotizacion || "—"}</td></tr>
+              <tr><td style={{ paddingRight: "4px", color: "#666", textAlign: "left" }}>Cotización :</td><td style={{ fontWeight: 500, textAlign: "left", paddingLeft: "6px" }}>COT-{data.numero_cotizacion || "—"}</td></tr>
               <tr><td style={{ paddingRight: "4px", color: "#666", textAlign: "left" }}>Validez :</td><td style={{ fontWeight: 500, textAlign: "left", paddingLeft: "6px" }}>{data.validez || "—"}</td></tr>
             </tbody>
           </table>
