@@ -1,7 +1,6 @@
 import { useCotizacionContext } from "../context/CotizacionContext";
 import { BRAND_CONFIG } from "../types";
-import React, { useRef, useCallback } from "react";
-import { generateCotizacionPDF } from "../utils/pdfExport";
+import React, { useRef } from "react";
 import logoSergen from "@/assets/sergen-logo.png";
 import logoIncoser from "@/assets/logo_incoser.png";
 import logoCvc from "@/assets/partners/cvcenergia.png";
