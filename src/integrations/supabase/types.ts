@@ -551,6 +551,7 @@ export type Database = {
           full_name: string | null
           id: string
           is_active: boolean
+          phone: string | null
           role: string
           telegram_chat_id: string | null
           updated_at: string
@@ -563,6 +564,7 @@ export type Database = {
           full_name?: string | null
           id?: string
           is_active?: boolean
+          phone?: string | null
           role?: string
           telegram_chat_id?: string | null
           updated_at?: string
@@ -575,6 +577,7 @@ export type Database = {
           full_name?: string | null
           id?: string
           is_active?: boolean
+          phone?: string | null
           role?: string
           telegram_chat_id?: string | null
           updated_at?: string
