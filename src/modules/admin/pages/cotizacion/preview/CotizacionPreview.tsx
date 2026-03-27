@@ -189,6 +189,6 @@ const CotizacionPreview = React.forwardRef<HTMLDivElement>((_, ref) => {
 
 CotizacionPreview.displayName = "CotizacionPreview";
 
-export const triggerCotizacionExport = () => _triggerExport?.();
+
 
 export default CotizacionPreview;
