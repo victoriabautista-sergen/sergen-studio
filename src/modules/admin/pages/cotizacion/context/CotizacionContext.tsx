@@ -37,8 +37,8 @@ const getCurrentPeriod = () => {
   return `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, "0")}`;
 };
 
-const formatCorrelativeNumber = (period: string, nextNumber: number) => {
-  return `COT-${period}-${String(nextNumber).padStart(3, "0")}`;
+const formatCorrelativeNumber = (_period: string, nextNumber: number) => {
+  return `COT-${String(nextNumber).padStart(4, "0")}`;
 };
 
 const readCorrelativeSequence = (): CorrelativeSequence => {
