@@ -26,21 +26,30 @@ export async function generateCotizacionPDF(
     windowWidth: 595,
     windowHeight: 842,
     onclone: (clonedDoc) => {
-      // Force vertical centering on orange band elements in the cloned DOM
-      // html2canvas renders from this clone, so styles here fix PDF output
       const el = clonedDoc.querySelector('[data-pdf-page="1"]') as HTMLElement;
       if (!el) return;
       
-      // Fix all table-cell spans used for vertical centering
-      el.querySelectorAll<HTMLElement>('span[style*="table-cell"]').forEach(span => {
+      el.querySelectorAll<HTMLElement>('[data-pdf-band]').forEach(band => {
+        band.style.overflow = 'hidden';
+      });
+
+      el.querySelectorAll<HTMLElement>('[data-pdf-band-label="true"]').forEach(span => {
+        span.style.display = 'table-cell';
         span.style.verticalAlign = 'middle';
         span.style.lineHeight = '1';
+        span.style.paddingTop = '0';
+        span.style.paddingBottom = '0';
+        span.style.position = 'relative';
+        span.style.top = '-1px';
       });
       
-      // Fix table header cells  
-      el.querySelectorAll<HTMLElement>('th').forEach(th => {
+      el.querySelectorAll<HTMLElement>('[data-pdf-table-head="true"]').forEach(th => {
         th.style.verticalAlign = 'middle';
-        th.style.lineHeight = '1.1';
+        th.style.lineHeight = '1';
+        th.style.paddingTop = '0';
+        th.style.paddingBottom = '0';
+        th.style.position = 'relative';
+        th.style.top = '-1px';
       });
     },
   });
