@@ -23,16 +23,16 @@ const CotizacionPreviewContent = () => {
   const brandConfig = BRAND_CONFIG[data.marca];
 
   return (
-    <div style={{ fontFamily: "'Inter', sans-serif", fontSize: "8px", color: "#333", lineHeight: 1.4 }}>
+    <div style={{ fontFamily: "'Inter', sans-serif", fontSize: "10px", color: "#333", lineHeight: 1.4 }}>
       {/* Header */}
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "12px" }}>
         <div>
           <img src={logo} alt={brandName} style={{ height: isIncoser ? "64px" : "48px", objectFit: "contain" }} />
         </div>
         <div style={{ textAlign: "right" }}>
-          <table style={{ fontSize: "7px", marginLeft: "auto" }}>
+          <table style={{ fontSize: "9px", marginLeft: "auto" }}>
             <tbody>
-              <tr><td colSpan={2} style={{ textAlign: "center", fontSize: "12px", fontWeight: 700, color: "#F58220", paddingBottom: "4px" }}>COTIZACIÓN</td></tr>
+              <tr><td colSpan={2} style={{ textAlign: "center", fontSize: "14px", fontWeight: 700, color: "#F58220", paddingBottom: "4px" }}>COTIZACIÓN</td></tr>
               <tr><td style={{ paddingRight: "4px", color: "#666", textAlign: "left" }}>Fecha :</td><td style={{ fontWeight: 500, textAlign: "left", paddingLeft: "6px" }}>{data.fecha}</td></tr>
               <tr><td style={{ paddingRight: "4px", color: "#666", textAlign: "left" }}>Cotización :</td><td style={{ fontWeight: 500, textAlign: "left", paddingLeft: "6px" }}>{data.numero_cotizacion || "—"}</td></tr>
               <tr><td style={{ paddingRight: "4px", color: "#666", textAlign: "left" }}>Validez :</td><td style={{ fontWeight: 500, textAlign: "left", paddingLeft: "6px" }}>{data.validez || "—"}</td></tr>
@@ -43,7 +43,7 @@ const CotizacionPreviewContent = () => {
 
 
       {/* Company info */}
-      <table style={{ fontSize: "7px", marginBottom: "10px" }}>
+      <table style={{ fontSize: "9px", marginBottom: "10px" }}>
         <tbody>
           <tr><td style={{ paddingRight: "8px", color: "#666", width: "55px" }}>Dirección</td><td><strong>:</strong> {data.direccion}</td></tr>
           <tr><td style={{ color: "#666" }}>Asesor</td><td><strong>:</strong> {data.asesor}</td></tr>
@@ -58,7 +58,7 @@ const CotizacionPreviewContent = () => {
           backgroundColor: ORANGE,
           color: "#fff",
           fontWeight: 700,
-          fontSize: "8px",
+          fontSize: "10px",
           marginBottom: "6px",
           display: "flex",
           alignItems: "center",
@@ -70,7 +70,7 @@ const CotizacionPreviewContent = () => {
       >
         CLIENTE
       </div>
-      <table style={{ fontSize: "7px", marginBottom: "12px" }}>
+      <table style={{ fontSize: "9px", marginBottom: "12px" }}>
         <tbody>
           <tr><td style={{ paddingRight: "8px", color: "#666", width: "55px" }}>Empresa</td><td><strong>:</strong> {data.empresa_cliente}</td></tr>
           <tr><td style={{ color: "#666" }}>Contacto</td><td><strong>:</strong> {data.contacto_cliente}</td></tr>
@@ -79,7 +79,7 @@ const CotizacionPreviewContent = () => {
       </table>
 
       {/* Items table */}
-      <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "7px", marginBottom: "4px", border: B }}>
+      <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "9px", marginBottom: "4px", border: B }}>
         <thead>
           <tr style={{ backgroundColor: ORANGE, color: "#fff", height: "16px" }}>
             <th style={{ padding: "0 4px 0 6px", textAlign: "left", fontWeight: 600, verticalAlign: "middle", lineHeight: 1, border: B }}>Descripción</th>
@@ -107,14 +107,14 @@ const CotizacionPreviewContent = () => {
       {/* Totals + Terms side by side */}
       <div style={{ display: "flex", gap: "8px", marginBottom: "12px" }}>
         {/* Terms */}
-        <div style={{ flex: 1, border: OB, padding: "6px", fontSize: "7px" }}>
+        <div style={{ flex: 1, border: OB, padding: "6px", fontSize: "9px" }}>
           <div
             style={{
               backgroundColor: ORANGE,
               color: "#fff",
               fontWeight: 700,
               marginBottom: "8px",
-              fontSize: "7px",
+              fontSize: "9px",
               display: "flex",
               alignItems: "center",
               height: "14px",
@@ -141,7 +141,7 @@ const CotizacionPreviewContent = () => {
           </div>
 
           {/* Signature inside terms box */}
-          <div style={{ textAlign: "center", marginTop: "36px", paddingTop: "8px", fontSize: "7px" }}>
+          <div style={{ textAlign: "center", marginTop: "36px", paddingTop: "8px", fontSize: "9px" }}>
             <div style={{ borderTop: "0.5px solid #666", width: "200px", margin: "0 auto", paddingTop: "4px" }}>
               Gerente General de {data.empresa_cliente || "_______________"}
             </div>
@@ -149,7 +149,7 @@ const CotizacionPreviewContent = () => {
         </div>
 
         {/* Totals */}
-        <div style={{ width: "160px", fontSize: "7px" }}>
+        <div style={{ width: "160px", fontSize: "9px" }}>
           <table style={{ width: "100%", borderCollapse: "collapse", borderSpacing: 0 }}>
             <tbody>
               <tr><td>Subtotal</td><td style={{ textAlign: "right" }}>S/ {fmt(data.subtotal)}</td></tr>
@@ -164,16 +164,16 @@ const CotizacionPreviewContent = () => {
       </div>
 
       {/* Footer */}
-      <div style={{ textAlign: "center", marginTop: "10px", fontSize: "7px", color: "#666" }}>
+      <div style={{ textAlign: "center", marginTop: "10px", fontSize: "9px", color: "#666" }}>
         Si usted tiene alguna pregunta sobre esta cotización, por favor, póngase en contacto con nosotros
       </div>
-      <div style={{ textAlign: "center", marginTop: "4px", fontSize: "9px", fontStyle: "italic", fontWeight: 600 }}>
+      <div style={{ textAlign: "center", marginTop: "4px", fontSize: "11px", fontStyle: "italic", fontWeight: 600 }}>
         ¡Gracias por su preferencia!
       </div>
 
       {/* Strategic Partners */}
       <div style={{ marginTop: "12px" }}>
-        <div style={{ fontSize: "7px", fontWeight: 700, color: "#1a2744", marginBottom: "8px", textTransform: "uppercase" }}>
+        <div style={{ fontSize: "9px", fontWeight: 700, color: "#1a2744", marginBottom: "8px", textTransform: "uppercase" }}>
           Socios Estratégicos:
         </div>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "6px" }}>
