@@ -3,7 +3,7 @@ import { Download, ZoomIn, ZoomOut, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
 import AdminShell from "../../components/AdminShell";
-import { CotizacionProvider } from "./context/CotizacionContext";
+import { CotizacionProvider, useCotizacionContext } from "./context/CotizacionContext";
 import CotizacionEditor from "./editor/CotizacionEditor";
 import CotizacionPreview from "./preview/CotizacionPreview";
 import { generateCotizacionPDF } from "./utils/pdfExport";
@@ -11,6 +11,7 @@ import { generateCotizacionPDF } from "./utils/pdfExport";
 const ZOOM_STEPS = [50, 60, 70, 80, 90, 100, 110, 120, 130, 150];
 
 const CotizacionContent = () => {
+  const { advanceCorrelative } = useCotizacionContext();
   const [downloading, setDownloading] = useState(false);
   const [zoomIndex, setZoomIndex] = useState(3); // 80% default
   const zoom = ZOOM_STEPS[zoomIndex];
@@ -22,6 +23,7 @@ const CotizacionContent = () => {
     setDownloading(true);
     try {
       await generateCotizacionPDF(previewRef.current, previewRef.current.dataset.filename || "cotizacion.pdf");
+      await advanceCorrelative();
     } finally {
       setDownloading(false);
     }
