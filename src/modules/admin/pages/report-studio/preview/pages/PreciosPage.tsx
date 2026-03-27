@@ -10,104 +10,107 @@ const PreciosPage = ({ data }: { data: ReportData }) => {
   const anio = dg.anio || "—";
 
   return (
-    <div className="text-[10px] leading-relaxed text-gray-800" style={{ fontFamily: "'Inter', sans-serif" }}>
-      {/* Header */}
-      <p className="text-xs font-bold" style={{ color: "#1B3A5C" }}>Sergen Eficiencia Energética</p>
-      <hr className="border-t border-gray-300 my-2" />
+    <div className="flex flex-col h-full text-[10px] leading-relaxed" style={{ fontFamily: "'Inter', sans-serif", color: "#1B3A5C" }}>
+      {/* Content */}
+      <div className="flex-1">
+        {/* Header */}
+        <p className="text-xs font-bold" style={{ color: "#1B3A5C" }}>Sergen Eficiencia Energética</p>
+        <hr className="border-t border-gray-300 my-2" />
 
-      {/* Title */}
-      <h1 className="text-sm font-semibold mb-4" style={{ color: "#1B3A5C" }}>
-        I. ACTUALIZACIÓN DE PRECIO
-      </h1>
+        {/* Title */}
+        <h1 className="text-sm font-semibold mb-4" style={{ color: "#1B3A5C" }}>
+          I. ACTUALIZACIÓN DE PRECIO
+        </h1>
 
-      {/* 1. Contexto */}
-      <h2 className="text-sm font-bold mb-2" style={{ color: "#1B3A5C" }}>1. Contexto</h2>
-      <p className="mb-5 text-[10px] leading-relaxed text-gray-700">
-        El presente informe tiene como objetivo analizar la actualización del precio contractual del servicio prestado,
-        conforme a las cláusulas de reajuste establecidas en el contrato vigente entre <strong>[{concesionaria}]</strong> y <strong>[{cliente}]</strong>.
-        Se utilizan las variables económicas y los índices de referencia aplicables al periodo {anio}.
-      </p>
-
-      {/* 2. Variables utilizadas */}
-      <h2 className="text-sm font-bold mb-1" style={{ color: "#1B3A5C" }}>2. Variables utilizadas</h2>
-      <p className="text-[9px] italic text-gray-500 mb-2">Tabla 1: Actualización de precios de energía</p>
-
-      <table className="w-full text-[10px] border-collapse mb-1">
-        <thead>
-          <tr style={{ backgroundColor: "#E8792B" }}>
-            <th className="px-1.5 py-0.5 text-left text-white font-semibold border border-orange-400">Descripción</th>
-            <th className="px-1.5 py-0.5 text-right text-white font-semibold border border-orange-400 w-24">Valores</th>
-          </tr>
-        </thead>
-        <tbody>
-          {[
-            ["PNG (Precio del gas natural)", h2.png_actual],
-            [`PNG₀ (Precio del gas natural base)`, h2.pngo],
-            ["TC (Tipo de cambio)", h2.tc_actual],
-            [`TC₀ (Tipo de cambio base)`, h2.tco],
-            ["IPP (Índice de precios al productor de EE.UU)", h2.ipp_actual],
-            [`IPP₀ (Índice de precios al productor de EE.UU base)`, h2.ippo],
-            ["Precio de energía base HP por kWh", h2.precio_base_hp],
-            ["Precio de energía base HFP por kWh", h2.precio_base_hfp],
-          ].map(([label, val], i) => (
-            <tr key={i} className="bg-white">
-              <td className="px-1.5 py-0.5 border border-gray-200" style={{ color: "#1B3A5C" }}>{String(label)}</td>
-              <td className="px-1.5 py-0.5 border border-gray-200 text-right font-mono" style={{ color: "#1B3A5C" }}>
-                {val ? Number(val).toFixed(4) : "—"}
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-      <p className="text-[8px] text-gray-400 text-right mb-5 italic">Fuente: Elaboración propia</p>
-
-      {/* 3. Cálculo de precio energía */}
-      <h2 className="text-sm font-bold mb-2" style={{ color: "#1B3A5C" }}>3. Cálculo de precio energía</h2>
-      <p className="text-[10px] text-gray-700 mb-2">Realizamos el cálculo de precio energía:</p>
-
-      <div className="border border-gray-200 rounded bg-gray-50 px-4 py-3 mb-3">
-        <p className="text-[10px] italic text-gray-700 font-mono">
-          Precio<sub>energía</sub> = Precio<sub>base</sub> × Factor<sub>E</sub>
+        {/* 1. Contexto */}
+        <h2 className="text-[11px] font-bold mb-1" style={{ color: "#1B3A5C" }}>1. Contexto</h2>
+        <p className="mb-4 text-[10px] leading-relaxed text-gray-700">
+          El presente informe tiene como objetivo analizar la actualización del precio contractual del servicio prestado,
+          conforme a las cláusulas de reajuste establecidas en el contrato vigente entre <strong>[{concesionaria}]</strong> y <strong>[{cliente}]</strong>.
+          Se utilizan las variables económicas y los índices de referencia aplicables al periodo {anio}.
         </p>
+
+        {/* 2. Variables utilizadas */}
+        <h2 className="text-[11px] font-bold mb-1" style={{ color: "#1B3A5C" }}>2. Variables utilizadas</h2>
+        <p className="text-[9px] italic text-gray-500 mb-1">Tabla 1: Actualización de precios de energía</p>
+
+        <table className="w-full text-[10px] border-collapse mb-1">
+          <thead>
+            <tr style={{ backgroundColor: "#E8792B" }}>
+              <th className="px-1.5 py-0.5 text-left text-white font-semibold border border-orange-400">Descripción</th>
+              <th className="px-1.5 py-0.5 text-right text-white font-semibold border border-orange-400 w-24">Valores</th>
+            </tr>
+          </thead>
+          <tbody>
+            {[
+              ["PNG (Precio del gas natural)", h2.png_actual],
+              [`PNG₀ (Precio del gas natural base)`, h2.pngo],
+              ["TC (Tipo de cambio)", h2.tc_actual],
+              [`TC₀ (Tipo de cambio base)`, h2.tco],
+              ["IPP (Índice de precios al productor de EE.UU)", h2.ipp_actual],
+              [`IPP₀ (Índice de precios al productor de EE.UU base)`, h2.ippo],
+              ["Precio de energía base HP por kWh", h2.precio_base_hp],
+              ["Precio de energía base HFP por kWh", h2.precio_base_hfp],
+            ].map(([label, val], i) => (
+              <tr key={i} className="bg-white">
+                <td className="px-1.5 py-0.5 border border-gray-200" style={{ color: "#1B3A5C" }}>{String(label)}</td>
+                <td className="px-1.5 py-0.5 border border-gray-200 text-right font-mono" style={{ color: "#1B3A5C" }}>
+                  {val ? Number(val).toFixed(4) : "—"}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        <p className="text-[8px] text-gray-400 text-right mb-4 italic">Fuente: Elaboración propia</p>
+
+        {/* 3. Cálculo de precio energía */}
+        <h2 className="text-[11px] font-bold mb-1" style={{ color: "#1B3A5C" }}>3. Cálculo de precio energía</h2>
+        <p className="text-[10px] text-gray-700 mb-2">Realizamos el cálculo de precio energía:</p>
+
+        <div className="border border-gray-200 rounded bg-gray-50 px-4 py-2 mb-2">
+          <p className="text-[10px] italic text-gray-700 font-mono">
+            Precio<sub>energía</sub> = Precio<sub>base</sub> × Factor<sub>E</sub>
+          </p>
+        </div>
+
+        <p className="text-[10px] text-gray-700 mb-2">
+          Realizando la conversión del precio actualizado de la energía tenemos que para el periodo <strong>{mesNombre} del {anio}</strong> el
+          costo de la energía es de <strong>{h2.precio_calculado_hp?.toFixed(5) || "0.00000"} {monedaSymbol}/kWh (HP)</strong> y{" "}
+          <strong>{h2.precio_calculado_hfp?.toFixed(5) || "0.00000"} {monedaSymbol}/kWh (HFP)</strong>.
+        </p>
+
+        <p className="text-[9px] italic text-gray-500 mb-1">Precios de Energía Actualizados – {mesNombre} del {anio}</p>
+
+        <table className="w-full text-[10px] border-collapse mb-1">
+          <thead>
+            <tr style={{ backgroundColor: "#E8792B" }}>
+              <th className="px-1.5 py-0.5 text-left text-white font-semibold border border-orange-400">Concepto</th>
+              <th className="px-1.5 py-0.5 text-center text-white font-semibold border border-orange-400 w-24">Valor</th>
+              <th className="px-1.5 py-0.5 text-center text-white font-semibold border border-orange-400 w-20">Unidad</th>
+            </tr>
+          </thead>
+          <tbody>
+            {[
+              ["Factor E", h2.factor_e?.toFixed(4) || "0.0000", ""],
+              ["Factor por pérdida", h2.factor_perdida?.toFixed(2) || "0.00", ""],
+              ["Precio actualizado HP", h2.precio_actualizado_hp?.toFixed(2) || "0.00", `${monedaSymbol}/MWh`],
+              ["Precio actualizado HFP", h2.precio_actualizado_hfp?.toFixed(2) || "0.00", `${monedaSymbol}/MWh`],
+              ["Precio Calculado HP", h2.precio_calculado_hp?.toFixed(5) || "0.00000", `${monedaSymbol}/kWh`],
+              ["Precio Calculado HFP", h2.precio_calculado_hfp?.toFixed(5) || "0.00000", `${monedaSymbol}/kWh`],
+            ].map(([label, val, unit], i) => (
+              <tr key={i} className="bg-white">
+                <td className={`px-1.5 py-0.5 border border-gray-200 ${i >= 2 ? "font-semibold" : ""}`} style={{ color: "#1B3A5C" }}>{label}</td>
+                <td className="px-1.5 py-0.5 border border-gray-200 text-center font-mono" style={{ color: "#1B3A5C" }}>{val}</td>
+                <td className="px-1.5 py-0.5 border border-gray-200 text-center" style={{ color: "#1B3A5C" }}>{unit}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        <p className="text-[8px] text-gray-400 text-right italic">Fuente: Elaboración propia</p>
       </div>
 
-      <p className="text-[10px] text-gray-700 mb-3">
-        Realizando la conversión del precio actualizado de la energía tenemos que para el periodo <strong>{mesNombre} del {anio}</strong> el
-        costo de la energía es de <strong>{h2.precio_calculado_hp?.toFixed(5) || "0.00000"} {monedaSymbol}/kWh (HP)</strong> y{" "}
-        <strong>{h2.precio_calculado_hfp?.toFixed(5) || "0.00000"} {monedaSymbol}/kWh (HFP)</strong>.
-      </p>
-
-      <p className="text-[9px] italic text-gray-500 mb-2">Precios de Energía Actualizados – {mesNombre} del {anio}</p>
-
-      <table className="w-full text-[10px] border-collapse mb-1">
-        <thead>
-          <tr style={{ backgroundColor: "#E8792B" }}>
-            <th className="px-1.5 py-0.5 text-left text-white font-semibold border border-orange-400">Concepto</th>
-            <th className="px-1.5 py-0.5 text-center text-white font-semibold border border-orange-400 w-24">Valor</th>
-            <th className="px-1.5 py-0.5 text-center text-white font-semibold border border-orange-400 w-20">Unidad</th>
-          </tr>
-        </thead>
-        <tbody>
-          {[
-            ["Factor E", h2.factor_e?.toFixed(4) || "0.0000", ""],
-            ["Factor por pérdida", h2.factor_perdida?.toFixed(2) || "0.00", ""],
-            ["Precio actualizado HP", h2.precio_actualizado_hp?.toFixed(2) || "0.00", `${monedaSymbol}/MWh`],
-            ["Precio actualizado HFP", h2.precio_actualizado_hfp?.toFixed(2) || "0.00", `${monedaSymbol}/MWh`],
-            ["Precio Calculado HP", h2.precio_calculado_hp?.toFixed(5) || "0.00000", `${monedaSymbol}/kWh`],
-            ["Precio Calculado HFP", h2.precio_calculado_hfp?.toFixed(5) || "0.00000", `${monedaSymbol}/kWh`],
-          ].map(([label, val, unit], i) => (
-            <tr key={i} className="bg-white">
-              <td className={`px-1.5 py-0.5 border border-gray-200 ${i >= 2 ? "font-semibold" : ""}`} style={{ color: "#1B3A5C" }}>{label}</td>
-              <td className="px-1.5 py-0.5 border border-gray-200 text-center font-mono" style={{ color: "#1B3A5C" }}>{val}</td>
-              <td className="px-1.5 py-0.5 border border-gray-200 text-center" style={{ color: "#1B3A5C" }}>{unit}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-      <p className="text-[8px] text-gray-400 text-right italic">Fuente: Elaboración propia</p>
-
-      {/* Footer */}
-      <div className="absolute bottom-6 left-10 right-10 flex justify-between text-[8px] text-gray-400 border-t border-gray-200 pt-2">
+      {/* Footer - anchored to bottom via flex */}
+      <div className="flex justify-between text-[8px] text-gray-400 border-t border-gray-200 pt-2 mt-auto">
         <span>Sergen Eficiencia Energética S.A.C. - Documento confidencial</span>
         <span>Página 2</span>
       </div>
