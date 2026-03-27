@@ -23,7 +23,7 @@ const CotizacionPreviewContent = () => {
   const brandConfig = BRAND_CONFIG[data.marca];
 
   return (
-    <div style={{ fontFamily: "'Inter', sans-serif", fontSize: "10px", color: "#333", lineHeight: 1.4 }}>
+    <div style={{ fontFamily: "'Inter', sans-serif", fontSize: "10px", color: "#000", lineHeight: 1.4 }}>
       {/* Header */}
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "12px" }}>
         <div>
