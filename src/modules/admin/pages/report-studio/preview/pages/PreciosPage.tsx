@@ -15,7 +15,7 @@ const PreciosPage = ({ data }: { data: ReportData }) => {
       <p className="text-xs font-bold mb-6" style={{ color: "#1B3A5C" }}>Sergen Eficiencia Energética</p>
 
       {/* Title */}
-      <h1 className="text-lg font-extrabold mb-5" style={{ color: "#1B3A5C" }}>
+      <h1 className="text-lg font-semibold mb-5" style={{ color: "#1B3A5C" }}>
         I. ACTUALIZACIÓN DE PRECIO
       </h1>
 
@@ -49,9 +49,9 @@ const PreciosPage = ({ data }: { data: ReportData }) => {
             ["Precio de energía base HP por kWh", h2.precio_base_hp],
             ["Precio de energía base HFP por kWh", h2.precio_base_hfp],
           ].map(([label, val], i) => (
-            <tr key={i} className={i % 2 === 0 ? "bg-white" : "bg-gray-50"}>
-              <td className="p-1.5 border border-gray-200 text-gray-700">{String(label)}</td>
-              <td className="p-1.5 border border-gray-200 text-right font-mono">
+            <tr key={i} className="bg-white">
+              <td className="px-1.5 py-1 border border-gray-200" style={{ color: "#1B3A5C" }}>{String(label)}</td>
+              <td className="px-1.5 py-1 border border-gray-200 text-right font-mono" style={{ color: "#1B3A5C" }}>
                 {val ? Number(val).toFixed(4) : "—"}
               </td>
             </tr>
@@ -95,10 +95,10 @@ const PreciosPage = ({ data }: { data: ReportData }) => {
             ["Precio Calculado HP", h2.precio_calculado_hp?.toFixed(5) || "0.00000", `${monedaSymbol}/kWh`],
             ["Precio Calculado HFP", h2.precio_calculado_hfp?.toFixed(5) || "0.00000", `${monedaSymbol}/kWh`],
           ].map(([label, val, unit], i) => (
-            <tr key={i} className={i % 2 === 0 ? "bg-white" : "bg-gray-50"}>
-              <td className={`p-1.5 border border-gray-200 text-gray-700 ${i >= 2 ? "font-semibold" : ""}`}>{label}</td>
-              <td className="p-1.5 border border-gray-200 text-center font-mono">{val}</td>
-              <td className="p-1.5 border border-gray-200 text-center text-gray-500">{unit}</td>
+            <tr key={i} className="bg-white">
+              <td className={`px-1.5 py-1 border border-gray-200 ${i >= 2 ? "font-semibold" : ""}`} style={{ color: "#1B3A5C" }}>{label}</td>
+              <td className="px-1.5 py-1 border border-gray-200 text-center font-mono" style={{ color: "#1B3A5C" }}>{val}</td>
+              <td className="px-1.5 py-1 border border-gray-200 text-center" style={{ color: "#1B3A5C" }}>{unit}</td>
             </tr>
           ))}
         </tbody>
