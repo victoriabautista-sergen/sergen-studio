@@ -111,8 +111,9 @@ const ReportStudioContent = () => {
                   <ZoomOut className="h-4 w-4" />
                 </Button>
                 <Button variant="outline" size="default">Reset</Button>
-                <Button size="default" onClick={handleDownloadPDF} className="gap-2 bg-[#E8792B] hover:bg-[#d06a22] text-white">
-                  <Download className="h-4 w-4" /> Descargar PDF
+                <Button size="default" onClick={handleDownloadPDF} disabled={downloading} className="gap-2 bg-[#E8792B] hover:bg-[#d06a22] text-white">
+                  {downloading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
+                  {downloading ? "Generando..." : "Descargar PDF"}
                 </Button>
               </div>
             </div>
