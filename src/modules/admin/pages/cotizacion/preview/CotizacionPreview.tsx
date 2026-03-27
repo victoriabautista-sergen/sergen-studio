@@ -56,14 +56,14 @@ const CotizacionPreviewContent = () => {
           color: "#fff",
           fontWeight: 700,
           fontSize: "8px",
-          marginBottom: "4px",
-          height: "16px",
+          marginBottom: "6px",
+          height: "20px",
           display: "table",
           width: "100%",
           boxSizing: "border-box",
         }}
       >
-        <span style={{ display: "table-cell", verticalAlign: "middle", paddingLeft: "6px" }}>
+        <span style={{ display: "table-cell", verticalAlign: "middle", paddingLeft: "8px", paddingTop: "1px" }}>
           CLIENTE
         </span>
       </div>
@@ -78,13 +78,13 @@ const CotizacionPreviewContent = () => {
       {/* Items table */}
       <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "7px", marginBottom: "4px" }}>
         <thead>
-          <tr style={{ backgroundColor: "#E8792B", color: "#fff", height: "16px" }}>
-            <th style={{ padding: "0 4px", textAlign: "left", fontWeight: 600, verticalAlign: "middle" }}>Descripción</th>
-            <th style={{ padding: "0 4px", textAlign: "center", fontWeight: 600, width: "50px", verticalAlign: "middle" }}>Código</th>
-            <th style={{ padding: "0 4px", textAlign: "center", fontWeight: 600, width: "60px", verticalAlign: "middle" }}>Precio Unit</th>
-            <th style={{ padding: "0 4px", textAlign: "center", fontWeight: 600, width: "30px", verticalAlign: "middle" }}>Cant.</th>
-            <th style={{ padding: "0 4px", textAlign: "center", fontWeight: 600, width: "55px", verticalAlign: "middle" }}>P.venta</th>
-            <th style={{ padding: "0 4px", textAlign: "center", fontWeight: 600, width: "55px", verticalAlign: "middle" }}>Total</th>
+          <tr style={{ backgroundColor: "#E8792B", color: "#fff", height: "20px" }}>
+            <th style={{ padding: "0 4px 0 6px", textAlign: "left", fontWeight: 600, verticalAlign: "middle", lineHeight: 1.1 }}>Descripción</th>
+            <th style={{ padding: "0 4px", textAlign: "center", fontWeight: 600, width: "50px", verticalAlign: "middle", lineHeight: 1.1 }}>Código</th>
+            <th style={{ padding: "0 4px", textAlign: "center", fontWeight: 600, width: "60px", verticalAlign: "middle", lineHeight: 1.1 }}>Precio Unit</th>
+            <th style={{ padding: "0 4px", textAlign: "center", fontWeight: 600, width: "30px", verticalAlign: "middle", lineHeight: 1.1 }}>Cant.</th>
+            <th style={{ padding: "0 4px", textAlign: "center", fontWeight: 600, width: "55px", verticalAlign: "middle", lineHeight: 1.1 }}>P.venta</th>
+            <th style={{ padding: "0 4px", textAlign: "center", fontWeight: 600, width: "55px", verticalAlign: "middle", lineHeight: 1.1 }}>Total</th>
           </tr>
         </thead>
         <tbody>
@@ -110,15 +110,15 @@ const CotizacionPreviewContent = () => {
               backgroundColor: "#E8792B",
               color: "#fff",
               fontWeight: 700,
-              marginBottom: "4px",
+              marginBottom: "8px",
               fontSize: "7px",
-              height: "14px",
+              height: "18px",
               display: "table",
               width: "100%",
               boxSizing: "border-box",
             }}
           >
-            <span style={{ display: "table-cell", verticalAlign: "middle", paddingLeft: "4px" }}>
+            <span style={{ display: "table-cell", verticalAlign: "middle", paddingLeft: "8px", paddingTop: "1px" }}>
               TÉRMINOS Y CONDICIONES
             </span>
           </div>
@@ -147,13 +147,13 @@ const CotizacionPreviewContent = () => {
 
         {/* Totals */}
         <div style={{ width: "160px", fontSize: "7px" }}>
-          <table style={{ width: "100%" }}>
+          <table style={{ width: "100%", borderCollapse: "separate", borderSpacing: "0 3px" }}>
             <tbody>
               <tr><td>Subtotal</td><td style={{ textAlign: "right" }}>S/ {fmt(data.subtotal)}</td></tr>
               <tr><td>Imponible</td><td style={{ textAlign: "right" }}>S/ {fmt(data.imponible)}</td></tr>
               <tr><td>Impuesto %</td><td style={{ textAlign: "right" }}>{data.impuesto_pct}%</td></tr>
-              <tr><td>Total Impuesto</td><td style={{ textAlign: "right" }}>S/ {fmt(data.total_impuesto)}</td></tr>
-              <tr style={{ borderTop: "1px solid #ccc" }}><td>Otros</td><td style={{ textAlign: "right" }}>S/ {data.otros > 0 ? fmt(data.otros) : "-"}</td></tr>
+              <tr><td style={{ paddingBottom: "4px" }}>Total Impuesto</td><td style={{ textAlign: "right", paddingBottom: "4px" }}>S/ {fmt(data.total_impuesto)}</td></tr>
+              <tr style={{ borderTop: "1px solid #ccc" }}><td style={{ paddingTop: "6px" }}>Otros</td><td style={{ textAlign: "right", paddingTop: "6px" }}>S/ {data.otros > 0 ? fmt(data.otros) : "-"}</td></tr>
               <tr style={{ borderTop: "2px solid #333", fontWeight: 700 }}><td>TOTAL</td><td style={{ textAlign: "right" }}>S/ {fmt(data.total)}</td></tr>
             </tbody>
           </table>
