@@ -78,13 +78,13 @@ const CotizacionPreviewContent = () => {
       {/* Items table */}
       <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "7px", marginBottom: "4px" }}>
         <thead>
-          <tr style={{ backgroundColor: "#E8792B", color: "#fff", height: "16px" }}>
-            <th style={{ padding: "0 4px", textAlign: "left", fontWeight: 600, verticalAlign: "middle" }}>Descripción</th>
-            <th style={{ padding: "0 4px", textAlign: "center", fontWeight: 600, width: "50px", verticalAlign: "middle" }}>Código</th>
-            <th style={{ padding: "0 4px", textAlign: "center", fontWeight: 600, width: "60px", verticalAlign: "middle" }}>Precio Unit</th>
-            <th style={{ padding: "0 4px", textAlign: "center", fontWeight: 600, width: "30px", verticalAlign: "middle" }}>Cant.</th>
-            <th style={{ padding: "0 4px", textAlign: "center", fontWeight: 600, width: "55px", verticalAlign: "middle" }}>P.venta</th>
-            <th style={{ padding: "0 4px", textAlign: "center", fontWeight: 600, width: "55px", verticalAlign: "middle" }}>Total</th>
+          <tr style={{ backgroundColor: "#E8792B", color: "#fff", height: "20px" }}>
+            <th style={{ padding: "0 4px 0 6px", textAlign: "left", fontWeight: 600, verticalAlign: "middle", lineHeight: 1.1 }}>Descripción</th>
+            <th style={{ padding: "0 4px", textAlign: "center", fontWeight: 600, width: "50px", verticalAlign: "middle", lineHeight: 1.1 }}>Código</th>
+            <th style={{ padding: "0 4px", textAlign: "center", fontWeight: 600, width: "60px", verticalAlign: "middle", lineHeight: 1.1 }}>Precio Unit</th>
+            <th style={{ padding: "0 4px", textAlign: "center", fontWeight: 600, width: "30px", verticalAlign: "middle", lineHeight: 1.1 }}>Cant.</th>
+            <th style={{ padding: "0 4px", textAlign: "center", fontWeight: 600, width: "55px", verticalAlign: "middle", lineHeight: 1.1 }}>P.venta</th>
+            <th style={{ padding: "0 4px", textAlign: "center", fontWeight: 600, width: "55px", verticalAlign: "middle", lineHeight: 1.1 }}>Total</th>
           </tr>
         </thead>
         <tbody>
