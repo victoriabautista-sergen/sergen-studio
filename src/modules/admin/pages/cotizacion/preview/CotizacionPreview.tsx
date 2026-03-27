@@ -134,8 +134,22 @@ const CotizacionPreviewContent = () => {
         </div>
       </div>
 
+      {/* Strategic Partners */}
+      <div style={{ marginTop: "16px", textAlign: "center" }}>
+        <div style={{ fontSize: "7px", fontWeight: 700, color: "#E8792B", marginBottom: "6px", textTransform: "uppercase" }}>
+          Socios Estratégicos
+        </div>
+        <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: "12px", flexWrap: "wrap" }}>
+          <img src={logoCvc} alt="CVC Energía" style={{ height: "24px", objectFit: "contain" }} />
+          <img src={logoKallpa} alt="Kallpa" style={{ height: "28px", objectFit: "contain" }} />
+          <img src={logoFenix} alt="Fenix" style={{ height: "24px", objectFit: "contain" }} />
+          <img src={logoOrazul} alt="Orazul Energy" style={{ height: "22px", objectFit: "contain" }} />
+          <img src={logoLaVirgen} alt="La Virgen" style={{ height: "26px", objectFit: "contain" }} />
+        </div>
+      </div>
+
       {/* Footer */}
-      <div style={{ textAlign: "center", marginTop: "16px", fontSize: "7px", color: "#666" }}>
+      <div style={{ textAlign: "center", marginTop: "10px", fontSize: "7px", color: "#666" }}>
         Si usted tiene alguna pregunta sobre esta cotización, por favor, póngase en contacto con nosotros
       </div>
       <div style={{ textAlign: "center", marginTop: "4px", fontSize: "9px", fontStyle: "italic", fontWeight: 600 }}>
