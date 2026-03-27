@@ -95,10 +95,10 @@ const PreciosPage = ({ data }: { data: ReportData }) => {
             ["Precio Calculado HP", h2.precio_calculado_hp?.toFixed(5) || "0.00000", `${monedaSymbol}/kWh`],
             ["Precio Calculado HFP", h2.precio_calculado_hfp?.toFixed(5) || "0.00000", `${monedaSymbol}/kWh`],
           ].map(([label, val, unit], i) => (
-            <tr key={i} className={i % 2 === 0 ? "bg-white" : "bg-gray-50"}>
-              <td className={`p-1.5 border border-gray-200 text-gray-700 ${i >= 2 ? "font-semibold" : ""}`}>{label}</td>
-              <td className="p-1.5 border border-gray-200 text-center font-mono">{val}</td>
-              <td className="p-1.5 border border-gray-200 text-center text-gray-500">{unit}</td>
+            <tr key={i} className="bg-white">
+              <td className={`px-1.5 py-1 border border-gray-200 ${i >= 2 ? "font-semibold" : ""}`} style={{ color: "#1B3A5C" }}>{label}</td>
+              <td className="px-1.5 py-1 border border-gray-200 text-center font-mono" style={{ color: "#1B3A5C" }}>{val}</td>
+              <td className="px-1.5 py-1 border border-gray-200 text-center" style={{ color: "#1B3A5C" }}>{unit}</td>
             </tr>
           ))}
         </tbody>
