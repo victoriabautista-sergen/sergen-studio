@@ -11,6 +11,18 @@ import logoLaVirgen from "@/assets/partners/lavirgen.jpeg";
 import logoElectroDunas from "@/assets/partners/electrodunas.png";
 
 const fmt = (n: number) => n.toFixed(2);
+const ORANGE = "#E8792B";
+const ORANGE_BORDER = `0.5px solid ${ORANGE}`;
+const BAND_LABEL_STYLE: React.CSSProperties = {
+  display: "table-cell",
+  verticalAlign: "middle",
+  paddingLeft: "6px",
+  lineHeight: 1,
+  paddingTop: 0,
+  paddingBottom: 0,
+  position: "relative",
+  top: "-1px",
+};
 
 const CotizacionPreviewContent = () => {
   const { data } = useCotizacionContext();
@@ -52,18 +64,19 @@ const CotizacionPreviewContent = () => {
       {/* Client */}
       <div
         style={{
-          backgroundColor: "#E8792B",
+          backgroundColor: ORANGE,
           color: "#fff",
           fontWeight: 700,
           fontSize: "8px",
           marginBottom: "6px",
-          height: "16px",
+          height: "14px",
           display: "table",
           width: "100%",
           boxSizing: "border-box",
         }}
+        data-pdf-band="cliente"
       >
-        <span style={{ display: "table-cell", verticalAlign: "middle", paddingLeft: "6px" }}>
+        <span data-pdf-band-label="true" style={BAND_LABEL_STYLE}>
           CLIENTE
         </span>
       </div>
@@ -76,26 +89,26 @@ const CotizacionPreviewContent = () => {
       </table>
 
       {/* Items table */}
-      <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "7px", marginBottom: "4px", border: "1px solid #E8792B" }}>
+      <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "7px", marginBottom: "4px", border: ORANGE_BORDER }}>
         <thead>
-          <tr style={{ backgroundColor: "#E8792B", color: "#fff", height: "16px" }}>
-            <th style={{ padding: "0 4px 0 6px", textAlign: "left", fontWeight: 600, verticalAlign: "middle", lineHeight: 1.1, border: "1px solid #E8792B" }}>Descripción</th>
-            <th style={{ padding: "0 4px", textAlign: "center", fontWeight: 600, width: "50px", verticalAlign: "middle", lineHeight: 1.1, border: "1px solid #E8792B" }}>Código</th>
-            <th style={{ padding: "0 4px", textAlign: "center", fontWeight: 600, width: "60px", verticalAlign: "middle", lineHeight: 1.1, border: "1px solid #E8792B" }}>Precio Unit</th>
-            <th style={{ padding: "0 4px", textAlign: "center", fontWeight: 600, width: "30px", verticalAlign: "middle", lineHeight: 1.1, border: "1px solid #E8792B" }}>Cant.</th>
-            <th style={{ padding: "0 4px", textAlign: "center", fontWeight: 600, width: "55px", verticalAlign: "middle", lineHeight: 1.1, border: "1px solid #E8792B" }}>P.venta</th>
-            <th style={{ padding: "0 4px", textAlign: "center", fontWeight: 600, width: "55px", verticalAlign: "middle", lineHeight: 1.1, border: "1px solid #E8792B" }}>Total</th>
+          <tr style={{ backgroundColor: ORANGE, color: "#fff", height: "14px" }}>
+            <th data-pdf-table-head="true" style={{ padding: "0 4px 0 6px", textAlign: "left", fontWeight: 600, verticalAlign: "middle", lineHeight: 1, border: ORANGE_BORDER }}>Descripción</th>
+            <th data-pdf-table-head="true" style={{ padding: "0 4px", textAlign: "center", fontWeight: 600, width: "50px", verticalAlign: "middle", lineHeight: 1, border: ORANGE_BORDER }}>Código</th>
+            <th data-pdf-table-head="true" style={{ padding: "0 4px", textAlign: "center", fontWeight: 600, width: "60px", verticalAlign: "middle", lineHeight: 1, border: ORANGE_BORDER }}>Precio Unit</th>
+            <th data-pdf-table-head="true" style={{ padding: "0 4px", textAlign: "center", fontWeight: 600, width: "30px", verticalAlign: "middle", lineHeight: 1, border: ORANGE_BORDER }}>Cant.</th>
+            <th data-pdf-table-head="true" style={{ padding: "0 4px", textAlign: "center", fontWeight: 600, width: "55px", verticalAlign: "middle", lineHeight: 1, border: ORANGE_BORDER }}>P.venta</th>
+            <th data-pdf-table-head="true" style={{ padding: "0 4px", textAlign: "center", fontWeight: 600, width: "55px", verticalAlign: "middle", lineHeight: 1, border: ORANGE_BORDER }}>Total</th>
           </tr>
         </thead>
         <tbody>
           {data.items.map((item, idx) => (
             <tr key={idx}>
-              <td style={{ padding: "4px 6px", verticalAlign: "top", whiteSpace: "pre-wrap", border: "1px solid #E8792B" }}>{item.descripcion}</td>
-              <td style={{ padding: "4px", textAlign: "center", verticalAlign: "middle", border: "1px solid #E8792B" }}>{item.codigo}</td>
-              <td style={{ padding: "4px", textAlign: "right", verticalAlign: "middle", border: "1px solid #E8792B" }}>S/ {fmt(item.precio_unitario)}</td>
-              <td style={{ padding: "4px", textAlign: "center", verticalAlign: "middle", border: "1px solid #E8792B" }}>{item.cantidad}</td>
-              <td style={{ padding: "4px", textAlign: "right", verticalAlign: "middle", border: "1px solid #E8792B" }}>S/ {fmt(item.precio_venta)}</td>
-              <td style={{ padding: "4px", textAlign: "right", verticalAlign: "middle", border: "1px solid #E8792B" }}>S/ {fmt(item.total)}</td>
+              <td style={{ padding: "4px 6px", verticalAlign: "top", whiteSpace: "pre-wrap", border: ORANGE_BORDER }}>{item.descripcion}</td>
+              <td style={{ padding: "4px", textAlign: "center", verticalAlign: "middle", border: ORANGE_BORDER }}>{item.codigo}</td>
+              <td style={{ padding: "4px", textAlign: "right", verticalAlign: "middle", border: ORANGE_BORDER }}>S/ {fmt(item.precio_unitario)}</td>
+              <td style={{ padding: "4px", textAlign: "center", verticalAlign: "middle", border: ORANGE_BORDER }}>{item.cantidad}</td>
+              <td style={{ padding: "4px", textAlign: "right", verticalAlign: "middle", border: ORANGE_BORDER }}>S/ {fmt(item.precio_venta)}</td>
+              <td style={{ padding: "4px", textAlign: "right", verticalAlign: "middle", border: ORANGE_BORDER }}>S/ {fmt(item.total)}</td>
             </tr>
           ))}
         </tbody>
@@ -104,21 +117,22 @@ const CotizacionPreviewContent = () => {
       {/* Totals + Terms side by side */}
       <div style={{ display: "flex", gap: "8px", marginBottom: "12px" }}>
         {/* Terms */}
-        <div style={{ flex: 1, border: "1px solid #E8792B", padding: "6px", fontSize: "7px" }}>
+        <div style={{ flex: 1, border: ORANGE_BORDER, padding: "6px", fontSize: "7px" }}>
           <div
             style={{
-              backgroundColor: "#E8792B",
+              backgroundColor: ORANGE,
               color: "#fff",
               fontWeight: 700,
               marginBottom: "8px",
               fontSize: "7px",
-              height: "14px",
+              height: "12px",
               display: "table",
               width: "100%",
               boxSizing: "border-box",
             }}
+            data-pdf-band="terminos"
           >
-            <span style={{ display: "table-cell", verticalAlign: "middle", paddingLeft: "6px" }}>
+            <span data-pdf-band-label="true" style={BAND_LABEL_STYLE}>
               TÉRMINOS Y CONDICIONES
             </span>
           </div>
@@ -153,8 +167,8 @@ const CotizacionPreviewContent = () => {
               <tr><td>Imponible</td><td style={{ textAlign: "right" }}>S/ {fmt(data.imponible)}</td></tr>
               <tr><td>Impuesto %</td><td style={{ textAlign: "right" }}>{data.impuesto_pct}%</td></tr>
               <tr><td style={{ paddingBottom: "4px" }}>Total Impuesto</td><td style={{ textAlign: "right", paddingBottom: "4px" }}>S/ {fmt(data.total_impuesto)}</td></tr>
-              <tr style={{ borderTop: "1px solid #ccc" }}><td style={{ paddingTop: "6px" }}>Otros</td><td style={{ textAlign: "right", paddingTop: "6px" }}>S/ {data.otros > 0 ? fmt(data.otros) : "-"}</td></tr>
-              <tr style={{ borderTop: "2px solid #333", fontWeight: 700 }}><td>TOTAL</td><td style={{ textAlign: "right" }}>S/ {fmt(data.total)}</td></tr>
+              <tr style={{ borderTop: "0.5px solid #ccc" }}><td style={{ paddingTop: "6px" }}>Otros</td><td style={{ textAlign: "right", paddingTop: "6px" }}>S/ {data.otros > 0 ? fmt(data.otros) : "-"}</td></tr>
+              <tr style={{ borderTop: "0.75px solid #333", fontWeight: 700 }}><td>TOTAL</td><td style={{ textAlign: "right" }}>S/ {fmt(data.total)}</td></tr>
             </tbody>
           </table>
         </div>
