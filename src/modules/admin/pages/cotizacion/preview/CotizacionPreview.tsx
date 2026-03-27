@@ -157,7 +157,7 @@ const CotizacionPreviewContent = () => {
               <tr><td>Impuesto %</td><td style={{ textAlign: "right" }}>{data.impuesto_pct}%</td></tr>
               <tr><td>Total Impuesto</td><td style={{ textAlign: "right" }}>S/ {fmt(data.total_impuesto)}</td></tr>
               <tr><td>Otros</td><td style={{ textAlign: "right" }}>S/ {fmt(data.otros)}</td></tr>
-              <tr style={{ borderTop: "0.5px solid #666", fontWeight: 700 }}><td style={{ paddingTop: "4px" }}>TOTAL</td><td style={{ textAlign: "right", paddingTop: "4px" }}>S/ {fmt(data.total)}</td></tr>
+              <tr style={{ borderTop: "0.5px solid #555", fontWeight: 700 }}><td style={{ paddingTop: "4px" }}>TOTAL</td><td style={{ textAlign: "right", paddingTop: "4px" }}>S/ {fmt(data.total)}</td></tr>
             </tbody>
           </table>
         </div>
