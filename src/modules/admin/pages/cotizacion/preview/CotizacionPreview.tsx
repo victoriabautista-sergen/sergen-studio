@@ -43,7 +43,7 @@ const CotizacionPreviewContent = () => {
 
 
       {/* Company info */}
-      <table style={{ fontSize: "9px", marginBottom: "10px" }}>
+      <table style={{ fontSize: "11px", marginBottom: "10px" }}>
         <tbody>
           <tr><td style={{ paddingRight: "8px", color: "#666", width: "55px" }}>Dirección</td><td><strong>:</strong> {data.direccion}</td></tr>
           <tr><td style={{ color: "#666" }}>Asesor</td><td><strong>:</strong> {data.asesor}</td></tr>
