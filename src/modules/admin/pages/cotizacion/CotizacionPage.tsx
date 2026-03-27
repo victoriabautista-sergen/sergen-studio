@@ -26,8 +26,8 @@ const CotizacionContent = () => {
     if (!container) return;
     const availW = container.clientWidth - PAD * 2;
     const availH = container.clientHeight - PAD * 2;
-    const s = Math.min(availW / A4_W, availH / A4_H, 2.2);
-    const clamped = Math.max(s * 1.2, 0.5);
+    const s = Math.min(availW / A4_W, availH / A4_H, 1.8);
+    const clamped = Math.max(s, 0.4);
     setAutoScale(clamped);
     setScale(clamped + manualOffset);
   }, [manualOffset]);
