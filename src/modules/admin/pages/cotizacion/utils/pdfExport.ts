@@ -5,16 +5,17 @@ export async function generateCotizacionPDF(
   // Clone the preview element
   const clone = pageEl.cloneNode(true) as HTMLDivElement;
 
-  // Reset any transforms and make it fill exactly one A4 page
+  // Reset any transforms – fill the printable area of one A4 page
   clone.style.transform = "none";
   clone.style.transformOrigin = "top left";
   clone.style.position = "relative";
-  clone.style.width = "186mm";   // 210mm - 2*12mm margins
-  clone.style.height = "273mm";  // 297mm - 2*12mm margins
+  clone.style.width = "100%";
+  clone.style.height = "100%";
   clone.style.maxHeight = "273mm";
   clone.style.overflow = "hidden";
   clone.style.padding = "0";
   clone.style.boxSizing = "border-box";
+
   // Collect all stylesheets from the parent document
   const styleSheets = Array.from(document.querySelectorAll('link[rel="stylesheet"], style'));
   const styleHTML = styleSheets.map(el => el.outerHTML).join("\n");
@@ -29,7 +30,7 @@ export async function generateCotizacionPDF(
   <style>
     @page {
       size: A4 portrait;
-      margin: 0;
+      margin: 12mm;
     }
     * {
       -webkit-print-color-adjust: exact !important;
@@ -38,11 +39,10 @@ export async function generateCotizacionPDF(
     }
     html, body {
       margin: 0;
-      padding: 12mm;
-      width: 210mm;
-      height: 297mm;
+      padding: 0;
+      width: 100%;
+      max-height: 273mm;
       overflow: hidden;
-      box-sizing: border-box;
     }
   </style>
 </head>
