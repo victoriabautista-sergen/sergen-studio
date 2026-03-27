@@ -149,7 +149,7 @@ const CotizacionPreviewContent = () => {
         </div>
 
         {/* Totals */}
-        <div style={{ width: "160px", fontSize: "7px" }}>
+        <div style={{ width: "160px", fontSize: "9px" }}>
           <table style={{ width: "100%", borderCollapse: "collapse", borderSpacing: 0 }}>
             <tbody>
               <tr><td>Subtotal</td><td style={{ textAlign: "right" }}>S/ {fmt(data.subtotal)}</td></tr>
