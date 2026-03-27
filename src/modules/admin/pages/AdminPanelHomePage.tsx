@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Building2, Inbox, Settings, Users } from "lucide-react";
+import { Building2, FileText, Inbox, Settings, Users } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import AdminShell from "../components/AdminShell";
