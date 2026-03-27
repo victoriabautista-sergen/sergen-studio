@@ -27,11 +27,9 @@ const getDefaultValidez = () => {
 // Generate next correlative number: COT-YYYYMM-NNN
 const generateCorrelativeNumber = async (): Promise<string> => {
   const now = new Date();
-  const prefix = `COT-${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, "0")}`;
-  
-  // For now, use timestamp-based. Could be improved with DB sequence.
+  const month = String(now.getMonth() + 1).padStart(2, "0");
   const count = String(Math.floor(Math.random() * 900) + 100);
-  return `${prefix}-${count}`;
+  return `COT-${month}-${count}`;
 };
 
 export const CotizacionProvider = ({ children }: { children: React.ReactNode }) => {
