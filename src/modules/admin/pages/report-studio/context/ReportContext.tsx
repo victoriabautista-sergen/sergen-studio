@@ -12,6 +12,8 @@ interface ReportContextType {
   saving: boolean;
   loadReport: (id: string) => Promise<void>;
   createNew: () => void;
+  hiddenPages: Set<number>;
+  togglePageVisibility: (page: number) => void;
 }
 
 const ReportContext = createContext<ReportContextType | null>(null);
@@ -26,6 +28,19 @@ export const ReportProvider = ({ children }: { children: React.ReactNode }) => {
   const [data, setData] = useState<ReportData>(defaultReportData);
   const [activeSheet, setActiveSheet] = useState(1);
   const [saving, setSaving] = useState(false);
+  const [hiddenPages, setHiddenPages] = useState<Set<number>>(new Set());
+
+  const togglePageVisibility = useCallback((page: number) => {
+    setHiddenPages(prev => {
+      const next = new Set(prev);
+      if (next.has(page)) {
+        next.delete(page);
+      } else {
+        next.add(page);
+      }
+      return next;
+    });
+  }, []);
   const { session } = useAuthContext();
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -111,7 +126,7 @@ export const ReportProvider = ({ children }: { children: React.ReactNode }) => {
   }, []);
 
   return (
-    <ReportContext.Provider value={{ data, activeSheet, setActiveSheet, updateSheet, saving, loadReport, createNew }}>
+    <ReportContext.Provider value={{ data, activeSheet, setActiveSheet, updateSheet, saving, loadReport, createNew, hiddenPages, togglePageVisibility }}>
       {children}
     </ReportContext.Provider>
   );

@@ -1,6 +1,6 @@
 import { useReportContext } from "../context/ReportContext";
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, Eye, EyeOff } from "lucide-react";
 import PortadaPage from "./pages/PortadaPage";
 import PreciosPage from "./pages/PreciosPage";
 import FacturaPage from "./pages/FacturaPage";
@@ -8,7 +8,7 @@ import ComparacionPage from "./pages/ComparacionPage";
 import PotenciaPage from "./pages/PotenciaPage";
 import ProyeccionPage from "./pages/ProyeccionPage";
 import ConclusionesPage from "./pages/ConclusionesPage";
-import React, { useRef, useCallback, useState } from "react";
+import React, { useRef, useCallback, useState, useMemo } from "react";
 import { generateReportPDF } from "../utils/pdfExport";
 
 const TOTAL_PAGES = 7;
@@ -23,34 +23,60 @@ const pageComponents: Record<number, React.FC<{ data: any }>> = {
   7: ConclusionesPage,
 };
 
+const PAGE_NAMES: Record<number, string> = {
+  1: "Portada",
+  2: "Precios",
+  3: "Factura",
+  4: "Comparación",
+  5: "Potencia",
+  6: "Proyección",
+  7: "Conclusiones",
+};
+
 // Store the export function so the toolbar can call it
 let _triggerExport: (() => Promise<void>) | null = null;
 let _isExporting = false;
 let _setExportingExternal: ((v: boolean) => void) | null = null;
 
 const Navigation = () => {
-  const { activeSheet, setActiveSheet } = useReportContext();
+  const { activeSheet, setActiveSheet, hiddenPages } = useReportContext();
   const [exporting, setExporting] = useState(false);
 
   _setExportingExternal = setExporting;
 
+  const visiblePages = useMemo(() => {
+    return Array.from({ length: TOTAL_PAGES }, (_, i) => i + 1).filter(p => !hiddenPages.has(p));
+  }, [hiddenPages]);
+
+  const currentIndex = visiblePages.indexOf(activeSheet);
+  const visibleCount = visiblePages.length;
+
+  const goToPrev = () => {
+    if (currentIndex > 0) setActiveSheet(visiblePages[currentIndex - 1]);
+  };
+  const goToNext = () => {
+    if (currentIndex < visibleCount - 1) setActiveSheet(visiblePages[currentIndex + 1]);
+  };
+
+  const displayNum = currentIndex >= 0 ? currentIndex + 1 : "—";
+
   return (
     <div className="flex items-center gap-3">
-      <Button variant="outline" size="default" onClick={() => setActiveSheet(Math.max(1, activeSheet - 1))} disabled={activeSheet === 1} className="gap-1">
+      <Button variant="outline" size="default" onClick={goToPrev} disabled={currentIndex <= 0} className="gap-1">
         <ChevronLeft className="h-4 w-4" /> Anterior
       </Button>
       <span className="text-sm text-muted-foreground whitespace-nowrap">
-        Página {activeSheet} de {TOTAL_PAGES}
+        Página {displayNum} de {visibleCount}
       </span>
-      <Button variant="outline" size="default" onClick={() => setActiveSheet(Math.min(TOTAL_PAGES, activeSheet + 1))} disabled={activeSheet === TOTAL_PAGES} className="gap-1">
+      <Button variant="outline" size="default" onClick={goToNext} disabled={currentIndex >= visibleCount - 1} className="gap-1">
         Siguiente <ChevronRight className="h-4 w-4" />
       </Button>
     </div>
   );
 };
 
-// Hidden component that renders ALL pages for PDF export
-const AllPagesForExport = React.forwardRef<HTMLDivElement, { data: any }>(({ data }, ref) => {
+// Hidden component that renders ALL visible pages for PDF export
+const AllPagesForExport = React.forwardRef<HTMLDivElement, { data: any; hiddenPages: Set<number> }>(({ data, hiddenPages }, ref) => {
   return (
     <div
       ref={ref}
@@ -62,7 +88,9 @@ const AllPagesForExport = React.forwardRef<HTMLDivElement, { data: any }>(({ dat
         pointerEvents: "none",
       }}
     >
-      {Object.entries(pageComponents).map(([pageNum, Component]) => (
+      {Object.entries(pageComponents)
+        .filter(([pageNum]) => !hiddenPages.has(Number(pageNum)))
+        .map(([pageNum, Component]) => (
         <div
           key={pageNum}
           data-pdf-page={pageNum}
@@ -86,9 +114,10 @@ const AllPagesForExport = React.forwardRef<HTMLDivElement, { data: any }>(({ dat
 AllPagesForExport.displayName = "AllPagesForExport";
 
 const ReportPreview = () => {
-  const { data, activeSheet } = useReportContext();
+  const { data, activeSheet, hiddenPages, togglePageVisibility } = useReportContext();
   const PageComponent = pageComponents[activeSheet];
   const allPagesRef = useRef<HTMLDivElement>(null);
+  const isCurrentHidden = hiddenPages.has(activeSheet);
 
   const handleExport = useCallback(async () => {
     if (!allPagesRef.current || _isExporting) return;
@@ -109,25 +138,49 @@ const ReportPreview = () => {
   _triggerExport = handleExport;
 
   return (
-    <div className="flex items-start justify-center h-full overflow-auto p-6 relative">
-      <div
-        className="bg-white shadow-xl border rounded-sm flex-shrink-0"
-        style={{
-          width: "595px",
-          minWidth: "595px",
-          height: "842px",
-          fontFamily: "'Inter', sans-serif",
-          position: "relative",
-          overflow: "hidden",
-        }}
-      >
-        <div className="px-10 py-8" style={{ height: "100%" }}>
-          <PageComponent data={data} />
+    <div className="flex flex-col items-center h-full overflow-auto p-6 relative">
+      {/* Hide/Show toggle */}
+      <div className="mb-3 flex items-center gap-2">
+        <Button
+          variant={isCurrentHidden ? "destructive" : "outline"}
+          size="sm"
+          onClick={() => togglePageVisibility(activeSheet)}
+          className="gap-2"
+        >
+          {isCurrentHidden ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+          {isCurrentHidden ? `Página "${PAGE_NAMES[activeSheet]}" oculta` : `Ocultar página "${PAGE_NAMES[activeSheet]}"`}
+        </Button>
+      </div>
+
+      <div className="relative flex-shrink-0">
+        {isCurrentHidden && (
+          <div className="absolute inset-0 z-10 bg-background/60 backdrop-blur-[1px] flex items-center justify-center rounded-sm">
+            <div className="text-center">
+              <EyeOff className="h-10 w-10 mx-auto mb-2 text-muted-foreground" />
+              <p className="text-muted-foreground font-medium">Página oculta</p>
+              <p className="text-xs text-muted-foreground">No se incluirá en el PDF</p>
+            </div>
+          </div>
+        )}
+        <div
+          className="bg-white shadow-xl border rounded-sm"
+          style={{
+            width: "595px",
+            minWidth: "595px",
+            height: "1010px",
+            fontFamily: "'Inter', sans-serif",
+            position: "relative",
+            overflow: "hidden",
+          }}
+        >
+          <div className="px-10 py-8" style={{ height: "100%" }}>
+            <PageComponent data={data} />
+          </div>
         </div>
       </div>
 
-      {/* Hidden: all pages rendered for PDF export */}
-      <AllPagesForExport ref={allPagesRef} data={data} />
+      {/* Hidden: all visible pages rendered for PDF export */}
+      <AllPagesForExport ref={allPagesRef} data={data} hiddenPages={hiddenPages} />
     </div>
   );
 };
