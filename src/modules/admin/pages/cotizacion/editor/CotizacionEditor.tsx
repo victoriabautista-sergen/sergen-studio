@@ -57,7 +57,13 @@ const CotizacionEditor = () => {
   };
 
   const handleMarcaChange = (marca: CotizacionMarca) => {
-    updateData("marca", marca);
+    setData(prev => {
+      let correo = prev.correo;
+      if (correo) {
+        correo = correo.replace(/@(sergen|incoser)\.pe/i, marca === "incoser" ? "@incoser.pe" : "@sergen.pe");
+      }
+      return { ...prev, marca, correo };
+    });
   };
 
   const updateItem = (index: number, field: keyof CotizacionItem, value: string | number) => {
