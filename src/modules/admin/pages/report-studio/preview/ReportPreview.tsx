@@ -39,7 +39,7 @@ let _isExporting = false;
 let _setExportingExternal: ((v: boolean) => void) | null = null;
 
 const Navigation = () => {
-  const { activeSheet, setActiveSheet, hiddenPages } = useReportContext();
+  const { activeSheet, setActiveSheet, hiddenPages, togglePageVisibility } = useReportContext();
   const [exporting, setExporting] = useState(false);
 
   _setExportingExternal = setExporting;
@@ -50,6 +50,7 @@ const Navigation = () => {
 
   const currentIndex = visiblePages.indexOf(activeSheet);
   const visibleCount = visiblePages.length;
+  const isCurrentHidden = hiddenPages.has(activeSheet);
 
   const goToPrev = () => {
     if (currentIndex > 0) setActiveSheet(visiblePages[currentIndex - 1]);
@@ -70,6 +71,15 @@ const Navigation = () => {
       </span>
       <Button variant="outline" size="default" onClick={goToNext} disabled={currentIndex >= visibleCount - 1} className="gap-1">
         Siguiente <ChevronRight className="h-4 w-4" />
+      </Button>
+      <Button
+        variant={isCurrentHidden ? "destructive" : "outline"}
+        size="default"
+        onClick={() => togglePageVisibility(activeSheet)}
+        className="gap-1"
+      >
+        {isCurrentHidden ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+        {isCurrentHidden ? "Mostrar página" : "Ocultar página"}
       </Button>
     </div>
   );
@@ -139,19 +149,6 @@ const ReportPreview = () => {
 
   return (
     <div className="flex flex-col items-center h-full overflow-auto p-6 relative">
-      {/* Hide/Show toggle */}
-      <div className="mb-3 flex items-center gap-2">
-        <Button
-          variant={isCurrentHidden ? "destructive" : "outline"}
-          size="sm"
-          onClick={() => togglePageVisibility(activeSheet)}
-          className="gap-2"
-        >
-          {isCurrentHidden ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-          {isCurrentHidden ? `Página "${PAGE_NAMES[activeSheet]}" oculta` : `Ocultar página "${PAGE_NAMES[activeSheet]}"`}
-        </Button>
-      </div>
-
       <div className="relative flex-shrink-0">
         {isCurrentHidden && (
           <div className="absolute inset-0 z-10 bg-background/60 backdrop-blur-[1px] flex items-center justify-center rounded-sm">
