@@ -1,17 +1,15 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 
-const CompanyModulesSection = ({ companyId }: { companyId: string }) => {
+const CompanyModulesSection = ({ companyId, readOnly = false }: { companyId: string; readOnly?: boolean }) => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  // Users in this company
   const { data: users = [], isLoading: loadingUsers } = useQuery({
     queryKey: ["company-mgmt-users", companyId],
     queryFn: async () => {
@@ -23,7 +21,6 @@ const CompanyModulesSection = ({ companyId }: { companyId: string }) => {
     },
   });
 
-  // Company modules (enabled)
   const { data: companyModules = [], isLoading: loadingModules } = useQuery({
     queryKey: ["company-mgmt-company-modules", companyId],
     queryFn: async () => {
@@ -36,7 +33,6 @@ const CompanyModulesSection = ({ companyId }: { companyId: string }) => {
     },
   });
 
-  // User modules map
   const { data: userModulesMap = {} } = useQuery({
     queryKey: ["company-mgmt-user-modules", companyId],
     enabled: users.length > 0,
@@ -91,7 +87,11 @@ const CompanyModulesSection = ({ companyId }: { companyId: string }) => {
     <Card>
       <CardHeader>
         <CardTitle>Permisos de módulos por usuario</CardTitle>
-        <CardDescription>Activa o desactiva el acceso a cada módulo para cada usuario.</CardDescription>
+        <CardDescription>
+          {readOnly
+            ? "Vista de los permisos de módulos asignados a cada usuario."
+            : "Activa o desactiva el acceso a cada módulo para cada usuario."}
+        </CardDescription>
       </CardHeader>
       <CardContent className="p-0">
         <Table>
@@ -129,7 +129,7 @@ const CompanyModulesSection = ({ companyId }: { companyId: string }) => {
                           onCheckedChange={(checked) =>
                             toggleModule.mutate({ userId: u.user_id, moduleId: m.id, enabled: checked })
                           }
-                          disabled={toggleModule.isPending}
+                          disabled={readOnly || toggleModule.isPending}
                         />
                       </TableCell>
                     );

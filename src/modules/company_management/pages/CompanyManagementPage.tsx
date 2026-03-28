@@ -6,16 +6,17 @@ import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuthContext } from "@/core/auth/context/AuthContext";
-import PrivateRoute from "@/core/auth/components/PrivateRoute";
 import ModuleLayout from "@/shared/components/ModuleLayout";
 import CompanyInfoSection from "../components/CompanyInfoSection";
 import CompanyUsersSection from "../components/CompanyUsersSection";
 import CompanyModulesSection from "../components/CompanyModulesSection";
 import CompanyRequestsSection from "../components/CompanyRequestsSection";
 
-const CompanyManagementContent = () => {
+const CompanyManagementPage = () => {
   const { role, clientIds } = useAuthContext();
   const isSergen = role === "super_admin" || role === "technical_user";
+  const isCompanyAdmin = role === "admin";
+  const isReadOnly = role === "client_user";
 
   const [search, setSearch] = useState("");
   const [selectedCompanyId, setSelectedCompanyId] = useState<string | null>(
@@ -62,6 +63,12 @@ const CompanyManagementContent = () => {
         (c.ruc ?? "").toLowerCase().includes(q)
     );
   }, [companies, search]);
+
+  // Determine number of tabs based on role
+  const showUsuarios = isSergen || isCompanyAdmin;
+  const showModulos = isSergen || isCompanyAdmin;
+  const showSolicitudes = isSergen || isCompanyAdmin;
+  const tabCount = 1 + (showUsuarios ? 1 : 0) + (showModulos ? 1 : 0) + (showSolicitudes ? 1 : 0);
 
   return (
     <ModuleLayout title="Gestión de Empresa">
@@ -138,24 +145,30 @@ const CompanyManagementContent = () => {
             </div>
 
             <Tabs defaultValue="info" className="w-full">
-              <TabsList className="grid w-full grid-cols-4">
+              <TabsList className={`grid w-full`} style={{ gridTemplateColumns: `repeat(${tabCount}, 1fr)` }}>
                 <TabsTrigger value="info">Información</TabsTrigger>
-                <TabsTrigger value="usuarios">Usuarios</TabsTrigger>
-                <TabsTrigger value="modulos">Permisos</TabsTrigger>
-                <TabsTrigger value="solicitudes">Solicitudes</TabsTrigger>
+                {showUsuarios && <TabsTrigger value="usuarios">Usuarios</TabsTrigger>}
+                {showModulos && <TabsTrigger value="modulos">Permisos</TabsTrigger>}
+                {showSolicitudes && <TabsTrigger value="solicitudes">Solicitudes</TabsTrigger>}
               </TabsList>
               <TabsContent value="info" className="mt-6">
-                <CompanyInfoSection company={company} />
+                <CompanyInfoSection company={company} readOnly={isReadOnly} />
               </TabsContent>
-              <TabsContent value="usuarios" className="mt-6">
-                <CompanyUsersSection companyId={company.id} />
-              </TabsContent>
-              <TabsContent value="modulos" className="mt-6">
-                <CompanyModulesSection companyId={company.id} />
-              </TabsContent>
-              <TabsContent value="solicitudes" className="mt-6">
-                <CompanyRequestsSection />
-              </TabsContent>
+              {showUsuarios && (
+                <TabsContent value="usuarios" className="mt-6">
+                  <CompanyUsersSection companyId={company.id} readOnly={isReadOnly} />
+                </TabsContent>
+              )}
+              {showModulos && (
+                <TabsContent value="modulos" className="mt-6">
+                  <CompanyModulesSection companyId={company.id} readOnly={isReadOnly} />
+                </TabsContent>
+              )}
+              {showSolicitudes && (
+                <TabsContent value="solicitudes" className="mt-6">
+                  <CompanyRequestsSection />
+                </TabsContent>
+              )}
             </Tabs>
           </div>
         ) : null}
@@ -163,11 +176,5 @@ const CompanyManagementContent = () => {
     </ModuleLayout>
   );
 };
-
-const CompanyManagementPage = () => (
-  <PrivateRoute>
-    <CompanyManagementContent />
-  </PrivateRoute>
-);
 
 export default CompanyManagementPage;

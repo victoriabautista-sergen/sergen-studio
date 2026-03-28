@@ -31,7 +31,7 @@ const ROLE_LABELS: Record<string, string> = {
   technical_user: "Técnico",
 };
 
-const CompanyUsersSection = ({ companyId }: { companyId: string }) => {
+const CompanyUsersSection = ({ companyId, readOnly = false }: { companyId: string; readOnly?: boolean }) => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [addOpen, setAddOpen] = useState(false);
@@ -108,9 +108,11 @@ const CompanyUsersSection = ({ companyId }: { companyId: string }) => {
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle>Usuarios</CardTitle>
-          <Button size="sm" onClick={() => setAddOpen(true)}>
-            <UserPlus className="h-4 w-4 mr-2" />Crear usuario
-          </Button>
+          {!readOnly && (
+            <Button size="sm" onClick={() => setAddOpen(true)}>
+              <UserPlus className="h-4 w-4 mr-2" />Crear usuario
+            </Button>
+          )}
         </CardHeader>
         <CardContent className="p-0">
           {isLoading ? (
@@ -127,7 +129,7 @@ const CompanyUsersSection = ({ companyId }: { companyId: string }) => {
                   <TableHead>Email</TableHead>
                   <TableHead>Rol</TableHead>
                   <TableHead>Estado</TableHead>
-                  <TableHead className="text-right">Acciones</TableHead>
+                  {!readOnly && <TableHead className="text-right">Acciones</TableHead>}
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -145,11 +147,13 @@ const CompanyUsersSection = ({ companyId }: { companyId: string }) => {
                         {u.is_active ? "Activo" : "Inactivo"}
                       </Badge>
                     </TableCell>
-                    <TableCell className="text-right">
-                      <Button variant="ghost" size="sm" className="text-destructive hover:text-destructive" onClick={() => setRemovingUserId(u.user_id)}>
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </TableCell>
+                    {!readOnly && (
+                      <TableCell className="text-right">
+                        <Button variant="ghost" size="sm" className="text-destructive hover:text-destructive" onClick={() => setRemovingUserId(u.user_id)}>
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </TableCell>
+                    )}
                   </TableRow>
                 ))}
               </TableBody>
@@ -158,48 +162,52 @@ const CompanyUsersSection = ({ companyId }: { companyId: string }) => {
         </CardContent>
       </Card>
 
-      <Dialog open={addOpen} onOpenChange={setAddOpen}>
-        <DialogContent className="max-w-md">
-          <DialogHeader><DialogTitle>Agregar usuario</DialogTitle></DialogHeader>
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <Label>Email del usuario *</Label>
-              <Input type="email" value={addEmail} onChange={(e) => setAddEmail(e.target.value)} placeholder="usuario@ejemplo.com" />
-              <p className="text-xs text-muted-foreground">El usuario debe tener una cuenta existente.</p>
-            </div>
-            <div className="space-y-2">
-              <Label>Rol</Label>
-              <Select value={addRole} onValueChange={setAddRole}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="client_user">Operador</SelectItem>
-                  <SelectItem value="admin">Admin empresa</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setAddOpen(false)}>Cancelar</Button>
-            <Button onClick={() => addUser.mutate({ email: addEmail, role: addRole })} disabled={addUser.isPending || !addEmail.trim()}>
-              {addUser.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : "Agregar"}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      {!readOnly && (
+        <>
+          <Dialog open={addOpen} onOpenChange={setAddOpen}>
+            <DialogContent className="max-w-md">
+              <DialogHeader><DialogTitle>Agregar usuario</DialogTitle></DialogHeader>
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label>Email del usuario *</Label>
+                  <Input type="email" value={addEmail} onChange={(e) => setAddEmail(e.target.value)} placeholder="usuario@ejemplo.com" />
+                  <p className="text-xs text-muted-foreground">El usuario debe tener una cuenta existente.</p>
+                </div>
+                <div className="space-y-2">
+                  <Label>Rol</Label>
+                  <Select value={addRole} onValueChange={setAddRole}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="client_user">Operador</SelectItem>
+                      <SelectItem value="admin">Admin empresa</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              <DialogFooter>
+                <Button variant="outline" onClick={() => setAddOpen(false)}>Cancelar</Button>
+                <Button onClick={() => addUser.mutate({ email: addEmail, role: addRole })} disabled={addUser.isPending || !addEmail.trim()}>
+                  {addUser.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : "Agregar"}
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
 
-      <AlertDialog open={Boolean(removingUserId)} onOpenChange={(open) => !open && setRemovingUserId(null)}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>¿Remover usuario?</AlertDialogTitle>
-            <AlertDialogDescription>El usuario dejará de pertenecer a esta empresa.</AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancelar</AlertDialogCancel>
-            <AlertDialogAction className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-              onClick={() => { if (removingUserId) removeUser.mutate(removingUserId); }}>Remover</AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+          <AlertDialog open={Boolean(removingUserId)} onOpenChange={(open) => !open && setRemovingUserId(null)}>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>¿Remover usuario?</AlertDialogTitle>
+                <AlertDialogDescription>El usuario dejará de pertenecer a esta empresa.</AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                <AlertDialogAction className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                  onClick={() => { if (removingUserId) removeUser.mutate(removingUserId); }}>Remover</AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        </>
+      )}
     </>
   );
 };

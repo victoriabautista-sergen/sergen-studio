@@ -38,12 +38,12 @@ const App = () => (
               <Route key={route.path} path={route.path} element={route.element} />
             ))}
 
-            {/* Protected routes */}
+            {/* Protected routes — all require authentication */}
             {[...dashboardRoutes, ...moduleRoutes].map((route) => (
               <Route
                 key={route.path}
                 path={route.path}
-                element={route.element}
+                element={<PrivateRoute>{route.element}</PrivateRoute>}
               />
             ))}
 

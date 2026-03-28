@@ -1,15 +1,17 @@
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
-import { Building2, ExternalLink, Loader2, Pencil, Plus, Search } from "lucide-react";
+import { Building2, ExternalLink, Eye, EyeOff, Loader2, Pencil, Plus, Search } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Separator } from "@/components/ui/separator";
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
@@ -25,6 +27,12 @@ type CompanyRow = {
   subscription_status: string | null;
   user_count: number;
   active_modules: number;
+};
+
+type ModuleRow = {
+  id: string;
+  name: string;
+  slug: string;
 };
 
 const StatusBadge = ({ status }: { status: string | null }) => {
@@ -44,14 +52,37 @@ const EmpresasPage = () => {
 
   const [search, setSearch] = useState("");
   const [createOpen, setCreateOpen] = useState(false);
+  // Company fields
   const [name, setName] = useState("");
   const [ruc, setRuc] = useState("");
   const [industry, setIndustry] = useState("");
+  // Admin user fields
+  const [adminName, setAdminName] = useState("");
+  const [adminEmail, setAdminEmail] = useState("");
+  const [adminPassword, setAdminPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  // Module selection
+  const [selectedModuleIds, setSelectedModuleIds] = useState<string[]>([]);
 
   const [editOpen, setEditOpen] = useState(false);
   const [editId, setEditId] = useState("");
   const [editName, setEditName] = useState("");
   const [editRuc, setEditRuc] = useState("");
+
+  // Fetch available modules for assignment
+  const { data: availableModules = [] } = useQuery({
+    queryKey: ["admin-modules-catalog"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("modules")
+        .select("id, name, slug")
+        .eq("is_active", true)
+        .neq("slug", "admin-panel")
+        .order("name");
+      if (error) throw error;
+      return (data ?? []) as ModuleRow[];
+    },
+  });
 
   const { data: companies = [], isLoading } = useQuery({
     queryKey: ["admin-empresas"],
@@ -97,20 +128,38 @@ const EmpresasPage = () => {
     return c.company_name.toLowerCase().includes(q) || (c.ruc?.toLowerCase().includes(q) ?? false);
   });
 
+  const resetCreateForm = () => {
+    setName(""); setRuc(""); setIndustry("");
+    setAdminName(""); setAdminEmail(""); setAdminPassword("");
+    setSelectedModuleIds([]); setShowPassword(false);
+  };
+
   const createMutation = useMutation({
     mutationFn: async () => {
-      const { error } = await supabase
-        .from("clients")
-        .insert({ company_name: name.trim(), ruc: ruc.trim() || null, industry: industry.trim() || null });
+      const { data, error } = await supabase.functions.invoke("create-company-with-admin", {
+        body: {
+          company_name: name.trim(),
+          ruc: ruc.trim() || null,
+          industry: industry.trim() || null,
+          admin_name: adminName.trim(),
+          admin_email: adminEmail.trim().toLowerCase(),
+          admin_password: adminPassword,
+          module_ids: selectedModuleIds,
+        },
+      });
       if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      return data;
     },
     onSuccess: () => {
-      toast({ title: "Empresa creada correctamente." });
+      toast({ title: "Empresa y administrador creados correctamente." });
       queryClient.invalidateQueries({ queryKey: ["admin-empresas"] });
       setCreateOpen(false);
-      setName(""); setRuc(""); setIndustry("");
+      resetCreateForm();
     },
-    onError: () => toast({ title: "Error al crear empresa.", variant: "destructive" }),
+    onError: (err: Error) => {
+      toast({ title: err.message || "Error al crear empresa.", variant: "destructive" });
+    },
   });
 
   const editMutation = useMutation({
@@ -136,6 +185,18 @@ const EmpresasPage = () => {
     setEditOpen(true);
   };
 
+  const toggleModule = (moduleId: string) => {
+    setSelectedModuleIds((prev) =>
+      prev.includes(moduleId) ? prev.filter((id) => id !== moduleId) : [...prev, moduleId]
+    );
+  };
+
+  const isCreateValid =
+    name.trim() &&
+    adminName.trim() &&
+    adminEmail.trim() &&
+    adminPassword.length >= 6;
+
   return (
     <AdminShell breadcrumbs={BREADCRUMBS}>
       <div className="space-y-6">
@@ -146,7 +207,7 @@ const EmpresasPage = () => {
               Gestión de empresas clientes del sistema.
             </p>
           </div>
-          <Button onClick={() => setCreateOpen(true)}>
+          <Button onClick={() => { resetCreateForm(); setCreateOpen(true); }}>
             <Plus className="h-4 w-4 mr-2" />
             Crear empresa
           </Button>
@@ -216,28 +277,112 @@ const EmpresasPage = () => {
         </Card>
       </div>
 
-      {/* Create dialog */}
-      <Dialog open={createOpen} onOpenChange={setCreateOpen}>
-        <DialogContent className="max-w-md">
-          <DialogHeader><DialogTitle>Crear empresa</DialogTitle></DialogHeader>
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <Label>Nombre de la empresa *</Label>
-              <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="Ej: Empresa ABC S.A.C." />
+      {/* Create dialog — includes company info + admin user + module selection */}
+      <Dialog open={createOpen} onOpenChange={(open) => { if (!open) { setCreateOpen(false); resetCreateForm(); } }}>
+        <DialogContent className="max-w-lg max-h-[85vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Crear empresa</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-6">
+            {/* Company info */}
+            <div className="space-y-4">
+              <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">Datos de la empresa</h3>
+              <div className="space-y-2">
+                <Label>Nombre de la empresa *</Label>
+                <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="Ej: Empresa ABC S.A.C." />
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-2">
+                  <Label>RUC</Label>
+                  <Input value={ruc} onChange={(e) => setRuc(e.target.value)} placeholder="20123456789" />
+                </div>
+                <div className="space-y-2">
+                  <Label>Sector</Label>
+                  <Input value={industry} onChange={(e) => setIndustry(e.target.value)} placeholder="Manufactura..." />
+                </div>
+              </div>
             </div>
-            <div className="space-y-2">
-              <Label>RUC</Label>
-              <Input value={ruc} onChange={(e) => setRuc(e.target.value)} placeholder="Ej: 20123456789" />
+
+            <Separator />
+
+            {/* Admin user */}
+            <div className="space-y-4">
+              <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">Administrador de la empresa</h3>
+              <p className="text-xs text-muted-foreground">
+                Se creará una cuenta de administrador que podrá gestionar los usuarios y módulos de la empresa.
+              </p>
+              <div className="space-y-2">
+                <Label>Nombre completo *</Label>
+                <Input value={adminName} onChange={(e) => setAdminName(e.target.value)} placeholder="Juan Pérez" />
+              </div>
+              <div className="space-y-2">
+                <Label>Correo electrónico *</Label>
+                <Input type="email" value={adminEmail} onChange={(e) => setAdminEmail(e.target.value)} placeholder="admin@empresa.com" />
+              </div>
+              <div className="space-y-2">
+                <Label>Contraseña *</Label>
+                <div className="relative">
+                  <Input
+                    type={showPassword ? "text" : "password"}
+                    value={adminPassword}
+                    onChange={(e) => setAdminPassword(e.target.value)}
+                    placeholder="Mínimo 6 caracteres"
+                  />
+                  <button
+                    type="button"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                    onClick={() => setShowPassword(!showPassword)}
+                  >
+                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
+                </div>
+                {adminPassword && adminPassword.length < 6 && (
+                  <p className="text-xs text-destructive">La contraseña debe tener al menos 6 caracteres.</p>
+                )}
+              </div>
             </div>
-            <div className="space-y-2">
-              <Label>Sector</Label>
-              <Input value={industry} onChange={(e) => setIndustry(e.target.value)} placeholder="Ej: Manufactura, Minería..." />
+
+            <Separator />
+
+            {/* Module selection */}
+            <div className="space-y-4">
+              <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">Módulos habilitados</h3>
+              <p className="text-xs text-muted-foreground">
+                Selecciona los módulos que la empresa tendrá disponibles. El administrador también recibirá acceso a estos módulos.
+              </p>
+              {availableModules.length === 0 ? (
+                <p className="text-sm text-muted-foreground">No hay módulos disponibles.</p>
+              ) : (
+                <div className="space-y-2">
+                  {availableModules.map((m) => (
+                    <label
+                      key={m.id}
+                      className="flex items-center gap-3 p-2 rounded-md hover:bg-muted/50 cursor-pointer"
+                    >
+                      <Checkbox
+                        checked={selectedModuleIds.includes(m.id)}
+                        onCheckedChange={() => toggleModule(m.id)}
+                      />
+                      <span className="text-sm">{m.name}</span>
+                    </label>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setCreateOpen(false)}>Cancelar</Button>
-            <Button onClick={() => createMutation.mutate()} disabled={createMutation.isPending || !name.trim()}>
-              {createMutation.isPending ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" />Creando...</> : "Crear empresa"}
+          <DialogFooter className="mt-4">
+            <Button variant="outline" onClick={() => { setCreateOpen(false); resetCreateForm(); }}>
+              Cancelar
+            </Button>
+            <Button
+              onClick={() => createMutation.mutate()}
+              disabled={createMutation.isPending || !isCreateValid}
+            >
+              {createMutation.isPending ? (
+                <><Loader2 className="h-4 w-4 mr-2 animate-spin" />Creando...</>
+              ) : (
+                "Crear empresa"
+              )}
             </Button>
           </DialogFooter>
         </DialogContent>
