@@ -126,7 +126,7 @@ export const ReportProvider = ({ children }: { children: React.ReactNode }) => {
   }, []);
 
   return (
-    <ReportContext.Provider value={{ data, activeSheet, setActiveSheet, updateSheet, saving, loadReport, createNew }}>
+    <ReportContext.Provider value={{ data, activeSheet, setActiveSheet, updateSheet, saving, loadReport, createNew, hiddenPages, togglePageVisibility }}>
       {children}
     </ReportContext.Provider>
   );
