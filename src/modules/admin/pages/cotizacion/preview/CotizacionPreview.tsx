@@ -107,7 +107,7 @@ const CotizacionPreviewContent = () => {
       {/* Totals + Terms side by side */}
       <div style={{ display: "flex", gap: "8px", marginBottom: "12px" }}>
         {/* Terms */}
-        <div style={{ flex: 1, border: OB, padding: "6px", fontSize: "9px" }}>
+        <div style={{ flex: 1, border: OB, padding: "6px", fontSize: "10px" }}>
           <div
             style={{
               backgroundColor: ORANGE,
