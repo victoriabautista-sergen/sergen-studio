@@ -147,15 +147,6 @@ const ReportPreview = () => {
   return (
     <div className="flex flex-col items-center h-full overflow-auto p-6 relative">
       <div className="relative flex-shrink-0">
-        {isCurrentHidden && (
-          <div className="absolute inset-0 z-10 bg-background/60 backdrop-blur-[1px] flex items-center justify-center rounded-sm">
-            <div className="text-center">
-              <EyeOff className="h-10 w-10 mx-auto mb-2 text-muted-foreground" />
-              <p className="text-muted-foreground font-medium">Página oculta</p>
-              <p className="text-xs text-muted-foreground">No se incluirá en el PDF</p>
-            </div>
-          </div>
-        )}
         <div
           className="bg-white shadow-xl border rounded-sm"
           style={{
