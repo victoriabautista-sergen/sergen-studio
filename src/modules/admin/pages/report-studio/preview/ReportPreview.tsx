@@ -39,7 +39,7 @@ let _isExporting = false;
 let _setExportingExternal: ((v: boolean) => void) | null = null;
 
 const Navigation = () => {
-  const { activeSheet, setActiveSheet, hiddenPages } = useReportContext();
+  const { activeSheet, setActiveSheet, hiddenPages, togglePageVisibility } = useReportContext();
   const [exporting, setExporting] = useState(false);
 
   _setExportingExternal = setExporting;
@@ -50,6 +50,7 @@ const Navigation = () => {
 
   const currentIndex = visiblePages.indexOf(activeSheet);
   const visibleCount = visiblePages.length;
+  const isCurrentHidden = hiddenPages.has(activeSheet);
 
   const goToPrev = () => {
     if (currentIndex > 0) setActiveSheet(visiblePages[currentIndex - 1]);
@@ -70,6 +71,15 @@ const Navigation = () => {
       </span>
       <Button variant="outline" size="default" onClick={goToNext} disabled={currentIndex >= visibleCount - 1} className="gap-1">
         Siguiente <ChevronRight className="h-4 w-4" />
+      </Button>
+      <Button
+        variant={isCurrentHidden ? "destructive" : "outline"}
+        size="default"
+        onClick={() => togglePageVisibility(activeSheet)}
+        className="gap-1"
+      >
+        {isCurrentHidden ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+        {isCurrentHidden ? "Mostrar página" : "Ocultar página"}
       </Button>
     </div>
   );
