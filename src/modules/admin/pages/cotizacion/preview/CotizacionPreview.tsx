@@ -79,7 +79,7 @@ const CotizacionPreviewContent = () => {
       </table>
 
       {/* Items table */}
-      <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "9px", marginBottom: "4px", border: B }}>
+      <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "10px", marginBottom: "4px", border: B }}>
         <thead>
           <tr style={{ backgroundColor: ORANGE, color: "#fff", height: "16px" }}>
             <th style={{ padding: "0 4px 0 6px", textAlign: "left", fontWeight: 600, verticalAlign: "middle", lineHeight: 1, border: B }}>Descripción</th>
