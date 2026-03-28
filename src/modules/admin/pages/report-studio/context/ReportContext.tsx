@@ -12,6 +12,8 @@ interface ReportContextType {
   saving: boolean;
   loadReport: (id: string) => Promise<void>;
   createNew: () => void;
+  hiddenPages: Set<number>;
+  togglePageVisibility: (page: number) => void;
 }
 
 const ReportContext = createContext<ReportContextType | null>(null);
