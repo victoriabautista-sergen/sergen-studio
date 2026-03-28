@@ -45,31 +45,28 @@ const Navigation = () => {
   _setExportingExternal = setExporting;
 
   const visiblePages = useMemo(() => {
-    return Array.from({ length: TOTAL_PAGES }, (_, i) => i + 1).filter(p => !hiddenPages.has(p));
-  }, [hiddenPages]);
+    return Array.from({ length: TOTAL_PAGES }, (_, i) => i + 1);
+  }, []);
 
   const currentIndex = visiblePages.indexOf(activeSheet);
-  const visibleCount = visiblePages.length;
   const isCurrentHidden = hiddenPages.has(activeSheet);
 
   const goToPrev = () => {
     if (currentIndex > 0) setActiveSheet(visiblePages[currentIndex - 1]);
   };
   const goToNext = () => {
-    if (currentIndex < visibleCount - 1) setActiveSheet(visiblePages[currentIndex + 1]);
+    if (currentIndex < TOTAL_PAGES - 1) setActiveSheet(visiblePages[currentIndex + 1]);
   };
-
-  const displayNum = currentIndex >= 0 ? currentIndex + 1 : "—";
 
   return (
     <div className="flex items-center gap-3">
-      <Button variant="outline" size="default" onClick={goToPrev} disabled={currentIndex <= 0} className="gap-1">
+      <Button variant="outline" size="default" onClick={goToPrev} disabled={activeSheet === 1} className="gap-1">
         <ChevronLeft className="h-4 w-4" /> Anterior
       </Button>
       <span className="text-sm text-muted-foreground whitespace-nowrap">
-        Página {displayNum} de {visibleCount}
+        Página {activeSheet} de {TOTAL_PAGES}
       </span>
-      <Button variant="outline" size="default" onClick={goToNext} disabled={currentIndex >= visibleCount - 1} className="gap-1">
+      <Button variant="outline" size="default" onClick={goToNext} disabled={activeSheet === TOTAL_PAGES} className="gap-1">
         Siguiente <ChevronRight className="h-4 w-4" />
       </Button>
       <Button
@@ -79,7 +76,7 @@ const Navigation = () => {
         className="gap-1"
       >
         {isCurrentHidden ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-        {isCurrentHidden ? "Mostrar página" : "Ocultar página"}
+        {isCurrentHidden ? "Incluir en PDF" : "Excluir del PDF"}
       </Button>
     </div>
   );
