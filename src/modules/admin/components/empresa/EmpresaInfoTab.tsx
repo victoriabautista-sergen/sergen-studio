@@ -31,6 +31,7 @@ const EmpresaInfoTab = ({ company }: { company: Company }) => {
   const [formName, setFormName] = useState(company.company_name);
   const [formRuc, setFormRuc] = useState(company.ruc ?? "");
   const [formIndustry, setFormIndustry] = useState(company.industry ?? "");
+  const [formPlan, setFormPlan] = useState("");
 
   // Extra fields from contract_info / energy_supply_info JSON
   const { data: fullCompany } = useQuery({
