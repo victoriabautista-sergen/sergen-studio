@@ -65,7 +65,7 @@ const EmpresasPage = () => {
   // Module selection
   const [selectedModuleIds, setSelectedModuleIds] = useState<string[]>([]);
   // Plan selection
-  const [selectedPlan, setSelectedPlan] = useState<string>("none");
+  const [selectedPlan, setSelectedPlan] = useState<string>("trial");
 
   const [editOpen, setEditOpen] = useState(false);
   const [editId, setEditId] = useState("");
