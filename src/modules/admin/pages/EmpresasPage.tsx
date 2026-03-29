@@ -148,6 +148,7 @@ const EmpresasPage = () => {
           admin_email: adminEmail.trim().toLowerCase(),
           admin_password: adminPassword,
           module_ids: selectedModuleIds,
+          plan: selectedPlan !== "none" ? selectedPlan : null,
         },
       });
       if (error) throw error;
