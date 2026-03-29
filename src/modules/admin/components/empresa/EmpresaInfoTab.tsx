@@ -50,16 +50,27 @@ const EmpresaInfoTab = ({ company }: { company: Company }) => {
   const [distribuidora, setDistribuidora] = useState(energyInfo.distribuidora ?? "");
   const [potenciaContratada, setPotenciaContratada] = useState(energyInfo.potencia_contratada ?? "");
 
-  // Subscription for status display
+  // Subscription
   const { data: subscription } = useQuery({
     queryKey: ["admin-empresa-sub", company.id],
     queryFn: async () => {
       const { data } = await supabase.from("subscriptions")
-        .select("status").eq("client_id", company.id)
+        .select("id, plan, status, start_date, end_date")
+        .eq("client_id", company.id)
         .order("created_at", { ascending: false }).limit(1).maybeSingle();
       return data;
     },
   });
+
+  // Sync plan from subscription when loaded
+  useState(() => {
+    if (subscription?.plan && !formPlan) setFormPlan(subscription.plan);
+  });
+  // Keep formPlan in sync
+  if (subscription?.plan && formPlan === "") setFormPlan(subscription.plan);
+
+  const [formStatus, setFormStatus] = useState("");
+  if (subscription?.status && formStatus === "") setFormStatus(subscription.status);
 
   const status = subscription?.status ?? "inactive";
 
