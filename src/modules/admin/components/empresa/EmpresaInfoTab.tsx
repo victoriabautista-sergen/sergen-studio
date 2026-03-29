@@ -136,10 +136,10 @@ const EmpresaInfoTab = ({ company }: { company: Company }) => {
     onError: () => toast({ title: "Error al eliminar.", variant: "destructive" }),
   });
 
-  const StatusBadge = () => {
-    if (status === "active") return <Badge className="bg-green-500/20 text-green-700 border-green-500/30">Activa</Badge>;
-    if (status === "suspended") return <Badge className="bg-destructive/15 text-destructive border-destructive/30">Suspendida</Badge>;
-    return <Badge variant="secondary">Inactiva</Badge>;
+  const PlanStatusBadge = () => {
+    if (status === "active") return <Badge className="bg-green-500/20 text-green-700 border-green-500/30">Activo</Badge>;
+    if (status === "suspended") return <Badge className="bg-destructive/15 text-destructive border-destructive/30">Suspendido</Badge>;
+    return <Badge variant="destructive">Sin plan</Badge>;
   };
 
   return (
