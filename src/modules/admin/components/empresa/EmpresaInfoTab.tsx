@@ -181,7 +181,7 @@ const EmpresaInfoTab = ({ company }: { company: Company }) => {
               </Select>
             </div>
             <div className="space-y-2">
-              <Label>Estado de suscripción</Label>
+              <Label>Estado del plan</Label>
               <Select value={formSubStatus || "active"} onValueChange={setFormSubStatus}>
                 <SelectTrigger>
                   <SelectValue />
