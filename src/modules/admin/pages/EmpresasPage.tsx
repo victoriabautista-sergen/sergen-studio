@@ -248,7 +248,7 @@ const EmpresasPage = () => {
                     <TableHead>Sector</TableHead>
                     <TableHead className="text-center">Usuarios</TableHead>
                     <TableHead className="text-center">Módulos activos</TableHead>
-                    <TableHead>Estado</TableHead>
+                    <TableHead>Plan</TableHead>
                     <TableHead className="text-right">Acciones</TableHead>
                   </TableRow>
                 </TableHeader>
