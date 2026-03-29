@@ -166,6 +166,7 @@ const EmpresaSuscripcionTab = ({ companyId }: { companyId: string }) => {
               <Select value={newPlan} onValueChange={setNewPlan}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
+              <SelectItem value="trial">Prueba gratuita</SelectItem>
                   <SelectItem value="basic">Básico</SelectItem>
                   <SelectItem value="advanced">Avanzado</SelectItem>
                 </SelectContent>
