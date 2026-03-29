@@ -134,7 +134,7 @@ const EmpresasPage = () => {
   const resetCreateForm = () => {
     setName(""); setRuc(""); setIndustry("");
     setAdminName(""); setAdminEmail(""); setAdminPassword("");
-    setSelectedModuleIds([]); setShowPassword(false);
+    setSelectedModuleIds([]); setShowPassword(false); setSelectedPlan("none");
   };
 
   const createMutation = useMutation({
