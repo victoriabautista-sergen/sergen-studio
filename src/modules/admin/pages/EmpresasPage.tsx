@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { Building2, ExternalLink, Eye, EyeOff, Loader2, Pencil, Plus, Search } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -63,6 +64,8 @@ const EmpresasPage = () => {
   const [showPassword, setShowPassword] = useState(false);
   // Module selection
   const [selectedModuleIds, setSelectedModuleIds] = useState<string[]>([]);
+  // Plan selection
+  const [selectedPlan, setSelectedPlan] = useState<string>("none");
 
   const [editOpen, setEditOpen] = useState(false);
   const [editId, setEditId] = useState("");
@@ -131,7 +134,7 @@ const EmpresasPage = () => {
   const resetCreateForm = () => {
     setName(""); setRuc(""); setIndustry("");
     setAdminName(""); setAdminEmail(""); setAdminPassword("");
-    setSelectedModuleIds([]); setShowPassword(false);
+    setSelectedModuleIds([]); setShowPassword(false); setSelectedPlan("none");
   };
 
   const createMutation = useMutation({
@@ -145,6 +148,7 @@ const EmpresasPage = () => {
           admin_email: adminEmail.trim().toLowerCase(),
           admin_password: adminPassword,
           module_ids: selectedModuleIds,
+          plan: selectedPlan !== "none" ? selectedPlan : null,
         },
       });
       if (error) throw error;
@@ -340,6 +344,27 @@ const EmpresasPage = () => {
                   <p className="text-xs text-destructive">La contraseña debe tener al menos 6 caracteres.</p>
                 )}
               </div>
+            </div>
+
+            <Separator />
+
+            {/* Plan / subscription */}
+            <div className="space-y-4">
+              <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">Plan de suscripción</h3>
+              <p className="text-xs text-muted-foreground">
+                Asigna un plan a la empresa. Selecciona "Sin plan" para crear sin suscripción activa.
+              </p>
+              <Select value={selectedPlan} onValueChange={setSelectedPlan}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Seleccionar plan" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">Sin plan</SelectItem>
+                  <SelectItem value="trial">Prueba gratuita</SelectItem>
+                  <SelectItem value="basic">Plan Básico</SelectItem>
+                  <SelectItem value="advanced">Plan Avanzado</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
 
             <Separator />

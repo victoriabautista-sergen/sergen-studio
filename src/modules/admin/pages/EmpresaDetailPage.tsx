@@ -7,6 +7,7 @@ import AdminShell from "../components/AdminShell";
 import EmpresaInfoTab from "../components/empresa/EmpresaInfoTab";
 import EmpresaUsuariosTab from "../components/empresa/EmpresaUsuariosTab";
 import EmpresaModulosTab from "../components/empresa/EmpresaModulosTab";
+import EmpresaSuscripcionTab from "../components/empresa/EmpresaSuscripcionTab";
 import EmpresaConfigTab from "../components/empresa/EmpresaConfigTab";
 
 const EmpresaDetailPage = () => {
@@ -60,10 +61,11 @@ const EmpresaDetailPage = () => {
         </div>
 
         <Tabs defaultValue="info" className="w-full">
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-5">
             <TabsTrigger value="info">Información</TabsTrigger>
             <TabsTrigger value="usuarios">Usuarios</TabsTrigger>
-            <TabsTrigger value="modulos">Módulos habilitados</TabsTrigger>
+            <TabsTrigger value="modulos">Módulos</TabsTrigger>
+            <TabsTrigger value="suscripcion">Suscripción</TabsTrigger>
             <TabsTrigger value="configuracion">Configuración</TabsTrigger>
           </TabsList>
           <TabsContent value="info" className="mt-6">
@@ -74,6 +76,9 @@ const EmpresaDetailPage = () => {
           </TabsContent>
           <TabsContent value="modulos" className="mt-6">
             <EmpresaModulosTab companyId={company.id} />
+          </TabsContent>
+          <TabsContent value="suscripcion" className="mt-6">
+            <EmpresaSuscripcionTab companyId={company.id} />
           </TabsContent>
           <TabsContent value="configuracion" className="mt-6">
             <EmpresaConfigTab companyId={company.id} />

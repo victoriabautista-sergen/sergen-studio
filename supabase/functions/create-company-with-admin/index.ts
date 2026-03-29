@@ -57,7 +57,7 @@ Deno.serve(async (req) => {
     const body = await req.json();
 
     // Validate required fields
-    const { company_name, ruc, industry, admin_name, admin_email, admin_password, module_ids } = body;
+    const { company_name, ruc, industry, admin_name, admin_email, admin_password, module_ids, plan } = body;
 
     if (!company_name?.trim()) {
       return new Response(JSON.stringify({ error: "Nombre de empresa requerido" }), {
@@ -197,6 +197,28 @@ Deno.serve(async (req) => {
       );
       if (umError) {
         console.error("Error creating user_modules:", umError);
+      }
+    }
+
+    // 7. Create subscription if plan was selected
+    if (plan && plan !== "none") {
+      const today = new Date().toISOString().split("T")[0];
+      // Trial: 30 days, basic/advanced: 1 year
+      const endDate = new Date();
+      if (plan === "trial") {
+        endDate.setDate(endDate.getDate() + 30);
+      } else {
+        endDate.setFullYear(endDate.getFullYear() + 1);
+      }
+      const { error: subError } = await adminClient.from("subscriptions").insert({
+        client_id: company.id,
+        plan,
+        start_date: today,
+        end_date: endDate.toISOString().split("T")[0],
+        status: "active",
+      });
+      if (subError) {
+        console.error("Error creating subscription:", subError);
       }
     }
 
