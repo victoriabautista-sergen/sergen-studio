@@ -41,7 +41,7 @@ const StatusBadge = ({ status }: { status: string | null }) => {
     return <Badge className="bg-green-500/20 text-green-700 border-green-500/30">Activa</Badge>;
   if (status === "suspended")
     return <Badge className="bg-destructive/15 text-destructive border-destructive/30">Suspendida</Badge>;
-  return <Badge variant="secondary">Sin suscripción</Badge>;
+  return <Badge variant="secondary">Sin plan</Badge>;
 };
 
 const BREADCRUMBS = [{ label: "Empresas" }];
