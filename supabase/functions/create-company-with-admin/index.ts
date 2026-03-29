@@ -200,6 +200,28 @@ Deno.serve(async (req) => {
       }
     }
 
+    // 7. Create subscription if plan was selected
+    if (plan && plan !== "none") {
+      const today = new Date().toISOString().split("T")[0];
+      // Trial: 30 days, basic/advanced: 1 year
+      const endDate = new Date();
+      if (plan === "trial") {
+        endDate.setDate(endDate.getDate() + 30);
+      } else {
+        endDate.setFullYear(endDate.getFullYear() + 1);
+      }
+      const { error: subError } = await adminClient.from("subscriptions").insert({
+        client_id: company.id,
+        plan,
+        start_date: today,
+        end_date: endDate.toISOString().split("T")[0],
+        status: "active",
+      });
+      if (subError) {
+        console.error("Error creating subscription:", subError);
+      }
+    }
+
     return new Response(
       JSON.stringify({
         company_id: company.id,
