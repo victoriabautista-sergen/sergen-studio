@@ -57,7 +57,7 @@ Deno.serve(async (req) => {
     const body = await req.json();
 
     // Validate required fields
-    const { company_name, ruc, industry, admin_name, admin_email, admin_password, module_ids } = body;
+    const { company_name, ruc, industry, admin_name, admin_email, admin_password, module_ids, plan } = body;
 
     if (!company_name?.trim()) {
       return new Response(JSON.stringify({ error: "Nombre de empresa requerido" }), {
