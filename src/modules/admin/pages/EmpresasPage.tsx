@@ -352,15 +352,14 @@ const EmpresasPage = () => {
             <div className="space-y-4">
               <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">Plan de suscripción</h3>
               <p className="text-xs text-muted-foreground">
-                Asigna un plan a la empresa. Selecciona "Sin plan" para crear sin suscripción activa.
+                Toda empresa requiere un plan activo para acceder a la plataforma.
               </p>
               <Select value={selectedPlan} onValueChange={setSelectedPlan}>
                 <SelectTrigger>
                   <SelectValue placeholder="Seleccionar plan" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="none">Sin plan</SelectItem>
-                  <SelectItem value="trial">Prueba gratuita</SelectItem>
+                  <SelectItem value="trial">Prueba gratuita (30 días)</SelectItem>
                   <SelectItem value="basic">Plan Básico</SelectItem>
                   <SelectItem value="advanced">Plan Avanzado</SelectItem>
                 </SelectContent>
