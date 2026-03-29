@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Loader2, Save, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -32,6 +32,7 @@ const EmpresaInfoTab = ({ company }: { company: Company }) => {
   const [formRuc, setFormRuc] = useState(company.ruc ?? "");
   const [formIndustry, setFormIndustry] = useState(company.industry ?? "");
   const [formPlan, setFormPlan] = useState("");
+  const [formSubStatus, setFormSubStatus] = useState("");
 
   // Extra fields from contract_info / energy_supply_info JSON
   const { data: fullCompany } = useQuery({
@@ -62,20 +63,18 @@ const EmpresaInfoTab = ({ company }: { company: Company }) => {
     },
   });
 
-  // Sync plan from subscription when loaded
-  useState(() => {
-    if (subscription?.plan && !formPlan) setFormPlan(subscription.plan);
-  });
-  // Keep formPlan in sync
-  if (subscription?.plan && formPlan === "") setFormPlan(subscription.plan);
-
-  const [formStatus, setFormStatus] = useState("");
-  if (subscription?.status && formStatus === "") setFormStatus(subscription.status);
+  useEffect(() => {
+    if (subscription) {
+      setFormPlan(subscription.plan);
+      setFormSubStatus(subscription.status);
+    }
+  }, [subscription]);
 
   const status = subscription?.status ?? "inactive";
 
   const updateMutation = useMutation({
     mutationFn: async () => {
+      // Update client info
       const { error } = await supabase.from("clients").update({
         company_name: formName.trim(),
         ruc: formRuc.trim() || null,
@@ -87,11 +86,38 @@ const EmpresaInfoTab = ({ company }: { company: Company }) => {
         },
       }).eq("id", company.id);
       if (error) throw error;
+
+      // Update subscription plan & status
+      if (subscription?.id) {
+        const { error: subError } = await supabase.from("subscriptions").update({
+          plan: formPlan,
+          status: formSubStatus,
+        }).eq("id", subscription.id);
+        if (subError) throw subError;
+      } else if (formPlan) {
+        // Create subscription if none exists
+        const today = new Date().toISOString().split("T")[0];
+        const endDate = new Date();
+        if (formPlan === "trial") {
+          endDate.setDate(endDate.getDate() + 30);
+        } else {
+          endDate.setFullYear(endDate.getFullYear() + 1);
+        }
+        const { error: subError } = await supabase.from("subscriptions").insert({
+          client_id: company.id,
+          plan: formPlan,
+          start_date: today,
+          end_date: endDate.toISOString().split("T")[0],
+          status: formSubStatus || "active",
+        });
+        if (subError) throw subError;
+      }
     },
     onSuccess: () => {
       toast({ title: "Información actualizada." });
       queryClient.invalidateQueries({ queryKey: ["admin-empresa", company.id] });
       queryClient.invalidateQueries({ queryKey: ["admin-empresa-full", company.id] });
+      queryClient.invalidateQueries({ queryKey: ["admin-empresa-sub", company.id] });
       queryClient.invalidateQueries({ queryKey: ["admin-empresas"] });
     },
     onError: () => toast({ title: "Error al actualizar.", variant: "destructive" }),
@@ -142,18 +168,37 @@ const EmpresaInfoTab = ({ company }: { company: Company }) => {
               <Input value={formIndustry} onChange={(e) => setFormIndustry(e.target.value)} placeholder="Manufactura, Minería…" />
             </div>
             <div className="space-y-2">
+              <Label>Plan</Label>
+              <Select value={formPlan || "trial"} onValueChange={setFormPlan}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="trial">Prueba gratuita</SelectItem>
+                  <SelectItem value="basic">Plan Básico</SelectItem>
+                  <SelectItem value="advanced">Plan Avanzado</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Estado de suscripción</Label>
+              <Select value={formSubStatus || "active"} onValueChange={setFormSubStatus}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="active">Activa</SelectItem>
+                  <SelectItem value="suspended">Suspendida</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
               <Label>Distribuidora eléctrica</Label>
               <Input value={distribuidora} onChange={(e) => setDistribuidora(e.target.value)} placeholder="Ej: Luz del Sur" />
             </div>
             <div className="space-y-2">
               <Label>Potencia contratada (kW)</Label>
               <Input value={potenciaContratada} onChange={(e) => setPotenciaContratada(e.target.value)} placeholder="Ej: 2500" />
-            </div>
-            <div className="space-y-2">
-              <Label>Estado</Label>
-              <div className="flex items-center h-10">
-                <StatusBadge />
-              </div>
             </div>
           </div>
           <div className="flex justify-end mt-6">
