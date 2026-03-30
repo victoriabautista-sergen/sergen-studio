@@ -1,0 +1,1 @@
+ALTER TABLE public.modulation_days ADD CONSTRAINT modulation_days_date_unique UNIQUE (date);
