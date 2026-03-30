@@ -352,6 +352,16 @@ const ActualizacionAlertaPage = () => {
 
       if (!data?.success) throw new Error("Error al enviar el correo");
 
+      // Registrar en modulation_days: is_modulated = true si hay restricción, false si es libre
+      const peruToday = format(toZonedTime(new Date(), "America/Lima"), "yyyy-MM-dd");
+      const isModulated = riskLevel !== "BAJO";
+      await supabase
+        .from("modulation_days")
+        .upsert(
+          { date: peruToday, is_modulated: isModulated },
+          { onConflict: "date" }
+        );
+
       setAlertSentToday(true);
       setAlertSentAt(new Date().toISOString());
       // Update local last sent recipients
