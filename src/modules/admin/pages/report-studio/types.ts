@@ -48,10 +48,16 @@ export interface Hoja3Data {
   precio_hp_facturado: number;
   precio_hfp_facturado: number;
   otros_cargos: number;
+  op_gravadas: number;
+  op_inafectas: number;
+  op_exonerada: number;
+  op_gratuita: number;
+  otros_descuentos: number;
   ruc: string;
   razon_social: string;
   items: FacturaItem[];
   subtotal: number;
+  isc: number;
   igv: number;
   importe_total: number;
   extracting: boolean;
