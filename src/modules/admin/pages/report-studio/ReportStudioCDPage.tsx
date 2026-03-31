@@ -50,6 +50,8 @@ const ReportStudioContent = () => {
         ...data.datos_generales,
         numero_informe: nextNum,
       });
+    } finally {
+      setDownloading(false);
     }
   };
 
