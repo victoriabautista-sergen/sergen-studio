@@ -19,28 +19,36 @@ const Hoja2Precios = () => {
   const pngBaseSymbol = (h2.png_moneda || "USD") === "USD" ? "$" : "S/";
   const pngActualSymbol = (h2.png_actual_moneda || h2.png_moneda || "USD") === "USD" ? "$" : "S/";
 
-  // Auto-calculate prices
+  // Detect which variables the formula uses
+  const formulaText = (h2.formula_calculo || "").toUpperCase();
+  const usesPNG = /PNG/.test(formulaText);
+  const usesTC = /TC/.test(formulaText);
+  const usesIPP = /IPP/.test(formulaText);
+
+  // Auto-calculate prices based on formula variables
   useEffect(() => {
-    if (h2.pngo > 0 && h2.tco > 0 && h2.ippo > 0) {
-      const factorE = (h2.png_actual / h2.pngo) * (h2.tc_actual / h2.tco) * (h2.ipp_actual / h2.ippo);
-      const factor = factorE * h2.factor_perdida;
-      const hp = +(h2.precio_base_hp * factor).toFixed(4);
-      const hfp = +(h2.precio_base_hfp * factor).toFixed(4);
-      const calcHp = +(hp / 1000).toFixed(5);
-      const calcHfp = +(hfp / 1000).toFixed(5);
-      const fe = +factorE.toFixed(4);
-      if (hp !== h2.precio_actualizado_hp || hfp !== h2.precio_actualizado_hfp || fe !== h2.factor_e || calcHp !== h2.precio_calculado_hp || calcHfp !== h2.precio_calculado_hfp) {
-        updateSheet("hoja2_data", {
-          ...h2,
-          factor_e: fe,
-          precio_actualizado_hp: hp,
-          precio_actualizado_hfp: hfp,
-          precio_calculado_hp: calcHp,
-          precio_calculado_hfp: calcHfp,
-        });
-      }
+    let factorA = 1;
+    if (usesPNG && h2.pngo > 0) factorA *= (h2.png_actual / h2.pngo);
+    if (usesTC && h2.tco > 0) factorA *= (h2.tc_actual / h2.tco);
+    if (usesIPP && h2.ippo > 0) factorA *= (h2.ipp_actual / h2.ippo);
+
+    const factor = factorA * h2.factor_perdida;
+    const hp = +(h2.precio_base_hp * factor).toFixed(4);
+    const hfp = +(h2.precio_base_hfp * factor).toFixed(4);
+    const calcHp = +(hp / 1000).toFixed(5);
+    const calcHfp = +(hfp / 1000).toFixed(5);
+    const fe = +factorA.toFixed(4);
+    if (hp !== h2.precio_actualizado_hp || hfp !== h2.precio_actualizado_hfp || fe !== h2.factor_e || calcHp !== h2.precio_calculado_hp || calcHfp !== h2.precio_calculado_hfp) {
+      updateSheet("hoja2_data", {
+        ...h2,
+        factor_e: fe,
+        precio_actualizado_hp: hp,
+        precio_actualizado_hfp: hfp,
+        precio_calculado_hp: calcHp,
+        precio_calculado_hfp: calcHfp,
+      });
     }
-  }, [h2.precio_base_hp, h2.precio_base_hfp, h2.pngo, h2.tco, h2.ippo, h2.png_actual, h2.tc_actual, h2.ipp_actual, h2.factor_perdida]);
+  }, [h2.precio_base_hp, h2.precio_base_hfp, h2.pngo, h2.tco, h2.ippo, h2.png_actual, h2.tc_actual, h2.ipp_actual, h2.factor_perdida, h2.formula_calculo]);
 
   const numField = (label: string, field: string, val: number, prefix?: string) => (
     <div>
