@@ -197,9 +197,15 @@ const Hoja2Precios = () => {
             </Popover>
           </div>
           <p className="text-[9px] text-muted-foreground mb-1">Se calcula independientemente para HP y HFP</p>
-          <div className="bg-muted/50 rounded px-3 py-2 text-xs font-mono text-muted-foreground border space-y-0.5">
-            <p>PE<sub>HP</sub> = PB<sub>HP</sub> × (PNG/PNGo) × (TC/TCo) × (IPP/IPPo) × FP</p>
-            <p>PE<sub>HFP</sub> = PB<sub>HFP</sub> × (PNG/PNGo) × (TC/TCo) × (IPP/IPPo) × FP</p>
+          <div className="bg-muted/50 rounded px-3 py-2 text-xs font-mono text-muted-foreground border space-y-1">
+            <p className="font-semibold text-foreground text-[10px]">Factor E:</p>
+            <p>Factor<sub>E</sub> = (PNG / PNG<sub>o</sub>) × (TC / TC<sub>o</sub>) × (IPP / IPP<sub>o</sub>)</p>
+            <p className="font-semibold text-foreground text-[10px] pt-1">Precio Actualizado (MWh):</p>
+            <p>PA<sub>HP</sub> = PB<sub>HP</sub> × Factor<sub>E</sub> × FP</p>
+            <p>PA<sub>HFP</sub> = PB<sub>HFP</sub> × Factor<sub>E</sub> × FP</p>
+            <p className="font-semibold text-foreground text-[10px] pt-1">Precio Calculado (kWh):</p>
+            <p>PC<sub>HP</sub> = PA<sub>HP</sub> / 1000</p>
+            <p>PC<sub>HFP</sub> = PA<sub>HFP</sub> / 1000</p>
           </div>
         </div>
 
