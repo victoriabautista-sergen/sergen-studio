@@ -1,5 +1,10 @@
 import { ReportData } from "../../types";
 
+const toSentenceCase = (s: string) => {
+  if (!s) return s;
+  return s.charAt(0).toUpperCase() + s.slice(1).toLowerCase();
+};
+
 const FacturaPage = ({ data }: { data: ReportData }) => {
   const h3 = data.hoja3_data;
   const dg = data.datos_generales;
@@ -57,7 +62,7 @@ const FacturaPage = ({ data }: { data: ReportData }) => {
               <tbody>
                 {h3.items.map((item, i) => (
                   <tr key={i} className={i % 2 === 0 ? "bg-white" : "bg-gray-50/50"}>
-                    <td className={`${borderStyle} p-1.5`} style={{ color: "#1B3A5C" }}>{item.descripcion}</td>
+                    <td className={`${borderStyle} p-1.5`} style={{ color: "#1B3A5C" }}>{toSentenceCase(item.descripcion)}</td>
                     <td className={`${borderStyle} p-1.5 text-center`} style={{ color: "#1B3A5C" }}>{item.unidad}</td>
                     <td className={`${borderStyle} p-1.5 text-right font-mono`} style={{ color: "#1B3A5C" }}>
                       {typeof item.cantidad === "number" ? item.cantidad.toLocaleString("es-PE", { minimumFractionDigits: 2 }) : item.cantidad}
