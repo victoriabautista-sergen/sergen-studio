@@ -38,6 +38,11 @@ const ReportStudioContent = () => {
   const ActiveComponent = sheetComponents[activeSheet];
 
   const [downloading, setDownloading] = useState(false);
+  const [zoom, setZoom] = useState(1);
+
+  const handleZoomIn = () => setZoom(prev => Math.min(prev + 0.1, 2));
+  const handleZoomOut = () => setZoom(prev => Math.max(prev - 0.1, 0.3));
+  const handleZoomReset = () => setZoom(1);
 
   const handleDownloadPDF = async () => {
     setDownloading(true);
