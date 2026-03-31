@@ -100,7 +100,7 @@ const PreciosPage = ({ data }: { data: ReportData }) => {
           <strong>{h2.precio_calculado_hfp?.toFixed(5) || "0.00000"} {monedaSymbol}/kWh (HFP)</strong>.
         </p>
 
-        <p className="text-[9px] italic text-gray-500 mb-1">Precios de Energía Actualizados – {mesNombre} del {anio}</p>
+        <p className="text-[9px] italic text-gray-500 mb-1">Precios de Energía Actualizados – {mesAnterior} del {mesIndex === 0 ? Number(anio) - 1 : anio}</p>
 
         <table className="w-full text-[10px] border-collapse mb-1" style={{ border: "1px solid rgba(232, 121, 43, 0.5)" }}>
           <thead>
