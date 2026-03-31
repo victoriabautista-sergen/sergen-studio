@@ -5,7 +5,8 @@ import { Switch } from "@/components/ui/switch";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Info } from "lucide-react";
 import { useReportContext } from "../context/ReportContext";
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
+import { evaluateFormula } from "../utils/formulaEvaluator";
 
 const Hoja2Precios = () => {
   const { data, updateSheet } = useReportContext();
