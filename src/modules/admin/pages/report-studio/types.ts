@@ -23,6 +23,7 @@ export interface Hoja2Data {
   factor_e: number;
   factor_perdida: number;
   formula: string;
+  formula_calculo: string;
   precio_actualizado_hp: number;
   precio_actualizado_hfp: number;
   precio_calculado_hp: number;
