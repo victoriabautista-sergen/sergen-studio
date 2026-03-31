@@ -64,8 +64,8 @@ const PreciosPage = ({ data }: { data: ReportData }) => {
           </thead>
           <tbody>
             {[
-              ["PNG (Precio del gas natural)", h2.png_actual, pngSymbol],
-              [`PNG₀ (Precio del gas natural base)`, h2.pngo, pngSymbol],
+              ["PNG (Precio del gas natural)", h2.png_actual, pngActualSymbol],
+              [`PNG₀ (Precio del gas natural base)`, h2.pngo, pngBaseSymbol],
               ["TC (Tipo de cambio)", h2.tc_actual, ""],
               [`TC₀ (Tipo de cambio base)`, h2.tco, ""],
               ["IPP (Índice de precios al productor de EE.UU)", h2.ipp_actual, ""],
