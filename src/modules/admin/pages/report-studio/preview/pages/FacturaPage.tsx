@@ -52,25 +52,25 @@ const FacturaPage = ({ data }: { data: ReportData }) => {
             <table className="w-full text-[11px] border-collapse mb-3" style={{ border: "1px solid rgba(27, 58, 92, 0.3)" }}>
               <thead>
                 <tr style={{ backgroundColor: "#1B3A5C" }}>
-                  <th className={`${borderStyle} p-1.5 text-left text-white font-semibold`}>DESCRIPCIÓN</th>
-                  <th className={`${borderStyle} p-1.5 text-center text-white font-semibold`}>UNIDAD</th>
-                  <th className={`${borderStyle} p-1.5 text-right text-white font-semibold`}>CANTIDAD</th>
-                  <th className={`${borderStyle} p-1.5 text-right text-white font-semibold`}>V. UNITARIO</th>
-                  <th className={`${borderStyle} p-1.5 text-right text-white font-semibold`}>V. VENTA</th>
+                  <th className={`${borderStyle} px-1.5 py-0.5 text-left text-white font-semibold`}>DESCRIPCIÓN</th>
+                  <th className={`${borderStyle} px-1.5 py-0.5 text-center text-white font-semibold`}>UNIDAD</th>
+                  <th className={`${borderStyle} px-1.5 py-0.5 text-right text-white font-semibold`}>CANTIDAD</th>
+                  <th className={`${borderStyle} px-1.5 py-0.5 text-right text-white font-semibold`}>V. UNITARIO</th>
+                  <th className={`${borderStyle} px-1.5 py-0.5 text-right text-white font-semibold`}>V. VENTA</th>
                 </tr>
               </thead>
               <tbody>
                 {h3.items.map((item, i) => (
                   <tr key={i} className={i % 2 === 0 ? "bg-white" : "bg-gray-50/50"}>
-                    <td className={`${borderStyle} p-1.5`} style={{ color: "#1B3A5C" }}>{toSentenceCase(item.descripcion)}</td>
-                    <td className={`${borderStyle} p-1.5 text-center`} style={{ color: "#1B3A5C" }}>{item.unidad}</td>
-                    <td className={`${borderStyle} p-1.5 text-right font-mono`} style={{ color: "#1B3A5C" }}>
+                    <td className={`${borderStyle} px-1.5 py-0.5`} style={{ color: "#1B3A5C" }}>{toSentenceCase(item.descripcion)}</td>
+                    <td className={`${borderStyle} px-1.5 py-0.5 text-center`} style={{ color: "#1B3A5C" }}>{item.unidad}</td>
+                    <td className={`${borderStyle} px-1.5 py-0.5 text-right font-mono`} style={{ color: "#1B3A5C" }}>
                       {typeof item.cantidad === "number" ? item.cantidad.toLocaleString("es-PE", { minimumFractionDigits: 2 }) : item.cantidad}
                     </td>
-                    <td className={`${borderStyle} p-1.5 text-right font-mono`} style={{ color: "#1B3A5C" }}>
+                    <td className={`${borderStyle} px-1.5 py-0.5 text-right font-mono`} style={{ color: "#1B3A5C" }}>
                       {typeof item.valor_unitario === "number" ? item.valor_unitario.toFixed(4) : item.valor_unitario}
                     </td>
-                    <td className={`${borderStyle} p-1.5 text-right font-mono`} style={{ color: "#1B3A5C" }}>
+                    <td className={`${borderStyle} px-1.5 py-0.5 text-right font-mono`} style={{ color: "#1B3A5C" }}>
                       {typeof item.valor_venta === "number" ? item.valor_venta.toLocaleString("es-PE", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : item.valor_venta}
                     </td>
                   </tr>
