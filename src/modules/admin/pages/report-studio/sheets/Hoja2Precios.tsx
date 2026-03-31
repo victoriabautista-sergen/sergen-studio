@@ -217,20 +217,22 @@ const Hoja2Precios = () => {
 
         <div className="bg-background rounded-lg p-3 space-y-2 border">
           <p className="text-xs font-medium text-muted-foreground">Resultados parciales</p>
-          {(() => {
-            const ratioPNG = h2.pngo > 0 ? (h2.png_actual / h2.pngo) : 0;
-            const ratioTC = h2.tco > 0 ? (h2.tc_actual / h2.tco) : 0;
-            const ratioIPP = h2.ippo > 0 ? (h2.ipp_actual / h2.ippo) : 0;
-            return (
-              <div className="space-y-0.5 text-[11px] text-muted-foreground bg-muted/40 rounded px-2 py-1.5 font-mono">
-                <div className="flex justify-between"><span>PNG / PNG<sub>o</sub></span><span className="text-foreground font-semibold">{ratioPNG.toFixed(6)}</span></div>
-                <div className="flex justify-between"><span>TC / TC<sub>o</sub></span><span className="text-foreground font-semibold">{ratioTC.toFixed(6)}</span></div>
-                <div className="flex justify-between"><span>IPP / IPP<sub>o</sub></span><span className="text-foreground font-semibold">{ratioIPP.toFixed(6)}</span></div>
-                <hr className="border-border my-1" />
-                <div className="flex justify-between"><span>Factor A</span><span className="text-foreground font-semibold">{h2.factor_e?.toFixed(6) || "0.000000"}</span></div>
-              </div>
-            );
-          })()}
+          <div className="space-y-0.5 text-[11px] text-muted-foreground bg-muted/40 rounded px-2 py-1.5 font-mono">
+            {usesPNG && (
+              <div className="flex justify-between"><span>PNG / PNG<sub>o</sub></span><span className="text-foreground font-semibold">{(h2.pngo > 0 ? h2.png_actual / h2.pngo : 0).toFixed(6)}</span></div>
+            )}
+            {usesTC && (
+              <div className="flex justify-between"><span>TC / TC<sub>o</sub></span><span className="text-foreground font-semibold">{(h2.tco > 0 ? h2.tc_actual / h2.tco : 0).toFixed(6)}</span></div>
+            )}
+            {usesIPP && (
+              <div className="flex justify-between"><span>IPP / IPP<sub>o</sub></span><span className="text-foreground font-semibold">{(h2.ippo > 0 ? h2.ipp_actual / h2.ippo : 0).toFixed(6)}</span></div>
+            )}
+            {!usesPNG && !usesTC && !usesIPP && (
+              <div className="text-[10px] text-muted-foreground italic">No se detectaron variables en la fórmula</div>
+            )}
+            <hr className="border-border my-1" />
+            <div className="flex justify-between"><span>Factor A</span><span className="text-foreground font-semibold">{h2.factor_e?.toFixed(6) || "0.000000"}</span></div>
+          </div>
 
           <p className="text-xs font-medium text-muted-foreground pt-1">Resultados finales ({monedaSymbol})</p>
           <div className="flex justify-between text-sm">
