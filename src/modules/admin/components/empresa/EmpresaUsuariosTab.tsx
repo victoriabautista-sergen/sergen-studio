@@ -257,12 +257,19 @@ const EmpresaUsuariosTab = ({ companyId }: { companyId: string }) => {
       {/* Add user dialog */}
       <Dialog open={addOpen} onOpenChange={setAddOpen}>
         <DialogContent className="max-w-md">
-          <DialogHeader><DialogTitle>Agregar usuario a la empresa</DialogTitle></DialogHeader>
+          <DialogHeader><DialogTitle>Crear usuario para la empresa</DialogTitle></DialogHeader>
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label>Email del usuario *</Label>
+              <Label>Nombre completo *</Label>
+              <Input value={addName} onChange={(e) => setAddName(e.target.value)} placeholder="Nombre del usuario" />
+            </div>
+            <div className="space-y-2">
+              <Label>Email *</Label>
               <Input type="email" value={addEmail} onChange={(e) => setAddEmail(e.target.value)} placeholder="usuario@ejemplo.com" />
-              <p className="text-xs text-muted-foreground">El usuario debe tener una cuenta existente.</p>
+            </div>
+            <div className="space-y-2">
+              <Label>Contraseña *</Label>
+              <Input type="password" value={addPassword} onChange={(e) => setAddPassword(e.target.value)} placeholder="Mínimo 6 caracteres" />
             </div>
             <div className="space-y-2">
               <Label>Rol</Label>
@@ -277,8 +284,11 @@ const EmpresaUsuariosTab = ({ companyId }: { companyId: string }) => {
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setAddOpen(false)}>Cancelar</Button>
-            <Button onClick={() => addUser.mutate({ email: addEmail, role: addRole })} disabled={addUser.isPending || !addEmail.trim()}>
-              {addUser.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : "Agregar"}
+            <Button
+              onClick={() => addUser.mutate({ name: addName, email: addEmail, password: addPassword, role: addRole })}
+              disabled={addUser.isPending || !addEmail.trim() || !addName.trim() || addPassword.length < 6}
+            >
+              {addUser.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : "Crear usuario"}
             </Button>
           </DialogFooter>
         </DialogContent>
