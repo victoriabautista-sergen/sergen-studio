@@ -20,19 +20,21 @@ const Hoja2Precios = () => {
   const pngBaseSymbol = (h2.png_moneda || "USD") === "USD" ? "$" : "S/";
   const pngActualSymbol = (h2.png_actual_moneda || h2.png_moneda || "USD") === "USD" ? "$" : "S/";
 
-  // Detect which variables the formula uses
-  const formulaText = (h2.formula_calculo || "").toUpperCase();
-  const usesPNG = /PNG/.test(formulaText);
-  const usesTC = /TC/.test(formulaText);
-  const usesIPP = /IPP/.test(formulaText);
+  // Evaluate formula and get steps
+  const formulaResult = useMemo(() => {
+    return evaluateFormula(h2.formula_calculo || "", {
+      PNG: h2.png_actual,
+      PNG_o: h2.pngo,
+      TC: h2.tc_actual,
+      TC_o: h2.tco,
+      IPP: h2.ipp_actual,
+      IPP_o: h2.ippo,
+    });
+  }, [h2.png_actual, h2.pngo, h2.tc_actual, h2.tco, h2.ipp_actual, h2.ippo, h2.formula_calculo]);
 
-  // Auto-calculate prices based on formula variables
+  // Auto-calculate prices based on formula
   useEffect(() => {
-    let factorA = 1;
-    if (usesPNG && h2.pngo > 0) factorA *= (h2.png_actual / h2.pngo);
-    if (usesTC && h2.tco > 0) factorA *= (h2.tc_actual / h2.tco);
-    if (usesIPP && h2.ippo > 0) factorA *= (h2.ipp_actual / h2.ippo);
-
+    const factorA = formulaResult.factorA;
     const factor = factorA * h2.factor_perdida;
     const hp = +(h2.precio_base_hp * factor).toFixed(4);
     const hfp = +(h2.precio_base_hfp * factor).toFixed(4);
@@ -49,7 +51,7 @@ const Hoja2Precios = () => {
         precio_calculado_hfp: calcHfp,
       });
     }
-  }, [h2.precio_base_hp, h2.precio_base_hfp, h2.pngo, h2.tco, h2.ippo, h2.png_actual, h2.tc_actual, h2.ipp_actual, h2.factor_perdida, h2.formula_calculo]);
+  }, [formulaResult.factorA, h2.precio_base_hp, h2.precio_base_hfp, h2.factor_perdida]);
 
   const numField = (label: string, field: string, val: number, prefix?: string) => (
     <div>
