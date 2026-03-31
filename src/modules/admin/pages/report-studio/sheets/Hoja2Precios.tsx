@@ -5,7 +5,8 @@ import { Switch } from "@/components/ui/switch";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Info } from "lucide-react";
 import { useReportContext } from "../context/ReportContext";
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
+import { evaluateFormula } from "../utils/formulaEvaluator";
 
 const Hoja2Precios = () => {
   const { data, updateSheet } = useReportContext();
@@ -19,19 +20,21 @@ const Hoja2Precios = () => {
   const pngBaseSymbol = (h2.png_moneda || "USD") === "USD" ? "$" : "S/";
   const pngActualSymbol = (h2.png_actual_moneda || h2.png_moneda || "USD") === "USD" ? "$" : "S/";
 
-  // Detect which variables the formula uses
-  const formulaText = (h2.formula_calculo || "").toUpperCase();
-  const usesPNG = /PNG/.test(formulaText);
-  const usesTC = /TC/.test(formulaText);
-  const usesIPP = /IPP/.test(formulaText);
+  // Evaluate formula and get steps
+  const formulaResult = useMemo(() => {
+    return evaluateFormula(h2.formula_calculo || "", {
+      PNG: h2.png_actual,
+      PNG_o: h2.pngo,
+      TC: h2.tc_actual,
+      TC_o: h2.tco,
+      IPP: h2.ipp_actual,
+      IPP_o: h2.ippo,
+    });
+  }, [h2.png_actual, h2.pngo, h2.tc_actual, h2.tco, h2.ipp_actual, h2.ippo, h2.formula_calculo]);
 
-  // Auto-calculate prices based on formula variables
+  // Auto-calculate prices based on formula
   useEffect(() => {
-    let factorA = 1;
-    if (usesPNG && h2.pngo > 0) factorA *= (h2.png_actual / h2.pngo);
-    if (usesTC && h2.tco > 0) factorA *= (h2.tc_actual / h2.tco);
-    if (usesIPP && h2.ippo > 0) factorA *= (h2.ipp_actual / h2.ippo);
-
+    const factorA = formulaResult.factorA;
     const factor = factorA * h2.factor_perdida;
     const hp = +(h2.precio_base_hp * factor).toFixed(4);
     const hfp = +(h2.precio_base_hfp * factor).toFixed(4);
@@ -48,7 +51,7 @@ const Hoja2Precios = () => {
         precio_calculado_hfp: calcHfp,
       });
     }
-  }, [h2.precio_base_hp, h2.precio_base_hfp, h2.pngo, h2.tco, h2.ippo, h2.png_actual, h2.tc_actual, h2.ipp_actual, h2.factor_perdida, h2.formula_calculo]);
+  }, [formulaResult.factorA, h2.precio_base_hp, h2.precio_base_hfp, h2.factor_perdida]);
 
   const numField = (label: string, field: string, val: number, prefix?: string) => (
     <div>
@@ -218,16 +221,14 @@ const Hoja2Precios = () => {
         <div className="bg-background rounded-lg p-3 space-y-2 border">
           <p className="text-xs font-medium text-muted-foreground">Resultados parciales</p>
           <div className="space-y-0.5 text-[11px] text-muted-foreground bg-muted/40 rounded px-2 py-1.5 font-mono">
-            {usesPNG && (
-              <div className="flex justify-between"><span>PNG / PNG<sub>o</sub></span><span className="text-foreground font-semibold">{(h2.pngo > 0 ? h2.png_actual / h2.pngo : 0).toFixed(6)}</span></div>
-            )}
-            {usesTC && (
-              <div className="flex justify-between"><span>TC / TC<sub>o</sub></span><span className="text-foreground font-semibold">{(h2.tco > 0 ? h2.tc_actual / h2.tco : 0).toFixed(6)}</span></div>
-            )}
-            {usesIPP && (
-              <div className="flex justify-between"><span>IPP / IPP<sub>o</sub></span><span className="text-foreground font-semibold">{(h2.ippo > 0 ? h2.ipp_actual / h2.ippo : 0).toFixed(6)}</span></div>
-            )}
-            {!usesPNG && !usesTC && !usesIPP && (
+            {formulaResult.steps.length > 0 ? (
+              formulaResult.steps.map((step, i) => (
+                <div key={i} className="flex justify-between">
+                  <span>{step.label}</span>
+                  <span className="text-foreground font-semibold">{step.value.toFixed(6)}</span>
+                </div>
+              ))
+            ) : (
               <div className="text-[10px] text-muted-foreground italic">No se detectaron variables en la fórmula</div>
             )}
             <hr className="border-border my-1" />
