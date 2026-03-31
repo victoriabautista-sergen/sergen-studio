@@ -55,18 +55,36 @@ const Hoja1DatosGenerales = () => {
         client_name: client.company_name,
       };
 
-      // Get last report for this client to pre-fill concesionaria
+      // Get last report for this client to pre-fill concesionaria + base values
       const { data: lastReports } = await supabase
         .from("reportes_control_demanda" as any)
-        .select("datos_generales")
+        .select("datos_generales, hoja2_data")
         .eq("client_id", clientId)
         .order("created_at", { ascending: false })
         .limit(1);
 
       if (lastReports && lastReports.length > 0) {
-        const lastDg = (lastReports[0] as any).datos_generales;
+        const last = lastReports[0] as any;
+        const lastDg = last.datos_generales;
         if (lastDg?.concesionaria) {
           updated.concesionaria = lastDg.concesionaria;
+        }
+
+        // Pre-fill base values from last report
+        const lastH2 = last.hoja2_data;
+        if (lastH2) {
+          const baseFields = {
+            precio_base_hp: lastH2.precio_base_hp ?? 0,
+            precio_base_hfp: lastH2.precio_base_hfp ?? 0,
+            precio_potencia: lastH2.precio_potencia ?? 0,
+            moneda: lastH2.moneda ?? "PEN",
+            pngo: lastH2.pngo ?? 0,
+            tco: lastH2.tco ?? 0,
+            ippo: lastH2.ippo ?? 0,
+            factor_perdida: lastH2.factor_perdida ?? 1.0,
+            formula: lastH2.formula ?? "PB × (PNG/PNGo) × (TC/TCo) × (IPP/IPPo) × FP",
+          };
+          updateSheet("hoja2_data", { ...data.hoja2_data, ...baseFields });
         }
       }
 
