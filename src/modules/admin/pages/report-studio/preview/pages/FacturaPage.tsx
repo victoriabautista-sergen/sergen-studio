@@ -49,7 +49,7 @@ const FacturaPage = ({ data }: { data: ReportData }) => {
             </div>
 
             {/* Items table */}
-            <table className="w-full text-[9px] border-collapse mb-3" style={{ border: "1px solid rgba(27, 58, 92, 0.3)" }}>
+            <table className="w-full text-[11px] border-collapse mb-3" style={{ border: "1px solid rgba(27, 58, 92, 0.3)" }}>
               <thead>
                 <tr style={{ backgroundColor: "#1B3A5C" }}>
                   <th className={`${borderStyle} p-1.5 text-left text-white font-semibold`}>DESCRIPCIÓN</th>
