@@ -114,7 +114,20 @@ const Hoja3Factura = () => {
 
       {/* Datos Extraídos */}
       <div className="border rounded-lg p-3 space-y-3 bg-muted/30">
-        <p className="text-xs font-semibold text-foreground uppercase tracking-wide">Datos Extraídos</p>
+        <div className="flex items-center justify-between">
+          <p className="text-xs font-semibold text-foreground uppercase tracking-wide">Datos Extraídos</p>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => h3.factura_file_url && extractData(h3.factura_file_url)}
+            disabled={!h3.factura_file_url || h3.extracting}
+            className="h-7 text-xs"
+          >
+            {h3.extracting ? <Loader2 className="w-3 h-3 mr-1 animate-spin" /> : <Search className="w-3 h-3 mr-1" />}
+            Re-extraer
+          </Button>
+        </div>
 
         <div className="grid grid-cols-2 gap-2">
           <div>
@@ -130,7 +143,7 @@ const Hoja3Factura = () => {
         {(h3.precio_hp_facturado === 0 || h3.precio_hfp_facturado === 0) && (
           <div className="border border-yellow-300 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg p-3 space-y-2">
             <p className="text-[10px] text-yellow-700 dark:text-yellow-400 font-medium">
-              ⚠ No se reconocieron los precios. Indica el nombre exacto del concepto en la factura:
+              ⚠ No se reconocieron los precios. Indica el nombre del concepto y presiona "Re-extraer":
             </p>
             {h3.precio_hp_facturado === 0 && (
               <div>
@@ -144,7 +157,6 @@ const Hoja3Factura = () => {
                 <Input value={h3.nombre_hfp} onChange={e => update("nombre_hfp", e.target.value)} className="h-8 text-sm" placeholder="ENERGÍA ACTIVA EN HORA FUERA DE PUNTA" />
               </div>
             )}
-            <p className="text-[9px] text-muted-foreground">Luego vuelve a hacer clic en "Extraer datos".</p>
           </div>
         )}
       </div>
