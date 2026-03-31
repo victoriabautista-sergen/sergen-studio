@@ -59,7 +59,7 @@ const PreciosPage = ({ data }: { data: ReportData }) => {
               <tr key={i} className="bg-white">
                 <td className="px-1.5 py-0.5 border border-gray-200" style={{ color: "#1B3A5C" }}>{String(label)}</td>
                 <td className="px-1.5 py-0.5 border border-gray-200 text-right font-mono" style={{ color: "#1B3A5C" }}>
-                  {val ? `${Number(val).toFixed(4)}${showCurrency ? ` ${monedaSymbol}` : ""}` : "—"}
+                  {val ? `${showCurrency ? `${monedaSymbol} ` : ""}${Number(val).toFixed(4)}` : "—"}
                 </td>
               </tr>
             ))}
