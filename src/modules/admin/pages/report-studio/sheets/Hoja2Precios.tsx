@@ -221,16 +221,14 @@ const Hoja2Precios = () => {
         <div className="bg-background rounded-lg p-3 space-y-2 border">
           <p className="text-xs font-medium text-muted-foreground">Resultados parciales</p>
           <div className="space-y-0.5 text-[11px] text-muted-foreground bg-muted/40 rounded px-2 py-1.5 font-mono">
-            {usesPNG && (
-              <div className="flex justify-between"><span>PNG / PNG<sub>o</sub></span><span className="text-foreground font-semibold">{(h2.pngo > 0 ? h2.png_actual / h2.pngo : 0).toFixed(6)}</span></div>
-            )}
-            {usesTC && (
-              <div className="flex justify-between"><span>TC / TC<sub>o</sub></span><span className="text-foreground font-semibold">{(h2.tco > 0 ? h2.tc_actual / h2.tco : 0).toFixed(6)}</span></div>
-            )}
-            {usesIPP && (
-              <div className="flex justify-between"><span>IPP / IPP<sub>o</sub></span><span className="text-foreground font-semibold">{(h2.ippo > 0 ? h2.ipp_actual / h2.ippo : 0).toFixed(6)}</span></div>
-            )}
-            {!usesPNG && !usesTC && !usesIPP && (
+            {formulaResult.steps.length > 0 ? (
+              formulaResult.steps.map((step, i) => (
+                <div key={i} className="flex justify-between">
+                  <span>{step.label}</span>
+                  <span className="text-foreground font-semibold">{step.value.toFixed(6)}</span>
+                </div>
+              ))
+            ) : (
               <div className="text-[10px] text-muted-foreground italic">No se detectaron variables en la fórmula</div>
             )}
             <hr className="border-border my-1" />
