@@ -14,7 +14,8 @@ const Hoja2Precios = () => {
   };
 
   const monedaSymbol = h2.moneda === "USD" ? "$" : "S/";
-  const pngSymbol = (h2.png_moneda || "USD") === "USD" ? "$" : "S/";
+  const pngBaseSymbol = (h2.png_moneda || "USD") === "USD" ? "$" : "S/";
+  const pngActualSymbol = (h2.png_actual_moneda || h2.png_moneda || "USD") === "USD" ? "$" : "S/";
 
   // Auto-calculate prices
   useEffect(() => {
@@ -57,26 +58,39 @@ const Hoja2Precios = () => {
     </div>
   );
 
+  const CurrencySwitch = ({ field, checked }: { field: string; checked: boolean }) => (
+    <div className="flex items-center gap-1">
+      <span className="text-[10px] text-muted-foreground">S/</span>
+      <Switch
+        checked={checked}
+        onCheckedChange={(c) => update(field, c ? "USD" : "PEN")}
+        className="scale-75"
+      />
+      <span className="text-[10px] text-muted-foreground">$</span>
+    </div>
+  );
+
   return (
     <div className="space-y-4">
       <h3 className="font-semibold text-foreground">Actualización de Precio</h3>
 
-      <div className="space-y-3">
-        {/* Currency selector */}
-        <div>
-          <Label className="text-xs">Moneda</Label>
-          <Select value={h2.moneda} onValueChange={(v) => update("moneda", v)}>
-            <SelectTrigger className="h-8 text-sm">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="PEN">S/ Soles</SelectItem>
-              <SelectItem value="USD">$ Dólares</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
+      {/* Moneda general */}
+      <div>
+        <Label className="text-xs">Moneda del Contrato</Label>
+        <Select value={h2.moneda} onValueChange={(v) => update("moneda", v)}>
+          <SelectTrigger className="h-8 text-sm">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="PEN">S/ Soles</SelectItem>
+            <SelectItem value="USD">$ Dólares</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
 
-        <p className="text-xs font-medium text-muted-foreground uppercase">Valores Base</p>
+      {/* CAJA 1: Valores Base */}
+      <div className="border rounded-lg p-3 space-y-3 bg-muted/30">
+        <p className="text-xs font-semibold text-foreground uppercase tracking-wide">Valores Base</p>
         <div className="grid grid-cols-2 gap-2">
           {numField("Precio Base HP", "precio_base_hp", h2.precio_base_hp, monedaSymbol)}
           {numField("Precio Base HFP", "precio_base_hfp", h2.precio_base_hfp, monedaSymbol)}
@@ -86,18 +100,10 @@ const Hoja2Precios = () => {
         <div>
           <div className="flex items-center justify-between mb-1">
             <Label className="text-xs">PNGo</Label>
-            <div className="flex items-center gap-1">
-              <span className="text-[10px] text-muted-foreground">S/</span>
-              <Switch
-                checked={(h2.png_moneda || "USD") === "USD"}
-                onCheckedChange={(checked) => update("png_moneda", checked ? "USD" : "PEN")}
-                className="scale-75"
-              />
-              <span className="text-[10px] text-muted-foreground">$</span>
-            </div>
+            <CurrencySwitch field="png_moneda" checked={(h2.png_moneda || "USD") === "USD"} />
           </div>
           <div className="relative">
-            <span className="absolute left-2 top-1/2 -translate-y-1/2 text-xs text-muted-foreground font-medium">{pngSymbol}</span>
+            <span className="absolute left-2 top-1/2 -translate-y-1/2 text-xs text-muted-foreground font-medium">{pngBaseSymbol}</span>
             <Input
               type="number"
               step="any"
@@ -112,15 +118,38 @@ const Hoja2Precios = () => {
           {numField("TCo", "tco", h2.tco)}
           {numField("IPPo", "ippo", h2.ippo)}
         </div>
+      </div>
 
-        <p className="text-xs font-medium text-muted-foreground uppercase mt-3">Valores Actuales</p>
-        {numField("PNG", "png_actual", h2.png_actual, pngSymbol)}
+      {/* CAJA 2: Valores Actuales */}
+      <div className="border rounded-lg p-3 space-y-3 bg-muted/30">
+        <p className="text-xs font-semibold text-foreground uppercase tracking-wide">Valores Actuales</p>
+
+        <div>
+          <div className="flex items-center justify-between mb-1">
+            <Label className="text-xs">PNG</Label>
+            <CurrencySwitch field="png_actual_moneda" checked={(h2.png_actual_moneda || h2.png_moneda || "USD") === "USD"} />
+          </div>
+          <div className="relative">
+            <span className="absolute left-2 top-1/2 -translate-y-1/2 text-xs text-muted-foreground font-medium">{pngActualSymbol}</span>
+            <Input
+              type="number"
+              step="any"
+              value={h2.png_actual || ""}
+              onChange={e => update("png_actual", parseFloat(e.target.value) || 0)}
+              className="h-8 text-sm pl-8"
+            />
+          </div>
+        </div>
+
         <div className="grid grid-cols-2 gap-2">
           {numField("TC", "tc_actual", h2.tc_actual)}
           {numField("IPP", "ipp_actual", h2.ipp_actual)}
         </div>
+      </div>
 
-        <p className="text-xs font-medium text-muted-foreground uppercase mt-3">Cálculo</p>
+      {/* CAJA 3: Cálculo */}
+      <div className="border rounded-lg p-3 space-y-3 bg-muted/30">
+        <p className="text-xs font-semibold text-foreground uppercase tracking-wide">Cálculo</p>
         <div className="grid grid-cols-2 gap-2">
           {numField("Factor E", "factor_e", h2.factor_e)}
           {numField("Factor de Pérdida", "factor_perdida", h2.factor_perdida)}
@@ -135,7 +164,7 @@ const Hoja2Precios = () => {
           />
         </div>
 
-        <div className="bg-muted/50 rounded-lg p-3 space-y-1">
+        <div className="bg-background rounded-lg p-3 space-y-1 border">
           <p className="text-xs font-medium text-muted-foreground">Resultados ({monedaSymbol})</p>
           <div className="flex justify-between text-sm">
             <span>Precio Actualizado HP:</span>

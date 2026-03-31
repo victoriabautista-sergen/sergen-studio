@@ -13,6 +13,7 @@ export interface Hoja2Data {
   precio_potencia: number;
   moneda: "PEN" | "USD";
   png_moneda: "PEN" | "USD";
+  png_actual_moneda: "PEN" | "USD";
   pngo: number;
   tco: number;
   ippo: number;
