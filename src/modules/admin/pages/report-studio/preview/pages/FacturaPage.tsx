@@ -92,7 +92,7 @@ const FacturaPage = ({ data }: { data: ReportData }) => {
                     ["SUBTOTAL", h3.subtotal, false],
                     ["ISC", h3.isc, false],
                     ["IGV", h3.igv, false],
-                    ["IMPORTE TOTAL DE LA VENTA", h3.importe_total, true],
+                    ["IMPORTE TOTAL", h3.importe_total, true],
                   ].filter(([, val, isBold]) => isBold || (val as number) !== 0).map(([label, val, isBold], i) => (
                     <tr key={i} style={isBold ? { backgroundColor: "#1B3A5C" } : {}}>
                       <td className={`px-2 py-1.5 ${borderStyle} ${isBold ? "font-bold text-white text-[10px]" : "font-semibold"}`} style={!isBold ? { color: "#1B3A5C" } : {}}>
