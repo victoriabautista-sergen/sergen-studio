@@ -1,6 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
-import { ArrowLeft, BarChart2, FileText, LayoutDashboard } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { BarChart2, FileText, Home, Receipt, FileCheck } from 'lucide-react';
 import PrivateRoute from '@/core/auth/components/PrivateRoute';
 import { cn } from '@/lib/utils';
 
@@ -9,9 +8,11 @@ interface EnergyShellProps {
 }
 
 const navLinks = [
-  { label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
+  { label: 'Inicio', href: '/dashboard', icon: Home },
   { label: 'Control de Demanda', href: '/energy-intelligence/control', icon: BarChart2 },
   { label: 'Generador de Reporte', href: '/energy-intelligence/reportes', icon: FileText },
+  { label: 'Facturas', href: '/energy-intelligence/facturas', icon: Receipt },
+  { label: 'Contratos y Adendas', href: '/energy-intelligence/contratos', icon: FileCheck },
 ];
 
 const EnergyShell = ({ children }: EnergyShellProps) => {
