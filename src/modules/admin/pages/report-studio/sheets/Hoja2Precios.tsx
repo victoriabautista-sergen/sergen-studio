@@ -19,28 +19,36 @@ const Hoja2Precios = () => {
   const pngBaseSymbol = (h2.png_moneda || "USD") === "USD" ? "$" : "S/";
   const pngActualSymbol = (h2.png_actual_moneda || h2.png_moneda || "USD") === "USD" ? "$" : "S/";
 
-  // Auto-calculate prices
+  // Detect which variables the formula uses
+  const formulaText = (h2.formula_calculo || "").toUpperCase();
+  const usesPNG = /PNG/.test(formulaText);
+  const usesTC = /TC/.test(formulaText);
+  const usesIPP = /IPP/.test(formulaText);
+
+  // Auto-calculate prices based on formula variables
   useEffect(() => {
-    if (h2.pngo > 0 && h2.tco > 0 && h2.ippo > 0) {
-      const factorE = (h2.png_actual / h2.pngo) * (h2.tc_actual / h2.tco) * (h2.ipp_actual / h2.ippo);
-      const factor = factorE * h2.factor_perdida;
-      const hp = +(h2.precio_base_hp * factor).toFixed(4);
-      const hfp = +(h2.precio_base_hfp * factor).toFixed(4);
-      const calcHp = +(hp / 1000).toFixed(5);
-      const calcHfp = +(hfp / 1000).toFixed(5);
-      const fe = +factorE.toFixed(4);
-      if (hp !== h2.precio_actualizado_hp || hfp !== h2.precio_actualizado_hfp || fe !== h2.factor_e || calcHp !== h2.precio_calculado_hp || calcHfp !== h2.precio_calculado_hfp) {
-        updateSheet("hoja2_data", {
-          ...h2,
-          factor_e: fe,
-          precio_actualizado_hp: hp,
-          precio_actualizado_hfp: hfp,
-          precio_calculado_hp: calcHp,
-          precio_calculado_hfp: calcHfp,
-        });
-      }
+    let factorA = 1;
+    if (usesPNG && h2.pngo > 0) factorA *= (h2.png_actual / h2.pngo);
+    if (usesTC && h2.tco > 0) factorA *= (h2.tc_actual / h2.tco);
+    if (usesIPP && h2.ippo > 0) factorA *= (h2.ipp_actual / h2.ippo);
+
+    const factor = factorA * h2.factor_perdida;
+    const hp = +(h2.precio_base_hp * factor).toFixed(4);
+    const hfp = +(h2.precio_base_hfp * factor).toFixed(4);
+    const calcHp = +(hp / 1000).toFixed(5);
+    const calcHfp = +(hfp / 1000).toFixed(5);
+    const fe = +factorA.toFixed(4);
+    if (hp !== h2.precio_actualizado_hp || hfp !== h2.precio_actualizado_hfp || fe !== h2.factor_e || calcHp !== h2.precio_calculado_hp || calcHfp !== h2.precio_calculado_hfp) {
+      updateSheet("hoja2_data", {
+        ...h2,
+        factor_e: fe,
+        precio_actualizado_hp: hp,
+        precio_actualizado_hfp: hfp,
+        precio_calculado_hp: calcHp,
+        precio_calculado_hfp: calcHfp,
+      });
     }
-  }, [h2.precio_base_hp, h2.precio_base_hfp, h2.pngo, h2.tco, h2.ippo, h2.png_actual, h2.tc_actual, h2.ipp_actual, h2.factor_perdida]);
+  }, [h2.precio_base_hp, h2.precio_base_hfp, h2.pngo, h2.tco, h2.ippo, h2.png_actual, h2.tc_actual, h2.ipp_actual, h2.factor_perdida, h2.formula_calculo]);
 
   const numField = (label: string, field: string, val: number, prefix?: string) => (
     <div>
@@ -209,20 +217,22 @@ const Hoja2Precios = () => {
 
         <div className="bg-background rounded-lg p-3 space-y-2 border">
           <p className="text-xs font-medium text-muted-foreground">Resultados parciales</p>
-          {(() => {
-            const ratioPNG = h2.pngo > 0 ? (h2.png_actual / h2.pngo) : 0;
-            const ratioTC = h2.tco > 0 ? (h2.tc_actual / h2.tco) : 0;
-            const ratioIPP = h2.ippo > 0 ? (h2.ipp_actual / h2.ippo) : 0;
-            return (
-              <div className="space-y-0.5 text-[11px] text-muted-foreground bg-muted/40 rounded px-2 py-1.5 font-mono">
-                <div className="flex justify-between"><span>PNG / PNG<sub>o</sub></span><span className="text-foreground font-semibold">{ratioPNG.toFixed(6)}</span></div>
-                <div className="flex justify-between"><span>TC / TC<sub>o</sub></span><span className="text-foreground font-semibold">{ratioTC.toFixed(6)}</span></div>
-                <div className="flex justify-between"><span>IPP / IPP<sub>o</sub></span><span className="text-foreground font-semibold">{ratioIPP.toFixed(6)}</span></div>
-                <hr className="border-border my-1" />
-                <div className="flex justify-between"><span>Factor A</span><span className="text-foreground font-semibold">{h2.factor_e?.toFixed(6) || "0.000000"}</span></div>
-              </div>
-            );
-          })()}
+          <div className="space-y-0.5 text-[11px] text-muted-foreground bg-muted/40 rounded px-2 py-1.5 font-mono">
+            {usesPNG && (
+              <div className="flex justify-between"><span>PNG / PNG<sub>o</sub></span><span className="text-foreground font-semibold">{(h2.pngo > 0 ? h2.png_actual / h2.pngo : 0).toFixed(6)}</span></div>
+            )}
+            {usesTC && (
+              <div className="flex justify-between"><span>TC / TC<sub>o</sub></span><span className="text-foreground font-semibold">{(h2.tco > 0 ? h2.tc_actual / h2.tco : 0).toFixed(6)}</span></div>
+            )}
+            {usesIPP && (
+              <div className="flex justify-between"><span>IPP / IPP<sub>o</sub></span><span className="text-foreground font-semibold">{(h2.ippo > 0 ? h2.ipp_actual / h2.ippo : 0).toFixed(6)}</span></div>
+            )}
+            {!usesPNG && !usesTC && !usesIPP && (
+              <div className="text-[10px] text-muted-foreground italic">No se detectaron variables en la fórmula</div>
+            )}
+            <hr className="border-border my-1" />
+            <div className="flex justify-between"><span>Factor A</span><span className="text-foreground font-semibold">{h2.factor_e?.toFixed(6) || "0.000000"}</span></div>
+          </div>
 
           <p className="text-xs font-medium text-muted-foreground pt-1">Resultados finales ({monedaSymbol})</p>
           <div className="flex justify-between text-sm">
