@@ -101,15 +101,15 @@ const EmpresasPage = () => {
     queryFn: async () => {
       const [{ data: clients, error }, { data: subs }, { data: clientUsers }, { data: companyMods }] = await Promise.all([
         supabase.from("clients").select("id, company_name, ruc, industry").order("company_name"),
-        supabase.from("subscriptions").select("client_id, status").order("created_at", { ascending: false }),
+        supabase.from("subscriptions").select("client_id, plan, status").order("created_at", { ascending: false }),
         supabase.from("client_users").select("client_id"),
         supabase.from("company_modules").select("company_id").eq("enabled", true),
       ]);
       if (error) throw error;
 
-      const subByClient = new Map<string, string>();
+      const subByClient = new Map<string, { status: string; plan: string }>();
       for (const s of subs ?? []) {
-        if (!subByClient.has(s.client_id)) subByClient.set(s.client_id, s.status);
+        if (!subByClient.has(s.client_id)) subByClient.set(s.client_id, { status: s.status, plan: s.plan });
       }
 
       const userCountByClient = new Map<string, number>();
