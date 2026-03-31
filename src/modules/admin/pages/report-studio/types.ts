@@ -61,6 +61,7 @@ export interface Hoja3Data {
   igv: number;
   importe_total: number;
   extracting: boolean;
+  reglas_extraccion: string; // instrucciones personalizadas para la IA por concesionario
 }
 
 export interface Hoja4Data {
