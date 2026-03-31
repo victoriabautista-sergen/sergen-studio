@@ -80,7 +80,7 @@ const FacturaPage = ({ data }: { data: ReportData }) => {
 
             {/* Totals - aligned right, reduced width */}
             <div className="flex justify-end mb-2">
-              <table className="text-[11px] border-collapse" style={{ width: "50%" }}>
+              <table className="text-[11px] border-collapse" style={{ width: "60%" }}>
                 <tbody>
                   {[
                     ["OP. GRAVADAS", h3.op_gravadas, false],
