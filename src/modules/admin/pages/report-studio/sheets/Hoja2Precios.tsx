@@ -164,6 +164,15 @@ const Hoja2Precios = () => {
       {/* CAJA 4: Cálculo */}
       <div className="border rounded-lg p-3 space-y-3 bg-muted/30">
         <p className="text-xs font-semibold text-foreground uppercase tracking-wide">Cálculo</p>
+        
+        <div>
+          <Label className="text-xs">Fórmula de cálculo</Label>
+          <p className="text-[9px] text-muted-foreground mb-1">Fórmula matemática aplicada al cálculo de precios</p>
+          <div className="bg-muted/50 rounded px-3 py-2 text-sm font-mono text-muted-foreground border">
+            PB × (PNG/PNGo) × (TC/TCo) × (IPP/IPPo) × FP
+          </div>
+        </div>
+
         {numField("Factor de Pérdida", "factor_perdida", h2.factor_perdida)}
 
         <div className="bg-background rounded-lg p-3 space-y-1 border">
