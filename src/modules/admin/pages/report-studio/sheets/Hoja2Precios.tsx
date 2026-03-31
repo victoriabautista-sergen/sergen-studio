@@ -180,6 +180,8 @@ const Hoja2Precios = () => {
                 <p className="font-semibold text-foreground mb-2">Siglas de la fórmula</p>
                 <div className="space-y-1 text-muted-foreground">
                   <p><strong className="text-foreground">PB</strong> — Precio Base (HP o HFP)</p>
+                  <p><strong className="text-foreground">PB<sub>HP</sub></strong> — Precio Base Hora Punta</p>
+                  <p><strong className="text-foreground">PB<sub>HFP</sub></strong> — Precio Base Hora Fuera de Punta</p>
                   <p><strong className="text-foreground">PNG</strong> — Precio del Gas Natural (actual)</p>
                   <p><strong className="text-foreground">PNGo</strong> — Precio del Gas Natural (base)</p>
                   <p><strong className="text-foreground">TC</strong> — Tipo de Cambio (actual)</p>
@@ -188,12 +190,16 @@ const Hoja2Precios = () => {
                   <p><strong className="text-foreground">IPPo</strong> — Índice de Precios al Productor (base)</p>
                   <p><strong className="text-foreground">FP</strong> — Factor de Pérdida</p>
                 </div>
+                <div className="mt-2 pt-2 border-t text-muted-foreground">
+                  <p className="text-[10px]">El cálculo se aplica por separado a cada precio base (HP y HFP).</p>
+                </div>
               </PopoverContent>
             </Popover>
           </div>
-          <p className="text-[9px] text-muted-foreground mb-1">Fórmula matemática aplicada al cálculo de precios</p>
-          <div className="bg-muted/50 rounded px-3 py-2 text-sm font-mono text-muted-foreground border">
-            PB × (PNG/PNGo) × (TC/TCo) × (IPP/IPPo) × FP
+          <p className="text-[9px] text-muted-foreground mb-1">Se calcula independientemente para HP y HFP</p>
+          <div className="bg-muted/50 rounded px-3 py-2 text-xs font-mono text-muted-foreground border space-y-0.5">
+            <p>PE<sub>HP</sub> = PB<sub>HP</sub> × (PNG/PNGo) × (TC/TCo) × (IPP/IPPo) × FP</p>
+            <p>PE<sub>HFP</sub> = PB<sub>HFP</sub> × (PNG/PNGo) × (TC/TCo) × (IPP/IPPo) × FP</p>
           </div>
         </div>
 
