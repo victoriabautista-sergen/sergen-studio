@@ -22,13 +22,11 @@ export const RiskManagementCard = ({
       <CardHeader className="pb-2">
         <CardTitle className="text-center w-full">Gestión de riesgo</CardTitle>
       </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="space-y-4 flex flex-col items-center">
-          <MaxPowerDisplay maxPower={maxPower} />
-          <TimeRangeDisplay timeRange={timeRange} />
-          <RiskLevelIndicator riskLevel={riskLevel} />
-          <ModulatedDaysCounter modulatedDays={modulatedDays} />
-        </div>
+      <CardContent className="space-y-3">
+        <MaxPowerDisplay maxPower={maxPower} />
+        <TimeRangeDisplay timeRange={timeRange} />
+        <RiskLevelIndicator riskLevel={riskLevel} />
+        <ModulatedDaysCounter modulatedDays={modulatedDays} />
       </CardContent>
     </Card>
   );
