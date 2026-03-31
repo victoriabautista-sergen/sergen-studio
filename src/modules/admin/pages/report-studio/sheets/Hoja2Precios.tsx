@@ -196,12 +196,12 @@ const Hoja2Precios = () => {
               </PopoverContent>
             </Popover>
           </div>
-          <p className="text-[9px] text-muted-foreground mb-1">Se calcula independientemente para HP y HFP. Edita el texto descriptivo abajo.</p>
+          <p className="text-[9px] text-muted-foreground mb-1">Fórmula del Factor A (editable)</p>
           <textarea
             value={h2.formula_calculo || ""}
             onChange={e => update("formula_calculo", e.target.value)}
-            className="w-full rounded-md border border-input bg-muted/50 px-3 py-2 text-xs font-mono ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring min-h-[120px] resize-y"
-            placeholder={"Factor_E = (PNG / PNG_o) × (TC / TC_o) × (IPP / IPP_o)\nPA_HP = PB_HP × Factor_E × FP\n..."}
+            className="w-full rounded-md border border-input bg-muted/50 px-3 py-2 text-xs font-mono ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring min-h-[40px] resize-y"
+            placeholder="Factor_A = (PNG / PNG_o) × (TC / TC_o) × (IPP / IPP_o)"
           />
         </div>
 
