@@ -25,7 +25,7 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const { image_url, nombre_hp, nombre_hfp } = await req.json();
+    const { image_url, nombre_hp, nombre_hfp, reglas_concesionario, concesionaria } = await req.json();
 
     if (!image_url) {
       return new Response(
@@ -73,8 +73,12 @@ Deno.serve(async (req) => {
     const dataUrl = `data:${mimeType};base64,${base64}`;
     console.log("File downloaded, mime:", mimeType, "size:", fileBuffer.byteLength);
 
-    const prompt = `Analiza esta factura de energía eléctrica y extrae los siguientes datos en formato JSON.
+    const reglasSection = reglas_concesionario 
+      ? `\nREGLAS ESPECÍFICAS DEL CONCESIONARIO (${concesionaria || "desconocido"}):\n${reglas_concesionario}\n`
+      : "";
 
+    const prompt = `Analiza esta factura de energía eléctrica y extrae los siguientes datos en formato JSON.
+${reglasSection}
 IMPORTANTE: 
 - El concepto de energía en hora punta puede aparecer como: "${nombre_hp || "ENERGÍA ACTIVA EN HORA PUNTA"}" o similar.
 - El concepto de energía fuera de hora punta puede aparecer como: "${nombre_hfp || "ENERGÍA ACTIVA EN HORA FUERA DE PUNTA"}" o similar.
