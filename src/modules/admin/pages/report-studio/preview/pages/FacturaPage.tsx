@@ -68,7 +68,7 @@ const FacturaPage = ({ data }: { data: ReportData }) => {
                       {typeof item.cantidad === "number" ? item.cantidad.toLocaleString("es-PE", { minimumFractionDigits: 2 }) : item.cantidad}
                     </td>
                     <td className={`${borderStyle} p-1.5 text-right font-mono`} style={{ color: "#1B3A5C" }}>
-                      {typeof item.valor_unitario === "number" ? item.valor_unitario.toFixed(10) : item.valor_unitario}
+                      {typeof item.valor_unitario === "number" ? item.valor_unitario.toFixed(4) : item.valor_unitario}
                     </td>
                     <td className={`${borderStyle} p-1.5 text-right font-mono`} style={{ color: "#1B3A5C" }}>
                       {typeof item.valor_venta === "number" ? item.valor_venta.toLocaleString("es-PE", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : item.valor_venta}
