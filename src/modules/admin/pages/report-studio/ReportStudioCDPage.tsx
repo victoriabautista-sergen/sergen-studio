@@ -34,7 +34,7 @@ const sheetComponents: Record<number, React.FC> = {
 };
 
 const ReportStudioContent = () => {
-  const { activeSheet, setActiveSheet, saving } = useReportContext();
+  const { data, activeSheet, setActiveSheet, saving, updateSheet } = useReportContext();
   const ActiveComponent = sheetComponents[activeSheet];
 
   const [downloading, setDownloading] = useState(false);
