@@ -26,6 +26,7 @@ type CompanyRow = {
   ruc: string | null;
   industry: string | null;
   subscription_status: string | null;
+  subscription_plan: string | null;
   user_count: number;
   active_modules: number;
 };
@@ -36,12 +37,20 @@ type ModuleRow = {
   slug: string;
 };
 
-const StatusBadge = ({ status }: { status: string | null }) => {
-  if (status === "active")
-    return <Badge className="bg-green-500/20 text-green-700 border-green-500/30">Activa</Badge>;
-  if (status === "suspended")
-    return <Badge className="bg-destructive/15 text-destructive border-destructive/30">Suspendida</Badge>;
-  return <Badge variant="secondary">Sin plan</Badge>;
+const planLabel = (plan: string | null) => {
+  if (plan === "trial") return "Prueba gratuita";
+  if (plan === "basic") return "Plan Básico";
+  if (plan === "advanced") return "Plan Avanzado";
+  return null;
+};
+
+const StatusBadge = ({ status, plan }: { status: string | null; plan: string | null }) => {
+  const label = planLabel(plan);
+  if (status === "active" && label)
+    return <Badge className="bg-green-500/20 text-green-700 border-green-500/30">{label}</Badge>;
+  if (status === "suspended" && label)
+    return <Badge className="bg-destructive/15 text-destructive border-destructive/30">{label} (Suspendida)</Badge>;
+  return <Badge variant="destructive">Sin plan</Badge>;
 };
 
 const BREADCRUMBS = [{ label: "Empresas" }];
@@ -92,15 +101,15 @@ const EmpresasPage = () => {
     queryFn: async () => {
       const [{ data: clients, error }, { data: subs }, { data: clientUsers }, { data: companyMods }] = await Promise.all([
         supabase.from("clients").select("id, company_name, ruc, industry").order("company_name"),
-        supabase.from("subscriptions").select("client_id, status").order("created_at", { ascending: false }),
+        supabase.from("subscriptions").select("client_id, plan, status").order("created_at", { ascending: false }),
         supabase.from("client_users").select("client_id"),
         supabase.from("company_modules").select("company_id").eq("enabled", true),
       ]);
       if (error) throw error;
 
-      const subByClient = new Map<string, string>();
+      const subByClient = new Map<string, { status: string; plan: string }>();
       for (const s of subs ?? []) {
-        if (!subByClient.has(s.client_id)) subByClient.set(s.client_id, s.status);
+        if (!subByClient.has(s.client_id)) subByClient.set(s.client_id, { status: s.status, plan: s.plan });
       }
 
       const userCountByClient = new Map<string, number>();
@@ -118,7 +127,8 @@ const EmpresasPage = () => {
         company_name: c.company_name,
         ruc: c.ruc,
         industry: c.industry,
-        subscription_status: subByClient.get(c.id) ?? null,
+        subscription_status: subByClient.get(c.id)?.status ?? null,
+        subscription_plan: subByClient.get(c.id)?.plan ?? null,
         user_count: userCountByClient.get(c.id) ?? 0,
         active_modules: modCountByClient.get(c.id) ?? 0,
       }));
@@ -260,7 +270,7 @@ const EmpresasPage = () => {
                       <TableCell className="text-muted-foreground">{c.industry ?? "—"}</TableCell>
                       <TableCell className="text-center">{c.user_count}</TableCell>
                       <TableCell className="text-center">{c.active_modules}</TableCell>
-                      <TableCell><StatusBadge status={c.subscription_status} /></TableCell>
+                      <TableCell><StatusBadge status={c.subscription_status} plan={c.subscription_plan} /></TableCell>
                       <TableCell className="text-right">
                         <div className="flex items-center justify-end gap-2">
                           <Button variant="ghost" size="sm" onClick={() => openEdit(c)}>
