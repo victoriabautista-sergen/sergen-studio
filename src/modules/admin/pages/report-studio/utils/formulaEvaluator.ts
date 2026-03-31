@@ -61,11 +61,7 @@ function findParenGroups(expr: string): { start: number; end: number; content: s
       groups.push({ start: s, end: i, content: expr.substring(s + 1, i) });
     }
   }
-  // Fix: content extraction
-  return groups.map(g => ({
-    ...g,
-    content: expr.substring(g.start + 1, g.end),
-  }));
+  return groups;
 }
 
 /** Split an expression by top-level + and - into terms */
