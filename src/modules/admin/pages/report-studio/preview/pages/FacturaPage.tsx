@@ -79,7 +79,7 @@ const FacturaPage = ({ data }: { data: ReportData }) => {
             </table>
 
             {/* Totals - aligned with last 4 columns of items table */}
-            <table className="w-full text-[9px] border-collapse mb-2">
+            <table className="w-full text-[11px] border-collapse mb-2">
               <tbody>
                 {[
                   ["OP. GRAVADAS", h3.op_gravadas, false],
