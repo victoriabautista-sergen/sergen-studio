@@ -5,24 +5,14 @@ import { Textarea } from "@/components/ui/textarea";
 import { useReportContext } from "../context/ReportContext";
 import { useAuthContext } from "@/core/auth/context/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
-import { Upload, Search, Loader2, Settings2 } from "lucide-react";
+import { Upload, Search, Loader2, MessageSquareWarning } from "lucide-react";
 import { toast } from "sonner";
 import { useRef, useState, useEffect, useCallback } from "react";
 
 const REGLAS_DEFAULT: Record<string, string> = {
-  "Luz del Sur": `La factura es de Luz del Sur S.A.A.
-- El concepto de energía en hora punta aparece como "CARGO POR ENERGÍA ACTIVA EN HORAS PUNTA" o similar.
-- El concepto fuera de punta aparece como "CARGO POR ENERGÍA ACTIVA EN HORAS FUERA DE PUNTA" o similar.
-- La sección de totales incluye: OP. GRAVADAS, OP. INAFECTAS, OP. EXONERADA, OP. GRATUITA, OTROS CARGOS, OTROS DESCUENTOS, SUBTOTAL, ISC, IGV, IMPORTE TOTAL DE LA VENTA.`,
-
-  "Enel": `La factura es de Enel Distribución Perú S.A.A.
-- El concepto de energía en hora punta puede aparecer como "ENERGÍA HORA PUNTA" o "ENERGÍA ACTIVA HP".
-- El concepto fuera de punta puede aparecer como "ENERGÍA HORA FUERA PUNTA" o "ENERGÍA ACTIVA HFP".
-- La sección de totales incluye: OP. GRAVADAS, OP. INAFECTAS, OP. EXONERADA, OP. GRATUITA, OTROS CARGOS, OTROS DESCUENTOS, SUBTOTAL, ISC, IGV, IMPORTE TOTAL DE LA VENTA.`,
-
-  "Electrocentro": `La factura es de Electrocentro S.A.
-- Buscar los conceptos de energía activa en hora punta y fuera de punta.
-- La sección de totales incluye: OP. GRAVADAS, OP. INAFECTAS, OP. EXONERADA, SUBTOTAL, IGV, IMPORTE TOTAL.`,
+  "Luz del Sur": `Factura de Luz del Sur S.A.A. El concepto de energía en hora punta aparece como "CARGO POR ENERGÍA ACTIVA EN HORAS PUNTA". Fuera de punta: "CARGO POR ENERGÍA ACTIVA EN HORAS FUERA DE PUNTA". Totales: OP. GRAVADAS, OP. INAFECTAS, OP. EXONERADA, OP. GRATUITA, OTROS CARGOS, OTROS DESCUENTOS, SUBTOTAL, ISC, IGV, IMPORTE TOTAL DE LA VENTA.`,
+  "Enel": `Factura de Enel Distribución Perú S.A.A. HP: "ENERGÍA HORA PUNTA" o "ENERGÍA ACTIVA HP". HFP: "ENERGÍA HORA FUERA PUNTA" o "ENERGÍA ACTIVA HFP". Totales: OP. GRAVADAS, OP. INAFECTAS, OP. EXONERADA, OP. GRATUITA, OTROS CARGOS, OTROS DESCUENTOS, SUBTOTAL, ISC, IGV, IMPORTE TOTAL DE LA VENTA.`,
+  "Electrocentro": `Factura de Electrocentro S.A. Buscar conceptos de energía activa en hora punta y fuera de punta. Totales: OP. GRAVADAS, OP. INAFECTAS, OP. EXONERADA, SUBTOTAL, IGV, IMPORTE TOTAL.`,
 };
 
 const Hoja3Factura = () => {
@@ -33,16 +23,23 @@ const Hoja3Factura = () => {
   const concesionaria = dg.concesionaria || "";
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
-  const [showReglas, setShowReglas] = useState(false);
-  const [savedRules, setSavedRules] = useState<Record<string, string>>({});
+  const [showFeedback, setShowFeedback] = useState(false);
+  const [feedback, setFeedback] = useState("");
+  const [adjusting, setAdjusting] = useState(false);
 
   const update = (field: string, value: any) => {
     updateSheet("hoja3_data", { ...h3, [field]: value });
   };
 
-  // Load saved extraction rules from past reports for this concesionaria
+  // Load saved rules from past reports for this concesionaria
+  const getReglas = useCallback((): string => {
+    if (h3.reglas_extraccion) return h3.reglas_extraccion;
+    return REGLAS_DEFAULT[concesionaria] || "";
+  }, [h3.reglas_extraccion, concesionaria]);
+
+  // Load rules from last report of same concesionaria
   useEffect(() => {
-    if (!concesionaria) return;
+    if (!concesionaria || h3.reglas_extraccion) return;
     supabase
       .from("reportes_control_demanda" as any)
       .select("hoja3_data, datos_generales")
@@ -50,40 +47,25 @@ const Hoja3Factura = () => {
       .limit(50)
       .then(({ data: rows }) => {
         if (!rows) return;
-        const rules: Record<string, string> = {};
-        (rows as any[]).forEach((r) => {
-          const c = r.datos_generales?.concesionaria;
-          const reglas = r.hoja3_data?.reglas_extraccion;
-          if (c && reglas && !rules[c]) {
-            rules[c] = reglas;
-          }
-        });
-        setSavedRules(rules);
-
-        // Auto-load rules for current concesionaria if empty
-        if (!h3.reglas_extraccion) {
-          const saved = rules[concesionaria] || REGLAS_DEFAULT[concesionaria] || "";
-          if (saved) {
-            update("reglas_extraccion", saved);
-          }
+        const match = (rows as any[]).find(
+          (r) => r.datos_generales?.concesionaria === concesionaria && r.hoja3_data?.reglas_extraccion
+        );
+        if (match) {
+          update("reglas_extraccion", match.hoja3_data.reglas_extraccion);
         }
       });
   }, [concesionaria]);
 
-  const getReglas = useCallback(() => {
-    return h3.reglas_extraccion || savedRules[concesionaria] || REGLAS_DEFAULT[concesionaria] || "";
-  }, [h3.reglas_extraccion, savedRules, concesionaria]);
-
-  const extractData = async (fileUrl: string) => {
+  const extractData = async (fileUrl: string, reglas?: string) => {
     updateSheet("hoja3_data", { ...h3, extracting: true });
     try {
-      const reglas = getReglas();
+      const reglasToUse = reglas || getReglas();
       const { data: result, error } = await supabase.functions.invoke("extract-invoice-data", {
         body: {
           image_url: fileUrl,
           nombre_hp: h3.nombre_hp,
           nombre_hfp: h3.nombre_hfp,
-          reglas_concesionario: reglas,
+          reglas_concesionario: reglasToUse,
           concesionaria,
         },
       });
@@ -110,7 +92,7 @@ const Hoja3Factura = () => {
         isc: extracted.isc ?? h3.isc,
         igv: extracted.igv ?? h3.igv,
         importe_total: extracted.importe_total ?? h3.importe_total,
-        reglas_extraccion: reglas,
+        reglas_extraccion: reglasToUse,
       });
       toast.success("Datos extraídos correctamente");
     } catch (err: any) {
@@ -124,6 +106,7 @@ const Hoja3Factura = () => {
     if (!file || !session?.user?.id) return;
 
     setUploading(true);
+    setShowFeedback(false);
     try {
       const formData = new FormData();
       formData.append("file", file);
@@ -145,7 +128,43 @@ const Hoja3Factura = () => {
     }
   };
 
+  // Use AI to auto-adjust rules based on user feedback
+  const handleAdjustRules = async () => {
+    if (!feedback.trim()) {
+      toast.error("Describe el problema de extracción");
+      return;
+    }
+    setAdjusting(true);
+    try {
+      const currentRules = getReglas();
+      const { data: result, error } = await supabase.functions.invoke("extract-invoice-data", {
+        body: {
+          adjust_rules: true,
+          current_rules: currentRules,
+          user_feedback: feedback,
+          concesionaria,
+        },
+      });
+      if (error) throw error;
+      const newRules = result?.new_rules || currentRules;
+      update("reglas_extraccion", newRules);
+      toast.success("Reglas actualizadas. Re-extrayendo datos...");
+      setShowFeedback(false);
+      setFeedback("");
+
+      // Re-extract with updated rules
+      if (h3.factura_file_url) {
+        await extractData(h3.factura_file_url, newRules);
+      }
+    } catch (err: any) {
+      toast.error("Error al ajustar reglas: " + (err.message || ""));
+    } finally {
+      setAdjusting(false);
+    }
+  };
+
   const isProcessing = uploading || h3.extracting;
+  const hasExtractedData = h3.factura_file_url && !isProcessing && (h3.items?.length > 0 || h3.importe_total > 0);
 
   return (
     <div className="space-y-4">
@@ -185,47 +204,6 @@ const Hoja3Factura = () => {
         )}
       </div>
 
-      {/* Reglas de extracción por concesionario */}
-      <div className="border rounded-lg p-3 space-y-2 bg-muted/30">
-        <div className="flex items-center justify-between">
-          <p className="text-xs font-semibold text-foreground uppercase tracking-wide">
-            Reglas de Extracción {concesionaria ? `– ${concesionaria}` : ""}
-          </p>
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            onClick={() => setShowReglas(!showReglas)}
-            className="h-7 text-xs"
-          >
-            <Settings2 className="w-3 h-3 mr-1" />
-            {showReglas ? "Ocultar" : "Configurar"}
-          </Button>
-        </div>
-
-        {!concesionaria && (
-          <p className="text-[10px] text-yellow-600">⚠ Selecciona una concesionaria en Datos Generales primero.</p>
-        )}
-
-        {showReglas && (
-          <div className="space-y-2">
-            <Label className="text-xs">
-              Instrucciones para la IA (describe cómo es la factura de este concesionario)
-            </Label>
-            <Textarea
-              value={h3.reglas_extraccion || getReglas()}
-              onChange={e => update("reglas_extraccion", e.target.value)}
-              rows={5}
-              className="text-xs"
-              placeholder={`Describe el formato de la factura de ${concesionaria || "este concesionario"}:\n- Nombre del concepto de energía HP\n- Nombre del concepto de energía HFP\n- Campos de la sección de totales\n- Cualquier particularidad del formato`}
-            />
-            <p className="text-[9px] text-muted-foreground">
-              Estas reglas se guardarán con el informe y se reutilizarán en futuros informes del mismo concesionario.
-            </p>
-          </div>
-        )}
-      </div>
-
       {/* Datos Extraídos */}
       <div className="border rounded-lg p-3 space-y-3 bg-muted/30">
         <div className="flex items-center justify-between">
@@ -254,21 +232,54 @@ const Hoja3Factura = () => {
           </div>
         </div>
 
-        {(h3.precio_hp_facturado === 0 || h3.precio_hfp_facturado === 0) && (
-          <div className="border border-yellow-300 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg p-3 space-y-2">
-            <p className="text-[10px] text-yellow-700 dark:text-yellow-400 font-medium">
-              ⚠ No se reconocieron los precios. Ajusta las reglas de extracción y presiona "Re-extraer":
-            </p>
-            {h3.precio_hp_facturado === 0 && (
-              <div>
-                <Label className="text-xs">Concepto Energía HP (como aparece en factura)</Label>
-                <Input value={h3.nombre_hp} onChange={e => update("nombre_hp", e.target.value)} className="h-8 text-sm" placeholder="ENERGÍA ACTIVA EN HORA PUNTA" />
-              </div>
-            )}
-            {h3.precio_hfp_facturado === 0 && (
-              <div>
-                <Label className="text-xs">Concepto Energía HFP (como aparece en factura)</Label>
-                <Input value={h3.nombre_hfp} onChange={e => update("nombre_hfp", e.target.value)} className="h-8 text-sm" placeholder="ENERGÍA ACTIVA EN HORA FUERA DE PUNTA" />
+        {/* Feedback section - only after extraction with data */}
+        {hasExtractedData && (
+          <div className="pt-1">
+            {!showFeedback ? (
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowFeedback(true)}
+                className="h-7 text-xs text-muted-foreground w-full"
+              >
+                <MessageSquareWarning className="w-3 h-3 mr-1" />
+                ¿Hay errores en la extracción? Reportar
+              </Button>
+            ) : (
+              <div className="border border-orange-300 bg-orange-50 dark:bg-orange-900/20 rounded-lg p-3 space-y-2">
+                <p className="text-[10px] text-orange-700 dark:text-orange-400 font-medium">
+                  Describe qué datos no se extrajeron bien o qué nombre tiene el concepto en la factura:
+                </p>
+                <Textarea
+                  value={feedback}
+                  onChange={e => setFeedback(e.target.value)}
+                  rows={3}
+                  className="text-xs"
+                  placeholder={`Ej: "El precio HP aparece como 'CARGO ENERGÍA PUNTA' y no se extrajo", "El IGV está mal calculado", "No reconoció los ítems de la segunda página"...`}
+                />
+                <div className="flex gap-2">
+                  <Button
+                    type="button"
+                    variant="default"
+                    size="sm"
+                    onClick={handleAdjustRules}
+                    disabled={adjusting || !feedback.trim()}
+                    className="flex-1 h-7 text-xs"
+                  >
+                    {adjusting ? <Loader2 className="w-3 h-3 mr-1 animate-spin" /> : null}
+                    {adjusting ? "Ajustando..." : "Corregir y re-extraer"}
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => { setShowFeedback(false); setFeedback(""); }}
+                    className="h-7 text-xs"
+                  >
+                    Cancelar
+                  </Button>
+                </div>
               </div>
             )}
           </div>
