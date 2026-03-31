@@ -6,9 +6,9 @@ const renderFormula = (text: string): React.ReactNode => {
   const parts = text.split(/(_\{[^}]+\}|_[a-zA-Z0-9])/g);
   return parts.map((part, i) => {
     const braceMatch = part.match(/^_\{(.+)\}$/);
-    if (braceMatch) return <sub key={i}>{braceMatch[1]}</sub>;
+    if (braceMatch) return <sub key={i} style={{ fontSize: "0.75em", verticalAlign: "sub", fontStyle: "normal", fontWeight: 600 }}>{braceMatch[1]}</sub>;
     const singleMatch = part.match(/^_([a-zA-Z0-9])$/);
-    if (singleMatch) return <sub key={i}>{singleMatch[1]}</sub>;
+    if (singleMatch) return <sub key={i} style={{ fontSize: "0.75em", verticalAlign: "sub", fontStyle: "normal", fontWeight: 600 }}>{singleMatch[1]}</sub>;
     return <React.Fragment key={i}>{part}</React.Fragment>;
   });
 };
@@ -88,7 +88,7 @@ const PreciosPage = ({ data }: { data: ReportData }) => {
         <p className="text-[10px] text-gray-700 mb-2">Realizamos el cálculo de precio energía:</p>
 
         <div className="border border-gray-200 rounded bg-gray-50 px-4 py-2 mb-2">
-          <p className="text-[10px] italic text-gray-700 font-mono whitespace-pre-wrap">
+          <p className="text-[11px] text-gray-700 whitespace-pre-wrap" style={{ fontFamily: "'Times New Roman', serif" }}>
             {renderFormula(h2.formula || "Precio energía = Precio base × Factor E")}
           </p>
         </div>
