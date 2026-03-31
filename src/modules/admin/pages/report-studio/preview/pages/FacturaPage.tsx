@@ -78,8 +78,8 @@ const FacturaPage = ({ data }: { data: ReportData }) => {
               </tbody>
             </table>
 
-            {/* Totals - aligned with items table */}
-            <table className="w-full text-[9px] border-collapse mb-2" style={{ border: "1px solid rgba(27, 58, 92, 0.3)" }}>
+            {/* Totals - aligned with last 4 columns of items table */}
+            <table className="w-full text-[9px] border-collapse mb-2">
               <tbody>
                 {[
                   ["OP. GRAVADAS", h3.op_gravadas, false],
@@ -94,10 +94,11 @@ const FacturaPage = ({ data }: { data: ReportData }) => {
                   ["IMPORTE TOTAL", h3.importe_total, true],
                 ].filter(([, val, isBold]) => isBold || (val as number) !== 0).map(([label, val, isBold], i) => (
                   <tr key={i} style={isBold ? { backgroundColor: "#1B3A5C" } : {}}>
-                    <td colSpan={3} className={`px-2 py-1.5 ${borderStyle} text-right ${isBold ? "font-bold text-white text-[10px]" : "font-semibold"}`} style={!isBold ? { color: "#1B3A5C" } : {}}>
+                    <td className="p-0" style={{ width: "40%" }}></td>
+                    <td colSpan={2} className={`px-2 py-1 ${borderStyle} text-right ${isBold ? "font-bold text-white text-[10px]" : "font-semibold"}`} style={!isBold ? { color: "#1B3A5C" } : {}}>
                       {label as string}
                     </td>
-                    <td colSpan={2} className={`px-2 py-1.5 ${borderStyle} text-right font-mono ${isBold ? "font-bold text-white text-[11px]" : ""}`} style={!isBold ? { color: "#1B3A5C" } : {}}>
+                    <td className={`px-2 py-1 ${borderStyle} text-right font-mono ${isBold ? "font-bold text-white text-[11px]" : ""}`} style={!isBold ? { color: "#1B3A5C" } : {}}>
                       {monedaSymbol} {((val as number) || 0).toLocaleString("es-PE", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                     </td>
                   </tr>
