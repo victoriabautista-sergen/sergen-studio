@@ -78,33 +78,34 @@ const FacturaPage = ({ data }: { data: ReportData }) => {
               </tbody>
             </table>
 
-            {/* Totals - aligned with last 4 columns of items table */}
-            <table className="w-full text-[11px] border-collapse mb-2">
-              <tbody>
-                {[
-                  ["OP. GRAVADAS", h3.op_gravadas, false],
-                  ["OP. INAFECTAS", h3.op_inafectas, false],
-                  ["OP. EXONERADA", h3.op_exonerada, false],
-                  ["OP. GRATUITA", h3.op_gratuita, false],
-                  ["OTROS CARGOS", h3.otros_cargos, false],
-                  ["OTROS DESCUENTOS", h3.otros_descuentos, false],
-                  ["SUBTOTAL", h3.subtotal, false],
-                  ["ISC", h3.isc, false],
-                  ["IGV", h3.igv, false],
-                  ["IMPORTE TOTAL", h3.importe_total, true],
-                ].filter(([, val, isBold]) => isBold || (val as number) !== 0).map(([label, val, isBold], i) => (
-                  <tr key={i} style={isBold ? { backgroundColor: "#1B3A5C" } : {}}>
-                    <td className="p-0" style={{ width: "40%" }}></td>
-                    <td colSpan={2} className={`px-2 py-1 ${borderStyle} text-right ${isBold ? "font-bold text-white text-[10px]" : "font-semibold"}`} style={!isBold ? { color: "#1B3A5C" } : {}}>
-                      {label as string}
-                    </td>
-                    <td className={`px-2 py-1 ${borderStyle} text-right font-mono ${isBold ? "font-bold text-white text-[11px]" : ""}`} style={!isBold ? { color: "#1B3A5C" } : {}}>
-                      {monedaSymbol} {((val as number) || 0).toLocaleString("es-PE", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+            {/* Totals - aligned right, reduced width */}
+            <div className="flex justify-end mb-2">
+              <table className="text-[11px] border-collapse" style={{ width: "50%" }}>
+                <tbody>
+                  {[
+                    ["OP. GRAVADAS", h3.op_gravadas, false],
+                    ["OP. INAFECTAS", h3.op_inafectas, false],
+                    ["OP. EXONERADA", h3.op_exonerada, false],
+                    ["OP. GRATUITA", h3.op_gratuita, false],
+                    ["OTROS CARGOS", h3.otros_cargos, false],
+                    ["OTROS DESCUENTOS", h3.otros_descuentos, false],
+                    ["SUBTOTAL", h3.subtotal, false],
+                    ["ISC", h3.isc, false],
+                    ["IGV", h3.igv, false],
+                    ["IMPORTE TOTAL", h3.importe_total, true],
+                  ].filter(([, val, isBold]) => isBold || (val as number) !== 0).map(([label, val, isBold], i) => (
+                    <tr key={i} style={isBold ? { backgroundColor: "#1B3A5C" } : {}}>
+                      <td className={`px-2 py-1 ${borderStyle} text-right ${isBold ? "font-bold text-white text-[10px]" : "font-semibold"}`} style={!isBold ? { color: "#1B3A5C" } : {}}>
+                        {label as string}
+                      </td>
+                      <td className={`px-2 py-1 ${borderStyle} text-right font-mono ${isBold ? "font-bold text-white text-[11px]" : ""}`} style={!isBold ? { color: "#1B3A5C" } : {}}>
+                        {monedaSymbol} {((val as number) || 0).toLocaleString("es-PE", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
 
             <p className="text-[8px] italic text-gray-400 text-right">
               Fuente: Factura emitida por {dg.concesionaria || "[Concesionaria]"}
