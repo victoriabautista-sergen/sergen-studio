@@ -97,8 +97,8 @@ const FacturaPage = ({ data }: { data: ReportData }) => {
                   ["IGV", h3.igv, false],
                   ["IMPORTE TOTAL", h3.importe_total, true],
                 ].filter(([, val, isBold]) => isBold || (val as number) !== 0).map(([label, val, isBold], i) => (
-                  <tr key={`total-${i}`} style={isBold ? { backgroundColor: "#1B3A5C" } : {}}>
-                    <td className={`p-0 ${isBold ? "" : "border-0"}`}></td>
+                  <tr key={`total-${i}`}>
+                    <td className="p-0 border-0"></td>
                     <td colSpan={2} className={`${borderStyle} px-1.5 py-0.5 text-right ${isBold ? "font-bold text-white text-[10px]" : "font-semibold"}`} style={!isBold ? { color: "#1B3A5C" } : {}}>
                       {label as string}
                     </td>
