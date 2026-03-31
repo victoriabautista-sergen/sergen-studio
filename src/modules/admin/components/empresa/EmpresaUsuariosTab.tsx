@@ -127,29 +127,28 @@ const EmpresaUsuariosTab = ({ companyId }: { companyId: string }) => {
   });
 
   const addUser = useMutation({
-    mutationFn: async ({ email, role }: { email: string; role: string }) => {
-      const { data: profile } = await supabase.from("profiles").select("user_id").eq("email", email.trim().toLowerCase()).maybeSingle();
-      if (!profile) throw new Error("USER_NOT_FOUND");
-      const { data: existing } = await supabase.from("client_users").select("id").eq("client_id", companyId).eq("user_id", profile.user_id).maybeSingle();
-      if (existing) throw new Error("ALREADY_IN_COMPANY");
-      await supabase.from("client_users").insert({ client_id: companyId, user_id: profile.user_id });
-      const { data: existingRole } = await supabase.from("user_roles").select("id").eq("user_id", profile.user_id).maybeSingle();
-      if (existingRole) {
-        await supabase.from("user_roles").update({ role: role as any }).eq("user_id", profile.user_id);
-      } else {
-        await supabase.from("user_roles").insert({ user_id: profile.user_id, role: role as any });
-      }
+    mutationFn: async ({ name, email, password, role }: { name: string; email: string; password: string; role: string }) => {
+      const { data, error } = await supabase.functions.invoke("add-user-to-company", {
+        body: {
+          company_id: companyId,
+          full_name: name.trim(),
+          email: email.trim().toLowerCase(),
+          password,
+          role,
+        },
+      });
+      if (error) throw new Error("Error de conexión");
+      if (data?.error) throw new Error(data.error);
+      return data;
     },
     onSuccess: () => {
-      toast({ title: "Usuario agregado." });
+      toast({ title: "Usuario creado y asignado correctamente." });
       queryClient.invalidateQueries({ queryKey: ["admin-empresa-users", companyId] });
       queryClient.invalidateQueries({ queryKey: ["admin-empresas"] });
-      setAddOpen(false); setAddEmail(""); setAddRole("client_user");
+      setAddOpen(false); setAddName(""); setAddEmail(""); setAddPassword(""); setAddRole("client_user");
     },
     onError: (err: Error) => {
-      const msg = err.message === "USER_NOT_FOUND" ? "No existe un usuario con ese email." :
-        err.message === "ALREADY_IN_COMPANY" ? "El usuario ya pertenece a esta empresa." : "Error al agregar.";
-      toast({ title: msg, variant: "destructive" });
+      toast({ title: err.message || "Error al crear usuario.", variant: "destructive" });
     },
   });
 
