@@ -270,7 +270,7 @@ const EmpresasPage = () => {
                       <TableCell className="text-muted-foreground">{c.industry ?? "—"}</TableCell>
                       <TableCell className="text-center">{c.user_count}</TableCell>
                       <TableCell className="text-center">{c.active_modules}</TableCell>
-                      <TableCell><StatusBadge status={c.subscription_status} /></TableCell>
+                      <TableCell><StatusBadge status={c.subscription_status} plan={c.subscription_plan} /></TableCell>
                       <TableCell className="text-right">
                         <div className="flex items-center justify-end gap-2">
                           <Button variant="ghost" size="sm" onClick={() => openEdit(c)}>
