@@ -37,12 +37,20 @@ type ModuleRow = {
   slug: string;
 };
 
-const StatusBadge = ({ status }: { status: string | null }) => {
-  if (status === "active")
-    return <Badge className="bg-green-500/20 text-green-700 border-green-500/30">Activa</Badge>;
-  if (status === "suspended")
-    return <Badge className="bg-destructive/15 text-destructive border-destructive/30">Suspendida</Badge>;
-  return <Badge variant="secondary">Sin plan</Badge>;
+const planLabel = (plan: string | null) => {
+  if (plan === "trial") return "Prueba gratuita";
+  if (plan === "basic") return "Plan Básico";
+  if (plan === "advanced") return "Plan Avanzado";
+  return null;
+};
+
+const StatusBadge = ({ status, plan }: { status: string | null; plan: string | null }) => {
+  const label = planLabel(plan);
+  if (status === "active" && label)
+    return <Badge className="bg-green-500/20 text-green-700 border-green-500/30">{label}</Badge>;
+  if (status === "suspended" && label)
+    return <Badge className="bg-destructive/15 text-destructive border-destructive/30">{label} (Suspendida)</Badge>;
+  return <Badge variant="destructive">Sin plan</Badge>;
 };
 
 const BREADCRUMBS = [{ label: "Empresas" }];
