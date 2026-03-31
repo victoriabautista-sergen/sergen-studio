@@ -6,9 +6,9 @@ const renderFormula = (text: string): React.ReactNode => {
   const parts = text.split(/(_\{[^}]+\}|_[a-zA-Z0-9])/g);
   return parts.map((part, i) => {
     const braceMatch = part.match(/^_\{(.+)\}$/);
-    if (braceMatch) return <sub key={i}>{braceMatch[1]}</sub>;
+    if (braceMatch) return <sub key={i} style={{ fontSize: "0.75em", verticalAlign: "sub", fontStyle: "normal", fontWeight: 600 }}>{braceMatch[1]}</sub>;
     const singleMatch = part.match(/^_([a-zA-Z0-9])$/);
-    if (singleMatch) return <sub key={i}>{singleMatch[1]}</sub>;
+    if (singleMatch) return <sub key={i} style={{ fontSize: "0.75em", verticalAlign: "sub", fontStyle: "normal", fontWeight: 600 }}>{singleMatch[1]}</sub>;
     return <React.Fragment key={i}>{part}</React.Fragment>;
   });
 };
