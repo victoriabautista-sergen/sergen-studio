@@ -12,6 +12,7 @@ export interface Hoja2Data {
   precio_base_hfp: number;
   precio_potencia: number;
   moneda: "PEN" | "USD";
+  png_moneda: "PEN" | "USD";
   pngo: number;
   tco: number;
   ippo: number;
@@ -120,6 +121,7 @@ export const defaultReportData: ReportData = {
     precio_base_hfp: 0,
     precio_potencia: 0,
     moneda: "PEN",
+    png_moneda: "USD",
     pngo: 0,
     tco: 0,
     ippo: 0,
