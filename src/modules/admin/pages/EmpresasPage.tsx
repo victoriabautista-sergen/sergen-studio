@@ -293,7 +293,7 @@ const EmpresasPage = () => {
 
       {/* Create dialog — includes company info + admin user + module selection */}
       <Dialog open={createOpen} onOpenChange={(open) => { if (!open) { setCreateOpen(false); resetCreateForm(); } }}>
-        <DialogContent className="max-w-3xl max-h-[85vh] overflow-y-auto">
+        <DialogContent className="max-w-4xl max-h-[85vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Crear empresa</DialogTitle>
           </DialogHeader>
