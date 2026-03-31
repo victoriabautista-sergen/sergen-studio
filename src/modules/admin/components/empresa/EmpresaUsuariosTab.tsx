@@ -28,7 +28,9 @@ const EmpresaUsuariosTab = ({ companyId }: { companyId: string }) => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [addOpen, setAddOpen] = useState(false);
+  const [addName, setAddName] = useState("");
   const [addEmail, setAddEmail] = useState("");
+  const [addPassword, setAddPassword] = useState("");
   const [addRole, setAddRole] = useState("client_user");
   const [removingUserId, setRemovingUserId] = useState<string | null>(null);
   const [expandedUserId, setExpandedUserId] = useState<string | null>(null);
