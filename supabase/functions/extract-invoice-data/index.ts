@@ -138,13 +138,8 @@ Responde SOLO con el JSON, sin markdown ni explicaciones.`;
     const content = aiResult.choices?.[0]?.message?.content || "";
     console.log("AI response received, length:", content.length);
 
-    // Parse JSON from response (handle possible markdown wrapping)
-    let jsonStr = content.trim();
-    if (jsonStr.startsWith("```")) {
-      jsonStr = jsonStr.replace(/^```(?:json)?\s*/i, "").replace(/```\s*$/, "");
-    }
-
-    const parsed = JSON.parse(jsonStr);
+    // Robust JSON extraction
+    const parsed = extractJsonFromResponse(content);
 
     return new Response(
       JSON.stringify({ data: parsed }),
