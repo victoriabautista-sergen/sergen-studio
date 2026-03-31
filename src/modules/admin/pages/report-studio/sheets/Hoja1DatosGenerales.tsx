@@ -104,7 +104,7 @@ const Hoja1DatosGenerales = () => {
       updateSheet("datos_generales", updated);
       updateSheet("client_id" as any, clientId);
     },
-    [clients, dg, updateSheet]
+    [clients, dg, data.id, updateSheet]
   );
 
   const update = (field: string, value: string) => {
