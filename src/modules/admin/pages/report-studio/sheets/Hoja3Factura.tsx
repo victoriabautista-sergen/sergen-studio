@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { useReportContext } from "../context/ReportContext";
 import { useAuthContext } from "@/core/auth/context/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
-import { Upload, FileText, Loader2 } from "lucide-react";
+import { Upload, Search, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { useRef, useState } from "react";
 
