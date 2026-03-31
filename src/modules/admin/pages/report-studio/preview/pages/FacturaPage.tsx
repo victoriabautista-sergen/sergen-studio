@@ -80,32 +80,23 @@ const FacturaPage = ({ data }: { data: ReportData }) => {
 
             {/* Totals */}
             <div className="flex justify-end mb-2">
-              <table className="text-[9px] border-collapse" style={{ width: "250px" }}>
+              <table className="text-[9px] border-collapse" style={{ width: "280px", border: "1px solid rgba(27, 58, 92, 0.2)" }}>
                 <tbody>
-                  <tr>
-                    <td className="p-1.5 text-right font-semibold" style={{ color: "#1B3A5C" }}>SUBTOTAL</td>
-                    <td className="p-1.5 text-right font-mono" style={{ color: "#1B3A5C" }}>
-                      {monedaSymbol} {(h3.subtotal || 0).toLocaleString("es-PE", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                    </td>
-                  </tr>
-                  <tr>
-                    <td className="p-1.5 text-right font-semibold" style={{ color: "#1B3A5C" }}>OTROS CARGOS</td>
-                    <td className="p-1.5 text-right font-mono" style={{ color: "#1B3A5C" }}>
-                      {monedaSymbol} {(h3.otros_cargos || 0).toLocaleString("es-PE", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                    </td>
-                  </tr>
-                  <tr>
-                    <td className="p-1.5 text-right font-semibold" style={{ color: "#1B3A5C" }}>IGV (18%)</td>
-                    <td className="p-1.5 text-right font-mono" style={{ color: "#1B3A5C" }}>
-                      {monedaSymbol} {(h3.igv || 0).toLocaleString("es-PE", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                    </td>
-                  </tr>
-                  <tr className="border-t border-gray-300">
-                    <td className="p-1.5 text-right font-bold" style={{ color: "#1B3A5C" }}>IMPORTE TOTAL</td>
-                    <td className="p-1.5 text-right font-mono font-bold" style={{ color: "#1B3A5C" }}>
-                      {monedaSymbol} {(h3.importe_total || 0).toLocaleString("es-PE", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                    </td>
-                  </tr>
+                  {[
+                    ["SUBTOTAL", h3.subtotal, false],
+                    ["OTROS CARGOS", h3.otros_cargos, false],
+                    ["IGV (18%)", h3.igv, false],
+                    ["IMPORTE TOTAL", h3.importe_total, true],
+                  ].map(([label, val, isBold], i) => (
+                    <tr key={i} style={isBold ? { backgroundColor: "#1B3A5C" } : {}}>
+                      <td className={`px-2 py-1.5 ${borderStyle} ${isBold ? "font-bold text-white" : "font-semibold"}`} style={!isBold ? { color: "#1B3A5C" } : {}}>
+                        {label as string}
+                      </td>
+                      <td className={`px-2 py-1.5 ${borderStyle} text-right font-mono ${isBold ? "font-bold text-white" : ""}`} style={!isBold ? { color: "#1B3A5C" } : {}}>
+                        {monedaSymbol} {((val as number) || 0).toLocaleString("es-PE", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                      </td>
+                    </tr>
+                  ))}
                 </tbody>
               </table>
             </div>
