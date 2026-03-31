@@ -47,19 +47,19 @@ const PreciosPage = ({ data }: { data: ReportData }) => {
           </thead>
           <tbody>
             {[
-              ["PNG (Precio del gas natural)", h2.png_actual, `${monedaSymbol}/MMBTU`],
-              [`PNG₀ (Precio del gas natural base)`, h2.pngo, `${monedaSymbol}/MMBTU`],
-              ["TC (Tipo de cambio)", h2.tc_actual, "S//$"],
-              [`TC₀ (Tipo de cambio base)`, h2.tco, "S//$"],
-              ["IPP (Índice de precios al productor de EE.UU)", h2.ipp_actual, ""],
-              [`IPP₀ (Índice de precios al productor de EE.UU base)`, h2.ippo, ""],
-              [`Precio de energía base HP por kWh`, h2.precio_base_hp, `${monedaSymbol}/kWh`],
-              [`Precio de energía base HFP por kWh`, h2.precio_base_hfp, `${monedaSymbol}/kWh`],
-            ].map(([label, val, unit], i) => (
+              ["PNG (Precio del gas natural)", h2.png_actual, true],
+              [`PNG₀ (Precio del gas natural base)`, h2.pngo, true],
+              ["TC (Tipo de cambio)", h2.tc_actual, false],
+              [`TC₀ (Tipo de cambio base)`, h2.tco, false],
+              ["IPP (Índice de precios al productor de EE.UU)", h2.ipp_actual, false],
+              [`IPP₀ (Índice de precios al productor de EE.UU base)`, h2.ippo, false],
+              [`Precio de energía base HP por kWh`, h2.precio_base_hp, true],
+              [`Precio de energía base HFP por kWh`, h2.precio_base_hfp, true],
+            ].map(([label, val, showCurrency], i) => (
               <tr key={i} className="bg-white">
                 <td className="px-1.5 py-0.5 border border-gray-200" style={{ color: "#1B3A5C" }}>{String(label)}</td>
                 <td className="px-1.5 py-0.5 border border-gray-200 text-right font-mono" style={{ color: "#1B3A5C" }}>
-                  {val ? `${Number(val).toFixed(4)} ${unit}` : "—"}
+                  {val ? `${Number(val).toFixed(4)}${showCurrency ? ` ${monedaSymbol}` : ""}` : "—"}
                 </td>
               </tr>
             ))}
