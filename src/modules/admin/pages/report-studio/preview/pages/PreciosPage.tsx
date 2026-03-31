@@ -106,8 +106,7 @@ const PreciosPage = ({ data }: { data: ReportData }) => {
           <thead>
             <tr style={{ backgroundColor: "#E8792B" }}>
               <th className={`px-1.5 py-0.5 text-left text-white font-semibold ${borderStyle}`}>Concepto</th>
-              <th className={`px-1.5 py-0.5 text-center text-white font-semibold ${borderStyle} w-24`}>Valor</th>
-              <th className={`px-1.5 py-0.5 text-center text-white font-semibold ${borderStyle} w-20`}>Unidad</th>
+              <th className={`px-1.5 py-0.5 text-center text-white font-semibold ${borderStyle} w-32`}>Valor</th>
             </tr>
           </thead>
           <tbody>
@@ -121,8 +120,9 @@ const PreciosPage = ({ data }: { data: ReportData }) => {
             ].map(([label, val, unit], i) => (
               <tr key={i} className="bg-white">
                 <td className={`px-1.5 py-0.5 ${borderStyle}`} style={{ color: "#1B3A5C" }}>{label}</td>
-                <td className={`px-1.5 py-0.5 ${borderStyle} text-center font-mono`} style={{ color: "#1B3A5C" }}>{val}</td>
-                <td className={`px-1.5 py-0.5 ${borderStyle} text-center`} style={{ color: "#1B3A5C" }}>{unit}</td>
+                <td className={`px-1.5 py-0.5 ${borderStyle} text-center font-mono`} style={{ color: "#1B3A5C" }}>
+                  {val}{unit ? <span className="text-[8px] text-gray-500 ml-1">{unit}</span> : null}
+                </td>
               </tr>
             ))}
           </tbody>
