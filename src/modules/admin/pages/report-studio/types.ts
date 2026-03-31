@@ -123,6 +123,7 @@ export const defaultReportData: ReportData = {
     precio_potencia: 0,
     moneda: "PEN",
     png_moneda: "USD",
+    png_actual_moneda: "USD",
     pngo: 0,
     tco: 0,
     ippo: 0,
