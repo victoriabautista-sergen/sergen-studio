@@ -132,7 +132,7 @@ const ReportStudioContent = () => {
             </div>
 
             <div className="flex-1 overflow-hidden">
-              <ReportPreview />
+              <ReportPreview zoom={zoom} />
             </div>
           </div>
         </ResizablePanel>
