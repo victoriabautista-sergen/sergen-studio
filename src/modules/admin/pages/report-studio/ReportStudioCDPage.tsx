@@ -34,7 +34,7 @@ const sheetComponents: Record<number, React.FC> = {
 };
 
 const ReportStudioContent = () => {
-  const { activeSheet, setActiveSheet, saving } = useReportContext();
+  const { data, activeSheet, setActiveSheet, saving, updateSheet } = useReportContext();
   const ActiveComponent = sheetComponents[activeSheet];
 
   const [downloading, setDownloading] = useState(false);
@@ -43,6 +43,13 @@ const ReportStudioContent = () => {
     setDownloading(true);
     try {
       await triggerPDFExport();
+      // Incrementar correlativo después de descargar
+      const currentNum = parseInt(data.datos_generales.numero_informe) || 0;
+      const nextNum = (currentNum + 1).toString().padStart(2, "0");
+      updateSheet("datos_generales", {
+        ...data.datos_generales,
+        numero_informe: nextNum,
+      });
     } finally {
       setDownloading(false);
     }
