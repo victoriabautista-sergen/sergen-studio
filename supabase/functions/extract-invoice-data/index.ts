@@ -25,7 +25,7 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const { image_url, nombre_hp, nombre_hfp } = await req.json();
+    const { image_url, nombre_hp, nombre_hfp, reglas_concesionario, concesionaria } = await req.json();
 
     if (!image_url) {
       return new Response(
