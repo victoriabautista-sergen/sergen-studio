@@ -79,6 +79,7 @@ const Hoja1DatosGenerales = () => {
             precio_potencia: lastH2.precio_potencia ?? 0,
             moneda: lastH2.moneda ?? "PEN",
             png_moneda: lastH2.png_moneda ?? "USD",
+            png_actual_moneda: lastH2.png_actual_moneda ?? lastH2.png_moneda ?? "USD",
             pngo: lastH2.pngo ?? 0,
             tco: lastH2.tco ?? 0,
             ippo: lastH2.ippo ?? 0,
