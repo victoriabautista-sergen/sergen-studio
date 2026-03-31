@@ -65,23 +65,21 @@ Deno.serve(async (req) => {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
-    if (!admin_email?.trim()) {
-      return new Response(JSON.stringify({ error: "Email del administrador requerido" }), {
-        status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-    if (!admin_password || admin_password.length < 6) {
-      return new Response(
-        JSON.stringify({ error: "Contraseña debe tener al menos 6 caracteres" }),
-        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
-    }
-    if (!admin_name?.trim()) {
-      return new Response(JSON.stringify({ error: "Nombre del administrador requerido" }), {
-        status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+
+    const hasAdmin = admin_email?.trim();
+    if (hasAdmin) {
+      if (!admin_password || admin_password.length < 6) {
+        return new Response(
+          JSON.stringify({ error: "Contraseña debe tener al menos 6 caracteres" }),
+          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+      if (!admin_name?.trim()) {
+        return new Response(JSON.stringify({ error: "Nombre del administrador requerido" }), {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
     }
 
     // Check RUC uniqueness if provided
@@ -99,17 +97,19 @@ Deno.serve(async (req) => {
       }
     }
 
-    // Check email uniqueness
-    const { data: existingEmail } = await adminClient
-      .from("profiles")
-      .select("id")
-      .eq("email", admin_email.trim().toLowerCase())
-      .maybeSingle();
-    if (existingEmail) {
-      return new Response(
-        JSON.stringify({ error: "Ya existe un usuario con ese email" }),
-        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
+    // Check email uniqueness (only if admin provided)
+    if (hasAdmin) {
+      const { data: existingEmail } = await adminClient
+        .from("profiles")
+        .select("id")
+        .eq("email", admin_email.trim().toLowerCase())
+        .maybeSingle();
+      if (existingEmail) {
+        return new Response(
+          JSON.stringify({ error: "Ya existe un usuario con ese email" }),
+          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
     }
 
     // 1. Create company
@@ -146,57 +146,60 @@ Deno.serve(async (req) => {
       }
     }
 
-    // 3. Create auth user (trigger will create profile + client_user role)
-    const { data: authData, error: authError } = await adminClient.auth.admin.createUser({
-      email: admin_email.trim().toLowerCase(),
-      password: admin_password,
-      email_confirm: true,
-      user_metadata: { full_name: admin_name.trim() },
-    });
+    let newUserId: string | null = null;
 
-    if (authError) {
-      // Rollback company
-      await adminClient.from("company_modules").delete().eq("company_id", company.id);
-      await adminClient.from("clients").delete().eq("id", company.id);
-      return new Response(
-        JSON.stringify({ error: "Error al crear usuario: " + authError.message }),
-        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
-    }
+    // 3. Create auth user only if admin data provided
+    if (hasAdmin) {
+      const { data: authData, error: authError } = await adminClient.auth.admin.createUser({
+        email: admin_email.trim().toLowerCase(),
+        password: admin_password,
+        email_confirm: true,
+        user_metadata: { full_name: admin_name.trim() },
+      });
 
-    const newUserId = authData.user.id;
+      if (authError) {
+        // Rollback company
+        await adminClient.from("company_modules").delete().eq("company_id", company.id);
+        await adminClient.from("clients").delete().eq("id", company.id);
+        return new Response(
+          JSON.stringify({ error: "Error al crear usuario: " + authError.message }),
+          { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
 
-    // 4. Link user to company
-    const { error: cuError } = await adminClient.from("client_users").insert({
-      client_id: company.id,
-      user_id: newUserId,
-    });
-    if (cuError) {
-      console.error("Error linking user to company:", cuError);
-    }
+      newUserId = authData.user.id;
 
-    // 5. Update role from client_user (set by trigger) to admin
-    // First delete the trigger-created role, then insert admin
-    await adminClient.from("user_roles").delete().eq("user_id", newUserId);
-    const { error: roleError } = await adminClient.from("user_roles").insert({
-      user_id: newUserId,
-      role: "admin",
-    });
-    if (roleError) {
-      console.error("Error setting admin role:", roleError);
-    }
+      // 4. Link user to company
+      const { error: cuError } = await adminClient.from("client_users").insert({
+        client_id: company.id,
+        user_id: newUserId,
+      });
+      if (cuError) {
+        console.error("Error linking user to company:", cuError);
+      }
 
-    // 6. Create user modules (same as company modules)
-    if (validModuleIds.length > 0) {
-      const { error: umError } = await adminClient.from("user_modules").insert(
-        validModuleIds.map((mid: string) => ({
-          user_id: newUserId,
-          module_id: mid,
-          enabled: true,
-        }))
-      );
-      if (umError) {
-        console.error("Error creating user_modules:", umError);
+      // 5. Update role from client_user (set by trigger) to admin
+      await adminClient.from("user_roles").delete().eq("user_id", newUserId);
+      const { error: roleError } = await adminClient.from("user_roles").insert({
+        user_id: newUserId,
+        role: "admin",
+      });
+      if (roleError) {
+        console.error("Error setting admin role:", roleError);
+      }
+
+      // 6. Create user modules (same as company modules)
+      if (validModuleIds.length > 0) {
+        const { error: umError } = await adminClient.from("user_modules").insert(
+          validModuleIds.map((mid: string) => ({
+            user_id: newUserId!,
+            module_id: mid,
+            enabled: true,
+          }))
+        );
+        if (umError) {
+          console.error("Error creating user_modules:", umError);
+        }
       }
     }
 

@@ -207,9 +207,7 @@ const EmpresasPage = () => {
 
   const isCreateValid =
     name.trim() &&
-    adminName.trim() &&
-    adminEmail.trim() &&
-    adminPassword.length >= 6;
+    (!adminEmail.trim() || (adminName.trim() && adminPassword.length >= 6));
 
   return (
     <AdminShell breadcrumbs={BREADCRUMBS}>
@@ -321,9 +319,9 @@ const EmpresasPage = () => {
 
             {/* Admin user */}
             <div className="space-y-4">
-              <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">Administrador de la empresa</h3>
+              <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">Administrador de la empresa (opcional)</h3>
               <p className="text-xs text-muted-foreground">
-                Se creará una cuenta de administrador que podrá gestionar los usuarios y módulos de la empresa.
+                Si deseas crear una cuenta de administrador ahora, completa los campos. Puedes agregarlo después.
               </p>
               <div className="space-y-2">
                 <Label>Nombre completo *</Label>
