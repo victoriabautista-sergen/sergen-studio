@@ -36,7 +36,7 @@ const DashboardContent = () => {
       return appModules;
     }
     if (role === "admin") {
-      return appModules;
+      return appModules.filter((m) => m.id === "company-management" || enabledModuleSlugs.includes(m.id));
     }
     return appModules.filter((m) => enabledModuleSlugs.includes(m.id));
   }, [role, enabledModuleSlugs]);
