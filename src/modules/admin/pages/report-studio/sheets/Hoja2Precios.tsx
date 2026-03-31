@@ -84,7 +84,30 @@ const Hoja2Precios = () => {
         </div>
 
         <div className="grid grid-cols-2 gap-2">
-          {numField("PNGo", "pngo", h2.pngo)}
+          <div>
+            <div className="flex items-center justify-between mb-1">
+              <Label className="text-xs">PNGo</Label>
+              <div className="flex items-center gap-1">
+                <span className="text-[10px] text-muted-foreground">S/</span>
+                <Switch
+                  checked={(h2.png_moneda || "USD") === "USD"}
+                  onCheckedChange={(checked) => update("png_moneda", checked ? "USD" : "PEN")}
+                  className="scale-75"
+                />
+                <span className="text-[10px] text-muted-foreground">$</span>
+              </div>
+            </div>
+            <div className="relative">
+              <span className="absolute left-2 top-1/2 -translate-y-1/2 text-xs text-muted-foreground font-medium">{pngSymbol}</span>
+              <Input
+                type="number"
+                step="any"
+                value={h2.pngo || ""}
+                onChange={e => update("pngo", parseFloat(e.target.value) || 0)}
+                className="h-8 text-sm pl-8"
+              />
+            </div>
+          </div>
           {numField("TCo", "tco", h2.tco)}
           {numField("IPPo", "ippo", h2.ippo)}
         </div>
