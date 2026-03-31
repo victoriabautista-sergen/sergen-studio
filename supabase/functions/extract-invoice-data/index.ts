@@ -89,9 +89,6 @@ Responde SOLO con el texto de las nuevas reglas, sin JSON ni markdown.`;
         { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 400 }
       );
     }
-        { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 500 }
-      );
-    }
 
     // Download the file and convert to base64 data URL
     console.log("Downloading file from:", image_url);
