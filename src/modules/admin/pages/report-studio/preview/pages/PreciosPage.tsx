@@ -112,7 +112,7 @@ const PreciosPage = ({ data }: { data: ReportData }) => {
           </thead>
           <tbody>
             {[
-              ["Factor E", h2.factor_e?.toFixed(4) || "0.0000", ""],
+              ["Factor A", h2.factor_e?.toFixed(4) || "0.0000", ""],
               ["Factor por pérdida", h2.factor_perdida?.toFixed(2) || "0.00", ""],
               ["Precio actualizado HP", h2.precio_actualizado_hp?.toFixed(2) || "0.00", `${monedaSymbol}/MWh`],
               ["Precio actualizado HFP", h2.precio_actualizado_hfp?.toFixed(2) || "0.00", `${monedaSymbol}/MWh`],
