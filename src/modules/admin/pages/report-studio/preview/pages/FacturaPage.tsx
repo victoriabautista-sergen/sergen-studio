@@ -52,11 +52,11 @@ const FacturaPage = ({ data }: { data: ReportData }) => {
             <table className="w-full text-[11px] border-collapse mb-3" style={{ border: "1px solid rgba(27, 58, 92, 0.3)" }}>
               <thead>
                 <tr style={{ backgroundColor: "#1B3A5C" }}>
-                  <th className={`${borderStyle} p-1.5 text-left text-white font-semibold`}>DESCRIPCIÓN</th>
-                  <th className={`${borderStyle} p-1.5 text-center text-white font-semibold`}>UNIDAD</th>
-                  <th className={`${borderStyle} p-1.5 text-right text-white font-semibold`}>CANTIDAD</th>
-                  <th className={`${borderStyle} p-1.5 text-right text-white font-semibold`}>V. UNITARIO</th>
-                  <th className={`${borderStyle} p-1.5 text-right text-white font-semibold`}>V. VENTA</th>
+                  <th className={`${borderStyle} px-1.5 py-0.5 text-left text-white font-semibold`}>DESCRIPCIÓN</th>
+                  <th className={`${borderStyle} px-1.5 py-0.5 text-center text-white font-semibold`}>UNIDAD</th>
+                  <th className={`${borderStyle} px-1.5 py-0.5 text-right text-white font-semibold`}>CANTIDAD</th>
+                  <th className={`${borderStyle} px-1.5 py-0.5 text-right text-white font-semibold`}>V. UNITARIO</th>
+                  <th className={`${borderStyle} px-1.5 py-0.5 text-right text-white font-semibold`}>V. VENTA</th>
                 </tr>
               </thead>
               <tbody>
