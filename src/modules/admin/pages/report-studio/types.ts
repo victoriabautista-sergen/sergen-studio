@@ -30,15 +30,31 @@ export interface Hoja2Data {
   precio_calculado_hfp: number;
 }
 
+export interface FacturaItem {
+  descripcion: string;
+  unidad: string;
+  cantidad: number;
+  valor_unitario: number;
+  valor_venta: number;
+}
+
 export interface Hoja3Data {
   nombre_hp: string;
   nombre_hfp: string;
   incluir_otros_cargos: boolean;
   factura_file_url: string;
   numero_factura: string;
+  fecha_factura: string;
   precio_hp_facturado: number;
   precio_hfp_facturado: number;
   otros_cargos: number;
+  ruc: string;
+  razon_social: string;
+  items: FacturaItem[];
+  subtotal: number;
+  igv: number;
+  importe_total: number;
+  extracting: boolean;
 }
 
 export interface Hoja4Data {
