@@ -28,6 +28,37 @@ Deno.serve(async (req) => {
       );
     }
 
+    // Download the file and convert to base64 data URL
+    console.log("Downloading file from:", image_url);
+    const fileResponse = await fetch(image_url);
+    if (!fileResponse.ok) {
+      return new Response(
+        JSON.stringify({ error: "Could not download the file" }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 400 }
+      );
+    }
+
+    const fileBuffer = await fileResponse.arrayBuffer();
+    const uint8Array = new Uint8Array(fileBuffer);
+    
+    // Convert to base64
+    let binary = "";
+    for (let i = 0; i < uint8Array.length; i++) {
+      binary += String.fromCharCode(uint8Array[i]);
+    }
+    const base64 = btoa(binary);
+
+    // Detect mime type from URL
+    const lowerUrl = image_url.toLowerCase();
+    let mimeType = "image/png";
+    if (lowerUrl.endsWith(".pdf")) mimeType = "application/pdf";
+    else if (lowerUrl.endsWith(".jpg") || lowerUrl.endsWith(".jpeg")) mimeType = "image/jpeg";
+    else if (lowerUrl.endsWith(".png")) mimeType = "image/png";
+    else if (lowerUrl.endsWith(".webp")) mimeType = "image/webp";
+
+    const dataUrl = `data:${mimeType};base64,${base64}`;
+    console.log("File downloaded, mime:", mimeType, "size:", fileBuffer.byteLength);
+
     const prompt = `Analiza esta factura de energía eléctrica y extrae los siguientes datos en formato JSON.
 
 IMPORTANTE: 
@@ -73,7 +104,7 @@ Responde SOLO con el JSON, sin markdown ni explicaciones.`;
             role: "user",
             content: [
               { type: "text", text: prompt },
-              { type: "image_url", image_url: { url: image_url } },
+              { type: "image_url", image_url: { url: dataUrl } },
             ],
           },
         ],
@@ -82,7 +113,21 @@ Responde SOLO con el JSON, sin markdown ni explicaciones.`;
 
     if (!response.ok) {
       const errText = await response.text();
-      console.error("AI API error:", errText);
+      console.error("AI API error:", response.status, errText);
+      
+      if (response.status === 429) {
+        return new Response(
+          JSON.stringify({ error: "Demasiadas solicitudes, intenta en unos segundos" }),
+          { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 429 }
+        );
+      }
+      if (response.status === 402) {
+        return new Response(
+          JSON.stringify({ error: "Créditos AI agotados" }),
+          { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 402 }
+        );
+      }
+
       return new Response(
         JSON.stringify({ error: "AI extraction failed" }),
         { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 500 }
@@ -91,6 +136,7 @@ Responde SOLO con el JSON, sin markdown ni explicaciones.`;
 
     const aiResult = await response.json();
     const content = aiResult.choices?.[0]?.message?.content || "";
+    console.log("AI response received, length:", content.length);
 
     // Parse JSON from response (handle possible markdown wrapping)
     let jsonStr = content.trim();
