@@ -83,38 +83,39 @@ const Hoja2Precios = () => {
           {numField("Precio Potencia", "precio_potencia", h2.precio_potencia, monedaSymbol)}
         </div>
 
-        <div className="grid grid-cols-2 gap-2">
-          <div>
-            <div className="flex items-center justify-between mb-1">
-              <Label className="text-xs">PNGo</Label>
-              <div className="flex items-center gap-1">
-                <span className="text-[10px] text-muted-foreground">S/</span>
-                <Switch
-                  checked={(h2.png_moneda || "USD") === "USD"}
-                  onCheckedChange={(checked) => update("png_moneda", checked ? "USD" : "PEN")}
-                  className="scale-75"
-                />
-                <span className="text-[10px] text-muted-foreground">$</span>
-              </div>
-            </div>
-            <div className="relative">
-              <span className="absolute left-2 top-1/2 -translate-y-1/2 text-xs text-muted-foreground font-medium">{pngSymbol}</span>
-              <Input
-                type="number"
-                step="any"
-                value={h2.pngo || ""}
-                onChange={e => update("pngo", parseFloat(e.target.value) || 0)}
-                className="h-8 text-sm pl-8"
+        <div>
+          <div className="flex items-center justify-between mb-1">
+            <Label className="text-xs">PNGo</Label>
+            <div className="flex items-center gap-1">
+              <span className="text-[10px] text-muted-foreground">S/</span>
+              <Switch
+                checked={(h2.png_moneda || "USD") === "USD"}
+                onCheckedChange={(checked) => update("png_moneda", checked ? "USD" : "PEN")}
+                className="scale-75"
               />
+              <span className="text-[10px] text-muted-foreground">$</span>
             </div>
           </div>
+          <div className="relative">
+            <span className="absolute left-2 top-1/2 -translate-y-1/2 text-xs text-muted-foreground font-medium">{pngSymbol}</span>
+            <Input
+              type="number"
+              step="any"
+              value={h2.pngo || ""}
+              onChange={e => update("pngo", parseFloat(e.target.value) || 0)}
+              className="h-8 text-sm pl-8"
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 gap-2">
           {numField("TCo", "tco", h2.tco)}
           {numField("IPPo", "ippo", h2.ippo)}
         </div>
 
         <p className="text-xs font-medium text-muted-foreground uppercase mt-3">Valores Actuales</p>
-        <div className="grid grid-cols-3 gap-2">
-          {numField("PNG", "png_actual", h2.png_actual, pngSymbol)}
+        {numField("PNG", "png_actual", h2.png_actual, pngSymbol)}
+        <div className="grid grid-cols-2 gap-2">
           {numField("TC", "tc_actual", h2.tc_actual)}
           {numField("IPP", "ipp_actual", h2.ipp_actual)}
         </div>
