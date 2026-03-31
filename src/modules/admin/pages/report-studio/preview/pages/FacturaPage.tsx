@@ -1,5 +1,10 @@
 import { ReportData } from "../../types";
 
+const toSentenceCase = (s: string) => {
+  if (!s) return s;
+  return s.charAt(0).toUpperCase() + s.slice(1).toLowerCase();
+};
+
 const FacturaPage = ({ data }: { data: ReportData }) => {
   const h3 = data.hoja3_data;
   const dg = data.datos_generales;
