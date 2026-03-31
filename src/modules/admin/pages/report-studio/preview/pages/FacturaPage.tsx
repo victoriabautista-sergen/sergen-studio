@@ -9,7 +9,9 @@ const FacturaPage = ({ data }: { data: ReportData }) => {
   const mesAnterior = mesIndex > 0 ? meses[mesIndex - 1] : mesIndex === 0 ? "Diciembre" : dg.mes;
   const anioAnterior = mesIndex === 0 ? Number(dg.anio) - 1 : dg.anio;
 
-  const isPdf = h3.factura_file_url?.toLowerCase().endsWith(".pdf");
+  const monedaSymbol = "S/";
+  const borderStyle = "border border-[#1B3A5C]/20";
+  const hasItems = h3.items && h3.items.length > 0;
 
   return (
     <div className="flex flex-col h-full text-[10px] leading-relaxed" style={{ fontFamily: "'Inter', sans-serif", color: "#1B3A5C" }}>
@@ -26,40 +28,95 @@ const FacturaPage = ({ data }: { data: ReportData }) => {
           Se presenta la factura <strong>{h3.numero_factura || "[N° Factura]"}</strong> de fecha <strong>{h3.fecha_factura || "[Fecha]"}</strong>, correspondiente al periodo de <strong>{mesAnterior?.toLowerCase()} del {anioAnterior}</strong>, con los importes originales emitidos por <strong>{dg.concesionaria || "[Concesionaria]"}</strong>.
         </p>
 
-        {/* Invoice display */}
-        {h3.factura_file_url ? (
-          isPdf ? (
-            <div className="border border-gray-200 rounded overflow-hidden" style={{ height: "680px" }}>
-              <iframe
-                src={h3.factura_file_url}
-                className="w-full h-full"
-                title="Factura original"
-                style={{ border: "none" }}
-              />
+        {hasItems ? (
+          <>
+            {/* Invoice header box */}
+            <div className="border border-gray-300 rounded p-3 mb-3 flex justify-between items-start">
+              <div>
+                <p className="text-[10px] font-bold" style={{ color: "#1B3A5C" }}>{h3.razon_social || dg.concesionaria || "[Concesionaria]"}</p>
+                <p className="text-[9px] text-gray-500">RUC: {h3.ruc || "—"}</p>
+              </div>
+              <div className="text-right">
+                <p className="text-[10px] font-bold" style={{ color: "#1B3A5C" }}>FACTURA ELECTRÓNICA</p>
+                <p className="text-[9px]" style={{ color: "#1B3A5C" }}>{h3.numero_factura || "—"}</p>
+                <p className="text-[9px]" style={{ color: "#1B3A5C" }}>{h3.fecha_factura || "—"}</p>
+              </div>
             </div>
-          ) : (
-            <div className="border border-gray-200 rounded overflow-hidden">
-              <img
-                src={h3.factura_file_url}
-                alt="Factura original"
-                className="w-full object-contain"
-                style={{ maxHeight: "680px" }}
-              />
+
+            {/* Items table */}
+            <table className="w-full text-[9px] border-collapse mb-3" style={{ border: "1px solid rgba(27, 58, 92, 0.3)" }}>
+              <thead>
+                <tr style={{ backgroundColor: "#1B3A5C" }}>
+                  <th className={`${borderStyle} p-1.5 text-left text-white font-semibold`}>DESCRIPCIÓN</th>
+                  <th className={`${borderStyle} p-1.5 text-center text-white font-semibold`}>UNIDAD</th>
+                  <th className={`${borderStyle} p-1.5 text-right text-white font-semibold`}>CANTIDAD</th>
+                  <th className={`${borderStyle} p-1.5 text-right text-white font-semibold`}>V. UNITARIO</th>
+                  <th className={`${borderStyle} p-1.5 text-right text-white font-semibold`}>V. VENTA</th>
+                </tr>
+              </thead>
+              <tbody>
+                {h3.items.map((item, i) => (
+                  <tr key={i} className={i % 2 === 0 ? "bg-white" : "bg-gray-50/50"}>
+                    <td className={`${borderStyle} p-1.5`} style={{ color: "#1B3A5C" }}>{item.descripcion}</td>
+                    <td className={`${borderStyle} p-1.5 text-center`} style={{ color: "#1B3A5C" }}>{item.unidad}</td>
+                    <td className={`${borderStyle} p-1.5 text-right font-mono`} style={{ color: "#1B3A5C" }}>
+                      {typeof item.cantidad === "number" ? item.cantidad.toLocaleString("es-PE", { minimumFractionDigits: 2 }) : item.cantidad}
+                    </td>
+                    <td className={`${borderStyle} p-1.5 text-right font-mono`} style={{ color: "#1B3A5C" }}>
+                      {typeof item.valor_unitario === "number" ? item.valor_unitario.toFixed(10) : item.valor_unitario}
+                    </td>
+                    <td className={`${borderStyle} p-1.5 text-right font-mono`} style={{ color: "#1B3A5C" }}>
+                      {typeof item.valor_venta === "number" ? item.valor_venta.toLocaleString("es-PE", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : item.valor_venta}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+
+            {/* Totals */}
+            <div className="flex justify-end mb-2">
+              <table className="text-[9px] border-collapse" style={{ width: "250px" }}>
+                <tbody>
+                  <tr>
+                    <td className="p-1.5 text-right font-semibold" style={{ color: "#1B3A5C" }}>SUBTOTAL</td>
+                    <td className="p-1.5 text-right font-mono" style={{ color: "#1B3A5C" }}>
+                      {monedaSymbol} {(h3.subtotal || 0).toLocaleString("es-PE", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                    </td>
+                  </tr>
+                  <tr>
+                    <td className="p-1.5 text-right font-semibold" style={{ color: "#1B3A5C" }}>OTROS CARGOS</td>
+                    <td className="p-1.5 text-right font-mono" style={{ color: "#1B3A5C" }}>
+                      {monedaSymbol} {(h3.otros_cargos || 0).toLocaleString("es-PE", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                    </td>
+                  </tr>
+                  <tr>
+                    <td className="p-1.5 text-right font-semibold" style={{ color: "#1B3A5C" }}>IGV (18%)</td>
+                    <td className="p-1.5 text-right font-mono" style={{ color: "#1B3A5C" }}>
+                      {monedaSymbol} {(h3.igv || 0).toLocaleString("es-PE", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                    </td>
+                  </tr>
+                  <tr className="border-t border-gray-300">
+                    <td className="p-1.5 text-right font-bold" style={{ color: "#1B3A5C" }}>IMPORTE TOTAL</td>
+                    <td className="p-1.5 text-right font-mono font-bold" style={{ color: "#1B3A5C" }}>
+                      {monedaSymbol} {(h3.importe_total || 0).toLocaleString("es-PE", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
             </div>
-          )
+
+            <p className="text-[8px] italic text-gray-400 text-right">
+              Fuente: Factura emitida por {dg.concesionaria || "[Concesionaria]"}
+            </p>
+          </>
         ) : (
+          /* No data extracted yet - show placeholder */
           <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 flex flex-col items-center justify-center text-gray-400 min-h-[300px]">
             <svg className="w-12 h-12 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
             </svg>
-            <p className="text-xs">Sube una factura en el editor para mostrarla aquí</p>
+            <p className="text-xs">Sube una factura y extrae los datos para mostrar aquí</p>
           </div>
-        )}
-
-        {h3.factura_file_url && (
-          <p className="text-[8px] italic text-gray-400 text-right mt-1">
-            Fuente: Factura emitida por {dg.concesionaria || "[Concesionaria]"}
-          </p>
         )}
       </div>
 
