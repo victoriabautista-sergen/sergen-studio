@@ -127,7 +127,8 @@ const EmpresasPage = () => {
         company_name: c.company_name,
         ruc: c.ruc,
         industry: c.industry,
-        subscription_status: subByClient.get(c.id) ?? null,
+        subscription_status: subByClient.get(c.id)?.status ?? null,
+        subscription_plan: subByClient.get(c.id)?.plan ?? null,
         user_count: userCountByClient.get(c.id) ?? 0,
         active_modules: modCountByClient.get(c.id) ?? 0,
       }));
