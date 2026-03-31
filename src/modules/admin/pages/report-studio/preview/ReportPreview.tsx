@@ -120,7 +120,7 @@ const AllPagesForExport = React.forwardRef<HTMLDivElement, { data: any; hiddenPa
 });
 AllPagesForExport.displayName = "AllPagesForExport";
 
-const ReportPreview = () => {
+const ReportPreview = ({ zoom = 1 }: { zoom?: number }) => {
   const { data, activeSheet, hiddenPages, togglePageVisibility } = useReportContext();
   const PageComponent = pageComponents[activeSheet];
   const allPagesRef = useRef<HTMLDivElement>(null);
@@ -146,7 +146,7 @@ const ReportPreview = () => {
 
   return (
     <div className="flex flex-col items-center h-full overflow-auto p-6 relative">
-      <div className="relative flex-shrink-0">
+      <div className="relative flex-shrink-0" style={{ transform: `scale(${zoom})`, transformOrigin: "top center" }}>
         <div
           className="bg-white shadow-xl border rounded-sm"
           style={{
