@@ -4,6 +4,7 @@ const PreciosPage = ({ data }: { data: ReportData }) => {
   const h2 = data.hoja2_data;
   const dg = data.datos_generales;
   const monedaSymbol = h2.moneda === "USD" ? "$" : "S/";
+  const pngSymbol = (h2.png_moneda || "USD") === "USD" ? "$" : "S/";
   const concesionaria = dg.concesionaria || "[Concesionaria]";
   const cliente = dg.client_name || "[Cliente]";
   const mesNombre = dg.mes || "—";
