@@ -89,6 +89,7 @@ const Hoja1DatosGenerales = () => {
             ippo: lastH2.ippo ?? 0,
             factor_perdida: lastH2.factor_perdida ?? 1.0,
             formula: lastH2.formula ?? "PB × (PNG/PNGo) × (TC/TCo) × (IPP/IPPo) × FP",
+            formula_calculo: lastH2.formula_calculo ?? "Factor_A = (PNG / PNG_o) × (TC / TC_o) × (IPP / IPP_o)",
           };
           updateSheet("hoja2_data", { ...data.hoja2_data, ...baseFields });
         }
