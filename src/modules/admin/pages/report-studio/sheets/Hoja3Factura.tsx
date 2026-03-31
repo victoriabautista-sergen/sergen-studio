@@ -132,71 +132,41 @@ const Hoja3Factura = () => {
         )}
       </div>
 
-      {/* Concept name mapping */}
+      {/* Datos Extraídos */}
       <div className="border rounded-lg p-3 space-y-3 bg-muted/30">
-        <p className="text-xs font-semibold text-foreground uppercase tracking-wide">Mapeo de Conceptos</p>
-        <p className="text-[10px] text-muted-foreground">
-          Escribe el nombre exacto del concepto como aparece en la factura para facilitar la extracción automática.
-        </p>
-        <div>
-          <Label className="text-xs">Concepto Energía HP (como aparece en factura)</Label>
-          <Input value={h3.nombre_hp} onChange={e => update("nombre_hp", e.target.value)} className="h-8 text-sm" placeholder="ENERGÍA ACTIVA EN HORA PUNTA" />
-        </div>
-        <div>
-          <Label className="text-xs">Concepto Energía HFP (como aparece en factura)</Label>
-          <Input value={h3.nombre_hfp} onChange={e => update("nombre_hfp", e.target.value)} className="h-8 text-sm" placeholder="ENERGÍA ACTIVA EN HORA FUERA DE PUNTA" />
-        </div>
-      </div>
-
-      {/* Extracted/Manual data */}
-      <div className="border rounded-lg p-3 space-y-3 bg-muted/30">
-        <p className="text-xs font-semibold text-foreground uppercase tracking-wide">Datos de la Factura</p>
-        <div className="grid grid-cols-2 gap-2">
-          <div>
-            <Label className="text-xs">N° Factura</Label>
-            <Input value={h3.numero_factura} onChange={e => update("numero_factura", e.target.value)} className="h-8 text-sm" placeholder="F001-00123" />
-          </div>
-          <div>
-            <Label className="text-xs">Fecha</Label>
-            <Input value={h3.fecha_factura} onChange={e => update("fecha_factura", e.target.value)} className="h-8 text-sm" placeholder="2026-03-13" />
-          </div>
-        </div>
-        <div className="grid grid-cols-2 gap-2">
-          <div>
-            <Label className="text-xs">RUC</Label>
-            <Input value={h3.ruc} onChange={e => update("ruc", e.target.value)} className="h-8 text-sm" />
-          </div>
-          <div>
-            <Label className="text-xs">Razón Social</Label>
-            <Input value={h3.razon_social} onChange={e => update("razon_social", e.target.value)} className="h-8 text-sm" />
-          </div>
-        </div>
+        <p className="text-xs font-semibold text-foreground uppercase tracking-wide">Datos Extraídos</p>
 
         <div className="grid grid-cols-2 gap-2">
           <div>
-            <Label className="text-xs">Precio HP Facturado (ctm/kWh)</Label>
+            <Label className="text-xs">Precio HP Facturado (V. Unitario)</Label>
             <Input type="number" step="any" value={h3.precio_hp_facturado || ""} onChange={e => update("precio_hp_facturado", parseFloat(e.target.value) || 0)} className="h-8 text-sm" />
           </div>
           <div>
-            <Label className="text-xs">Precio HFP Facturado (ctm/kWh)</Label>
+            <Label className="text-xs">Precio HFP Facturado (V. Unitario)</Label>
             <Input type="number" step="any" value={h3.precio_hfp_facturado || ""} onChange={e => update("precio_hfp_facturado", parseFloat(e.target.value) || 0)} className="h-8 text-sm" />
           </div>
         </div>
 
-        <div className="grid grid-cols-3 gap-2">
-          <div>
-            <Label className="text-xs">Subtotal</Label>
-            <Input type="number" step="any" value={h3.subtotal || ""} onChange={e => update("subtotal", parseFloat(e.target.value) || 0)} className="h-8 text-sm" />
+        {(h3.precio_hp_facturado === 0 || h3.precio_hfp_facturado === 0) && (
+          <div className="border border-yellow-300 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg p-3 space-y-2">
+            <p className="text-[10px] text-yellow-700 dark:text-yellow-400 font-medium">
+              ⚠ No se reconocieron los precios. Indica el nombre exacto del concepto en la factura:
+            </p>
+            {h3.precio_hp_facturado === 0 && (
+              <div>
+                <Label className="text-xs">Concepto Energía HP (como aparece en factura)</Label>
+                <Input value={h3.nombre_hp} onChange={e => update("nombre_hp", e.target.value)} className="h-8 text-sm" placeholder="ENERGÍA ACTIVA EN HORA PUNTA" />
+              </div>
+            )}
+            {h3.precio_hfp_facturado === 0 && (
+              <div>
+                <Label className="text-xs">Concepto Energía HFP (como aparece en factura)</Label>
+                <Input value={h3.nombre_hfp} onChange={e => update("nombre_hfp", e.target.value)} className="h-8 text-sm" placeholder="ENERGÍA ACTIVA EN HORA FUERA DE PUNTA" />
+              </div>
+            )}
+            <p className="text-[9px] text-muted-foreground">Luego vuelve a hacer clic en "Extraer datos".</p>
           </div>
-          <div>
-            <Label className="text-xs">IGV</Label>
-            <Input type="number" step="any" value={h3.igv || ""} onChange={e => update("igv", parseFloat(e.target.value) || 0)} className="h-8 text-sm" />
-          </div>
-          <div>
-            <Label className="text-xs">Total</Label>
-            <Input type="number" step="any" value={h3.importe_total || ""} onChange={e => update("importe_total", parseFloat(e.target.value) || 0)} className="h-8 text-sm" />
-          </div>
-        </div>
+        )}
       </div>
     </div>
   );
