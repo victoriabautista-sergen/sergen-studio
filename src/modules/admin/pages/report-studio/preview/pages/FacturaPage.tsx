@@ -89,10 +89,10 @@ const FacturaPage = ({ data }: { data: ReportData }) => {
                     ["IMPORTE TOTAL", h3.importe_total, true],
                   ].map(([label, val, isBold], i) => (
                     <tr key={i} style={isBold ? { backgroundColor: "#1B3A5C" } : {}}>
-                      <td className={`px-2 py-1.5 ${borderStyle} ${isBold ? "font-bold text-white" : "font-semibold"}`} style={!isBold ? { color: "#1B3A5C" } : {}}>
+                      <td className={`px-2 py-1.5 ${borderStyle} ${isBold ? "font-bold text-white text-[10px]" : "font-semibold"}`} style={!isBold ? { color: "#1B3A5C" } : {}}>
                         {label as string}
                       </td>
-                      <td className={`px-2 py-1.5 ${borderStyle} text-right font-mono ${isBold ? "font-bold text-white" : ""}`} style={!isBold ? { color: "#1B3A5C" } : {}}>
+                      <td className={`px-2 py-1.5 ${borderStyle} text-right font-mono ${isBold ? "font-bold text-white text-[11px]" : ""}`} style={!isBold ? { color: "#1B3A5C" } : {}}>
                         {monedaSymbol} {((val as number) || 0).toLocaleString("es-PE", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                       </td>
                     </tr>
