@@ -95,7 +95,7 @@ const PreciosPage = ({ data }: { data: ReportData }) => {
         </div>
 
         <p className="text-[10px] text-gray-700 mb-2">
-          Realizando la conversión del precio actualizado de la energía tenemos que para el periodo <strong>{mesNombre} del {anio}</strong> el
+          Realizando la conversión del precio actualizado de la energía tenemos que para el periodo <strong>{mesAnterior} del {mesIndex === 0 ? String(Number(anio) - 1) : anio}</strong> el
           costo de la energía es de <strong>{h2.precio_calculado_hp?.toFixed(5) || "0.00000"} {monedaSymbol}/kWh (HP)</strong> y{" "}
           <strong>{h2.precio_calculado_hfp?.toFixed(5) || "0.00000"} {monedaSymbol}/kWh (HFP)</strong>.
         </p>
