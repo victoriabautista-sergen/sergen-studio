@@ -23,6 +23,7 @@ export interface Hoja2Data {
   factor_e: number;
   factor_perdida: number;
   formula: string;
+  formula_calculo: string;
   precio_actualizado_hp: number;
   precio_actualizado_hfp: number;
   precio_calculado_hp: number;
@@ -133,6 +134,7 @@ export const defaultReportData: ReportData = {
     factor_e: 0,
     factor_perdida: 1.0,
     formula: "PB × (PNG/PNGo) × (TC/TCo) × (IPP/IPPo) × FP",
+    formula_calculo: "Factor_E = (PNG / PNG_o) × (TC / TC_o) × (IPP / IPP_o)\nPA_HP = PB_HP × Factor_E × FP\nPA_HFP = PB_HFP × Factor_E × FP\nPC_HP = PA_HP / 1000\nPC_HFP = PA_HFP / 1000",
     precio_actualizado_hp: 0,
     precio_actualizado_hfp: 0,
     precio_calculado_hp: 0,
