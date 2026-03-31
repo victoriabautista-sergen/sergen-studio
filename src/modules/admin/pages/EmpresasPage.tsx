@@ -207,9 +207,7 @@ const EmpresasPage = () => {
 
   const isCreateValid =
     name.trim() &&
-    adminName.trim() &&
-    adminEmail.trim() &&
-    adminPassword.length >= 6;
+    (!adminEmail.trim() || (adminName.trim() && adminPassword.length >= 6));
 
   return (
     <AdminShell breadcrumbs={BREADCRUMBS}>
