@@ -25,19 +25,70 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const { image_url, nombre_hp, nombre_hfp, reglas_concesionario, concesionaria } = await req.json();
+    const body = await req.json();
+    const { image_url, nombre_hp, nombre_hfp, reglas_concesionario, concesionaria, adjust_rules, current_rules, user_feedback } = body;
 
+    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
+    if (!LOVABLE_API_KEY) {
+      return new Response(
+        JSON.stringify({ error: "AI API key not configured" }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 500 }
+      );
+    }
+
+    // MODE: Adjust rules based on user feedback
+    if (adjust_rules) {
+      const adjustPrompt = `Eres un experto en facturas de energía eléctrica de Perú. 
+Un usuario reporta problemas al extraer datos de una factura del concesionario "${concesionaria || "desconocido"}".
+
+REGLAS ACTUALES:
+${current_rules || "(sin reglas previas)"}
+
+PROBLEMA REPORTADO POR EL USUARIO:
+${user_feedback}
+
+Genera unas NUEVAS reglas de extracción mejoradas que corrijan el problema. Las reglas deben incluir:
+- Los nombres exactos de los conceptos de energía HP y HFP como aparecen en la factura
+- La estructura de la sección de totales
+- Cualquier particularidad del formato
+
+Responde SOLO con el texto de las nuevas reglas, sin JSON ni markdown.`;
+
+      const adjustResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${LOVABLE_API_KEY}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          model: "google/gemini-2.5-flash",
+          messages: [{ role: "user", content: adjustPrompt }],
+        }),
+      });
+
+      if (!adjustResponse.ok) {
+        return new Response(
+          JSON.stringify({ error: "Error al ajustar reglas" }),
+          { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 500 }
+        );
+      }
+
+      const adjustResult = await adjustResponse.json();
+      const newRules = adjustResult.choices?.[0]?.message?.content || current_rules;
+
+      return new Response(
+        JSON.stringify({ new_rules: newRules }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // MODE: Extract invoice data
     if (!image_url) {
       return new Response(
         JSON.stringify({ error: "image_url is required" }),
         { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 400 }
       );
     }
-
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    if (!LOVABLE_API_KEY) {
-      return new Response(
-        JSON.stringify({ error: "AI API key not configured" }),
         { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 500 }
       );
     }
