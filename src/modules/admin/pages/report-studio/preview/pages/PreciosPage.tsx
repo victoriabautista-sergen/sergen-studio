@@ -76,7 +76,7 @@ const PreciosPage = ({ data }: { data: ReportData }) => {
 
         <div className="border border-gray-200 rounded bg-gray-50 px-4 py-2 mb-2">
           <p className="text-[10px] italic text-gray-700 font-mono whitespace-pre-wrap">
-            {h2.formula || "Precio energía = Precio base × Factor E"}
+            {renderFormula(h2.formula || "Precio energía = Precio base × Factor E")}
           </p>
         </div>
 
