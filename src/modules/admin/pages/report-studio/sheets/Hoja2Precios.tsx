@@ -168,7 +168,29 @@ const Hoja2Precios = () => {
         <p className="text-xs font-semibold text-foreground uppercase tracking-wide">Cálculo</p>
         
         <div>
-          <Label className="text-xs">Fórmula de cálculo</Label>
+          <div className="flex items-center gap-1.5">
+            <Label className="text-xs">Fórmula de cálculo</Label>
+            <Popover>
+              <PopoverTrigger asChild>
+                <button type="button" className="text-muted-foreground hover:text-foreground transition-colors">
+                  <Info size={14} />
+                </button>
+              </PopoverTrigger>
+              <PopoverContent className="w-72 text-xs space-y-1.5" side="right">
+                <p className="font-semibold text-foreground mb-2">Siglas de la fórmula</p>
+                <div className="space-y-1 text-muted-foreground">
+                  <p><strong className="text-foreground">PB</strong> — Precio Base (HP o HFP)</p>
+                  <p><strong className="text-foreground">PNG</strong> — Precio del Gas Natural (actual)</p>
+                  <p><strong className="text-foreground">PNGo</strong> — Precio del Gas Natural (base)</p>
+                  <p><strong className="text-foreground">TC</strong> — Tipo de Cambio (actual)</p>
+                  <p><strong className="text-foreground">TCo</strong> — Tipo de Cambio (base)</p>
+                  <p><strong className="text-foreground">IPP</strong> — Índice de Precios al Productor (actual)</p>
+                  <p><strong className="text-foreground">IPPo</strong> — Índice de Precios al Productor (base)</p>
+                  <p><strong className="text-foreground">FP</strong> — Factor de Pérdida</p>
+                </div>
+              </PopoverContent>
+            </Popover>
+          </div>
           <p className="text-[9px] text-muted-foreground mb-1">Fórmula matemática aplicada al cálculo de precios</p>
           <div className="bg-muted/50 rounded px-3 py-2 text-sm font-mono text-muted-foreground border">
             PB × (PNG/PNGo) × (TC/TCo) × (IPP/IPPo) × FP
