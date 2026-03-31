@@ -116,13 +116,14 @@ const ReportStudioContent = () => {
             <div className="border-b bg-card px-4 py-2 flex items-center justify-between shrink-0">
               <ReportPreview.Navigation />
               <div className="flex items-center gap-2">
-                <Button variant="outline" size="default" className="gap-1">
+                <Button variant="outline" size="default" className="gap-1" onClick={handleZoomIn}>
                   <ZoomIn className="h-4 w-4" />
                 </Button>
-                <Button variant="outline" size="default" className="gap-1">
+                <Button variant="outline" size="default" className="gap-1" onClick={handleZoomOut}>
                   <ZoomOut className="h-4 w-4" />
                 </Button>
-                <Button variant="outline" size="default">Reset</Button>
+                <span className="text-xs text-muted-foreground min-w-[3rem] text-center">{Math.round(zoom * 100)}%</span>
+                <Button variant="outline" size="default" onClick={handleZoomReset}>Reset</Button>
                 <Button size="default" onClick={handleDownloadPDF} disabled={downloading} className="gap-2 bg-[#E8792B] hover:bg-[#d06a22] text-white">
                   {downloading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
                   {downloading ? "Generando..." : "Descargar PDF"}
