@@ -54,6 +54,7 @@ const Hoja1DatosGenerales = () => {
         client_id: clientId,
         client_name: client.company_name,
       };
+      let ultimoCorrelativo: string | null = null;
 
       // Get last report for this client to pre-fill concesionaria + base values
       const { data: lastReports } = await supabase
@@ -68,6 +69,9 @@ const Hoja1DatosGenerales = () => {
         const lastDg = last.datos_generales;
         if (lastDg?.concesionaria) {
           updated.concesionaria = lastDg.concesionaria;
+        }
+        if (lastDg?.numero_informe) {
+          ultimoCorrelativo = String(lastDg.numero_informe).trim();
         }
 
         // Pre-fill base values from last report
@@ -90,15 +94,10 @@ const Hoja1DatosGenerales = () => {
         }
       }
 
-      // Auto-correlative: only set for new reports (no existing id)
+      // Auto-correlative: set the current baseline only for new reports.
+      // It must increase exclusively when clicking "Descargar PDF".
       if (!data.id) {
-        const { count } = await supabase
-          .from("reportes_control_demanda" as any)
-          .select("id", { count: "exact", head: true })
-          .eq("client_id", clientId);
-
-        const nextNumber = ((count || 0) + 1).toString().padStart(2, "0");
-        updated.numero_informe = nextNumber;
+        updated.numero_informe = ultimoCorrelativo || "01";
       }
 
       updateSheet("datos_generales", updated);
