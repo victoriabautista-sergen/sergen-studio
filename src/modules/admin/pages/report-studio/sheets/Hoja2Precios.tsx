@@ -147,22 +147,24 @@ const Hoja2Precios = () => {
         </div>
       </div>
 
-      {/* CAJA 3: Cálculo */}
+      {/* CAJA 3: Fórmula (visual) */}
       <div className="border rounded-lg p-3 space-y-3 bg-muted/30">
-        <p className="text-xs font-semibold text-foreground uppercase tracking-wide">Cálculo</p>
-        <div className="grid grid-cols-2 gap-2">
-          {numField("Factor E", "factor_e", h2.factor_e)}
-          {numField("Factor de Pérdida", "factor_perdida", h2.factor_perdida)}
-        </div>
-
+        <p className="text-xs font-semibold text-foreground uppercase tracking-wide">Fórmula (Visual)</p>
+        <p className="text-[10px] text-muted-foreground">Este texto es solo descriptivo y no afecta el cálculo. Cada empresa puede usar nombres o siglas diferentes.</p>
         <div>
-          <Label className="text-xs">Fórmula</Label>
-          <Input
+          <Label className="text-xs">Texto de la fórmula</Label>
+          <textarea
             value={h2.formula}
             onChange={e => update("formula", e.target.value)}
-            className="h-8 text-sm font-mono"
+            className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm font-mono ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring min-h-[60px] resize-y"
           />
         </div>
+      </div>
+
+      {/* CAJA 4: Cálculo */}
+      <div className="border rounded-lg p-3 space-y-3 bg-muted/30">
+        <p className="text-xs font-semibold text-foreground uppercase tracking-wide">Cálculo</p>
+        {numField("Factor de Pérdida", "factor_perdida", h2.factor_perdida)}
 
         <div className="bg-background rounded-lg p-3 space-y-1 border">
           <p className="text-xs font-medium text-muted-foreground">Resultados ({monedaSymbol})</p>
