@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
-import { ArrowLeft, BarChart2, FileText } from 'lucide-react';
+import { ArrowLeft, BarChart2, FileText, LayoutDashboard } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import PrivateRoute from '@/core/auth/components/PrivateRoute';
 import { cn } from '@/lib/utils';
@@ -9,8 +9,9 @@ interface EnergyShellProps {
 }
 
 const navLinks = [
-  { label: 'Control', href: '/energy-intelligence/control', icon: BarChart2 },
-  { label: 'Reportes', href: '/energy-intelligence/reportes', icon: FileText },
+  { label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
+  { label: 'Control de Demanda', href: '/energy-intelligence/control', icon: BarChart2 },
+  { label: 'Generador de Reporte', href: '/energy-intelligence/reportes', icon: FileText },
 ];
 
 const EnergyShell = ({ children }: EnergyShellProps) => {
@@ -18,53 +19,50 @@ const EnergyShell = ({ children }: EnergyShellProps) => {
 
   return (
     <PrivateRoute>
-      <div className="min-h-screen bg-background flex flex-col">
-        {/* Header */}
-        <header className="border-b bg-card shrink-0 z-10">
-          <div className="flex items-center h-14 px-6 gap-3">
-            <Button variant="ghost" size="icon" asChild>
-              <Link to="/dashboard">
-                <ArrowLeft className="h-5 w-5" />
-              </Link>
-            </Button>
-            <span className="font-heading font-semibold text-lg tracking-tight">Control de Demanda</span>
+      <div className="min-h-screen bg-background flex">
+        {/* Dark sidebar */}
+        <aside className="w-72 shrink-0 flex flex-col"
+          style={{ background: 'linear-gradient(180deg, hsl(215 30% 14%) 0%, hsl(215 35% 10%) 100%)' }}
+        >
+          {/* Brand */}
+          <div className="flex items-center h-14 px-5 gap-3 border-b border-white/10">
+            <span className="font-heading font-bold text-white tracking-tight text-lg">SERGEN</span>
           </div>
-        </header>
 
-        {/* Body: sidebar + content */}
-        <div className="flex flex-1 overflow-hidden">
-          {/* Sidebar */}
-          <aside className="w-72 shrink-0 border-r bg-card flex flex-col">
-            <nav className="flex flex-col gap-1.5 px-5 py-6">
-              {navLinks.map(link => {
-                const Icon = link.icon;
-                const isActive =
-                  location.pathname === link.href ||
-                  location.pathname.startsWith(link.href + '/');
-                return (
-                  <Link
-                    key={link.href}
-                    to={link.href}
-                    className={cn(
-                      'flex items-center gap-3 px-4 py-2.5 rounded-lg text-base font-medium transition-colors',
-                      isActive
-                        ? 'bg-primary/10 text-primary'
-                        : 'text-muted-foreground hover:bg-muted hover:text-foreground'
-                    )}
-                  >
-                    <Icon className="h-5 w-5 shrink-0" />
-                    {link.label}
-                  </Link>
-                );
-              })}
-            </nav>
-          </aside>
+          <nav className="flex flex-col gap-1 px-3 py-4 flex-1">
+            {navLinks.map(link => {
+              const Icon = link.icon;
+              const isActive =
+                link.href === '/dashboard'
+                  ? location.pathname === '/dashboard'
+                  : location.pathname === link.href ||
+                    location.pathname.startsWith(link.href + '/');
+              return (
+                <Link
+                  key={link.href}
+                  to={link.href}
+                  className={cn(
+                    'flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-all',
+                    isActive
+                      ? 'text-white shadow-md'
+                      : 'text-white/70 hover:text-white hover:bg-white/5'
+                  )}
+                  style={isActive ? {
+                    background: 'linear-gradient(135deg, hsl(25 95% 53%) 0%, hsl(15 90% 48%) 100%)',
+                  } : undefined}
+                >
+                  <Icon className="h-4 w-4 shrink-0" />
+                  {link.label}
+                </Link>
+              );
+            })}
+          </nav>
+        </aside>
 
-          {/* Main content */}
-          <main className="flex-1 overflow-auto">
-            <div className="px-8 py-8 max-w-[1400px]">{children}</div>
-          </main>
-        </div>
+        {/* Main content */}
+        <main className="flex-1 overflow-auto">
+          <div className="px-8 py-8 max-w-[1400px]">{children}</div>
+        </main>
       </div>
     </PrivateRoute>
   );
