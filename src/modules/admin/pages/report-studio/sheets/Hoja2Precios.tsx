@@ -114,7 +114,7 @@ const Hoja2Precios = () => {
 
         <p className="text-xs font-medium text-muted-foreground uppercase mt-3">Valores Actuales</p>
         <div className="grid grid-cols-3 gap-2">
-          {numField("PNG", "png_actual", h2.png_actual)}
+          {numField("PNG", "png_actual", h2.png_actual, pngSymbol)}
           {numField("TC", "tc_actual", h2.tc_actual)}
           {numField("IPP", "ipp_actual", h2.ipp_actual)}
         </div>
