@@ -1,15 +1,21 @@
+import { Zap } from "lucide-react";
+
 interface MaxPowerDisplayProps {
   maxPower: number;
 }
 
 export const MaxPowerDisplay = ({ maxPower }: MaxPowerDisplayProps) => (
-  <div className="text-center w-[266px]">
-    <p className="text-[#8E9196] text-lg font-medium mb-2">Potencia Máxima</p>
-    <p
-      className="px-4 h-[66px] rounded w-full flex items-center justify-center text-white text-2xl font-medium"
-      style={{ backgroundColor: '#156082' }}
-    >
-      {maxPower.toFixed(2)} MW
-    </p>
+  <div className="w-full rounded-xl overflow-hidden border border-border shadow-sm">
+    <div className="px-4 py-2" style={{ background: 'linear-gradient(135deg, hsl(195 70% 30%) 0%, hsl(195 60% 22%) 100%)' }}>
+      <p className="text-white text-sm font-semibold tracking-wide">Potencia Máxima</p>
+    </div>
+    <div className="bg-card px-4 py-5 flex items-center justify-between">
+      <p className="text-3xl font-bold text-foreground">
+        {maxPower.toLocaleString('en-US', { minimumFractionDigits: 2 })} <span className="text-lg font-medium text-muted-foreground">MW</span>
+      </p>
+      <div className="h-10 w-10 rounded-full flex items-center justify-center" style={{ background: 'hsl(195 70% 30%)' }}>
+        <Zap className="h-5 w-5 text-white" />
+      </div>
+    </div>
   </div>
 );
