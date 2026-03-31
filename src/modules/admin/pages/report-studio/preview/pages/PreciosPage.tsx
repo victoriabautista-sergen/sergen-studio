@@ -1,4 +1,17 @@
+import React from "react";
 import { ReportData } from "../../types";
+
+/** Renders formula text with subscript support: _x becomes <sub>x</sub>, _{abc} becomes <sub>abc</sub> */
+const renderFormula = (text: string): React.ReactNode => {
+  const parts = text.split(/(_\{[^}]+\}|_[a-zA-Z0-9])/g);
+  return parts.map((part, i) => {
+    const braceMatch = part.match(/^_\{(.+)\}$/);
+    if (braceMatch) return <sub key={i}>{braceMatch[1]}</sub>;
+    const singleMatch = part.match(/^_([a-zA-Z0-9])$/);
+    if (singleMatch) return <sub key={i}>{singleMatch[1]}</sub>;
+    return <React.Fragment key={i}>{part}</React.Fragment>;
+  });
+};
 
 const PreciosPage = ({ data }: { data: ReportData }) => {
   const h2 = data.hoja2_data;
