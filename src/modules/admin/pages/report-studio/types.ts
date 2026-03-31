@@ -186,6 +186,7 @@ export const defaultReportData: ReportData = {
     igv: 0,
     importe_total: 0,
     extracting: false,
+    reglas_extraccion: "",
   },
   hoja4_data: {
     precio_calculado_hp: 0,
