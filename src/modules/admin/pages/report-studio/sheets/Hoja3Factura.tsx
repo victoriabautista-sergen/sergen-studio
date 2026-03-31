@@ -42,10 +42,16 @@ const Hoja3Factura = () => {
         precio_hp_facturado: extracted.precio_hp ?? h3.precio_hp_facturado,
         precio_hfp_facturado: extracted.precio_hfp ?? h3.precio_hfp_facturado,
         items: extracted.items || h3.items,
+        op_gravadas: extracted.op_gravadas ?? h3.op_gravadas,
+        op_inafectas: extracted.op_inafectas ?? h3.op_inafectas,
+        op_exonerada: extracted.op_exonerada ?? h3.op_exonerada,
+        op_gratuita: extracted.op_gratuita ?? h3.op_gratuita,
+        otros_cargos: extracted.otros_cargos ?? h3.otros_cargos,
+        otros_descuentos: extracted.otros_descuentos ?? h3.otros_descuentos,
         subtotal: extracted.subtotal ?? h3.subtotal,
+        isc: extracted.isc ?? h3.isc,
         igv: extracted.igv ?? h3.igv,
         importe_total: extracted.importe_total ?? h3.importe_total,
-        otros_cargos: extracted.otros_cargos ?? h3.otros_cargos,
       });
       toast.success("Datos extraídos correctamente");
     } catch (err: any) {

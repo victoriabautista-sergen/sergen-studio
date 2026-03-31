@@ -83,10 +83,16 @@ const FacturaPage = ({ data }: { data: ReportData }) => {
               <table className="text-[9px] border-collapse" style={{ width: "280px", border: "1px solid rgba(27, 58, 92, 0.2)" }}>
                 <tbody>
                   {[
-                    ["SUBTOTAL", h3.subtotal, false],
+                    ["OP. GRAVADAS", h3.op_gravadas, false],
+                    ["OP. INAFECTAS", h3.op_inafectas, false],
+                    ["OP. EXONERADA", h3.op_exonerada, false],
+                    ["OP. GRATUITA", h3.op_gratuita, false],
                     ["OTROS CARGOS", h3.otros_cargos, false],
-                    ["IGV (18%)", h3.igv, false],
-                    ["IMPORTE TOTAL", h3.importe_total, true],
+                    ["OTROS DESCUENTOS", h3.otros_descuentos, false],
+                    ["SUBTOTAL", h3.subtotal, false],
+                    ["ISC", h3.isc, false],
+                    ["IGV", h3.igv, false],
+                    ["IMPORTE TOTAL DE LA VENTA", h3.importe_total, true],
                   ].map(([label, val, isBold], i) => (
                     <tr key={i} style={isBold ? { backgroundColor: "#1B3A5C" } : {}}>
                       <td className={`px-2 py-1.5 ${borderStyle} ${isBold ? "font-bold text-white text-[10px]" : "font-semibold"}`} style={!isBold ? { color: "#1B3A5C" } : {}}>

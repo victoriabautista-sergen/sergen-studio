@@ -48,10 +48,16 @@ export interface Hoja3Data {
   precio_hp_facturado: number;
   precio_hfp_facturado: number;
   otros_cargos: number;
+  op_gravadas: number;
+  op_inafectas: number;
+  op_exonerada: number;
+  op_gratuita: number;
+  otros_descuentos: number;
   ruc: string;
   razon_social: string;
   items: FacturaItem[];
   subtotal: number;
+  isc: number;
   igv: number;
   importe_total: number;
   extracting: boolean;
@@ -166,10 +172,16 @@ export const defaultReportData: ReportData = {
     precio_hp_facturado: 0,
     precio_hfp_facturado: 0,
     otros_cargos: 0,
+    op_gravadas: 0,
+    op_inafectas: 0,
+    op_exonerada: 0,
+    op_gratuita: 0,
+    otros_descuentos: 0,
     ruc: "",
     razon_social: "",
     items: [],
     subtotal: 0,
+    isc: 0,
     igv: 0,
     importe_total: 0,
     extracting: false,

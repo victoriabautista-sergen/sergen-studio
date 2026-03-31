@@ -97,10 +97,16 @@ Extrae este JSON:
       "valor_venta": (número)
     }
   ],
+  "op_gravadas": (número),
+  "op_inafectas": (número o 0),
+  "op_exonerada": (número o 0),
+  "op_gratuita": (número o 0),
+  "otros_cargos": (número o 0),
+  "otros_descuentos": (número o 0),
   "subtotal": (número),
+  "isc": (número o 0),
   "igv": (número),
-  "importe_total": (número),
-  "otros_cargos": 0
+  "importe_total": (número)
 }
 
 Responde SOLO con el JSON, sin markdown ni explicaciones.`;
