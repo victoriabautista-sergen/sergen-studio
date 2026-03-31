@@ -5,6 +5,20 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+function extractJsonFromResponse(text: string): unknown {
+  let cleaned = text.replace(/```json\s*/gi, "").replace(/```\s*/g, "").trim();
+  const start = cleaned.search(/[\{\[]/);
+  const end = cleaned.lastIndexOf(start !== -1 && cleaned[start] === "[" ? "]" : "}");
+  if (start === -1 || end === -1) throw new Error("No JSON found in AI response");
+  cleaned = cleaned.substring(start, end + 1);
+  try {
+    return JSON.parse(cleaned);
+  } catch {
+    cleaned = cleaned.replace(/,\s*}/g, "}").replace(/,\s*]/g, "]").replace(/[\x00-\x1F\x7F]/g, "");
+    return JSON.parse(cleaned);
+  }
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
@@ -138,13 +152,8 @@ Responde SOLO con el JSON, sin markdown ni explicaciones.`;
     const content = aiResult.choices?.[0]?.message?.content || "";
     console.log("AI response received, length:", content.length);
 
-    // Parse JSON from response (handle possible markdown wrapping)
-    let jsonStr = content.trim();
-    if (jsonStr.startsWith("```")) {
-      jsonStr = jsonStr.replace(/^```(?:json)?\s*/i, "").replace(/```\s*$/, "");
-    }
-
-    const parsed = JSON.parse(jsonStr);
+    // Robust JSON extraction
+    const parsed = extractJsonFromResponse(content);
 
     return new Response(
       JSON.stringify({ data: parsed }),
