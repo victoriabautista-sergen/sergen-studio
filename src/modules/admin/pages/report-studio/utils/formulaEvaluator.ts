@@ -57,8 +57,8 @@ function findParenGroups(expr: string): { start: number; end: number; content: s
   for (let i = 0; i < expr.length; i++) {
     if (expr[i] === "(") stack.push(i);
     if (expr[i] === ")") {
-      const start = stack.pop()!;
-      groups.push({ start, end: i, content: expr.substring(start + 1, end) });
+      const s = stack.pop()!;
+      groups.push({ start: s, end: i, content: expr.substring(s + 1, i) });
     }
   }
   // Fix: content extraction
