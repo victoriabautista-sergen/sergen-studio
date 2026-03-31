@@ -14,6 +14,8 @@ const PreciosPage = ({ data }: { data: ReportData }) => {
   const mesIndex = meses.indexOf(mesNombre);
   const mesAnterior = mesIndex > 0 ? meses[mesIndex - 1] : mesIndex === 0 ? "Diciembre" : mesNombre;
 
+  const borderStyle = "border border-[#E8792B]/50";
+
   return (
     <div className="flex flex-col h-full text-[10px] leading-relaxed" style={{ fontFamily: "'Inter', sans-serif", color: "#1B3A5C" }}>
       {/* Content */}
@@ -39,11 +41,11 @@ const PreciosPage = ({ data }: { data: ReportData }) => {
         <h2 className="text-[11px] font-bold mb-1" style={{ color: "#1B3A5C" }}>2. Variables utilizadas</h2>
         <p className="text-[9px] italic text-gray-500 mb-1">Tabla 1: Actualización de precios de energía</p>
 
-        <table className="w-full text-[10px] border-collapse mb-1">
+        <table className="w-full text-[10px] border-collapse mb-1" style={{ border: "1px solid rgba(232, 121, 43, 0.5)" }}>
           <thead>
             <tr style={{ backgroundColor: "#E8792B" }}>
-              <th className="px-1.5 py-0.5 text-left text-white font-semibold border border-orange-400">Descripción</th>
-              <th className="px-1.5 py-0.5 text-right text-white font-semibold border border-orange-400 w-24">Valores</th>
+              <th className={`px-1.5 py-0.5 text-left text-white font-semibold ${borderStyle}`}>Descripción</th>
+              <th className={`px-1.5 py-0.5 text-right text-white font-semibold ${borderStyle} w-24`}>Valores</th>
             </tr>
           </thead>
           <tbody>
@@ -58,8 +60,8 @@ const PreciosPage = ({ data }: { data: ReportData }) => {
               [`Precio de energía base HFP por kWh`, h2.precio_base_hfp, monedaSymbol],
             ].map(([label, val, symbol], i) => (
               <tr key={i} className="bg-white">
-                <td className="px-1.5 py-0.5 border border-gray-200" style={{ color: "#1B3A5C" }}>{String(label)}</td>
-                <td className="px-1.5 py-0.5 border border-gray-200 text-right font-mono" style={{ color: "#1B3A5C" }}>
+                <td className={`px-1.5 py-0.5 ${borderStyle}`} style={{ color: "#1B3A5C" }}>{String(label)}</td>
+                <td className={`px-1.5 py-0.5 ${borderStyle} text-right font-mono`} style={{ color: "#1B3A5C" }}>
                   {val ? `${symbol ? `${symbol} ` : ""}${Number(val).toFixed(4)}` : "—"}
                 </td>
               </tr>
@@ -86,12 +88,12 @@ const PreciosPage = ({ data }: { data: ReportData }) => {
 
         <p className="text-[9px] italic text-gray-500 mb-1">Precios de Energía Actualizados – {mesNombre} del {anio}</p>
 
-        <table className="w-full text-[10px] border-collapse mb-1">
+        <table className="w-full text-[10px] border-collapse mb-1" style={{ border: "1px solid rgba(232, 121, 43, 0.5)" }}>
           <thead>
             <tr style={{ backgroundColor: "#E8792B" }}>
-              <th className="px-1.5 py-0.5 text-left text-white font-semibold border border-orange-400">Concepto</th>
-              <th className="px-1.5 py-0.5 text-center text-white font-semibold border border-orange-400 w-24">Valor</th>
-              <th className="px-1.5 py-0.5 text-center text-white font-semibold border border-orange-400 w-20">Unidad</th>
+              <th className={`px-1.5 py-0.5 text-left text-white font-semibold ${borderStyle}`}>Concepto</th>
+              <th className={`px-1.5 py-0.5 text-center text-white font-semibold ${borderStyle} w-24`}>Valor</th>
+              <th className={`px-1.5 py-0.5 text-center text-white font-semibold ${borderStyle} w-20`}>Unidad</th>
             </tr>
           </thead>
           <tbody>
@@ -104,9 +106,9 @@ const PreciosPage = ({ data }: { data: ReportData }) => {
               ["Precio Calculado HFP", h2.precio_calculado_hfp?.toFixed(5) || "0.00000", `${monedaSymbol}/kWh`],
             ].map(([label, val, unit], i) => (
               <tr key={i} className="bg-white">
-                <td className={`px-1.5 py-0.5 border border-gray-200 ${i >= 2 ? "font-semibold" : ""}`} style={{ color: "#1B3A5C" }}>{label}</td>
-                <td className="px-1.5 py-0.5 border border-gray-200 text-center font-mono" style={{ color: "#1B3A5C" }}>{val}</td>
-                <td className="px-1.5 py-0.5 border border-gray-200 text-center" style={{ color: "#1B3A5C" }}>{unit}</td>
+                <td className={`px-1.5 py-0.5 ${borderStyle} ${i >= 2 ? "font-semibold" : ""}`} style={{ color: "#1B3A5C" }}>{label}</td>
+                <td className={`px-1.5 py-0.5 ${borderStyle} text-center font-mono`} style={{ color: "#1B3A5C" }}>{val}</td>
+                <td className={`px-1.5 py-0.5 ${borderStyle} text-center`} style={{ color: "#1B3A5C" }}>{unit}</td>
               </tr>
             ))}
           </tbody>
@@ -114,7 +116,7 @@ const PreciosPage = ({ data }: { data: ReportData }) => {
         <p className="text-[8px] text-gray-400 text-right italic">Fuente: Elaboración propia</p>
       </div>
 
-      {/* Footer - anchored to bottom via flex */}
+      {/* Footer */}
       <div className="flex justify-between text-[8px] text-gray-400 border-t border-gray-200 pt-2 mt-auto">
         <span>Sergen Eficiencia Energética S.A.C. - Documento confidencial</span>
         <span>Página 2</span>
