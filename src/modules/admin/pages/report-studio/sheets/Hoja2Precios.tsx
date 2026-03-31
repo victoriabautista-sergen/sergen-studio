@@ -13,6 +13,7 @@ const Hoja2Precios = () => {
     updateSheet("hoja2_data", { ...h2, [field]: value });
   };
 
+  const monedaSymbol = h2.moneda === "USD" ? "$" : "S/";
   const pngSymbol = (h2.png_moneda || "USD") === "USD" ? "$" : "S/";
 
   // Auto-calculate prices
