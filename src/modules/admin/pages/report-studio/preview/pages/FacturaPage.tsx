@@ -3,7 +3,11 @@ import { ReportData } from "../../types";
 const FacturaPage = ({ data }: { data: ReportData }) => {
   const h3 = data.hoja3_data;
   const dg = data.datos_generales;
-  const borderStyle = "border border-[#E8792B]/50";
+
+  const meses = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
+  const mesIndex = meses.indexOf(dg.mes || "");
+  const mesAnterior = mesIndex > 0 ? meses[mesIndex - 1] : mesIndex === 0 ? "Diciembre" : dg.mes;
+  const anioAnterior = mesIndex === 0 ? Number(dg.anio) - 1 : dg.anio;
 
   return (
     <div className="flex flex-col h-full text-[10px] leading-relaxed" style={{ fontFamily: "'Inter', sans-serif", color: "#1B3A5C" }}>
@@ -12,53 +16,38 @@ const FacturaPage = ({ data }: { data: ReportData }) => {
         <p className="text-xs font-bold" style={{ color: "#1B3A5C" }}>Sergen Eficiencia Energética</p>
         <hr className="border-t border-gray-300 my-2" />
 
-        <h1 className="text-xs font-semibold mt-4 mb-4" style={{ color: "#1B3A5C" }}>
+        <h1 className="text-xs font-semibold mt-4 mb-3" style={{ color: "#1B3A5C" }}>
           II. FACTURA EMITIDA
         </h1>
 
-        <div className="grid grid-cols-2 gap-4 text-xs mb-4">
-          <div>
-            <p className="text-gray-500">Cliente</p>
-            <p className="font-medium" style={{ color: "#1B3A5C" }}>{dg.client_name || "—"}</p>
-          </div>
-          <div>
-            <p className="text-gray-500">N° Factura</p>
-            <p className="font-medium" style={{ color: "#1B3A5C" }}>{h3.numero_factura || "—"}</p>
-          </div>
-          <div>
-            <p className="text-gray-500">Período</p>
-            <p className="font-medium" style={{ color: "#1B3A5C" }}>{dg.mes} {dg.anio}</p>
-          </div>
-          <div>
-            <p className="text-gray-500">Concesionaria</p>
-            <p className="font-medium" style={{ color: "#1B3A5C" }}>{dg.concesionaria || "—"}</p>
-          </div>
-        </div>
+        <p className="text-[9px] mb-4" style={{ color: "#1B3A5C" }}>
+          Se presenta la factura <strong>{h3.numero_factura || "[N° Factura]"}</strong> de fecha <strong>{h3.fecha_factura || "[Fecha]"}</strong>, correspondiente al periodo de <strong>{mesAnterior?.toLowerCase()} del {anioAnterior}</strong>, con los importes originales emitidos por <strong>{dg.concesionaria || "[Concesionaria]"}</strong>.
+        </p>
 
-        <table className="w-full text-xs border-collapse" style={{ border: "1px solid rgba(232, 121, 43, 0.5)" }}>
-          <thead>
-            <tr style={{ backgroundColor: "#E8792B" }}>
-              <th className={`${borderStyle} p-2 text-left text-white`}>Concepto</th>
-              <th className={`${borderStyle} p-2 text-right text-white`}>Precio (ctm S//kWh)</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td className={`${borderStyle} p-2`} style={{ color: "#1B3A5C" }}>{h3.nombre_hp}</td>
-              <td className={`${borderStyle} p-2 text-right font-mono`} style={{ color: "#1B3A5C" }}>{h3.precio_hp_facturado.toFixed(4)}</td>
-            </tr>
-            <tr>
-              <td className={`${borderStyle} p-2`} style={{ color: "#1B3A5C" }}>{h3.nombre_hfp}</td>
-              <td className={`${borderStyle} p-2 text-right font-mono`} style={{ color: "#1B3A5C" }}>{h3.precio_hfp_facturado.toFixed(4)}</td>
-            </tr>
-            {h3.incluir_otros_cargos && (
-              <tr>
-                <td className={`${borderStyle} p-2`} style={{ color: "#1B3A5C" }}>Otros Cargos</td>
-                <td className={`${borderStyle} p-2 text-right font-mono`} style={{ color: "#1B3A5C" }}>S/ {h3.otros_cargos.toFixed(2)}</td>
-              </tr>
-            )}
-          </tbody>
-        </table>
+        {/* Invoice image or placeholder */}
+        {h3.factura_file_url ? (
+          <div className="border border-gray-200 rounded overflow-hidden">
+            <img
+              src={h3.factura_file_url}
+              alt="Factura original"
+              className="w-full object-contain"
+              style={{ maxHeight: "680px" }}
+            />
+          </div>
+        ) : (
+          <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 flex flex-col items-center justify-center text-gray-400 min-h-[300px]">
+            <svg className="w-12 h-12 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+            <p className="text-xs">Sube una factura en el editor para mostrarla aquí</p>
+          </div>
+        )}
+
+        {h3.factura_file_url && (
+          <p className="text-[8px] italic text-gray-400 text-right mt-1">
+            Fuente: Factura emitida por {dg.concesionaria || "[Concesionaria]"}
+          </p>
+        )}
       </div>
 
       {/* Footer */}
