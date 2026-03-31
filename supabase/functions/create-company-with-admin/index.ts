@@ -65,23 +65,21 @@ Deno.serve(async (req) => {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
-    if (!admin_email?.trim()) {
-      return new Response(JSON.stringify({ error: "Email del administrador requerido" }), {
-        status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-    if (!admin_password || admin_password.length < 6) {
-      return new Response(
-        JSON.stringify({ error: "Contraseña debe tener al menos 6 caracteres" }),
-        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
-    }
-    if (!admin_name?.trim()) {
-      return new Response(JSON.stringify({ error: "Nombre del administrador requerido" }), {
-        status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+
+    const hasAdmin = admin_email?.trim();
+    if (hasAdmin) {
+      if (!admin_password || admin_password.length < 6) {
+        return new Response(
+          JSON.stringify({ error: "Contraseña debe tener al menos 6 caracteres" }),
+          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+      if (!admin_name?.trim()) {
+        return new Response(JSON.stringify({ error: "Nombre del administrador requerido" }), {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
     }
 
     // Check RUC uniqueness if provided
