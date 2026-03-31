@@ -26,6 +26,7 @@ type CompanyRow = {
   ruc: string | null;
   industry: string | null;
   subscription_status: string | null;
+  subscription_plan: string | null;
   user_count: number;
   active_modules: number;
 };
