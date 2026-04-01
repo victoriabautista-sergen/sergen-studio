@@ -55,34 +55,31 @@ const PreciosPage = ({ data }: { data: ReportData }) => {
         <h2 className="text-[11px] font-bold mb-1" style={{ color: "#1B3A5C" }}>2. Variables utilizadas</h2>
         <p className="text-[9px] italic text-gray-500 mb-1">Tabla 1: Actualización de precios de energía</p>
 
-        <table className="w-full text-[10px]" style={orangeTableStyle}>
+        <table className="w-full text-[10px] border-collapse mb-1" style={{ border: "1px solid rgba(232, 121, 43, 0.5)" }}>
           <thead>
             <tr style={{ backgroundColor: "#E8792B" }}>
-              <th className="px-1.5 py-0.5 text-left text-white font-semibold">Descripción</th>
-              <th className="px-1.5 py-0.5 text-right text-white font-semibold w-24">Valores</th>
+              <th className={`px-1.5 py-0.5 text-left text-white font-semibold ${borderStyle}`}>Descripción</th>
+              <th className={`px-1.5 py-0.5 text-right text-white font-semibold ${borderStyle} w-24`}>Valores</th>
             </tr>
           </thead>
           <tbody>
-            {(() => {
-              const rows = [
-                ["PNG (Precio del gas natural)", h2.png_actual, pngActualSymbol],
-                [`PNG₀ (Precio del gas natural base)`, h2.pngo, pngBaseSymbol],
-                ["TC (Tipo de cambio)", h2.tc_actual, ""],
-                [`TC₀ (Tipo de cambio base)`, h2.tco, ""],
-                ["IPP (Índice de precios al productor de EE.UU)", h2.ipp_actual, ""],
-                [`IPP₀ (Índice de precios al productor de EE.UU base)`, h2.ippo, ""],
-                [`Precio de energía base HP por kWh`, h2.precio_base_hp, monedaSymbol],
-                [`Precio de energía base HFP por kWh`, h2.precio_base_hfp, monedaSymbol],
-              ];
-              return rows.map(([label, val, symbol], i) => (
-                <tr key={i} className="bg-white">
-                  <td className="px-1.5 py-0.5" style={orangeCellStyle(i === rows.length - 1)}>{String(label)}</td>
-                  <td className="px-1.5 py-0.5 text-right font-mono" style={orangeCellStyle(i === rows.length - 1)}>
-                    {val ? `${symbol ? `${symbol} ` : ""}${Number(val).toFixed(4)}` : "—"}
-                  </td>
-                </tr>
-              ));
-            })()}
+            {[
+              ["PNG (Precio del gas natural)", h2.png_actual, pngActualSymbol],
+              [`PNG₀ (Precio del gas natural base)`, h2.pngo, pngBaseSymbol],
+              ["TC (Tipo de cambio)", h2.tc_actual, ""],
+              [`TC₀ (Tipo de cambio base)`, h2.tco, ""],
+              ["IPP (Índice de precios al productor de EE.UU)", h2.ipp_actual, ""],
+              [`IPP₀ (Índice de precios al productor de EE.UU base)`, h2.ippo, ""],
+              [`Precio de energía base HP por kWh`, h2.precio_base_hp, monedaSymbol],
+              [`Precio de energía base HFP por kWh`, h2.precio_base_hfp, monedaSymbol],
+            ].map(([label, val, symbol], i) => (
+              <tr key={i} className="bg-white">
+                <td className={`px-1.5 py-0.5 ${borderStyle}`} style={{ color: "#1B3A5C" }}>{String(label)}</td>
+                <td className={`px-1.5 py-0.5 ${borderStyle} text-right font-mono`} style={{ color: "#1B3A5C" }}>
+                  {val ? `${symbol ? `${symbol} ` : ""}${Number(val).toFixed(4)}` : "—"}
+                </td>
+              </tr>
+            ))}
           </tbody>
         </table>
         <p className="text-[8px] text-gray-400 text-right mb-4 italic">Fuente: Elaboración propia</p>
