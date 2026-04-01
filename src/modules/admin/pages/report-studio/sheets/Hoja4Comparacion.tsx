@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useReportContext } from "../context/ReportContext";
@@ -12,7 +11,6 @@ const Hoja4Comparacion = () => {
   const h4 = data.hoja4_data;
   const h3 = data.hoja3_data;
   const h2 = data.hoja2_data;
-  const dg = data.datos_generales;
 
   const [nuevoInafecto, setNuevoInafecto] = useState("");
 
@@ -27,7 +25,6 @@ const Hoja4Comparacion = () => {
 
     const inafectos = h4.conceptos_inafectos || [];
 
-    // Build recalculated items
     const items_recalculados: Hoja4Item[] = h3.items.map((item) => {
       const descUpper = item.descripcion.toUpperCase();
       const isHP = descUpper.includes(h3.nombre_hp.toUpperCase());
@@ -61,7 +58,6 @@ const Hoja4Comparacion = () => {
     const igv_recalculado = +(subtotal_afecto * 0.18).toFixed(2);
     const total_recalculado = +(subtotal_afecto + igv_recalculado).toFixed(2);
 
-    // Calculate energy quantities for impact
     const energiaHP = h3.items.find(i => i.descripcion.toUpperCase().includes(h3.nombre_hp.toUpperCase()));
     const energiaHFP = h3.items.find(i => i.descripcion.toUpperCase().includes(h3.nombre_hfp.toUpperCase()));
     const cantHP = energiaHP?.cantidad || 0;
@@ -75,6 +71,7 @@ const Hoja4Comparacion = () => {
     const conclusion = `Considerando las cantidades facturadas de ${cantHP.toLocaleString("es-PE")} kWh (HP) y ${cantHFP.toLocaleString("es-PE")} kWh (HFP), la diferencia de precios representa un impacto económico de S/ ${impacto.toLocaleString("es-PE", { minimumFractionDigits: 2 })} que el cliente ${pagoMas ? "pagó de más" : "ahorró"} respecto al precio calculado según contrato.`;
 
     updateSheet("hoja4_data", {
+      ...h4,
       items_recalculados,
       subtotal_afecto,
       igv_recalculado,
@@ -93,6 +90,7 @@ const Hoja4Comparacion = () => {
   const agregarInafecto = () => {
     if (nuevoInafecto.trim()) {
       updateSheet("hoja4_data", {
+        ...h4,
         conceptos_inafectos: [...(h4.conceptos_inafectos || []), nuevoInafecto.trim().toUpperCase()],
       });
       setNuevoInafecto("");
@@ -102,14 +100,14 @@ const Hoja4Comparacion = () => {
   const eliminarInafecto = (idx: number) => {
     const updated = [...(h4.conceptos_inafectos || [])];
     updated.splice(idx, 1);
-    updateSheet("hoja4_data", { conceptos_inafectos: updated });
+    updateSheet("hoja4_data", { ...h4, conceptos_inafectos: updated });
   };
 
   const updateItemTipo = (idx: number, tipo: "gravado" | "inafecto" | "exonerado") => {
     const updated = [...(h4.items_recalculados || [])];
     if (updated[idx]) {
       updated[idx] = { ...updated[idx], tipo };
-      
+
       const subtotal_afecto = +updated
         .filter(i => i.tipo === "gravado")
         .reduce((sum, i) => sum + i.valor_venta_calc, 0)
@@ -117,7 +115,7 @@ const Hoja4Comparacion = () => {
       const igv_recalculado = +(subtotal_afecto * 0.18).toFixed(2);
       const total_recalculado = +(subtotal_afecto + igv_recalculado).toFixed(2);
 
-      updateSheet("hoja4_data", { items_recalculados: updated, subtotal_afecto, igv_recalculado, total_recalculado });
+      updateSheet("hoja4_data", { ...h4, items_recalculados: updated, subtotal_afecto, igv_recalculado, total_recalculado });
     }
   };
 
@@ -192,7 +190,7 @@ const Hoja4Comparacion = () => {
           {(h4.items_recalculados || []).map((item, i) => (
             <div key={i} className="grid grid-cols-[1fr_90px_90px] gap-1 text-sm items-center bg-muted/30 rounded px-1 py-0.5">
               <span className="text-xs truncate font-medium">{item.descripcion}</span>
-              <Select value={item.tipo} onValueChange={(v) => updateItemTipo(i, v as any)}>
+              <Select value={item.tipo} onValueChange={(v) => updateItemTipo(i, v as "gravado" | "inafecto" | "exonerado")}>
                 <SelectTrigger className="h-7 text-xs">
                   <SelectValue />
                 </SelectTrigger>
