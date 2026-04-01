@@ -81,10 +81,10 @@ const ComparacionPage = ({ data }: { data: ReportData }) => {
               </colgroup>
               <thead>
                 <tr style={{ backgroundColor: "#1B3A5C" }}>
-                  <th className={`${borderStyle} px-1 py-0.5 text-left text-white font-semibold`}>DESCRIPCIÓN</th>
-                  <th className={`${borderStyle} px-1 py-0.5 text-right text-white font-semibold`}>CANT.</th>
-                  <th className={`${borderStyle} px-1 py-0.5 text-right text-white font-semibold`}>V.UNIT. CALC.</th>
-                  <th className={`${borderStyle} px-1 py-0.5 text-right text-white font-semibold`}>V.VENTA RECALC.</th>
+                  <th className={`${borderStyle} px-1.5 py-0.5 text-left text-white font-semibold`}>DESCRIPCIÓN</th>
+                  <th className={`${borderStyle} px-1.5 py-0.5 text-right text-white font-semibold`}>CANT.</th>
+                  <th className={`${borderStyle} px-1.5 py-0.5 text-right text-white font-semibold`}>V.UNIT. CALC.</th>
+                  <th className={`${borderStyle} px-1.5 py-0.5 text-right text-white font-semibold`}>V.VENTA RECALC.</th>
                 </tr>
               </thead>
               <tbody>
