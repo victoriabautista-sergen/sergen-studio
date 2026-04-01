@@ -57,7 +57,7 @@ const ComparacionPage = ({ data }: { data: ReportData }) => {
               </div>
               <div className="text-right">
                 <p className="text-[10px] font-bold" style={{ color: "#1B3A5C" }}>FACTURA ELECTRÓNICA</p>
-                <p className="text-[9px]" style={{ color: "#1B3A5C" }}>{h3.numero_factura || "—"}</p>
+                <p className="text-[10px] font-bold" style={{ color: "#dc2626" }}>SIMULACIÓN</p>
                 <p className="text-[9px]" style={{ color: "#1B3A5C" }}>{h3.fecha_factura || "—"}</p>
               </div>
             </div>
