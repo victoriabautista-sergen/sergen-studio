@@ -51,15 +51,19 @@ const FacturaPage = ({ data }: { data: ReportData }) => {
             {/* Items table + Totals in same table for column alignment */}
             <table className="w-full text-[9px] border-collapse mb-3" style={{ tableLayout: "fixed" }}>
               <colgroup>
-                <col style={{ width: "55%" }} />
-                <col style={{ width: "15%" }} />
-                <col style={{ width: "30%" }} />
+                <col style={{ width: "46%" }} />
+                <col style={{ width: "12%" }} />
+                <col style={{ width: "16%" }} />
+                <col style={{ width: "13%" }} />
+                <col style={{ width: "13%" }} />
               </colgroup>
               <thead>
                 <tr style={{ backgroundColor: "#1B3A5C" }}>
                   <th className={`${borderStyle} px-1.5 py-0.5 text-left text-white font-semibold`}>DESCRIPCIÓN</th>
                   <th className={`${borderStyle} px-1.5 py-0.5 text-center text-white font-semibold`}>UNIDAD</th>
                   <th className={`${borderStyle} px-1.5 py-0.5 text-right text-white font-semibold`}>CANTIDAD</th>
+                  <th className={`${borderStyle} px-1.5 py-0.5 text-right text-white font-semibold`}>V. UNITARIO</th>
+                  <th className={`${borderStyle} px-1.5 py-0.5 text-right text-white font-semibold`}>V. VENTA</th>
                 </tr>
               </thead>
               <tbody>
