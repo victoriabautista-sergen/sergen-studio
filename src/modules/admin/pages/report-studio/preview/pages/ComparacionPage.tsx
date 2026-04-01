@@ -105,13 +105,18 @@ const ComparacionPage = ({ data }: { data: ReportData }) => {
                   const opInafectas = items.filter(i => i.tipo === "inafecto").reduce((s, i) => s + i.valor_venta_calc, 0);
                   const opExonerada = items.filter(i => i.tipo === "exonerado").reduce((s, i) => s + i.valor_venta_calc, 0);
                   const subtotal = h4.subtotal_afecto + opInafectas + opExonerada;
+                  const totalFinal = h4.total_recalculado + opInafectas + opExonerada;
                   return [
                     ["OP. GRAVADAS", h4.subtotal_afecto, false],
                     ["OP. INAFECTAS", opInafectas, false],
                     ["OP. EXONERADA", opExonerada, false],
+                    ["OP. GRATUITA", h3.op_gratuita || 0, false],
+                    ["OTROS CARGOS", h3.otros_cargos || 0, false],
+                    ["OTROS DESCUENTOS", h3.otros_descuentos || 0, false],
                     ["SUBTOTAL", subtotal, false],
+                    ["ISC", h3.isc || 0, false],
                     ["IGV", h4.igv_recalculado, false],
-                    ["IMPORTE TOTAL", h4.total_recalculado + opInafectas + opExonerada, true],
+                    ["IMPORTE TOTAL", totalFinal, true],
                   ].filter(([, val, isBold]) => isBold || (val as number) !== 0);
                 })().map(([label, val, isBold], i) => (
                   <tr key={`total-${i}`}>
