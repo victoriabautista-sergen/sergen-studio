@@ -62,7 +62,7 @@ const ComparacionPage = ({ data }: { data: ReportData }) => {
               </div>
             </div>
 
-            <table className="w-full text-[9px] mb-3" style={blueTableStyle}>
+            <table className="w-full text-[9px] border-collapse mb-3" style={{ tableLayout: "fixed" }}>
               <colgroup>
                 <col style={{ width: "46%" }} />
                 <col style={{ width: "12%" }} />
@@ -72,27 +72,27 @@ const ComparacionPage = ({ data }: { data: ReportData }) => {
               </colgroup>
               <thead>
                 <tr style={{ backgroundColor: "#1B3A5C" }}>
-                  <th className="px-1.5 py-0.5 text-left text-white font-semibold">DESCRIPCIÓN</th>
-                  <th className="px-1.5 py-0.5 text-center text-white font-semibold">UNIDAD</th>
-                  <th className="px-1.5 py-0.5 text-right text-white font-semibold">CANTIDAD</th>
-                  <th className="px-1.5 py-0.5 text-right text-white font-semibold">V. UNITARIO</th>
-                  <th className="px-1.5 py-0.5 text-right text-white font-semibold">V. VENTA</th>
+                  <th className={`${borderStyle} px-1.5 py-0.5 text-left text-white font-semibold`}>DESCRIPCIÓN</th>
+                  <th className={`${borderStyle} px-1.5 py-0.5 text-center text-white font-semibold`}>UNIDAD</th>
+                  <th className={`${borderStyle} px-1.5 py-0.5 text-right text-white font-semibold`}>CANTIDAD</th>
+                  <th className={`${borderStyle} px-1.5 py-0.5 text-right text-white font-semibold`}>V. UNITARIO</th>
+                  <th className={`${borderStyle} px-1.5 py-0.5 text-right text-white font-semibold`}>V. VENTA</th>
                 </tr>
               </thead>
               <tbody>
                 {items.map((item, i) => (
-                  <tr key={i} className="bg-white" style={item.is_energy ? { backgroundColor: "#FFF3E0" } : {}}>
-                    <td className="px-1.5 py-0.5" style={{ color: item.is_energy ? "#E8792B" : "#1B3A5C", fontWeight: item.is_energy ? 600 : 400, borderBottom: i === items.length - 1 ? "none" : "1px solid #e5e7eb" }}>
+                  <tr key={i} className={item.is_energy ? "" : (i % 2 === 0 ? "bg-white" : "bg-gray-50/50")} style={item.is_energy ? { backgroundColor: "#FFF3E0" } : {}}>
+                    <td className={`${borderStyle} px-1.5 py-0.5`} style={{ color: item.is_energy ? "#E8792B" : "#1B3A5C", fontWeight: item.is_energy ? 600 : 400 }}>
                       {toSentenceCase(item.descripcion)}
                     </td>
-                    <td className="px-1.5 py-0.5 text-center" style={{ color: item.is_energy ? "#E8792B" : "#1B3A5C", borderBottom: i === items.length - 1 ? "none" : "1px solid #e5e7eb" }}>{item.unidad}</td>
-                    <td className="px-1.5 py-0.5 text-right font-mono" style={{ color: item.is_energy ? "#E8792B" : "#1B3A5C", borderBottom: i === items.length - 1 ? "none" : "1px solid #e5e7eb" }}>
+                    <td className={`${borderStyle} px-1.5 py-0.5 text-center`} style={{ color: item.is_energy ? "#E8792B" : "#1B3A5C" }}>{item.unidad}</td>
+                    <td className={`${borderStyle} px-1.5 py-0.5 text-right font-mono`} style={{ color: item.is_energy ? "#E8792B" : "#1B3A5C" }}>
                       {fmt(item.cantidad, 2)}
                     </td>
-                    <td className="px-1.5 py-0.5 text-right font-mono" style={{ color: item.is_energy ? "#E8792B" : "#1B3A5C", fontWeight: item.is_energy ? 700 : 400, borderBottom: i === items.length - 1 ? "none" : "1px solid #e5e7eb" }}>
+                    <td className={`${borderStyle} px-1.5 py-0.5 text-right font-mono`} style={{ color: item.is_energy ? "#E8792B" : "#1B3A5C", fontWeight: item.is_energy ? 700 : 400 }}>
                       {item.is_energy ? fmt(item.valor_unitario_calc, 3) : fmt(item.valor_unitario_original, 2)}
                     </td>
-                    <td className="px-1.5 py-0.5 text-right font-mono" style={{ color: item.is_energy ? "#E8792B" : "#1B3A5C", fontWeight: item.is_energy ? 700 : 400, borderBottom: i === items.length - 1 ? "none" : "1px solid #e5e7eb" }}>
+                    <td className={`${borderStyle} px-1.5 py-0.5 text-right font-mono`} style={{ color: item.is_energy ? "#E8792B" : "#1B3A5C", fontWeight: item.is_energy ? 700 : 400 }}>
                       {item.is_energy ? fmt(item.valor_venta_calc, 2) : fmt(item.valor_venta_original, 2)}
                     </td>
                   </tr>
@@ -122,10 +122,10 @@ const ComparacionPage = ({ data }: { data: ReportData }) => {
                 })().map(([label, val, isBold], i) => (
                   <tr key={`total-${i}`}>
                     <td className="p-0 border-0"></td>
-                    <td colSpan={2} className={`px-1.5 py-0.5 text-left ${isBold ? "font-bold text-white text-[10px]" : "font-semibold"}`} style={isBold ? { backgroundColor: "#1B3A5C", border: "1px solid #1B3A5C" } : { color: "#1B3A5C", borderBottom: "1px solid #e5e7eb" }}>
+                    <td colSpan={2} className={`${borderStyle} px-1.5 py-0.5 text-left ${isBold ? "font-bold text-white text-[10px]" : "font-semibold"}`} style={isBold ? { backgroundColor: "#1B3A5C" } : { color: "#1B3A5C" }}>
                       {label as string}
                     </td>
-                    <td colSpan={2} className={`px-1.5 py-0.5 text-right font-mono ${isBold ? "font-bold text-white text-[11px]" : ""}`} style={isBold ? { backgroundColor: "#1B3A5C", border: "1px solid #1B3A5C" } : { color: "#1B3A5C", borderBottom: "1px solid #e5e7eb" }}>
+                    <td colSpan={2} className={`${borderStyle} px-1.5 py-0.5 text-right font-mono ${isBold ? "font-bold text-white text-[11px]" : ""}`} style={isBold ? { backgroundColor: "#1B3A5C" } : { color: "#1B3A5C" }}>
                       {monedaSymbol} {fmt((val as number) || 0)}
                     </td>
                   </tr>
