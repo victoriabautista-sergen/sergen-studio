@@ -29,7 +29,7 @@ const FacturaPage = ({ data }: { data: ReportData }) => {
           II. FACTURA EMITIDA
         </h1>
 
-        <p className="text-[9px] mb-4" style={{ color: "#1B3A5C" }}>
+        <p className="text-[11px] mb-4" style={{ color: "#1B3A5C" }}>
           Se presenta la factura <strong>{h3.numero_factura || "[N° Factura]"}</strong> de fecha <strong>{h3.fecha_factura || "[Fecha]"}</strong>, correspondiente al periodo de <strong>{mesAnterior?.toLowerCase()} del {anioAnterior}</strong>, con los importes originales emitidos por <strong>{dg.concesionaria || "[Concesionaria]"}</strong>.
         </p>
 
