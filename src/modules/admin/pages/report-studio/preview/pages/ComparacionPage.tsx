@@ -11,7 +11,6 @@ const fmt = (n: number, decimals = 2) =>
 const ComparacionPage = ({ data }: { data: ReportData }) => {
   const h4 = data.hoja4_data;
   const h3 = data.hoja3_data;
-  const h2 = data.hoja2_data;
   const dg = data.datos_generales;
 
   const borderStyle = "border border-[#1B3A5C]/20";
@@ -21,7 +20,8 @@ const ComparacionPage = ({ data }: { data: ReportData }) => {
   const mesIndex = meses.indexOf(dg.mes || "");
   const mesAnterior = mesIndex > 0 ? meses[mesIndex - 1] : mesIndex === 0 ? "Diciembre" : dg.mes;
 
-  const precioFacturado = h3.precio_hp_facturado || h3.precio_hfp_facturado || 0;
+  const items = h4.items_recalculados || [];
+  const hasItems = items.length > 0;
 
   // Find energy items for impact calc
   const energiaHP = h3.items.find(i => i.descripcion.toUpperCase().includes(h3.nombre_hp.toUpperCase()));
@@ -30,15 +30,6 @@ const ComparacionPage = ({ data }: { data: ReportData }) => {
   const cantHFP = energiaHFP?.cantidad || 0;
   const impactoHP = +(cantHP * h4.diferencia_hp).toFixed(2);
   const impactoHFP = +(cantHFP * h4.diferencia_hfp).toFixed(2);
-
-  const items = h4.items_recalculados || [];
-  const hasItems = items.length > 0;
-
-  // Determine if items with 0 unit price should be highlighted
-  const isHPorHFP = (desc: string) => {
-    const d = desc.toUpperCase();
-    return d.includes(h3.nombre_hp.toUpperCase()) || d.includes(h3.nombre_hfp.toUpperCase());
-  };
 
   return (
     <div className="flex flex-col h-full text-[10px] leading-relaxed" style={{ fontFamily: "'Inter', sans-serif", color: "#1B3A5C" }}>
@@ -51,30 +42,30 @@ const ComparacionPage = ({ data }: { data: ReportData }) => {
           III. COMPARACIÓN CON FACTURA
         </h1>
 
-        {/* Intro paragraph */}
-        <p className="text-[10px] mb-4" style={{ color: "#1B3A5C" }}>
-          En la factura <strong>{h3.numero_factura || "[N° Factura]"}</strong> el precio de la energía actualizada que la concesionaria considera es de <strong>{fmt(precioFacturado, 4)} S/kWh</strong>. Comparando con el cálculo realizado en este informe tenemos que el precio de la energía <strong>varía</strong> respecto al precio facturado por <strong>[{dg.concesionaria || "Concesionaria"}]</strong>.
+        <p className="text-[11px] mb-4" style={{ color: "#1B3A5C" }}>
+          A continuación se presenta la factura con los precios de energía recalculados según contrato. Los ítems de energía resaltados muestran el precio calculado por Sergen.
         </p>
 
         {hasItems ? (
           <>
-            {/* Simulated Invoice Header */}
-            <div className="flex justify-between items-start mb-2">
+            {/* Invoice header box - same as Hoja 3 */}
+            <div className="border border-gray-300 rounded p-3 mb-3 flex justify-between items-start">
               <div>
-                <p className="text-[10px] font-bold" style={{ color: "#1B3A5C" }}>{dg.concesionaria || "Concesionaria"}</p>
+                <p className="text-[10px] font-bold" style={{ color: "#1B3A5C" }}>{h3.razon_social || dg.concesionaria || "[Concesionaria]"}</p>
                 <p className="text-[9px] text-gray-500">RUC: {h3.ruc || "—"}</p>
               </div>
               <div className="text-right">
-                <p className="text-[10px] font-bold" style={{ color: "#E8792B" }}>FACTURA SIMULADA</p>
-                <p className="text-[8px] text-gray-500">Precios recalculados según contrato</p>
+                <p className="text-[10px] font-bold" style={{ color: "#1B3A5C" }}>FACTURA ELECTRÓNICA</p>
+                <p className="text-[9px]" style={{ color: "#1B3A5C" }}>{h3.numero_factura || "—"}</p>
+                <p className="text-[9px]" style={{ color: "#1B3A5C" }}>{h3.fecha_factura || "—"}</p>
               </div>
             </div>
 
-            {/* Simulated Invoice Table */}
-            <table className="w-full text-[9px] border-collapse mb-2" style={{ tableLayout: "fixed" }}>
+            {/* Invoice table - same 5-column structure as Hoja 3 */}
+            <table className="w-full text-[9px] border-collapse mb-3" style={{ tableLayout: "fixed" }}>
               <colgroup>
-                <col style={{ width: "42%" }} />
-                <col style={{ width: "16%" }} />
+                <col style={{ width: "46%" }} />
+                <col style={{ width: "12%" }} />
                 <col style={{ width: "16%" }} />
                 <col style={{ width: "13%" }} />
                 <col style={{ width: "13%" }} />
@@ -82,47 +73,55 @@ const ComparacionPage = ({ data }: { data: ReportData }) => {
               <thead>
                 <tr style={{ backgroundColor: "#1B3A5C" }}>
                   <th className={`${borderStyle} px-1.5 py-0.5 text-left text-white font-semibold`}>DESCRIPCIÓN</th>
-                  <th className={`${borderStyle} px-1.5 py-0.5 text-right text-white font-semibold`}>CANT.</th>
-                  <th className={`${borderStyle} px-1.5 py-0.5 text-right text-white font-semibold`}>V.UNIT. CALC.</th>
-                  <th className={`${borderStyle} px-1.5 py-0.5 text-right text-white font-semibold`}>V.VENTA RECALC.</th>
+                  <th className={`${borderStyle} px-1.5 py-0.5 text-center text-white font-semibold`}>UNIDAD</th>
+                  <th className={`${borderStyle} px-1.5 py-0.5 text-right text-white font-semibold`}>CANTIDAD</th>
+                  <th className={`${borderStyle} px-1.5 py-0.5 text-right text-white font-semibold`}>V. UNITARIO</th>
+                  <th className={`${borderStyle} px-1.5 py-0.5 text-right text-white font-semibold`}>V. VENTA</th>
                 </tr>
               </thead>
               <tbody>
-                {items.map((item, i) => {
-                  const highlighted = isHPorHFP(item.descripcion) && item.valor_unitario_calc === 0;
-                  return (
-                    <tr key={i} className={i % 2 === 0 ? "bg-white" : "bg-gray-50/50"}>
-                      <td className={`${borderStyle} px-1.5 py-0.5 font-medium`} style={{ color: "#1B3A5C" }}>{toSentenceCase(item.descripcion)}</td>
-                      <td className={`${borderStyle} px-1.5 py-0.5 text-right font-mono`} style={{ color: "#1B3A5C" }}>{fmt(item.cantidad, 6)}</td>
-                      <td className={`${borderStyle} px-1.5 py-0.5 text-right font-mono`} style={{ color: highlighted ? "#E8792B" : "#1B3A5C" }}>
-                        {fmt(item.valor_unitario_calc, 6)}
-                      </td>
-                      <td className={`${borderStyle} px-1.5 py-0.5 text-right font-mono`} style={{ color: highlighted ? "#E8792B" : "#1B3A5C" }}>
-                        {fmt(item.valor_venta_calc, 2)}
-                      </td>
-                    </tr>
-                  );
-                })}
+                {items.map((item, i) => (
+                  <tr key={i} className={item.is_energy ? "" : (i % 2 === 0 ? "bg-white" : "bg-gray-50/50")} style={item.is_energy ? { backgroundColor: "#FFF3E0" } : {}}>
+                    <td className={`${borderStyle} px-1.5 py-0.5`} style={{ color: item.is_energy ? "#E8792B" : "#1B3A5C", fontWeight: item.is_energy ? 600 : 400 }}>
+                      {toSentenceCase(item.descripcion)}
+                    </td>
+                    <td className={`${borderStyle} px-1.5 py-0.5 text-center`} style={{ color: item.is_energy ? "#E8792B" : "#1B3A5C" }}>{item.unidad}</td>
+                    <td className={`${borderStyle} px-1.5 py-0.5 text-right font-mono`} style={{ color: item.is_energy ? "#E8792B" : "#1B3A5C" }}>
+                      {fmt(item.cantidad, 2)}
+                    </td>
+                    <td className={`${borderStyle} px-1.5 py-0.5 text-right font-mono`} style={{ color: item.is_energy ? "#E8792B" : "#1B3A5C", fontWeight: item.is_energy ? 700 : 400 }}>
+                      {item.is_energy ? fmt(item.valor_unitario_calc, 3) : fmt(item.valor_unitario_original, 2)}
+                    </td>
+                    <td className={`${borderStyle} px-1.5 py-0.5 text-right font-mono`} style={{ color: item.is_energy ? "#E8792B" : "#1B3A5C", fontWeight: item.is_energy ? 700 : 400 }}>
+                      {item.is_energy ? fmt(item.valor_venta_calc, 2) : fmt(item.valor_venta_original, 2)}
+                    </td>
+                  </tr>
+                ))}
                 {/* Spacer */}
-                <tr><td colSpan={4} className="py-0.5 border-0"></td></tr>
-                {/* Totals */}
+                <tr><td colSpan={5} className="py-1 border-0"></td></tr>
+                {/* Totals - same structure as Hoja 3 */}
                 {[
-                  ["SUBTOTAL AFECTO", h4.subtotal_afecto, false],
-                  ["IGV RECALCULADO", h4.igv_recalculado, false],
-                  ["TOTAL RECALCULADO", h4.total_recalculado, true],
-                ].map(([label, val, isBold], i) => (
-                  <tr key={`t-${i}`}>
-                    <td colSpan={2} className="p-0 border-0"></td>
-                    <td className={`${borderStyle} px-1 py-0.5 text-right ${isBold ? "font-bold text-white" : "font-semibold"}`} style={isBold ? { backgroundColor: "#1B3A5C" } : { color: "#1B3A5C" }}>
+                  ["OP. GRAVADAS", h4.subtotal_afecto, false],
+                  ["SUBTOTAL", h4.subtotal_afecto, false],
+                  ["IGV", h4.igv_recalculado, false],
+                  ["IMPORTE TOTAL", h4.total_recalculado, true],
+                ].filter(([, val, isBold]) => isBold || (val as number) !== 0).map(([label, val, isBold], i) => (
+                  <tr key={`total-${i}`}>
+                    <td className="p-0 border-0"></td>
+                    <td colSpan={2} className={`${borderStyle} px-1.5 py-0.5 text-left ${isBold ? "font-bold text-white text-[10px]" : "font-semibold"}`} style={isBold ? { backgroundColor: "#1B3A5C" } : { color: "#1B3A5C" }}>
                       {label as string}
                     </td>
-                    <td className={`${borderStyle} px-1 py-0.5 text-right font-mono ${isBold ? "font-bold text-white" : ""}`} style={isBold ? { backgroundColor: "#1B3A5C" } : { color: "#1B3A5C" }}>
+                    <td colSpan={2} className={`${borderStyle} px-1.5 py-0.5 text-right font-mono ${isBold ? "font-bold text-white text-[11px]" : ""}`} style={isBold ? { backgroundColor: "#1B3A5C" } : { color: "#1B3A5C" }}>
                       {monedaSymbol} {fmt((val as number) || 0)}
                     </td>
                   </tr>
                 ))}
               </tbody>
             </table>
+
+            <p className="text-[8px] italic text-gray-400 text-right mb-3">
+              Fuente: Factura recalculada con precios según contrato
+            </p>
           </>
         ) : (
           <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 flex flex-col items-center justify-center text-gray-400 min-h-[150px]">
@@ -130,16 +129,11 @@ const ComparacionPage = ({ data }: { data: ReportData }) => {
           </div>
         )}
 
-        {/* Comparison text */}
-        <p className="text-[10px] mt-4 mb-2" style={{ color: "#1B3A5C" }}>
-          Para el mes de <strong>{mesAnterior?.toLowerCase()} del {dg.anio}</strong>, el precio de energía calculado según contrato es de — y —, mientras que el precio facturado por <strong>[{dg.concesionaria || "Concesionaria"}]</strong> es de <strong>{fmt(h4.precio_facturado_hp, 4)} S/kWh (HP)</strong> y <strong>{fmt(h4.precio_facturado_hfp, 4)} S/kWh (HFP)</strong>. A continuación se presenta la tabla de diferencias:
-        </p>
-
+        {/* Comparison Table */}
         <p className="text-[9px] italic text-gray-500 mb-1">
           Tabla comparativa – Periodo {mesAnterior?.toLowerCase()} del {dg.anio}
         </p>
 
-        {/* Comparison Table */}
         <table className="w-full text-[9px] border-collapse mb-3" style={{ tableLayout: "fixed" }}>
           <colgroup>
             <col style={{ width: "34%" }} />
@@ -161,7 +155,7 @@ const ComparacionPage = ({ data }: { data: ReportData }) => {
               <td className="border border-gray-200 px-1.5 py-0.5 text-right font-mono" style={{ color: "#1B3A5C" }}>{fmt(h4.precio_calculado_hp, 5)}</td>
               <td className="border border-gray-200 px-1.5 py-0.5 text-right font-mono" style={{ color: "#1B3A5C" }}>{fmt(h4.precio_facturado_hp, 5)}</td>
               <td className="border border-gray-200 px-1.5 py-0.5 text-right font-mono font-bold" style={{ color: h4.diferencia_hp > 0 ? "#E8792B" : "#22c55e" }}>
-                +{fmt(h4.diferencia_hp, 5)}
+                {h4.diferencia_hp >= 0 ? "+" : ""}{fmt(h4.diferencia_hp, 5)}
               </td>
             </tr>
             <tr className="bg-gray-50/50">
@@ -169,7 +163,7 @@ const ComparacionPage = ({ data }: { data: ReportData }) => {
               <td className="border border-gray-200 px-1.5 py-0.5 text-right font-mono" style={{ color: "#1B3A5C" }}>{fmt(h4.precio_calculado_hfp, 5)}</td>
               <td className="border border-gray-200 px-1.5 py-0.5 text-right font-mono" style={{ color: "#1B3A5C" }}>{fmt(h4.precio_facturado_hfp, 5)}</td>
               <td className="border border-gray-200 px-1.5 py-0.5 text-right font-mono font-bold" style={{ color: h4.diferencia_hfp > 0 ? "#E8792B" : "#22c55e" }}>
-                +{fmt(h4.diferencia_hfp, 5)}
+                {h4.diferencia_hfp >= 0 ? "+" : ""}{fmt(h4.diferencia_hfp, 5)}
               </td>
             </tr>
           </tbody>
