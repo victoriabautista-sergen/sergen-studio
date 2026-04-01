@@ -49,7 +49,7 @@ const FacturaPage = ({ data }: { data: ReportData }) => {
             </div>
 
             {/* Items table + Totals in same table for column alignment */}
-            <table className="w-full text-[11px] border-collapse mb-3" style={{ tableLayout: "fixed" }}>
+            <table className="w-full text-[9px] border-collapse mb-3" style={{ tableLayout: "fixed" }}>
               <colgroup>
                 <col style={{ width: "36%" }} />
                 <col style={{ width: "12%" }} />
