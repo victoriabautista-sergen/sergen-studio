@@ -71,6 +71,7 @@ const ComparacionPage = ({ data }: { data: ReportData }) => {
         </table>
         <p className="text-[8px] italic text-gray-400 text-right -mt-3 mb-3">Fuente: Elaboración propia</p>
 
+        {hasItems ? (
           <>
             {/* Invoice header box - same as Hoja 3 */}
             <div className="border border-gray-300 rounded p-3 mb-3 flex justify-between items-start">
