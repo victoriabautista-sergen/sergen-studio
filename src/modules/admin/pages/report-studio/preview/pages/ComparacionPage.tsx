@@ -44,7 +44,7 @@ const ComparacionPage = ({ data }: { data: ReportData }) => {
         </h1>
 
         <p className="text-[11px] mb-4" style={{ color: "#1B3A5C" }}>
-          A continuación se presenta la factura con los precios de energía recalculados según contrato. El precio calculado es de <strong>{fmt(h2.precio_base_hp, 4)} S/kWh (HP)</strong> y <strong>{fmt(h2.precio_base_hfp, 4)} S/kWh (HFP)</strong>. Los ítems de energía resaltados muestran el precio calculado por Sergen.
+          A continuación se presenta la factura con los precios de energía recalculados según contrato. El precio calculado es de <strong>{fmt(h2.precio_calculado_hp, 4)} S/kWh (HP)</strong> y <strong>{fmt(h2.precio_calculado_hfp, 4)} S/kWh (HFP)</strong>. Los ítems de energía resaltados muestran el precio calculado por Sergen.
         </p>
 
         {hasItems ? (
