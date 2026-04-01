@@ -16,8 +16,8 @@ const Hoja4Comparacion = () => {
 
   // Build recalculated items from hoja3 items
   useEffect(() => {
-    const calc_hp = h2.precio_actualizado_hp;
-    const calc_hfp = h2.precio_actualizado_hfp;
+    const calc_hp = h2.precio_calculado_hp;
+    const calc_hfp = h2.precio_calculado_hfp;
     const fact_hp = h3.precio_hp_facturado;
     const fact_hfp = h3.precio_hfp_facturado;
     const diff_hp = +(fact_hp - calc_hp).toFixed(5);
