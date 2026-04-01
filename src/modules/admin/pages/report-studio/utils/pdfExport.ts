@@ -33,7 +33,7 @@ export async function generateReportPDF(
   ${styleHTML}
   <style>
     @page {
-      size: A4;
+      size: A4 portrait;
       margin: 0;
     }
     * {
@@ -44,7 +44,11 @@ export async function generateReportPDF(
     html, body {
       margin: 0;
       padding: 0;
+      width: 210mm;
       background: #ffffff !important;
+    }
+    body {
+      display: block;
     }
     .pdf-page {
       width: 210mm;
@@ -52,12 +56,14 @@ export async function generateReportPDF(
       padding: 12mm 14mm;
       box-sizing: border-box;
       background: #ffffff !important;
-      page-break-after: always;
       overflow: hidden;
       position: relative;
+      page-break-inside: avoid;
+      break-inside: avoid;
     }
-    .pdf-page:last-child {
-      page-break-after: auto;
+    .pdf-page + .pdf-page {
+      page-break-before: always;
+      break-before: page;
     }
     /* Ensure thin borders in print */
     table {
@@ -65,23 +71,6 @@ export async function generateReportPDF(
     }
     td, th {
       border-width: 0.5px !important;
-    }
-    @media print {
-      html, body {
-        width: 210mm;
-        height: auto;
-        min-height: 100%;
-        background: #ffffff !important;
-      }
-      .pdf-page {
-        width: 210mm;
-        height: 297mm;
-        page-break-after: always;
-        overflow: hidden;
-      }
-      .pdf-page:last-child {
-        page-break-after: auto;
-      }
     }
   </style>
 </head>
