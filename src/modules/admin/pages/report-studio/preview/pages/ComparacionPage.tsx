@@ -11,6 +11,7 @@ const fmt = (n: number, decimals = 2) =>
 const ComparacionPage = ({ data }: { data: ReportData }) => {
   const h4 = data.hoja4_data;
   const h3 = data.hoja3_data;
+  const h2 = data.hoja2_data;
   const dg = data.datos_generales;
 
   const borderStyle = "border border-[#1B3A5C]/20";
