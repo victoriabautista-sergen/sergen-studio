@@ -92,12 +92,12 @@ const ComparacionPage = ({ data }: { data: ReportData }) => {
                   const highlighted = isHPorHFP(item.descripcion) && item.valor_unitario_calc === 0;
                   return (
                     <tr key={i} className={i % 2 === 0 ? "bg-white" : "bg-gray-50/50"}>
-                      <td className={`${borderStyle} px-1 py-0.5 font-medium`} style={{ color: "#1B3A5C" }}>{toSentenceCase(item.descripcion)}</td>
-                      <td className={`${borderStyle} px-1 py-0.5 text-right font-mono`} style={{ color: "#1B3A5C" }}>{fmt(item.cantidad, 6)}</td>
-                      <td className={`${borderStyle} px-1 py-0.5 text-right font-mono`} style={{ color: highlighted ? "#E8792B" : "#1B3A5C" }}>
+                      <td className={`${borderStyle} px-1.5 py-0.5 font-medium`} style={{ color: "#1B3A5C" }}>{toSentenceCase(item.descripcion)}</td>
+                      <td className={`${borderStyle} px-1.5 py-0.5 text-right font-mono`} style={{ color: "#1B3A5C" }}>{fmt(item.cantidad, 6)}</td>
+                      <td className={`${borderStyle} px-1.5 py-0.5 text-right font-mono`} style={{ color: highlighted ? "#E8792B" : "#1B3A5C" }}>
                         {fmt(item.valor_unitario_calc, 6)}
                       </td>
-                      <td className={`${borderStyle} px-1 py-0.5 text-right font-mono`} style={{ color: highlighted ? "#E8792B" : "#1B3A5C" }}>
+                      <td className={`${borderStyle} px-1.5 py-0.5 text-right font-mono`} style={{ color: highlighted ? "#E8792B" : "#1B3A5C" }}>
                         {fmt(item.valor_venta_calc, 2)}
                       </td>
                     </tr>
