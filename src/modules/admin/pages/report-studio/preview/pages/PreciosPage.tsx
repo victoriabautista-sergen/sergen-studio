@@ -106,27 +106,30 @@ const PreciosPage = ({ data }: { data: ReportData }) => {
 
         <p className="text-[9px] italic text-gray-500 mb-1">Precios de Energía Actualizados – {mesAnterior} del {mesIndex === 0 ? Number(anio) - 1 : anio}</p>
 
-        <table className="w-full text-[10px] border-collapse mb-1" style={{ border: "1px solid rgba(232, 121, 43, 0.5)" }}>
+        <table className="w-full text-[10px]" style={orangeTableStyle}>
           <thead>
             <tr style={{ backgroundColor: "#E8792B" }}>
-              <th className={`px-1.5 py-0.5 text-left text-white font-semibold ${borderStyle}`}>Descripción</th>
-              <th className={`px-1.5 py-0.5 text-right text-white font-semibold ${borderStyle} w-24`}>Valores</th>
+              <th className="px-1.5 py-0.5 text-left text-white font-semibold">Descripción</th>
+              <th className="px-1.5 py-0.5 text-right text-white font-semibold w-24">Valores</th>
             </tr>
           </thead>
           <tbody>
-            {[
-              ["Factor A", h2.factor_e?.toFixed(4) || "0.0000"],
-              ["Factor por pérdida", h2.factor_perdida?.toFixed(2) || "0.00"],
-              ["Precio actualizado HP por MWh", `${monedaSymbol} ${h2.precio_actualizado_hp?.toFixed(2) || "0.00"}`],
-              ["Precio actualizado HFP por MWh", `${monedaSymbol} ${h2.precio_actualizado_hfp?.toFixed(2) || "0.00"}`],
-              ["Precio de energía base HP por kWh", `${monedaSymbol} ${h2.precio_calculado_hp?.toFixed(4) || "0.0000"}`],
-              ["Precio de energía base HFP por kWh", `${monedaSymbol} ${h2.precio_calculado_hfp?.toFixed(4) || "0.0000"}`],
-            ].map(([label, val], i) => (
-              <tr key={i} className="bg-white">
-                <td className={`px-1.5 py-0.5 ${borderStyle}`} style={{ color: "#1B3A5C" }}>{label}</td>
-                <td className={`px-1.5 py-0.5 ${borderStyle} text-right font-mono`} style={{ color: "#1B3A5C" }}>{val}</td>
-              </tr>
-            ))}
+            {(() => {
+              const rows = [
+                ["Factor A", h2.factor_e?.toFixed(4) || "0.0000"],
+                ["Factor por pérdida", h2.factor_perdida?.toFixed(2) || "0.00"],
+                ["Precio actualizado HP por MWh", `${monedaSymbol} ${h2.precio_actualizado_hp?.toFixed(2) || "0.00"}`],
+                ["Precio actualizado HFP por MWh", `${monedaSymbol} ${h2.precio_actualizado_hfp?.toFixed(2) || "0.00"}`],
+                ["Precio de energía base HP por kWh", `${monedaSymbol} ${h2.precio_calculado_hp?.toFixed(4) || "0.0000"}`],
+                ["Precio de energía base HFP por kWh", `${monedaSymbol} ${h2.precio_calculado_hfp?.toFixed(4) || "0.0000"}`],
+              ];
+              return rows.map(([label, val], i) => (
+                <tr key={i} className="bg-white">
+                  <td className="px-1.5 py-0.5" style={orangeCellStyle(i === rows.length - 1)}>{label}</td>
+                  <td className="px-1.5 py-0.5 text-right font-mono" style={orangeCellStyle(i === rows.length - 1)}>{val}</td>
+                </tr>
+              ));
+            })()}
           </tbody>
         </table>
         <p className="text-[8px] text-gray-400 text-right italic">Fuente: Elaboración propia</p>

@@ -16,26 +16,29 @@ const PotenciaPage = ({ data }: { data: ReportData }) => {
           IV. POTENCIA COINCIDENTE
         </h1>
 
-        <table className="w-full text-xs border-collapse" style={{ border: "1px solid rgba(232, 121, 43, 0.5)" }}>
+        <table className="w-full text-xs" style={orangeTableStyle}>
           <thead>
             <tr style={{ backgroundColor: "#E8792B" }}>
-              <th className={`${borderStyle} p-2 text-left text-white`}>Parámetro</th>
-              <th className={`${borderStyle} p-2 text-right text-white`}>Valor</th>
+              <th className="p-2 text-left text-white font-semibold">Parámetro</th>
+              <th className="p-2 text-right text-white font-semibold">Valor</th>
             </tr>
           </thead>
           <tbody>
-            {[
-              ["Fecha", h5.fecha || "—"],
-              ["Hora", h5.hora || "—"],
-              ["SEIN (MW)", h5.sein_mw ? h5.sein_mw.toFixed(2) : "—"],
-              ["Importación (MW)", h5.importacion ? h5.importacion.toFixed(2) : "—"],
-              ["Exportación (MW)", h5.exportacion ? h5.exportacion.toFixed(2) : "—"],
-            ].map(([label, val]) => (
-              <tr key={String(label)}>
-                <td className={`${borderStyle} p-2`} style={{ color: "#1B3A5C" }}>{label}</td>
-                <td className={`${borderStyle} p-2 text-right font-mono`} style={{ color: "#1B3A5C" }}>{val}</td>
-              </tr>
-            ))}
+            {(() => {
+              const rows = [
+                ["Fecha", h5.fecha || "—"],
+                ["Hora", h5.hora || "—"],
+                ["SEIN (MW)", h5.sein_mw ? h5.sein_mw.toFixed(2) : "—"],
+                ["Importación (MW)", h5.importacion ? h5.importacion.toFixed(2) : "—"],
+                ["Exportación (MW)", h5.exportacion ? h5.exportacion.toFixed(2) : "—"],
+              ];
+              return rows.map(([label, val], i) => (
+                <tr key={String(label)} className="bg-white">
+                  <td className="p-2" style={orangeCellStyle(i === rows.length - 1)}>{label}</td>
+                  <td className="p-2 text-right font-mono" style={orangeCellStyle(i === rows.length - 1)}>{val}</td>
+                </tr>
+              ));
+            })()}
           </tbody>
         </table>
 
