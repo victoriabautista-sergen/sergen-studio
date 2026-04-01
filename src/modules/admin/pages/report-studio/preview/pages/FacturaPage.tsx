@@ -51,15 +51,19 @@ const FacturaPage = ({ data }: { data: ReportData }) => {
             {/* Items table + Totals in same table for column alignment */}
             <table className="w-full text-[9px] border-collapse mb-3" style={{ tableLayout: "fixed" }}>
               <colgroup>
-                <col style={{ width: "55%" }} />
-                <col style={{ width: "15%" }} />
-                <col style={{ width: "30%" }} />
+                <col style={{ width: "46%" }} />
+                <col style={{ width: "12%" }} />
+                <col style={{ width: "16%" }} />
+                <col style={{ width: "13%" }} />
+                <col style={{ width: "13%" }} />
               </colgroup>
               <thead>
                 <tr style={{ backgroundColor: "#1B3A5C" }}>
                   <th className={`${borderStyle} px-1.5 py-0.5 text-left text-white font-semibold`}>DESCRIPCIÓN</th>
                   <th className={`${borderStyle} px-1.5 py-0.5 text-center text-white font-semibold`}>UNIDAD</th>
                   <th className={`${borderStyle} px-1.5 py-0.5 text-right text-white font-semibold`}>CANTIDAD</th>
+                  <th className={`${borderStyle} px-1.5 py-0.5 text-right text-white font-semibold`}>V. UNITARIO</th>
+                  <th className={`${borderStyle} px-1.5 py-0.5 text-right text-white font-semibold`}>V. VENTA</th>
                 </tr>
               </thead>
               <tbody>
@@ -70,11 +74,17 @@ const FacturaPage = ({ data }: { data: ReportData }) => {
                     <td className={`${borderStyle} px-1.5 py-0.5 text-right font-mono`} style={{ color: "#1B3A5C" }}>
                       {typeof item.cantidad === "number" ? item.cantidad.toLocaleString("es-PE", { minimumFractionDigits: 2 }) : item.cantidad}
                     </td>
+                    <td className={`${borderStyle} px-1.5 py-0.5 text-right font-mono`} style={{ color: "#1B3A5C" }}>
+                      {typeof item.valor_unitario === "number" ? item.valor_unitario.toLocaleString("es-PE", { minimumFractionDigits: 2 }) : item.valor_unitario || "—"}
+                    </td>
+                    <td className={`${borderStyle} px-1.5 py-0.5 text-right font-mono`} style={{ color: "#1B3A5C" }}>
+                      {typeof item.valor_venta === "number" ? item.valor_venta.toLocaleString("es-PE", { minimumFractionDigits: 2 }) : item.valor_venta || "—"}
+                    </td>
                   </tr>
                 ))}
                 {/* Spacer */}
-                <tr><td colSpan={3} className="py-1 border-0"></td></tr>
-                {/* Totals using same 3-column grid */}
+                <tr><td colSpan={5} className="py-1 border-0"></td></tr>
+                {/* Totals using same 5-column grid */}
                 {[
                   ["OP. GRAVADAS", h3.op_gravadas, false],
                   ["OP. INAFECTAS", h3.op_inafectas, false],
@@ -88,7 +98,7 @@ const FacturaPage = ({ data }: { data: ReportData }) => {
                   ["IMPORTE TOTAL", h3.importe_total, true],
                 ].filter(([, val, isBold]) => isBold || (val as number) !== 0).map(([label, val, isBold], i) => (
                   <tr key={`total-${i}`}>
-                    <td className="p-0 border-0"></td>
+                    <td colSpan={3} className="p-0 border-0"></td>
                     <td className={`${borderStyle} px-1.5 py-0.5 text-right ${isBold ? "font-bold text-white text-[10px]" : "font-semibold"}`} style={isBold ? { backgroundColor: "#1B3A5C" } : { color: "#1B3A5C" }}>
                       {label as string}
                     </td>
