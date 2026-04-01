@@ -110,7 +110,7 @@ const AllPagesForExport = React.forwardRef<HTMLDivElement, { data: any; hiddenPa
             position: "relative",
           }}
         >
-          <div style={{ padding: "32px 40px", minHeight: "800px" }}>
+          <div style={{ padding: "24px 32px", minHeight: "800px" }}>
             <Component data={data} />
           </div>
         </div>
