@@ -9,7 +9,7 @@ const PotenciaPage = ({ data }: { data: ReportData }) => {
   const mesAnterior = mesIndex > 0 ? meses[mesIndex - 1] : mesIndex === 0 ? "Diciembre" : dg.mes;
   const anioAnterior = mesIndex === 0 ? Number(dg.anio) - 1 : dg.anio;
 
-  const borderStyle = "border border-[#1B3A5C]/20";
+  const borderStyle = "border border-gray-300";
 
   return (
     <div className="flex flex-col h-full text-[10px] leading-relaxed" style={{ fontFamily: "'Inter', sans-serif", color: "#1B3A5C" }}>
