@@ -3,7 +3,7 @@ import { ReportData } from "../../types";
 const PotenciaPage = ({ data }: { data: ReportData }) => {
   const h5 = data.hoja5_data;
   const orangeTableStyle = { border: "1px solid #E8792B", borderCollapse: "collapse" as const };
-  const orangeCellStyle = (isLast = false) => ({ color: "#1B3A5C", borderBottom: isLast ? "none" : "1px solid #e5e7eb" });
+  const orangeCellStyle = (isLast = false) => ({ color: "#1B3A5C", borderBottom: isLast ? "none" : "1px solid #E8792B" });
 
   return (
     <div className="flex flex-col h-full text-[10px] leading-relaxed" style={{ fontFamily: "'Inter', sans-serif", color: "#1B3A5C" }}>
