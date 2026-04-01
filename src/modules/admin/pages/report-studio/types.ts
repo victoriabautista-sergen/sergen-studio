@@ -202,6 +202,11 @@ export const defaultReportData: ReportData = {
     reglas_extraccion: "",
   },
   hoja4_data: {
+    conceptos_inafectos: [],
+    items_recalculados: [],
+    subtotal_afecto: 0,
+    igv_recalculado: 0,
+    total_recalculado: 0,
     precio_calculado_hp: 0,
     precio_calculado_hfp: 0,
     precio_facturado_hp: 0,
