@@ -166,10 +166,10 @@ const ComparacionPage = ({ data }: { data: ReportData }) => {
           </thead>
           <tbody>
             <tr className="bg-white">
-              <td className="px-1.5 py-0.5" style={{ color: "#1B3A5C", borderBottom: "1px solid #e5e7eb" }}>Precio energía HP (S/kWh)</td>
-              <td className="px-1.5 py-0.5 text-right font-mono" style={{ color: "#1B3A5C", borderBottom: "1px solid #e5e7eb" }}>{fmt(h4.precio_calculado_hp, 5)}</td>
-              <td className="px-1.5 py-0.5 text-right font-mono" style={{ color: "#1B3A5C", borderBottom: "1px solid #e5e7eb" }}>{fmt(h4.precio_facturado_hp, 5)}</td>
-              <td className="px-1.5 py-0.5 text-right font-mono font-bold" style={{ color: h4.diferencia_hp > 0 ? "#dc2626" : "#16a34a", borderBottom: "1px solid #e5e7eb" }}>
+              <td className="px-1.5 py-0.5" style={{ color: "#1B3A5C", borderBottom: "1px solid #E8792B" }}>Precio energía HP (S/kWh)</td>
+              <td className="px-1.5 py-0.5 text-right font-mono" style={{ color: "#1B3A5C", borderBottom: "1px solid #E8792B" }}>{fmt(h4.precio_calculado_hp, 5)}</td>
+              <td className="px-1.5 py-0.5 text-right font-mono" style={{ color: "#1B3A5C", borderBottom: "1px solid #E8792B" }}>{fmt(h4.precio_facturado_hp, 5)}</td>
+              <td className="px-1.5 py-0.5 text-right font-mono font-bold" style={{ color: h4.diferencia_hp > 0 ? "#dc2626" : "#16a34a", borderBottom: "1px solid #E8792B" }}>
                 {h4.diferencia_hp >= 0 ? "+" : ""}{fmt(h4.diferencia_hp, 5)}
               </td>
             </tr>

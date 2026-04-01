@@ -3,7 +3,7 @@ import { ReportData } from "../../types";
 const ProyeccionPage = ({ data }: { data: ReportData }) => {
   const h6 = data.hoja6_data;
   const orangeTableStyle = { border: "1px solid #E8792B", borderCollapse: "collapse" as const };
-  const orangeCellStyle = (isLast = false) => ({ color: "#1B3A5C", borderBottom: isLast ? "none" : "1px solid #e5e7eb" });
+  const orangeCellStyle = (isLast = false) => ({ color: "#1B3A5C", borderBottom: isLast ? "none" : "1px solid #E8792B" });
 
   const renderTable = (title: string, items: typeof h6.items_original, total: number) => (
     <div>
