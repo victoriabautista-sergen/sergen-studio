@@ -30,6 +30,7 @@ const Hoja4Comparacion = () => {
       const isHP = descUpper.includes(h3.nombre_hp.toUpperCase());
       const isHFP = descUpper.includes(h3.nombre_hfp.toUpperCase());
       const isInafecto = inafectos.some(c => descUpper.includes(c.toUpperCase()));
+      const isEnergy = isHP || isHFP;
 
       let valor_unitario_calc = item.valor_unitario;
       let valor_venta_calc = item.valor_venta;
@@ -44,10 +45,14 @@ const Hoja4Comparacion = () => {
 
       return {
         descripcion: item.descripcion,
+        unidad: item.unidad,
         cantidad: item.cantidad,
         tipo: isInafecto ? "inafecto" as const : "gravado" as const,
+        valor_unitario_original: item.valor_unitario,
+        valor_venta_original: item.valor_venta,
         valor_unitario_calc,
         valor_venta_calc,
+        is_energy: isEnergy,
       };
     });
 
