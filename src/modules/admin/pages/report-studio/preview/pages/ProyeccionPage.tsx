@@ -2,32 +2,33 @@ import { ReportData } from "../../types";
 
 const ProyeccionPage = ({ data }: { data: ReportData }) => {
   const h6 = data.hoja6_data;
-  const borderStyle = "border border-[#E8792B]/50";
+  const orangeTableStyle = { border: "1px solid #E8792B", borderCollapse: "collapse" as const };
+  const orangeCellStyle = (isLast = false) => ({ color: "#1B3A5C", borderBottom: isLast ? "none" : "1px solid #e5e7eb" });
 
   const renderTable = (title: string, items: typeof h6.items_original, total: number) => (
     <div>
       <p className="text-[10px] font-semibold text-gray-500 uppercase mb-2">{title}</p>
-      <table className="w-full text-xs border-collapse" style={{ border: "1px solid rgba(232, 121, 43, 0.5)" }}>
+      <table className="w-full text-xs" style={orangeTableStyle}>
         <thead>
           <tr style={{ backgroundColor: "#E8792B" }}>
-            <th className={`${borderStyle} p-1.5 text-left text-white`}>Concepto</th>
-            <th className={`${borderStyle} p-1.5 text-right text-white`}>Cant.</th>
-            <th className={`${borderStyle} p-1.5 text-right text-white`}>P. Unit.</th>
-            <th className={`${borderStyle} p-1.5 text-right text-white`}>Total</th>
+            <th className="p-1.5 text-left text-white font-semibold">Concepto</th>
+            <th className="p-1.5 text-right text-white font-semibold">Cant.</th>
+            <th className="p-1.5 text-right text-white font-semibold">P. Unit.</th>
+            <th className="p-1.5 text-right text-white font-semibold">Total</th>
           </tr>
         </thead>
         <tbody>
           {items.map((item, i) => (
-            <tr key={i}>
-              <td className={`${borderStyle} p-1.5`} style={{ color: "#1B3A5C" }}>{item.concepto || "—"}</td>
-              <td className={`${borderStyle} p-1.5 text-right font-mono`} style={{ color: "#1B3A5C" }}>{item.cantidad}</td>
-              <td className={`${borderStyle} p-1.5 text-right font-mono`} style={{ color: "#1B3A5C" }}>{item.precio_unitario.toFixed(4)}</td>
-              <td className={`${borderStyle} p-1.5 text-right font-mono font-medium`} style={{ color: "#1B3A5C" }}>{item.total.toFixed(2)}</td>
+            <tr key={i} className="bg-white">
+              <td className="p-1.5" style={orangeCellStyle(i === items.length - 1 && !total)}>{item.concepto || "—"}</td>
+              <td className="p-1.5 text-right font-mono" style={orangeCellStyle(i === items.length - 1 && !total)}>{item.cantidad}</td>
+              <td className="p-1.5 text-right font-mono" style={orangeCellStyle(i === items.length - 1 && !total)}>{item.precio_unitario.toFixed(4)}</td>
+              <td className="p-1.5 text-right font-mono font-medium" style={orangeCellStyle(i === items.length - 1 && !total)}>{item.total.toFixed(2)}</td>
             </tr>
           ))}
-          <tr className="font-bold">
-            <td className={`${borderStyle} p-1.5`} style={{ color: "#1B3A5C" }} colSpan={3}>Total</td>
-            <td className={`${borderStyle} p-1.5 text-right font-mono`} style={{ color: "#1B3A5C" }}>S/ {total.toFixed(2)}</td>
+          <tr className="font-bold bg-white">
+            <td className="p-1.5" style={{ color: "#1B3A5C" }} colSpan={3}>Total</td>
+            <td className="p-1.5 text-right font-mono" style={{ color: "#1B3A5C" }}>S/ {total.toFixed(2)}</td>
           </tr>
         </tbody>
       </table>

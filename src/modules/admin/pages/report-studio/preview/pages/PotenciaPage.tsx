@@ -2,7 +2,8 @@ import { ReportData } from "../../types";
 
 const PotenciaPage = ({ data }: { data: ReportData }) => {
   const h5 = data.hoja5_data;
-  const borderStyle = "border border-[#E8792B]/50";
+  const orangeTableStyle = { border: "1px solid #E8792B", borderCollapse: "collapse" as const };
+  const orangeCellStyle = (isLast = false) => ({ color: "#1B3A5C", borderBottom: isLast ? "none" : "1px solid #e5e7eb" });
 
   return (
     <div className="flex flex-col h-full text-[10px] leading-relaxed" style={{ fontFamily: "'Inter', sans-serif", color: "#1B3A5C" }}>
@@ -15,26 +16,29 @@ const PotenciaPage = ({ data }: { data: ReportData }) => {
           IV. POTENCIA COINCIDENTE
         </h1>
 
-        <table className="w-full text-xs border-collapse" style={{ border: "1px solid rgba(232, 121, 43, 0.5)" }}>
+        <table className="w-full text-xs" style={orangeTableStyle}>
           <thead>
             <tr style={{ backgroundColor: "#E8792B" }}>
-              <th className={`${borderStyle} p-2 text-left text-white`}>Parámetro</th>
-              <th className={`${borderStyle} p-2 text-right text-white`}>Valor</th>
+              <th className="p-2 text-left text-white font-semibold">Parámetro</th>
+              <th className="p-2 text-right text-white font-semibold">Valor</th>
             </tr>
           </thead>
           <tbody>
-            {[
-              ["Fecha", h5.fecha || "—"],
-              ["Hora", h5.hora || "—"],
-              ["SEIN (MW)", h5.sein_mw ? h5.sein_mw.toFixed(2) : "—"],
-              ["Importación (MW)", h5.importacion ? h5.importacion.toFixed(2) : "—"],
-              ["Exportación (MW)", h5.exportacion ? h5.exportacion.toFixed(2) : "—"],
-            ].map(([label, val]) => (
-              <tr key={String(label)}>
-                <td className={`${borderStyle} p-2`} style={{ color: "#1B3A5C" }}>{label}</td>
-                <td className={`${borderStyle} p-2 text-right font-mono`} style={{ color: "#1B3A5C" }}>{val}</td>
-              </tr>
-            ))}
+            {(() => {
+              const rows = [
+                ["Fecha", h5.fecha || "—"],
+                ["Hora", h5.hora || "—"],
+                ["SEIN (MW)", h5.sein_mw ? h5.sein_mw.toFixed(2) : "—"],
+                ["Importación (MW)", h5.importacion ? h5.importacion.toFixed(2) : "—"],
+                ["Exportación (MW)", h5.exportacion ? h5.exportacion.toFixed(2) : "—"],
+              ];
+              return rows.map(([label, val], i) => (
+                <tr key={String(label)} className="bg-white">
+                  <td className="p-2" style={orangeCellStyle(i === rows.length - 1)}>{label}</td>
+                  <td className="p-2 text-right font-mono" style={orangeCellStyle(i === rows.length - 1)}>{val}</td>
+                </tr>
+              ));
+            })()}
           </tbody>
         </table>
 

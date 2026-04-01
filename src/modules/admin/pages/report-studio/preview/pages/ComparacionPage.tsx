@@ -14,7 +14,8 @@ const ComparacionPage = ({ data }: { data: ReportData }) => {
   const h2 = data.hoja2_data;
   const dg = data.datos_generales;
 
-  const borderStyle = "border border-[#1B3A5C]/20";
+  const blueCellStyle = (isLast = false) => ({ color: "#1B3A5C", borderBottom: isLast ? "none" : "1px solid #e5e7eb" });
+  const blueTableStyle = { border: "1px solid #1B3A5C", borderCollapse: "collapse" as const, tableLayout: "fixed" as const };
   const monedaSymbol = "S/";
 
   const meses = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
@@ -62,8 +63,7 @@ const ComparacionPage = ({ data }: { data: ReportData }) => {
               </div>
             </div>
 
-            {/* Invoice table - same 5-column structure as Hoja 3 */}
-            <table className="w-full text-[9px] border-collapse mb-3" style={{ tableLayout: "fixed" }}>
+            <table className="w-full text-[9px] mb-3" style={blueTableStyle}>
               <colgroup>
                 <col style={{ width: "46%" }} />
                 <col style={{ width: "12%" }} />
@@ -73,27 +73,27 @@ const ComparacionPage = ({ data }: { data: ReportData }) => {
               </colgroup>
               <thead>
                 <tr style={{ backgroundColor: "#1B3A5C" }}>
-                  <th className={`${borderStyle} px-1.5 py-0.5 text-left text-white font-semibold`}>DESCRIPCIÓN</th>
-                  <th className={`${borderStyle} px-1.5 py-0.5 text-center text-white font-semibold`}>UNIDAD</th>
-                  <th className={`${borderStyle} px-1.5 py-0.5 text-right text-white font-semibold`}>CANTIDAD</th>
-                  <th className={`${borderStyle} px-1.5 py-0.5 text-right text-white font-semibold`}>V. UNITARIO</th>
-                  <th className={`${borderStyle} px-1.5 py-0.5 text-right text-white font-semibold`}>V. VENTA</th>
+                  <th className="px-1.5 py-0.5 text-left text-white font-semibold">DESCRIPCIÓN</th>
+                  <th className="px-1.5 py-0.5 text-center text-white font-semibold">UNIDAD</th>
+                  <th className="px-1.5 py-0.5 text-right text-white font-semibold">CANTIDAD</th>
+                  <th className="px-1.5 py-0.5 text-right text-white font-semibold">V. UNITARIO</th>
+                  <th className="px-1.5 py-0.5 text-right text-white font-semibold">V. VENTA</th>
                 </tr>
               </thead>
               <tbody>
                 {items.map((item, i) => (
-                  <tr key={i} className={item.is_energy ? "" : (i % 2 === 0 ? "bg-white" : "bg-gray-50/50")} style={item.is_energy ? { backgroundColor: "#FFF3E0" } : {}}>
-                    <td className={`${borderStyle} px-1.5 py-0.5`} style={{ color: item.is_energy ? "#E8792B" : "#1B3A5C", fontWeight: item.is_energy ? 600 : 400 }}>
+                  <tr key={i} className="bg-white" style={item.is_energy ? { backgroundColor: "#FFF3E0" } : {}}>
+                    <td className="px-1.5 py-0.5" style={{ color: item.is_energy ? "#E8792B" : "#1B3A5C", fontWeight: item.is_energy ? 600 : 400, borderBottom: i === items.length - 1 ? "none" : "1px solid #e5e7eb" }}>
                       {toSentenceCase(item.descripcion)}
                     </td>
-                    <td className={`${borderStyle} px-1.5 py-0.5 text-center`} style={{ color: item.is_energy ? "#E8792B" : "#1B3A5C" }}>{item.unidad}</td>
-                    <td className={`${borderStyle} px-1.5 py-0.5 text-right font-mono`} style={{ color: item.is_energy ? "#E8792B" : "#1B3A5C" }}>
+                    <td className="px-1.5 py-0.5 text-center" style={{ color: item.is_energy ? "#E8792B" : "#1B3A5C", borderBottom: i === items.length - 1 ? "none" : "1px solid #e5e7eb" }}>{item.unidad}</td>
+                    <td className="px-1.5 py-0.5 text-right font-mono" style={{ color: item.is_energy ? "#E8792B" : "#1B3A5C", borderBottom: i === items.length - 1 ? "none" : "1px solid #e5e7eb" }}>
                       {fmt(item.cantidad, 2)}
                     </td>
-                    <td className={`${borderStyle} px-1.5 py-0.5 text-right font-mono`} style={{ color: item.is_energy ? "#E8792B" : "#1B3A5C", fontWeight: item.is_energy ? 700 : 400 }}>
+                    <td className="px-1.5 py-0.5 text-right font-mono" style={{ color: item.is_energy ? "#E8792B" : "#1B3A5C", fontWeight: item.is_energy ? 700 : 400, borderBottom: i === items.length - 1 ? "none" : "1px solid #e5e7eb" }}>
                       {item.is_energy ? fmt(item.valor_unitario_calc, 3) : fmt(item.valor_unitario_original, 2)}
                     </td>
-                    <td className={`${borderStyle} px-1.5 py-0.5 text-right font-mono`} style={{ color: item.is_energy ? "#E8792B" : "#1B3A5C", fontWeight: item.is_energy ? 700 : 400 }}>
+                    <td className="px-1.5 py-0.5 text-right font-mono" style={{ color: item.is_energy ? "#E8792B" : "#1B3A5C", fontWeight: item.is_energy ? 700 : 400, borderBottom: i === items.length - 1 ? "none" : "1px solid #e5e7eb" }}>
                       {item.is_energy ? fmt(item.valor_venta_calc, 2) : fmt(item.valor_venta_original, 2)}
                     </td>
                   </tr>
@@ -123,10 +123,10 @@ const ComparacionPage = ({ data }: { data: ReportData }) => {
                 })().map(([label, val, isBold], i) => (
                   <tr key={`total-${i}`}>
                     <td className="p-0 border-0"></td>
-                    <td colSpan={2} className={`${borderStyle} px-1.5 py-0.5 text-left ${isBold ? "font-bold text-white text-[10px]" : "font-semibold"}`} style={isBold ? { backgroundColor: "#1B3A5C" } : { color: "#1B3A5C" }}>
+                    <td colSpan={2} className={`px-1.5 py-0.5 text-left ${isBold ? "font-bold text-white text-[10px]" : "font-semibold"}`} style={isBold ? { backgroundColor: "#1B3A5C", border: "1px solid #1B3A5C" } : { color: "#1B3A5C", borderBottom: "1px solid #e5e7eb" }}>
                       {label as string}
                     </td>
-                    <td colSpan={2} className={`${borderStyle} px-1.5 py-0.5 text-right font-mono ${isBold ? "font-bold text-white text-[11px]" : ""}`} style={isBold ? { backgroundColor: "#1B3A5C" } : { color: "#1B3A5C" }}>
+                    <td colSpan={2} className={`px-1.5 py-0.5 text-right font-mono ${isBold ? "font-bold text-white text-[11px]" : ""}`} style={isBold ? { backgroundColor: "#1B3A5C", border: "1px solid #1B3A5C" } : { color: "#1B3A5C", borderBottom: "1px solid #e5e7eb" }}>
                       {monedaSymbol} {fmt((val as number) || 0)}
                     </td>
                   </tr>
@@ -149,7 +149,7 @@ const ComparacionPage = ({ data }: { data: ReportData }) => {
           Tabla comparativa – Periodo {mesAnterior?.toLowerCase()} del {dg.anio}
         </p>
 
-        <table className="w-full text-[9px] mb-3" style={{ tableLayout: "fixed", borderCollapse: "collapse", border: "1px solid #1B3A5C" }}>
+        <table className="w-full text-[9px] mb-3" style={{ tableLayout: "fixed", borderCollapse: "collapse", border: "1px solid #E8792B" }}>
           <colgroup>
             <col style={{ width: "34%" }} />
             <col style={{ width: "22%" }} />
@@ -158,10 +158,10 @@ const ComparacionPage = ({ data }: { data: ReportData }) => {
           </colgroup>
           <thead>
             <tr style={{ backgroundColor: "#E8792B" }}>
-              <th className="px-1.5 py-0.5 text-left text-white font-semibold" style={{ borderBottom: "1px solid rgba(255,255,255,0.3)" }}>Concepto</th>
-              <th className="px-1.5 py-0.5 text-right text-white font-semibold" style={{ borderBottom: "1px solid rgba(255,255,255,0.3)" }}>Calculado</th>
-              <th className="px-1.5 py-0.5 text-right text-white font-semibold" style={{ borderBottom: "1px solid rgba(255,255,255,0.3)" }}>Facturado</th>
-              <th className="px-1.5 py-0.5 text-right text-white font-semibold" style={{ borderBottom: "1px solid rgba(255,255,255,0.3)" }}>Diferencia</th>
+              <th className="px-1.5 py-0.5 text-left text-white font-semibold">Concepto</th>
+              <th className="px-1.5 py-0.5 text-right text-white font-semibold">Calculado</th>
+              <th className="px-1.5 py-0.5 text-right text-white font-semibold">Facturado</th>
+              <th className="px-1.5 py-0.5 text-right text-white font-semibold">Diferencia</th>
             </tr>
           </thead>
           <tbody>
@@ -173,7 +173,7 @@ const ComparacionPage = ({ data }: { data: ReportData }) => {
                 {h4.diferencia_hp >= 0 ? "+" : ""}{fmt(h4.diferencia_hp, 5)}
               </td>
             </tr>
-            <tr className="bg-gray-50/50">
+            <tr className="bg-white">
               <td className="px-1.5 py-0.5" style={{ color: "#1B3A5C" }}>Precio energía HFP (S/kWh)</td>
               <td className="px-1.5 py-0.5 text-right font-mono" style={{ color: "#1B3A5C" }}>{fmt(h4.precio_calculado_hfp, 5)}</td>
               <td className="px-1.5 py-0.5 text-right font-mono" style={{ color: "#1B3A5C" }}>{fmt(h4.precio_facturado_hfp, 5)}</td>
