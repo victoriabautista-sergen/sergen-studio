@@ -15,7 +15,8 @@ const FacturaPage = ({ data }: { data: ReportData }) => {
   const anioAnterior = mesIndex === 0 ? Number(dg.anio) - 1 : dg.anio;
 
   const monedaSymbol = "S/";
-  const borderStyle = "border border-[#1B3A5C]/20";
+  const blueCellStyle = (isLast = false) => ({ color: "#1B3A5C", borderBottom: isLast ? "none" : "1px solid #e5e7eb" });
+  const blueTableStyle = { border: "1px solid #1B3A5C", borderCollapse: "collapse" as const, tableLayout: "fixed" as const };
   const hasItems = h3.items && h3.items.length > 0;
 
   return (
