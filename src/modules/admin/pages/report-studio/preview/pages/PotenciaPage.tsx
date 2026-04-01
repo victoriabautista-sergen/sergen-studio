@@ -29,12 +29,12 @@ const PotenciaPage = ({ data }: { data: ReportData }) => {
         {/* Multi-header table matching reference */}
         <table className="w-full text-[9px] border-collapse mb-4" style={{ tableLayout: "fixed" }}>
           <thead>
-            <tr style={{ backgroundColor: "#6b7280" }}>
+            <tr style={{ backgroundColor: "#4a7fb5" }}>
               <th className={`${borderStyle} px-1.5 py-1 text-center text-white font-semibold`} colSpan={2}>Máxima demanda en hora punta</th>
               <th className={`${borderStyle} px-1.5 py-1 text-center text-white font-semibold`} colSpan={2}>Interconexión</th>
               <th className={`${borderStyle} px-1.5 py-1 text-center text-white font-semibold`} rowSpan={2}>SEIN<br/>MW</th>
             </tr>
-            <tr style={{ backgroundColor: "#6b7280" }}>
+            <tr style={{ backgroundColor: "#4a7fb5" }}>
               <th className={`${borderStyle} px-1.5 py-1 text-center text-white font-semibold`}>Fecha</th>
               <th className={`${borderStyle} px-1.5 py-1 text-center text-white font-semibold`}>Hora</th>
               <th className={`${borderStyle} px-1.5 py-1 text-center text-white font-semibold`}>PER-ECU Exportación MW</th>
@@ -57,7 +57,7 @@ const PotenciaPage = ({ data }: { data: ReportData }) => {
         </p>
 
         {/* Potencia coincidente promedio box */}
-        <div className="flex justify-between items-center rounded px-3 py-2" style={{ backgroundColor: "#FFF7ED", border: "1px solid #E8792B" }}>
+        <div className="flex justify-between items-center rounded px-3 py-2" style={{ backgroundColor: "#eef3f8", border: "1px solid #d0d8e0" }}>
           <span className="text-[10px] font-semibold" style={{ color: "#1B3A5C" }}>
             POTENCIA COINCIDENTE PROMEDIO DEL CLIENTE (kW):
           </span>
