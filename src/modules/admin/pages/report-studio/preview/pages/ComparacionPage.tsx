@@ -14,8 +14,7 @@ const ComparacionPage = ({ data }: { data: ReportData }) => {
   const h2 = data.hoja2_data;
   const dg = data.datos_generales;
 
-  const blueCellStyle = (isLast = false) => ({ color: "#1B3A5C", borderBottom: isLast ? "none" : "1px solid #e5e7eb" });
-  const blueTableStyle = { border: "1px solid #1B3A5C", borderCollapse: "collapse" as const, tableLayout: "fixed" as const };
+  const borderStyle = "border border-[#1B3A5C]/20";
   const monedaSymbol = "S/";
 
   const meses = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
