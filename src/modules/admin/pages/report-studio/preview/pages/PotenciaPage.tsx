@@ -9,7 +9,7 @@ const PotenciaPage = ({ data }: { data: ReportData }) => {
   const mesAnterior = mesIndex > 0 ? meses[mesIndex - 1] : mesIndex === 0 ? "Diciembre" : dg.mes;
   const anioAnterior = mesIndex === 0 ? Number(dg.anio) - 1 : dg.anio;
 
-  const borderStyle = "border border-[#1B3A5C]/20";
+  const borderStyle = "border border-gray-300";
 
   return (
     <div className="flex flex-col h-full text-[10px] leading-relaxed" style={{ fontFamily: "'Inter', sans-serif", color: "#1B3A5C" }}>
@@ -29,12 +29,12 @@ const PotenciaPage = ({ data }: { data: ReportData }) => {
         {/* Multi-header table matching reference */}
         <table className="w-full text-[9px] border-collapse mb-4" style={{ tableLayout: "fixed" }}>
           <thead>
-            <tr style={{ backgroundColor: "#1B3A5C" }}>
+            <tr style={{ backgroundColor: "#6b7280" }}>
               <th className={`${borderStyle} px-1.5 py-1 text-center text-white font-semibold`} colSpan={2}>Máxima demanda en hora punta</th>
               <th className={`${borderStyle} px-1.5 py-1 text-center text-white font-semibold`} colSpan={2}>Interconexión</th>
               <th className={`${borderStyle} px-1.5 py-1 text-center text-white font-semibold`} rowSpan={2}>SEIN<br/>MW</th>
             </tr>
-            <tr style={{ backgroundColor: "#1B3A5C" }}>
+            <tr style={{ backgroundColor: "#6b7280" }}>
               <th className={`${borderStyle} px-1.5 py-1 text-center text-white font-semibold`}>Fecha</th>
               <th className={`${borderStyle} px-1.5 py-1 text-center text-white font-semibold`}>Hora</th>
               <th className={`${borderStyle} px-1.5 py-1 text-center text-white font-semibold`}>PER-ECU Exportación MW</th>
