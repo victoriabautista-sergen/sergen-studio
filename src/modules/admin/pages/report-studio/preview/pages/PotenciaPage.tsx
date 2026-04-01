@@ -2,8 +2,14 @@ import { ReportData } from "../../types";
 
 const PotenciaPage = ({ data }: { data: ReportData }) => {
   const h5 = data.hoja5_data;
-  const orangeTableStyle = { border: "1px solid #E8792B", borderCollapse: "collapse" as const };
-  const orangeCellStyle = (isLast = false) => ({ color: "#1B3A5C", borderBottom: isLast ? "none" : "1px solid #E8792B" });
+  const dg = data.datos_generales;
+
+  const meses = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
+  const mesIndex = meses.indexOf(dg.mes || "");
+  const mesAnterior = mesIndex > 0 ? meses[mesIndex - 1] : mesIndex === 0 ? "Diciembre" : dg.mes;
+  const anioAnterior = mesIndex === 0 ? Number(dg.anio) - 1 : dg.anio;
+
+  const borderStyle = "border border-[#1B3A5C]/20";
 
   return (
     <div className="flex flex-col h-full text-[10px] leading-relaxed" style={{ fontFamily: "'Inter', sans-serif", color: "#1B3A5C" }}>
@@ -12,41 +18,52 @@ const PotenciaPage = ({ data }: { data: ReportData }) => {
         <p className="text-xs font-bold" style={{ color: "#1B3A5C" }}>Sergen Eficiencia Energética</p>
         <hr className="border-t border-gray-300 my-2" />
 
-        <h1 className="text-xs font-semibold mt-4 mb-4" style={{ color: "#1B3A5C" }}>
-          IV. POTENCIA COINCIDENTE
+        <h1 className="text-xs font-semibold mt-4 mb-3" style={{ color: "#1B3A5C" }}>
+          II. POTENCIA COINCIDENTE
         </h1>
 
-        <table className="w-full text-xs" style={orangeTableStyle}>
+        <p className="text-[10px] mb-3" style={{ color: "#1B3A5C" }}>
+          Para el periodo <strong>{mesAnterior?.toLowerCase()} {anioAnterior}</strong> la potencia coincidente publicada por el COES fue la siguiente:
+        </p>
+
+        {/* Multi-header table matching reference */}
+        <table className="w-full text-[9px] border-collapse mb-4" style={{ tableLayout: "fixed" }}>
           <thead>
-            <tr style={{ backgroundColor: "#E8792B" }}>
-              <th className="p-2 text-left text-white font-semibold">Parámetro</th>
-              <th className="p-2 text-right text-white font-semibold">Valor</th>
+            <tr style={{ backgroundColor: "#1B3A5C" }}>
+              <th className={`${borderStyle} px-1.5 py-1 text-center text-white font-semibold`} colSpan={2}>Máxima demanda en hora punta</th>
+              <th className={`${borderStyle} px-1.5 py-1 text-center text-white font-semibold`} colSpan={2}>Interconexión</th>
+              <th className={`${borderStyle} px-1.5 py-1 text-center text-white font-semibold`} rowSpan={2}>SEIN<br/>MW</th>
+            </tr>
+            <tr style={{ backgroundColor: "#1B3A5C" }}>
+              <th className={`${borderStyle} px-1.5 py-1 text-center text-white font-semibold`}>Fecha</th>
+              <th className={`${borderStyle} px-1.5 py-1 text-center text-white font-semibold`}>Hora</th>
+              <th className={`${borderStyle} px-1.5 py-1 text-center text-white font-semibold`}>PER-ECU Exportación MW</th>
+              <th className={`${borderStyle} px-1.5 py-1 text-center text-white font-semibold`}>ECU-PER Importación MW</th>
             </tr>
           </thead>
           <tbody>
-            {(() => {
-              const rows = [
-                ["Fecha", h5.fecha || "—"],
-                ["Hora", h5.hora || "—"],
-                ["SEIN (MW)", h5.sein_mw ? h5.sein_mw.toFixed(2) : "—"],
-                ["Importación (MW)", h5.importacion ? h5.importacion.toFixed(2) : "—"],
-                ["Exportación (MW)", h5.exportacion ? h5.exportacion.toFixed(2) : "—"],
-              ];
-              return rows.map(([label, val], i) => (
-                <tr key={String(label)} className="bg-white">
-                  <td className="p-2" style={orangeCellStyle(i === rows.length - 1)}>{label}</td>
-                  <td className="p-2 text-right font-mono" style={orangeCellStyle(i === rows.length - 1)}>{val}</td>
-                </tr>
-              ));
-            })()}
+            <tr className="bg-white">
+              <td className={`${borderStyle} px-1.5 py-1 text-center`} style={{ color: "#1B3A5C" }}>{h5.fecha || "—"}</td>
+              <td className={`${borderStyle} px-1.5 py-1 text-center`} style={{ color: "#1B3A5C" }}>{h5.hora || "—"}</td>
+              <td className={`${borderStyle} px-1.5 py-1 text-center font-mono`} style={{ color: "#1B3A5C" }}>{h5.exportacion ? h5.exportacion.toFixed(3) : "0.000"}</td>
+              <td className={`${borderStyle} px-1.5 py-1 text-center font-mono`} style={{ color: "#1B3A5C" }}>{h5.importacion ? h5.importacion.toFixed(3) : "0.000"}</td>
+              <td className={`${borderStyle} px-1.5 py-1 text-center font-mono`} style={{ color: "#1B3A5C" }}>{h5.sein_mw ? h5.sein_mw.toFixed(2) : "—"}</td>
+            </tr>
           </tbody>
         </table>
 
-        <div className="bg-gray-50 border rounded-lg p-4 text-center space-y-1 mt-4">
-          <p className="text-[10px] text-gray-500 uppercase font-semibold">Potencia Coincidente Promedio</p>
-          <p className="text-2xl font-bold" style={{ color: "#E8792B" }}>
-            {h5.potencia_coincidente_promedio ? `${h5.potencia_coincidente_promedio.toFixed(2)} kW` : "— kW"}
-          </p>
+        <p className="text-[10px] mb-3" style={{ color: "#1B3A5C" }}>
+          De las facturas analizadas de <strong>{dg.client_name || "—"}</strong> tenemos el siguiente cuadro:
+        </p>
+
+        {/* Potencia coincidente promedio box */}
+        <div className="flex justify-between items-center rounded px-3 py-2" style={{ backgroundColor: "#FFF7ED", border: "1px solid #E8792B" }}>
+          <span className="text-[10px] font-semibold" style={{ color: "#1B3A5C" }}>
+            POTENCIA COINCIDENTE PROMEDIO DEL CLIENTE (kW):
+          </span>
+          <span className="text-sm font-bold font-mono" style={{ color: "#E8792B" }}>
+            {h5.potencia_coincidente_promedio ? h5.potencia_coincidente_promedio.toFixed(2) : "—"}
+          </span>
         </div>
       </div>
 
