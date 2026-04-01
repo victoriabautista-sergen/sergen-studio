@@ -11,6 +11,7 @@ const fmt = (n: number, decimals = 2) =>
 const ComparacionPage = ({ data }: { data: ReportData }) => {
   const h4 = data.hoja4_data;
   const h3 = data.hoja3_data;
+  const h2 = data.hoja2_data;
   const dg = data.datos_generales;
 
   const borderStyle = "border border-[#1B3A5C]/20";
@@ -45,6 +46,30 @@ const ComparacionPage = ({ data }: { data: ReportData }) => {
         <p className="text-[11px] mb-4" style={{ color: "#1B3A5C" }}>
           A continuación se presenta la factura con los precios de energía recalculados según contrato. Los ítems de energía resaltados muestran el precio calculado por Sergen.
         </p>
+
+        {/* Precio base table */}
+        <table className="w-full text-[9px] border-collapse mb-4" style={{ tableLayout: "fixed" }}>
+          <colgroup>
+            <col style={{ width: "70%" }} />
+            <col style={{ width: "30%" }} />
+          </colgroup>
+          <thead>
+            <tr style={{ backgroundColor: "#E8792B" }}>
+              <th className="border border-[#E8792B]/50 px-1.5 py-0.5 text-left text-white font-semibold" colSpan={2}>Precio de energía calculado según contrato</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr className="bg-white">
+              <td className="border border-gray-200 px-1.5 py-0.5" style={{ color: "#1B3A5C" }}>Precio de energía base HP por kWh</td>
+              <td className="border border-gray-200 px-1.5 py-0.5 text-right font-mono" style={{ color: "#1B3A5C" }}>{monedaSymbol} {fmt(h2.precio_actualizado_hp, 4)}</td>
+            </tr>
+            <tr className="bg-gray-50/50">
+              <td className="border border-gray-200 px-1.5 py-0.5" style={{ color: "#1B3A5C" }}>Precio de energía base HFP por kWh</td>
+              <td className="border border-gray-200 px-1.5 py-0.5 text-right font-mono" style={{ color: "#1B3A5C" }}>{monedaSymbol} {fmt(h2.precio_actualizado_hfp, 4)}</td>
+            </tr>
+          </tbody>
+        </table>
+        <p className="text-[8px] italic text-gray-400 text-right -mt-3 mb-3">Fuente: Elaboración propia</p>
 
         {hasItems ? (
           <>
