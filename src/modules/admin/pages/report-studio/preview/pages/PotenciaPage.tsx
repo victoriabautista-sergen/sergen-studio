@@ -29,16 +29,16 @@ const PotenciaPage = ({ data }: { data: ReportData }) => {
         {/* Multi-header table matching reference */}
         <table className="w-full text-[9px] border-collapse mb-4" style={{ tableLayout: "fixed" }}>
           <thead>
-            <tr style={{ backgroundColor: "#4a7fb5" }}>
-              <th className={`${borderStyle} px-1.5 py-1 text-center text-white font-semibold`} colSpan={2}>Máxima demanda en hora punta</th>
-              <th className={`${borderStyle} px-1.5 py-1 text-center text-white font-semibold`} colSpan={2}>Interconexión</th>
-              <th className={`${borderStyle} px-1.5 py-1 text-center text-white font-semibold`} rowSpan={2}>SEIN<br/>MW</th>
+            <tr style={{ backgroundColor: "#e5e7eb" }}>
+              <th className={`${borderStyle} px-1.5 py-1 text-center font-semibold`} style={{ color: "#1B3A5C" }} colSpan={2}>Máxima demanda en hora punta</th>
+              <th className={`${borderStyle} px-1.5 py-1 text-center font-semibold`} style={{ color: "#1B3A5C" }} colSpan={2}>Interconexión</th>
+              <th className={`${borderStyle} px-1.5 py-1 text-center font-semibold`} style={{ color: "#1B3A5C" }} rowSpan={2}>SEIN<br/>MW</th>
             </tr>
-            <tr style={{ backgroundColor: "#4a7fb5" }}>
-              <th className={`${borderStyle} px-1.5 py-1 text-center text-white font-semibold`}>Fecha</th>
-              <th className={`${borderStyle} px-1.5 py-1 text-center text-white font-semibold`}>Hora</th>
-              <th className={`${borderStyle} px-1.5 py-1 text-center text-white font-semibold`}>PER-ECU Exportación MW</th>
-              <th className={`${borderStyle} px-1.5 py-1 text-center text-white font-semibold`}>ECU-PER Importación MW</th>
+            <tr style={{ backgroundColor: "#e5e7eb" }}>
+              <th className={`${borderStyle} px-1.5 py-1 text-center font-semibold`} style={{ color: "#1B3A5C" }}>Fecha</th>
+              <th className={`${borderStyle} px-1.5 py-1 text-center font-semibold`} style={{ color: "#1B3A5C" }}>Hora</th>
+              <th className={`${borderStyle} px-1.5 py-1 text-center font-semibold`} style={{ color: "#1B3A5C" }}>PER-ECU Exportación MW</th>
+              <th className={`${borderStyle} px-1.5 py-1 text-center font-semibold`} style={{ color: "#1B3A5C" }}>ECU-PER Importación MW</th>
             </tr>
           </thead>
           <tbody>
