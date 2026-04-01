@@ -57,7 +57,7 @@ const PotenciaPage = ({ data }: { data: ReportData }) => {
         </p>
 
         {/* Potencia coincidente promedio box */}
-        <div className="flex justify-between items-center rounded px-3 py-2" style={{ backgroundColor: "#FFF7ED", border: "1px solid #E8792B" }}>
+        <div className="flex justify-between items-center rounded px-3 py-2" style={{ backgroundColor: "#eef3f8", border: "1px solid #d0d8e0" }}>
           <span className="text-[10px] font-semibold" style={{ color: "#1B3A5C" }}>
             POTENCIA COINCIDENTE PROMEDIO DEL CLIENTE (kW):
           </span>
