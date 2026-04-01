@@ -101,12 +101,19 @@ const ComparacionPage = ({ data }: { data: ReportData }) => {
                 {/* Spacer */}
                 <tr><td colSpan={5} className="py-1 border-0"></td></tr>
                 {/* Totals - same structure as Hoja 3 */}
-                {[
-                  ["OP. GRAVADAS", h4.subtotal_afecto, false],
-                  ["SUBTOTAL", h4.subtotal_afecto, false],
-                  ["IGV", h4.igv_recalculado, false],
-                  ["IMPORTE TOTAL", h4.total_recalculado, true],
-                ].filter(([, val, isBold]) => isBold || (val as number) !== 0).map(([label, val, isBold], i) => (
+                {(() => {
+                  const opInafectas = items.filter(i => i.tipo === "inafecto").reduce((s, i) => s + i.valor_venta_calc, 0);
+                  const opExonerada = items.filter(i => i.tipo === "exonerado").reduce((s, i) => s + i.valor_venta_calc, 0);
+                  const subtotal = h4.subtotal_afecto + opInafectas + opExonerada;
+                  return [
+                    ["OP. GRAVADAS", h4.subtotal_afecto, false],
+                    ["OP. INAFECTAS", opInafectas, false],
+                    ["OP. EXONERADA", opExonerada, false],
+                    ["SUBTOTAL", subtotal, false],
+                    ["IGV", h4.igv_recalculado, false],
+                    ["IMPORTE TOTAL", h4.total_recalculado + opInafectas + opExonerada, true],
+                  ].filter(([, val, isBold]) => isBold || (val as number) !== 0);
+                })().map(([label, val, isBold], i) => (
                   <tr key={`total-${i}`}>
                     <td className="p-0 border-0"></td>
                     <td colSpan={2} className={`${borderStyle} px-1.5 py-0.5 text-left ${isBold ? "font-bold text-white text-[10px]" : "font-semibold"}`} style={isBold ? { backgroundColor: "#1B3A5C" } : { color: "#1B3A5C" }}>
