@@ -185,7 +185,7 @@ const ComparacionPage = ({ data }: { data: ReportData }) => {
 
         {/* Energy impact breakdown */}
         <div className="border border-gray-200 rounded mb-2">
-          <div className="flex justify-between px-2 py-1 text-[9px] bg-gray-50">
+          <div className="flex justify-between px-2 py-0.5 text-[9px] bg-gray-50">
             <span style={{ color: "#1B3A5C" }}>
               <strong>Energía HP:</strong> {fmt(cantHP, 2)} × {fmt(h4.diferencia_hp, 5)}
             </span>
@@ -193,7 +193,7 @@ const ComparacionPage = ({ data }: { data: ReportData }) => {
               {monedaSymbol} {fmt(Math.abs(impactoHP))}
             </span>
           </div>
-          <div className="flex justify-between px-2 py-1 text-[9px]">
+          <div className="flex justify-between px-2 py-0.5 text-[9px]">
             <span style={{ color: "#1B3A5C" }}>
               <strong>Energía HFP:</strong> {fmt(cantHFP, 2)} × {fmt(h4.diferencia_hfp, 5)}
             </span>
@@ -201,7 +201,7 @@ const ComparacionPage = ({ data }: { data: ReportData }) => {
               {monedaSymbol} {fmt(Math.abs(impactoHFP))}
             </span>
           </div>
-          <div className="flex justify-between px-2 py-1 text-[10px] border-t border-gray-200 bg-gray-50">
+          <div className="flex justify-between px-2 py-0.5 text-[9px] border-t border-gray-200 bg-gray-50">
             <span className="font-semibold" style={{ color: "#1B3A5C" }}>Impacto económico total</span>
             <span className="font-mono font-bold" style={{ color: "#1B3A5C" }}>
               {monedaSymbol} {fmt(h4.impacto_economico, 3)}
