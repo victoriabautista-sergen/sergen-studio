@@ -15,8 +15,7 @@ const FacturaPage = ({ data }: { data: ReportData }) => {
   const anioAnterior = mesIndex === 0 ? Number(dg.anio) - 1 : dg.anio;
 
   const monedaSymbol = "S/";
-  const blueCellStyle = (isLast = false) => ({ color: "#1B3A5C", borderBottom: isLast ? "none" : "1px solid #e5e7eb" });
-  const blueTableStyle = { border: "1px solid #1B3A5C", borderCollapse: "collapse" as const, tableLayout: "fixed" as const };
+  const borderStyle = "border border-[#1B3A5C]/20";
   const hasItems = h3.items && h3.items.length > 0;
 
   return (
@@ -49,7 +48,7 @@ const FacturaPage = ({ data }: { data: ReportData }) => {
               </div>
             </div>
 
-            <table className="w-full text-[9px] mb-3" style={blueTableStyle}>
+            <table className="w-full text-[9px] border-collapse mb-3" style={{ tableLayout: "fixed" }}>
               <colgroup>
                 <col style={{ width: "46%" }} />
                 <col style={{ width: "12%" }} />
@@ -59,25 +58,25 @@ const FacturaPage = ({ data }: { data: ReportData }) => {
               </colgroup>
               <thead>
                 <tr style={{ backgroundColor: "#1B3A5C" }}>
-                  <th className="px-1.5 py-0.5 text-left text-white font-semibold">DESCRIPCIÓN</th>
-                  <th className="px-1.5 py-0.5 text-center text-white font-semibold">UNIDAD</th>
-                  <th className="px-1.5 py-0.5 text-right text-white font-semibold">CANTIDAD</th>
-                  <th className="px-1.5 py-0.5 text-right text-white font-semibold">V. UNITARIO</th>
-                  <th className="px-1.5 py-0.5 text-right text-white font-semibold">V. VENTA</th>
+                  <th className={`${borderStyle} px-1.5 py-0.5 text-left text-white font-semibold`}>DESCRIPCIÓN</th>
+                  <th className={`${borderStyle} px-1.5 py-0.5 text-center text-white font-semibold`}>UNIDAD</th>
+                  <th className={`${borderStyle} px-1.5 py-0.5 text-right text-white font-semibold`}>CANTIDAD</th>
+                  <th className={`${borderStyle} px-1.5 py-0.5 text-right text-white font-semibold`}>V. UNITARIO</th>
+                  <th className={`${borderStyle} px-1.5 py-0.5 text-right text-white font-semibold`}>V. VENTA</th>
                 </tr>
               </thead>
               <tbody>
                 {h3.items.map((item, i) => (
-                  <tr key={i} className="bg-white">
-                    <td className="px-1.5 py-0.5" style={blueCellStyle(i === h3.items.length - 1)}>{toSentenceCase(item.descripcion)}</td>
-                    <td className="px-1.5 py-0.5 text-center" style={blueCellStyle(i === h3.items.length - 1)}>{item.unidad}</td>
-                    <td className="px-1.5 py-0.5 text-right font-mono" style={blueCellStyle(i === h3.items.length - 1)}>
+                  <tr key={i} className={i % 2 === 0 ? "bg-white" : "bg-gray-50/50"}>
+                    <td className={`${borderStyle} px-1.5 py-0.5`} style={{ color: "#1B3A5C" }}>{toSentenceCase(item.descripcion)}</td>
+                    <td className={`${borderStyle} px-1.5 py-0.5 text-center`} style={{ color: "#1B3A5C" }}>{item.unidad}</td>
+                    <td className={`${borderStyle} px-1.5 py-0.5 text-right font-mono`} style={{ color: "#1B3A5C" }}>
                       {typeof item.cantidad === "number" ? item.cantidad.toLocaleString("es-PE", { minimumFractionDigits: 2 }) : item.cantidad}
                     </td>
-                    <td className="px-1.5 py-0.5 text-right font-mono" style={blueCellStyle(i === h3.items.length - 1)}>
+                    <td className={`${borderStyle} px-1.5 py-0.5 text-right font-mono`} style={{ color: "#1B3A5C" }}>
                       {typeof item.valor_unitario === "number" ? item.valor_unitario.toLocaleString("es-PE", { minimumFractionDigits: 2 }) : item.valor_unitario || "—"}
                     </td>
-                    <td className="px-1.5 py-0.5 text-right font-mono" style={blueCellStyle(i === h3.items.length - 1)}>
+                    <td className={`${borderStyle} px-1.5 py-0.5 text-right font-mono`} style={{ color: "#1B3A5C" }}>
                       {typeof item.valor_venta === "number" ? item.valor_venta.toLocaleString("es-PE", { minimumFractionDigits: 2 }) : item.valor_venta || "—"}
                     </td>
                   </tr>
@@ -99,10 +98,10 @@ const FacturaPage = ({ data }: { data: ReportData }) => {
                 ].filter(([, val, isBold]) => isBold || (val as number) !== 0).map(([label, val, isBold], i) => (
                   <tr key={`total-${i}`}>
                     <td className="p-0 border-0"></td>
-                    <td colSpan={2} className={`px-1.5 py-0.5 text-left ${isBold ? "font-bold text-white text-[10px]" : "font-semibold"}`} style={isBold ? { backgroundColor: "#1B3A5C", border: "1px solid #1B3A5C" } : { color: "#1B3A5C", borderBottom: "1px solid #e5e7eb" }}>
+                    <td colSpan={2} className={`${borderStyle} px-1.5 py-0.5 text-left ${isBold ? "font-bold text-white text-[10px]" : "font-semibold"}`} style={isBold ? { backgroundColor: "#1B3A5C" } : { color: "#1B3A5C" }}>
                       {label as string}
                     </td>
-                    <td colSpan={2} className={`px-1.5 py-0.5 text-right font-mono ${isBold ? "font-bold text-white text-[11px]" : ""}`} style={isBold ? { backgroundColor: "#1B3A5C", border: "1px solid #1B3A5C" } : { color: "#1B3A5C", borderBottom: "1px solid #e5e7eb" }}>
+                    <td colSpan={2} className={`${borderStyle} px-1.5 py-0.5 text-right font-mono ${isBold ? "font-bold text-white text-[11px]" : ""}`} style={isBold ? { backgroundColor: "#1B3A5C" } : { color: "#1B3A5C" }}>
                       {monedaSymbol} {((val as number) || 0).toLocaleString("es-PE", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                     </td>
                   </tr>
