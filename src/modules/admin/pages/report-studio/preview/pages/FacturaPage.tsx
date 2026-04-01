@@ -74,11 +74,17 @@ const FacturaPage = ({ data }: { data: ReportData }) => {
                     <td className={`${borderStyle} px-1.5 py-0.5 text-right font-mono`} style={{ color: "#1B3A5C" }}>
                       {typeof item.cantidad === "number" ? item.cantidad.toLocaleString("es-PE", { minimumFractionDigits: 2 }) : item.cantidad}
                     </td>
+                    <td className={`${borderStyle} px-1.5 py-0.5 text-right font-mono`} style={{ color: "#1B3A5C" }}>
+                      {typeof item.valor_unitario === "number" ? item.valor_unitario.toLocaleString("es-PE", { minimumFractionDigits: 2 }) : item.valor_unitario || "—"}
+                    </td>
+                    <td className={`${borderStyle} px-1.5 py-0.5 text-right font-mono`} style={{ color: "#1B3A5C" }}>
+                      {typeof item.valor_venta === "number" ? item.valor_venta.toLocaleString("es-PE", { minimumFractionDigits: 2 }) : item.valor_venta || "—"}
+                    </td>
                   </tr>
                 ))}
                 {/* Spacer */}
-                <tr><td colSpan={3} className="py-1 border-0"></td></tr>
-                {/* Totals using same 3-column grid */}
+                <tr><td colSpan={5} className="py-1 border-0"></td></tr>
+                {/* Totals using same 5-column grid */}
                 {[
                   ["OP. GRAVADAS", h3.op_gravadas, false],
                   ["OP. INAFECTAS", h3.op_inafectas, false],
@@ -92,7 +98,7 @@ const FacturaPage = ({ data }: { data: ReportData }) => {
                   ["IMPORTE TOTAL", h3.importe_total, true],
                 ].filter(([, val, isBold]) => isBold || (val as number) !== 0).map(([label, val, isBold], i) => (
                   <tr key={`total-${i}`}>
-                    <td className="p-0 border-0"></td>
+                    <td colSpan={3} className="p-0 border-0"></td>
                     <td className={`${borderStyle} px-1.5 py-0.5 text-right ${isBold ? "font-bold text-white text-[10px]" : "font-semibold"}`} style={isBold ? { backgroundColor: "#1B3A5C" } : { color: "#1B3A5C" }}>
                       {label as string}
                     </td>
