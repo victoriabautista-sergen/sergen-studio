@@ -149,7 +149,7 @@ const ComparacionPage = ({ data }: { data: ReportData }) => {
           Tabla comparativa – Periodo {mesAnterior?.toLowerCase()} del {dg.anio}
         </p>
 
-        <table className="w-full text-[9px] border-collapse mb-3" style={{ tableLayout: "fixed" }}>
+        <table className="w-full text-[9px] mb-3" style={{ tableLayout: "fixed", borderCollapse: "collapse", border: "1px solid #1B3A5C" }}>
           <colgroup>
             <col style={{ width: "34%" }} />
             <col style={{ width: "22%" }} />
@@ -158,26 +158,26 @@ const ComparacionPage = ({ data }: { data: ReportData }) => {
           </colgroup>
           <thead>
             <tr style={{ backgroundColor: "#E8792B" }}>
-              <th className="border border-[#E8792B]/50 px-1.5 py-0.5 text-left text-white font-semibold">Concepto</th>
-              <th className="border border-[#E8792B]/50 px-1.5 py-0.5 text-right text-white font-semibold">Calculado</th>
-              <th className="border border-[#E8792B]/50 px-1.5 py-0.5 text-right text-white font-semibold">Facturado</th>
-              <th className="border border-[#E8792B]/50 px-1.5 py-0.5 text-right text-white font-semibold">Diferencia</th>
+              <th className="px-1.5 py-0.5 text-left text-white font-semibold" style={{ borderBottom: "1px solid rgba(255,255,255,0.3)" }}>Concepto</th>
+              <th className="px-1.5 py-0.5 text-right text-white font-semibold" style={{ borderBottom: "1px solid rgba(255,255,255,0.3)" }}>Calculado</th>
+              <th className="px-1.5 py-0.5 text-right text-white font-semibold" style={{ borderBottom: "1px solid rgba(255,255,255,0.3)" }}>Facturado</th>
+              <th className="px-1.5 py-0.5 text-right text-white font-semibold" style={{ borderBottom: "1px solid rgba(255,255,255,0.3)" }}>Diferencia</th>
             </tr>
           </thead>
           <tbody>
             <tr className="bg-white">
-              <td className="border border-gray-200 px-1.5 py-0.5" style={{ color: "#1B3A5C" }}>Precio energía HP (S/kWh)</td>
-              <td className="border border-gray-200 px-1.5 py-0.5 text-right font-mono" style={{ color: "#1B3A5C" }}>{fmt(h4.precio_calculado_hp, 5)}</td>
-              <td className="border border-gray-200 px-1.5 py-0.5 text-right font-mono" style={{ color: "#1B3A5C" }}>{fmt(h4.precio_facturado_hp, 5)}</td>
-              <td className="border border-gray-200 px-1.5 py-0.5 text-right font-mono font-bold" style={{ color: h4.diferencia_hp > 0 ? "#E8792B" : "#22c55e" }}>
+              <td className="px-1.5 py-0.5" style={{ color: "#1B3A5C", borderBottom: "1px solid #e5e7eb" }}>Precio energía HP (S/kWh)</td>
+              <td className="px-1.5 py-0.5 text-right font-mono" style={{ color: "#1B3A5C", borderBottom: "1px solid #e5e7eb" }}>{fmt(h4.precio_calculado_hp, 5)}</td>
+              <td className="px-1.5 py-0.5 text-right font-mono" style={{ color: "#1B3A5C", borderBottom: "1px solid #e5e7eb" }}>{fmt(h4.precio_facturado_hp, 5)}</td>
+              <td className="px-1.5 py-0.5 text-right font-mono font-bold" style={{ color: h4.diferencia_hp > 0 ? "#dc2626" : "#16a34a", borderBottom: "1px solid #e5e7eb" }}>
                 {h4.diferencia_hp >= 0 ? "+" : ""}{fmt(h4.diferencia_hp, 5)}
               </td>
             </tr>
             <tr className="bg-gray-50/50">
-              <td className="border border-gray-200 px-1.5 py-0.5" style={{ color: "#1B3A5C" }}>Precio energía HFP (S/kWh)</td>
-              <td className="border border-gray-200 px-1.5 py-0.5 text-right font-mono" style={{ color: "#1B3A5C" }}>{fmt(h4.precio_calculado_hfp, 5)}</td>
-              <td className="border border-gray-200 px-1.5 py-0.5 text-right font-mono" style={{ color: "#1B3A5C" }}>{fmt(h4.precio_facturado_hfp, 5)}</td>
-              <td className="border border-gray-200 px-1.5 py-0.5 text-right font-mono font-bold" style={{ color: h4.diferencia_hfp > 0 ? "#E8792B" : "#22c55e" }}>
+              <td className="px-1.5 py-0.5" style={{ color: "#1B3A5C" }}>Precio energía HFP (S/kWh)</td>
+              <td className="px-1.5 py-0.5 text-right font-mono" style={{ color: "#1B3A5C" }}>{fmt(h4.precio_calculado_hfp, 5)}</td>
+              <td className="px-1.5 py-0.5 text-right font-mono" style={{ color: "#1B3A5C" }}>{fmt(h4.precio_facturado_hfp, 5)}</td>
+              <td className="px-1.5 py-0.5 text-right font-mono font-bold" style={{ color: h4.diferencia_hfp > 0 ? "#dc2626" : "#16a34a" }}>
                 {h4.diferencia_hfp >= 0 ? "+" : ""}{fmt(h4.diferencia_hfp, 5)}
               </td>
             </tr>
