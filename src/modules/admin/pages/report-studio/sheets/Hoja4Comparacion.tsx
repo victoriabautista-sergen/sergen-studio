@@ -147,42 +147,8 @@ const Hoja4Comparacion = () => {
         </div>
       )}
 
-      <div className="border-t pt-4">
-        <h3 className="font-semibold text-foreground flex items-center gap-2 mb-3">📊 Comparación de precios</h3>
-        <div className="bg-muted/50 rounded-lg p-3 space-y-2">
-          {[
-            ["Precio calculado HP", h4.precio_calculado_hp, "S/kWh"],
-            ["Precio factura HP", h4.precio_facturado_hp, "S/kWh"],
-          ].map(([label, val, unit]) => (
-            <div key={label as string} className="flex justify-between text-sm">
-              <span>{label as string}</span>
-              <span className="font-mono font-medium">{(val as number).toFixed(5)} {unit as string}</span>
-            </div>
-          ))}
-          <div className="flex justify-between text-sm">
-            <span>Diferencia HP</span>
-            <span className={`font-mono font-bold ${h4.diferencia_hp > 0 ? "text-red-600" : "text-green-600"}`}>
-              +{h4.diferencia_hp.toFixed(5)} S/kWh
-            </span>
-          </div>
-          <div className="border-t my-2" />
-          {[
-            ["Precio calculado HFP", h4.precio_calculado_hfp, "S/kWh"],
-            ["Precio factura HFP", h4.precio_facturado_hfp, "S/kWh"],
-          ].map(([label, val, unit]) => (
-            <div key={label as string} className="flex justify-between text-sm">
-              <span>{label as string}</span>
-              <span className="font-mono font-medium">{(val as number).toFixed(5)} {unit as string}</span>
-            </div>
-          ))}
-          <div className="flex justify-between text-sm">
-            <span>Diferencia HFP</span>
-            <span className={`font-mono font-bold ${h4.diferencia_hfp > 0 ? "text-red-600" : "text-green-600"}`}>
-              +{h4.diferencia_hfp.toFixed(5)} S/kWh
-            </span>
-          </div>
-        </div>
-      </div>
+
+
 
       <div className="border-t pt-4">
         <h3 className="font-semibold text-foreground flex items-center gap-2 mb-3">📄 Factura recalculada</h3>
