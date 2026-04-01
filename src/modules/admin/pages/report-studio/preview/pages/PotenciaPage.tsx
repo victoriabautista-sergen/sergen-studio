@@ -29,12 +29,12 @@ const PotenciaPage = ({ data }: { data: ReportData }) => {
         {/* Multi-header table matching reference */}
         <table className="w-full text-[9px] border-collapse mb-4" style={{ tableLayout: "fixed" }}>
           <thead>
-            <tr style={{ backgroundColor: "#e5e7eb" }}>
+            <tr style={{ backgroundColor: "#f3f4f6" }}>
               <th className={`${borderStyle} px-1.5 py-1 text-center font-semibold`} style={{ color: "#1B3A5C" }} colSpan={2}>Máxima demanda en hora punta</th>
               <th className={`${borderStyle} px-1.5 py-1 text-center font-semibold`} style={{ color: "#1B3A5C" }} colSpan={2}>Interconexión</th>
               <th className={`${borderStyle} px-1.5 py-1 text-center font-semibold`} style={{ color: "#1B3A5C" }} rowSpan={2}>SEIN<br/>MW</th>
             </tr>
-            <tr style={{ backgroundColor: "#e5e7eb" }}>
+            <tr style={{ backgroundColor: "#f3f4f6" }}>
               <th className={`${borderStyle} px-1.5 py-1 text-center font-semibold`} style={{ color: "#1B3A5C" }}>Fecha</th>
               <th className={`${borderStyle} px-1.5 py-1 text-center font-semibold`} style={{ color: "#1B3A5C" }}>Hora</th>
               <th className={`${borderStyle} px-1.5 py-1 text-center font-semibold`} style={{ color: "#1B3A5C" }}>PER-ECU Exportación MW</th>
