@@ -64,7 +64,20 @@ export interface Hoja3Data {
   reglas_extraccion: string; // instrucciones personalizadas para la IA por concesionario
 }
 
+export interface Hoja4Item {
+  descripcion: string;
+  cantidad: number;
+  tipo: "gravado" | "inafecto" | "exonerado";
+  valor_unitario_calc: number;
+  valor_venta_calc: number;
+}
+
 export interface Hoja4Data {
+  conceptos_inafectos: string[];
+  items_recalculados: Hoja4Item[];
+  subtotal_afecto: number;
+  igv_recalculado: number;
+  total_recalculado: number;
   precio_calculado_hp: number;
   precio_calculado_hfp: number;
   precio_facturado_hp: number;
