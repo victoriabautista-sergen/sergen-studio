@@ -23,7 +23,7 @@ const EnergyShell = ({ children }: EnergyShellProps) => {
       <div className="min-h-screen bg-background flex">
         {/* Dark sidebar */}
         <aside className="w-72 shrink-0 flex flex-col"
-          style={{ background: 'linear-gradient(180deg, hsl(215 30% 14%) 0%, hsl(215 35% 10%) 100%)' }}
+          style={{ background: 'linear-gradient(180deg, hsl(195 70% 30%) 0%, hsl(195 60% 22%) 100%)' }}
         >
           {/* Brand */}
           <div className="flex items-center h-14 px-5 gap-3 border-b border-white/10">
