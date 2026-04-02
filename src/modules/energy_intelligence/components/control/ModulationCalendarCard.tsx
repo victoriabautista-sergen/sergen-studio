@@ -49,20 +49,29 @@ export const ModulationCalendarCard = ({
 
   return (
     <Card className="w-full h-full flex flex-col">
-      <CardHeader className="pb-4">
+      <CardHeader className="pb-2 pt-4">
         <CardTitle className="text-2xl text-center w-full">Calendario</CardTitle>
       </CardHeader>
-      <CardContent className="flex flex-col items-center flex-1 pt-2">
+      <CardContent className="flex flex-col items-center flex-1 justify-center px-3 pb-4">
         <Calendar
           mode="single"
           selected={date}
           onSelect={() => {}}
           month={selectedMonth}
           onMonthChange={onMonthChange}
-          className="rounded-md border"
+          className="rounded-md border w-full"
           locale={es}
           classNames={{
+            months: "w-full",
+            month: "w-full space-y-4",
+            table: "w-full border-collapse",
+            head_row: "flex w-full",
+            head_cell: "text-muted-foreground rounded-md flex-1 font-normal text-sm text-center",
+            row: "flex w-full mt-2",
+            cell: "flex-1 text-center text-sm p-0 relative",
             day_today: "",
+            nav_button: "h-9 w-9",
+            caption: "flex justify-center pt-1 relative items-center text-base font-medium",
           }}
           components={{
             Day: ({ date: dayDate }: { date: Date; displayMonth: Date }) => {
@@ -76,7 +85,7 @@ export const ModulationCalendarCard = ({
                   onClick={() => handleDayClick(dayDate)}
                   disabled={!isClickable && editable}
                   className={cn(
-                    'h-9 w-9 p-0 font-normal flex items-center justify-center rounded-md transition-colors',
+                    'h-10 w-10 mx-auto p-0 font-normal flex items-center justify-center rounded-md transition-colors text-sm',
                     getDateClassName(dayDate),
                     isClickable && 'hover:bg-accent cursor-pointer',
                     !isClickable && editable && 'cursor-not-allowed',
