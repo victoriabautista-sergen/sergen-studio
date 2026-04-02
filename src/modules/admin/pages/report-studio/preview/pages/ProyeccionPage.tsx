@@ -40,10 +40,17 @@ const ProyeccionPage = ({ data }: { data: ReportData }) => {
     return { ...item, is_potencia: false };
   });
 
-  // Calculate totals
-  const subtotalProyectado = +projectedItems.reduce((sum, i) => sum + i.valor_venta, 0).toFixed(2);
-  const igvProyectado = +(subtotalProyectado * 0.18).toFixed(2);
-  const totalProyectado = +(subtotalProyectado + igvProyectado).toFixed(2);
+  // Calculate totals - replicate Hoja 3 structure
+  const opGravadas = +projectedItems.reduce((sum, i) => sum + i.valor_venta, 0).toFixed(2);
+  const opInafectas = h3.op_inafectas || 0;
+  const opExonerada = h3.op_exonerada || 0;
+  const opGratuita = h3.op_gratuita || 0;
+  const otrosCargos = h3.otros_cargos || 0;
+  const otrosDescuentos = h3.otros_descuentos || 0;
+  const subtotalProyectado = +(opGravadas + opInafectas + opExonerada).toFixed(2);
+  const iscProyectado = h3.isc || 0;
+  const igvProyectado = +(opGravadas * 0.18).toFixed(2);
+  const totalProyectado = +(subtotalProyectado + iscProyectado + igvProyectado + otrosCargos - otrosDescuentos).toFixed(2);
   const desviacion = +(totalProyectado - (h3.importe_total || 0)).toFixed(2);
 
   return (
