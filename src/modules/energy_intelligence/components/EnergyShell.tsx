@@ -1,5 +1,6 @@
+import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { BarChart2, FileText, Home, Receipt, FileCheck } from 'lucide-react';
+import { BarChart2, FileText, Home, Receipt, FileCheck, PanelLeftClose, PanelLeftOpen } from 'lucide-react';
 import PrivateRoute from '@/core/auth/components/PrivateRoute';
 import { cn } from '@/lib/utils';
 
@@ -17,17 +18,22 @@ const navLinks = [
 
 const EnergyShell = ({ children }: EnergyShellProps) => {
   const location = useLocation();
+  const [collapsed, setCollapsed] = useState(false);
 
   return (
     <PrivateRoute>
       <div className="min-h-screen bg-background flex">
-        {/* Dark sidebar */}
-        <aside className="w-72 shrink-0 flex flex-col"
+        {/* Sidebar */}
+        <aside
+          className={cn(
+            "shrink-0 flex flex-col transition-all duration-300 ease-in-out relative",
+            collapsed ? "w-0 overflow-hidden" : "w-72"
+          )}
           style={{ background: 'linear-gradient(180deg, hsl(195 70% 30%) 0%, hsl(195 60% 22%) 100%)' }}
         >
           {/* Brand */}
           <div className="flex items-center h-14 px-5 gap-3 border-b border-white/10">
-            <span className="font-heading font-bold text-white tracking-tight text-lg">SERGEN</span>
+            <span className="font-heading font-bold text-white tracking-tight text-lg whitespace-nowrap">SERGEN</span>
           </div>
 
           <nav className="flex flex-col gap-1 px-3 py-4 flex-1">
@@ -43,7 +49,7 @@ const EnergyShell = ({ children }: EnergyShellProps) => {
                   key={link.href}
                   to={link.href}
                   className={cn(
-                    'flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-all',
+                    'flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-all whitespace-nowrap',
                     isActive
                       ? 'text-white shadow-md'
                       : 'text-white/70 hover:text-white hover:bg-white/5'
@@ -59,6 +65,16 @@ const EnergyShell = ({ children }: EnergyShellProps) => {
             })}
           </nav>
         </aside>
+
+        {/* Toggle button */}
+        <button
+          onClick={() => setCollapsed(prev => !prev)}
+          className="absolute top-3 z-20 flex items-center justify-center h-8 w-8 rounded-md transition-colors hover:bg-muted/80 bg-card border border-border shadow-sm"
+          style={{ left: collapsed ? '8px' : 'calc(18rem - 2.5rem)' }}
+          title={collapsed ? 'Mostrar sidebar' : 'Ocultar sidebar'}
+        >
+          {collapsed ? <PanelLeftOpen className="h-4 w-4 text-foreground" /> : <PanelLeftClose className="h-4 w-4 text-white" />}
+        </button>
 
         {/* Main content */}
         <main className="flex-1 overflow-auto">
