@@ -75,7 +75,8 @@ const PotenciaPage = ({ data }: { data: ReportData }) => {
             <img
               src={h5.evidencia_alerta_url}
               alt="Evidencia de envío de alerta"
-              className="w-full max-h-[500px] object-contain border border-gray-300 rounded"
+              className="w-full border border-gray-300 rounded"
+              style={{ imageRendering: "auto" }}
             />
           </div>
         )}
