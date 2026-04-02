@@ -1,0 +1,1 @@
+ALTER TABLE public.concesionaria_potencia_keywords ADD COLUMN IF NOT EXISTS inafecto_keywords text[] NOT NULL DEFAULT '{}'::text[];

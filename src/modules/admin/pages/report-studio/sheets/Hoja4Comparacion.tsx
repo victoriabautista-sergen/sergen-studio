@@ -4,15 +4,66 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useReportContext } from "../context/ReportContext";
 import { Hoja4Item } from "../types";
-import { X } from "lucide-react";
+import { X, Save } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 const Hoja4Comparacion = () => {
   const { data, updateSheet } = useReportContext();
   const h4 = data.hoja4_data;
   const h3 = data.hoja3_data;
   const h2 = data.hoja2_data;
+  const concesionaria = data.datos_generales.concesionaria || "";
 
   const [nuevoInafecto, setNuevoInafecto] = useState("");
+  const [savingKeywords, setSavingKeywords] = useState(false);
+
+  // Auto-load inafecto keywords from DB for this concesionaria
+  useEffect(() => {
+    if (!concesionaria) return;
+    supabase
+      .from("concesionaria_potencia_keywords")
+      .select("inafecto_keywords")
+      .eq("concesionaria", concesionaria)
+      .maybeSingle()
+      .then(({ data: row }) => {
+        if (row && (row as any).inafecto_keywords?.length > 0 && (!h4.conceptos_inafectos || h4.conceptos_inafectos.length === 0)) {
+          updateSheet("hoja4_data", {
+            ...h4,
+            conceptos_inafectos: (row as any).inafecto_keywords,
+          });
+        }
+      });
+  }, [concesionaria]);
+
+  // Save inafecto keywords to DB for concesionaria
+  const saveKeywordsForConcesionaria = async () => {
+    if (!concesionaria || !h4.conceptos_inafectos?.length) return;
+    setSavingKeywords(true);
+    try {
+      const { data: existing } = await supabase
+        .from("concesionaria_potencia_keywords")
+        .select("id")
+        .eq("concesionaria", concesionaria)
+        .maybeSingle();
+
+      if (existing) {
+        await supabase
+          .from("concesionaria_potencia_keywords")
+          .update({ inafecto_keywords: h4.conceptos_inafectos } as any)
+          .eq("concesionaria", concesionaria);
+      } else {
+        await supabase
+          .from("concesionaria_potencia_keywords")
+          .insert({ concesionaria, inafecto_keywords: h4.conceptos_inafectos } as any);
+      }
+      toast.success(`Conceptos inafectos guardados para ${concesionaria}`);
+    } catch (err: any) {
+      toast.error("Error al guardar: " + (err.message || ""));
+    } finally {
+      setSavingKeywords(false);
+    }
+  };
 
   // Build recalculated items from hoja3 items
   useEffect(() => {
@@ -29,19 +80,14 @@ const Hoja4Comparacion = () => {
       const descUpper = item.descripcion.toUpperCase();
       const isHP = descUpper.includes(h3.nombre_hp.toUpperCase());
       const isHFP = descUpper.includes(h3.nombre_hfp.toUpperCase());
-      const isInafectoFromH3 = item.tipo === "inafecto";
-      const isExoneradoFromH3 = item.tipo === "exonerado";
+      const isInafectoFromH3 = item.tipo === "inafecto" || (item.tipo as string) === "exonerado";
       const isInafectoFromList = inafectos.some(c => descUpper.includes(c.toUpperCase()));
       const isEnergy = isHP || isHFP;
 
-      // Determine tipo: prioritize h3 item tipo, then conceptos_inafectos list, default gravado
-      let tipo: "gravado" | "inafecto" | "exonerado" = "gravado";
+      // Only gravado or inafecto - merge exonerado into inafecto
+      let tipo: "gravado" | "inafecto" = "gravado";
       if (isInafectoFromH3 || isInafectoFromList) {
         tipo = "inafecto";
-      } else if (isExoneradoFromH3) {
-        tipo = "exonerado";
-      } else if (item.tipo) {
-        tipo = item.tipo;
       }
 
       let valor_unitario_calc = item.valor_unitario;
@@ -120,7 +166,7 @@ const Hoja4Comparacion = () => {
     updateSheet("hoja4_data", { ...h4, conceptos_inafectos: updated });
   };
 
-  const updateItemTipo = (idx: number, tipo: "gravado" | "inafecto" | "exonerado") => {
+  const updateItemTipo = (idx: number, tipo: "gravado" | "inafecto") => {
     const updated = [...(h4.items_recalculados || [])];
     if (updated[idx]) {
       updated[idx] = { ...updated[idx], tipo };
@@ -146,16 +192,24 @@ const Hoja4Comparacion = () => {
           onChange={(e) => setNuevoInafecto(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && agregarInafecto()}
         />
-        <Button onClick={agregarInafecto} size="sm">Guardar</Button>
+        <Button onClick={agregarInafecto} size="sm">Agregar</Button>
       </div>
       {(h4.conceptos_inafectos || []).length > 0 && (
-        <div className="flex flex-wrap gap-1">
-          {h4.conceptos_inafectos.map((c, i) => (
-            <span key={i} className="bg-muted px-2 py-1 rounded text-xs flex items-center gap-1">
-              {c}
-              <X className="w-3 h-3 cursor-pointer" onClick={() => eliminarInafecto(i)} />
-            </span>
-          ))}
+        <div className="space-y-2">
+          <div className="flex flex-wrap gap-1">
+            {h4.conceptos_inafectos.map((c, i) => (
+              <span key={i} className="bg-muted px-2 py-1 rounded text-xs flex items-center gap-1">
+                {c}
+                <X className="w-3 h-3 cursor-pointer" onClick={() => eliminarInafecto(i)} />
+              </span>
+            ))}
+          </div>
+          {concesionaria && (
+            <Button onClick={saveKeywordsForConcesionaria} size="sm" variant="outline" disabled={savingKeywords} className="text-xs h-7">
+              <Save className="w-3 h-3 mr-1" />
+              {savingKeywords ? "Guardando..." : `Guardar para ${concesionaria}`}
+            </Button>
+          )}
         </div>
       )}
 
@@ -173,14 +227,13 @@ const Hoja4Comparacion = () => {
           {(h4.items_recalculados || []).map((item, i) => (
             <div key={i} className="grid grid-cols-[1fr_90px_90px] gap-1 text-sm items-center bg-muted/30 rounded px-1 py-0.5">
               <span className="text-xs truncate font-medium">{item.descripcion}</span>
-              <Select value={item.tipo} onValueChange={(v) => updateItemTipo(i, v as "gravado" | "inafecto" | "exonerado")}>
+              <Select value={item.tipo} onValueChange={(v) => updateItemTipo(i, v as "gravado" | "inafecto")}>
                 <SelectTrigger className="h-7 text-xs">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="gravado">Gravado</SelectItem>
                   <SelectItem value="inafecto">Inafecto</SelectItem>
-                  <SelectItem value="exonerado">Exonerado</SelectItem>
                 </SelectContent>
               </Select>
               <span className="text-right font-mono text-xs">{item.cantidad.toLocaleString("es-PE")}</span>
