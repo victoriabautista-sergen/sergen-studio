@@ -249,5 +249,6 @@ export const defaultReportData: ReportData = {
     resumen_modulacion: "",
     conclusiones_auto: [],
     conclusiones_manuales: "",
+    modulation_days: [],
   },
 };
