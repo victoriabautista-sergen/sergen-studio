@@ -130,14 +130,23 @@ const ProyeccionPage = ({ data }: { data: ReportData }) => {
                 {/* Totals */}
                 {(() => {
                   const rows: [string, number, boolean][] = [
-                    ["TOTAL AFECTO", subtotalProyectado, false],
-                    ["IGV (18%)", igvProyectado, false],
+                    ["OP. GRAVADAS", opGravadas, false],
+                    ["OP. INAFECTAS", opInafectas, false],
+                    ["OP. EXONERADA", opExonerada, false],
+                    ["OP. GRATUITA", opGratuita, false],
+                    ["OTROS CARGOS", otrosCargos, false],
+                    ["OTROS DESCUENTOS", otrosDescuentos, false],
+                    ["SUBTOTAL", subtotalProyectado, false],
+                    ["ISC", iscProyectado, false],
+                    ["IGV", igvProyectado, false],
                     ["IMPORTE TOTAL", totalProyectado, true],
                   ];
-                  return rows.map(([label, val, isBold], i) => (
+                  return rows
+                    .filter(([, val, isBold]) => isBold || (val as number) !== 0)
+                    .map(([label, val, isBold], i) => (
                     <tr key={`total-${i}`}>
                       <td className="p-0 border-0"></td>
-                      <td colSpan={2} className={`${borderStyle} px-1.5 py-0.5 text-right ${isBold ? "font-bold text-white text-[10px]" : "font-semibold"}`} style={isBold ? { backgroundColor: "#1B3A5C" } : { color: "#1B3A5C" }}>
+                      <td colSpan={2} className={`${borderStyle} px-1.5 py-0.5 text-left ${isBold ? "font-bold text-white text-[10px]" : "font-semibold"}`} style={isBold ? { backgroundColor: "#1B3A5C" } : { color: "#1B3A5C" }}>
                         {label}
                       </td>
                       <td colSpan={2} className={`${borderStyle} px-1.5 py-0.5 text-right font-mono ${isBold ? "font-bold text-white text-[11px]" : ""}`} style={isBold ? { backgroundColor: "#1B3A5C" } : { color: "#1B3A5C" }}>
