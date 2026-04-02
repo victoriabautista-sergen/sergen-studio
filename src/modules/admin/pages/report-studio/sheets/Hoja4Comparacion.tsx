@@ -192,16 +192,24 @@ const Hoja4Comparacion = () => {
           onChange={(e) => setNuevoInafecto(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && agregarInafecto()}
         />
-        <Button onClick={agregarInafecto} size="sm">Guardar</Button>
+        <Button onClick={agregarInafecto} size="sm">Agregar</Button>
       </div>
       {(h4.conceptos_inafectos || []).length > 0 && (
-        <div className="flex flex-wrap gap-1">
-          {h4.conceptos_inafectos.map((c, i) => (
-            <span key={i} className="bg-muted px-2 py-1 rounded text-xs flex items-center gap-1">
-              {c}
-              <X className="w-3 h-3 cursor-pointer" onClick={() => eliminarInafecto(i)} />
-            </span>
-          ))}
+        <div className="space-y-2">
+          <div className="flex flex-wrap gap-1">
+            {h4.conceptos_inafectos.map((c, i) => (
+              <span key={i} className="bg-muted px-2 py-1 rounded text-xs flex items-center gap-1">
+                {c}
+                <X className="w-3 h-3 cursor-pointer" onClick={() => eliminarInafecto(i)} />
+              </span>
+            ))}
+          </div>
+          {concesionaria && (
+            <Button onClick={saveKeywordsForConcesionaria} size="sm" variant="outline" disabled={savingKeywords} className="text-xs h-7">
+              <Save className="w-3 h-3 mr-1" />
+              {savingKeywords ? "Guardando..." : `Guardar para ${concesionaria}`}
+            </Button>
+          )}
         </div>
       )}
 
