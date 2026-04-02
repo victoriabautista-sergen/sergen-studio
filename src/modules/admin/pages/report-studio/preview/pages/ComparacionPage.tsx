@@ -101,7 +101,7 @@ const ComparacionPage = ({ data }: { data: ReportData }) => {
                 <tr><td colSpan={5} className="py-1 border-0"></td></tr>
                 {/* Totals - same structure as Hoja 3 */}
                 {(() => {
-                   const opInafectasCalc = items.filter(i => i.tipo === "inafecto").reduce((s, i) => s + i.valor_venta_calc, 0);
+                   const opExoneradaCalc = items.filter(i => i.tipo === "exonerado").reduce((s, i) => s + i.valor_venta_calc, 0);
                    const opInafectas = opInafectasCalc || h3.op_inafectas || 0;
                    const opExonerada = h3.op_exonerada || 0;
                    const subtotal = h4.subtotal_afecto + opInafectas + opExonerada;
