@@ -56,17 +56,17 @@ export const HistoricalPowerChart = ({ data, showTime = true }: HistoricalPowerC
   };
 
   return (
-    <div className="w-full flex-1" style={{ minHeight: 0, height: '100%' }}>
+    <div className="w-full flex-1" style={{ minHeight: 0, height: "100%" }}>
       <ResponsiveContainer width="100%" height="100%">
-        <BarChart data={chartData} margin={{ top: 10, right: 10, bottom: 30, left: 0 }}>
+        <BarChart data={chartData} margin={{ top: 10, right: 10, bottom: 8, left: 0 }}>
           <XAxis
             dataKey="date"
             angle={-45}
             textAnchor="end"
-            height={55}
+            height={40}
             interval={calculateInterval()}
             fontSize={11}
-            tickMargin={10}
+            tickMargin={4}
           />
           <YAxis type="number" domain={[7000, 8500]} width={55} allowDataOverflow={true} fontSize={11} tickLine={false} tickFormatter={(v: number) => `${v}`} />
           <Tooltip formatter={formatTooltip} labelFormatter={formatTooltipLabel} />
