@@ -26,7 +26,7 @@ export const HistoricalPowerMaximum = () => {
           </Button>
         </CardTitle>
       </CardHeader>
-      <CardContent className="flex-1 flex flex-col pt-2">
+      <CardContent className="flex flex-col pt-2 overflow-hidden">
         {isLoading ? (
           <div className="flex items-center justify-center h-64">
             <Loader2 className="h-8 w-8 animate-spin mr-2" />
