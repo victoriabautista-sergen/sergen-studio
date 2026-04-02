@@ -90,7 +90,7 @@ export const ModulationCalendarCard = ({
                       getDateClassName(dayDate),
                       isClickable && 'hover:bg-accent cursor-pointer',
                       !isClickable && editable && 'cursor-not-allowed',
-                      date && isSameDay(dayDate, date) && 'ring-2 ring-primary'
+                      date && isSameDay(dayDate, date) && 'ring-2 ring-sidebar'
                     )}
                   >
                     {dayDate.getDate()}
