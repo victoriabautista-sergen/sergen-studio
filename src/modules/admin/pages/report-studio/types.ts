@@ -100,6 +100,7 @@ export interface Hoja5Data {
   importacion: number;
   exportacion: number;
   potencia_coincidente_promedio: number;
+  evidencia_alerta_url: string;
 }
 
 export interface Hoja6Item {
@@ -228,6 +229,7 @@ export const defaultReportData: ReportData = {
     importacion: 0,
     exportacion: 0,
     potencia_coincidente_promedio: 0,
+    evidencia_alerta_url: "",
   },
   hoja6_data: {
     items_original: [],
