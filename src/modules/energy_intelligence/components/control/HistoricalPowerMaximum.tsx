@@ -13,7 +13,7 @@ export const HistoricalPowerMaximum = () => {
   const { data, isLoading, error } = useHistoricalPowerData(view);
 
   return (
-    <Card className="w-full h-full flex flex-col">
+    <Card className="w-full flex flex-col overflow-hidden">
       <CardHeader className="pb-4">
         <CardTitle className="flex items-center justify-between text-2xl">
           <span>Potencia Máxima – {getMonthLabel(view)}</span>
