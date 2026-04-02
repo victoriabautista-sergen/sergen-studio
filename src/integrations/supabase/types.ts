@@ -261,6 +261,30 @@ export type Database = {
           },
         ]
       }
+      concesionaria_potencia_keywords: {
+        Row: {
+          concesionaria: string
+          created_at: string
+          id: string
+          keywords: string[]
+          updated_at: string
+        }
+        Insert: {
+          concesionaria: string
+          created_at?: string
+          id?: string
+          keywords?: string[]
+          updated_at?: string
+        }
+        Update: {
+          concesionaria?: string
+          created_at?: string
+          id?: string
+          keywords?: string[]
+          updated_at?: string
+        }
+        Relationships: []
+      }
       documents: {
         Row: {
           created_at: string
