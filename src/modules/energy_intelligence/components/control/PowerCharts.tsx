@@ -4,12 +4,16 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useForecastData } from '../../hooks/useForecastData';
 import { ForecastDisplay } from './ForecastDisplay';
 
-export const PowerCharts = forwardRef<HTMLDivElement>((_, ref) => {
+interface PowerChartsProps {
+  className?: string;
+}
+
+export const PowerCharts = forwardRef<HTMLDivElement, PowerChartsProps>(({ className }, ref) => {
   const { data, loading } = useForecastData();
   const currentDate = format(new Date(), 'dd/MM/yyyy');
 
   return (
-    <Card ref={ref}>
+    <Card ref={ref} className={className}>
       <CardHeader className="pb-2">
         <CardTitle>Pronóstico de Demanda - {currentDate}</CardTitle>
       </CardHeader>
