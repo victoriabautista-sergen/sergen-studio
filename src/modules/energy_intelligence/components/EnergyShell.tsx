@@ -82,7 +82,7 @@ const EnergyShell = ({ children }: EnergyShellProps) => {
 
         {/* Main content */}
         <main className="flex-1 overflow-auto">
-          <div className="px-8 py-8 max-w-[1400px]">{children}</div>
+          <div className={cn("py-8 max-w-[1400px]", collapsed ? "px-12" : "px-10")}>{children}</div>
         </main>
       </div>
     </PrivateRoute>
