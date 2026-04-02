@@ -266,6 +266,7 @@ export type Database = {
           concesionaria: string
           created_at: string
           id: string
+          inafecto_keywords: string[]
           keywords: string[]
           updated_at: string
         }
@@ -273,6 +274,7 @@ export type Database = {
           concesionaria: string
           created_at?: string
           id?: string
+          inafecto_keywords?: string[]
           keywords?: string[]
           updated_at?: string
         }
@@ -280,6 +282,7 @@ export type Database = {
           concesionaria?: string
           created_at?: string
           id?: string
+          inafecto_keywords?: string[]
           keywords?: string[]
           updated_at?: string
         }
