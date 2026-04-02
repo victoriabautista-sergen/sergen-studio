@@ -8,7 +8,6 @@ import ReportPreview, { triggerPDFExport } from "./preview/ReportPreview";
 import Hoja1DatosGenerales from "./sheets/Hoja1DatosGenerales";
 import Hoja2Precios from "./sheets/Hoja2Precios";
 import Hoja3Factura from "./sheets/Hoja3Factura";
-import Hoja4Comparacion from "./sheets/Hoja4Comparacion";
 import Hoja5Potencia from "./sheets/Hoja5Potencia";
 import Hoja6Proyeccion from "./sheets/Hoja6Proyeccion";
 import Hoja7Conclusiones from "./sheets/Hoja7Conclusiones";
@@ -17,7 +16,6 @@ const SHEETS = [
   { id: 1, label: "Hoja 1", title: "Datos Generales", icon: "📁" },
   { id: 2, label: "Hoja 2", title: "Precios", icon: "💰" },
   { id: 3, label: "Hoja 3", title: "Factura", icon: "🧾" },
-  { id: 4, label: "Hoja 4", title: "Comparación", icon: "📊" },
   { id: 5, label: "Hoja 5", title: "Potencia", icon: "⚡" },
   { id: 6, label: "Hoja 6", title: "Proyección", icon: "📈" },
   { id: 7, label: "Hoja 7", title: "Conclusiones", icon: "✅" },
@@ -27,7 +25,6 @@ const sheetComponents: Record<number, React.FC> = {
   1: Hoja1DatosGenerales,
   2: Hoja2Precios,
   3: Hoja3Factura,
-  4: Hoja4Comparacion,
   5: Hoja5Potencia,
   6: Hoja6Proyeccion,
   7: Hoja7Conclusiones,
