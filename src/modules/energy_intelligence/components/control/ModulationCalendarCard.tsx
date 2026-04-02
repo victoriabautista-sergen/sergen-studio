@@ -67,7 +67,7 @@ export const ModulationCalendarCard = ({
             table: "w-full border-collapse",
             head_row: "flex w-full",
             head_cell: "text-muted-foreground rounded-md flex-1 font-normal text-sm text-center",
-            row: "flex w-full mt-2",
+            row: "flex w-full mt-3",
             cell: "flex-1 text-center text-sm p-0 relative",
             day_today: "",
             nav_button: "h-9 w-9",
@@ -85,7 +85,7 @@ export const ModulationCalendarCard = ({
                   onClick={() => handleDayClick(dayDate)}
                   disabled={!isClickable && editable}
                   className={cn(
-                    'h-10 w-10 mx-auto p-0 font-normal flex items-center justify-center rounded-md transition-colors text-sm',
+                    'h-11 w-11 mx-auto p-0 font-normal flex items-center justify-center rounded-md transition-colors text-sm',
                     getDateClassName(dayDate),
                     isClickable && 'hover:bg-accent cursor-pointer',
                     !isClickable && editable && 'cursor-not-allowed',
