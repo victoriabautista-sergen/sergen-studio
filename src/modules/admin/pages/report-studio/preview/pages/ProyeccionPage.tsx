@@ -40,10 +40,17 @@ const ProyeccionPage = ({ data }: { data: ReportData }) => {
     return { ...item, is_potencia: false };
   });
 
-  // Calculate totals
-  const subtotalProyectado = +projectedItems.reduce((sum, i) => sum + i.valor_venta, 0).toFixed(2);
-  const igvProyectado = +(subtotalProyectado * 0.18).toFixed(2);
-  const totalProyectado = +(subtotalProyectado + igvProyectado).toFixed(2);
+  // Calculate totals - replicate Hoja 3 structure
+  const opGravadas = +projectedItems.reduce((sum, i) => sum + i.valor_venta, 0).toFixed(2);
+  const opInafectas = h3.op_inafectas || 0;
+  const opExonerada = h3.op_exonerada || 0;
+  const opGratuita = h3.op_gratuita || 0;
+  const otrosCargos = h3.otros_cargos || 0;
+  const otrosDescuentos = h3.otros_descuentos || 0;
+  const subtotalProyectado = +(opGravadas + opInafectas + opExonerada).toFixed(2);
+  const iscProyectado = h3.isc || 0;
+  const igvProyectado = +(opGravadas * 0.18).toFixed(2);
+  const totalProyectado = +(subtotalProyectado + iscProyectado + igvProyectado + otrosCargos - otrosDescuentos).toFixed(2);
   const desviacion = +(totalProyectado - (h3.importe_total || 0)).toFixed(2);
 
   return (
@@ -123,14 +130,23 @@ const ProyeccionPage = ({ data }: { data: ReportData }) => {
                 {/* Totals */}
                 {(() => {
                   const rows: [string, number, boolean][] = [
-                    ["TOTAL AFECTO", subtotalProyectado, false],
-                    ["IGV (18%)", igvProyectado, false],
+                    ["OP. GRAVADAS", opGravadas, false],
+                    ["OP. INAFECTAS", opInafectas, false],
+                    ["OP. EXONERADA", opExonerada, false],
+                    ["OP. GRATUITA", opGratuita, false],
+                    ["OTROS CARGOS", otrosCargos, false],
+                    ["OTROS DESCUENTOS", otrosDescuentos, false],
+                    ["SUBTOTAL", subtotalProyectado, false],
+                    ["ISC", iscProyectado, false],
+                    ["IGV", igvProyectado, false],
                     ["IMPORTE TOTAL", totalProyectado, true],
                   ];
-                  return rows.map(([label, val, isBold], i) => (
+                  return rows
+                    .filter(([, val, isBold]) => isBold || (val as number) !== 0)
+                    .map(([label, val, isBold], i) => (
                     <tr key={`total-${i}`}>
                       <td className="p-0 border-0"></td>
-                      <td colSpan={2} className={`${borderStyle} px-1.5 py-0.5 text-right ${isBold ? "font-bold text-white text-[10px]" : "font-semibold"}`} style={isBold ? { backgroundColor: "#1B3A5C" } : { color: "#1B3A5C" }}>
+                      <td colSpan={2} className={`${borderStyle} px-1.5 py-0.5 text-left ${isBold ? "font-bold text-white text-[10px]" : "font-semibold"}`} style={isBold ? { backgroundColor: "#1B3A5C" } : { color: "#1B3A5C" }}>
                         {label}
                       </td>
                       <td colSpan={2} className={`${borderStyle} px-1.5 py-0.5 text-right font-mono ${isBold ? "font-bold text-white text-[11px]" : ""}`} style={isBold ? { backgroundColor: "#1B3A5C" } : { color: "#1B3A5C" }}>
