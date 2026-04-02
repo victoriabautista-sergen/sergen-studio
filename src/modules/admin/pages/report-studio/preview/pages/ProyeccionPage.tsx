@@ -112,7 +112,7 @@ const ProyeccionPage = ({ data }: { data: ReportData }) => {
                         {toSentenceCase(item.descripcion)}
                       </td>
                       <td className={`${borderStyle} px-1.5 py-0.5 text-center`} style={{ color: item.is_potencia ? "#dc2626" : "#1B3A5C", fontWeight: item.is_potencia ? 700 : 400 }}>{item.unidad}</td>
-                      <td className={`${borderStyle} px-1.5 py-0.5 text-right font-mono`} style={{ color: item.is_potencia ? "#ffffff" : "#1B3A5C", fontWeight: item.is_potencia ? 700 : 400 }}>
+<td className={`${borderStyle} px-1.5 py-0.5 text-right font-mono`} style={{ color: item.is_potencia ? "#dc2626" : "#1B3A5C", fontWeight: item.is_potencia ? 700 : 400 }}>
                         {fmt(item.cantidad, 2)}
                       </td>
                       <td className={`${borderStyle} px-1.5 py-0.5 text-right font-mono`} style={{ color: item.is_potencia ? "#ffffff" : "#1B3A5C", fontWeight: item.is_potencia ? 700 : 400 }}>
