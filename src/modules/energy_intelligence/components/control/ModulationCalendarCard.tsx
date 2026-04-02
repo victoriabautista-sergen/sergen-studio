@@ -53,7 +53,7 @@ export const ModulationCalendarCard = ({
         <CardTitle className="text-2xl text-center w-full">Calendario</CardTitle>
       </CardHeader>
       <CardContent className="flex flex-col items-center flex-1 justify-center px-3 pb-4">
-        <div className="w-[95%] mx-auto">
+        <div className="w-[90%] mx-auto">
           <Calendar
             mode="single"
             selected={date}
