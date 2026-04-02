@@ -80,7 +80,6 @@ export const ModulationCalendarCard = ({
                 const isCurrentMonth = isSameMonth(dayDate, selectedMonth);
                 const isClickable = editable && !isFuture && isCurrentMonth;
 
-                const isSelected = date && isSameDay(dayDate, date);
                 return (
                   <button
                     type="button"
@@ -90,10 +89,8 @@ export const ModulationCalendarCard = ({
                       'h-[3.5rem] w-10 mx-auto p-0 font-normal flex items-center justify-center rounded-md transition-colors text-sm',
                       getDateClassName(dayDate),
                       isClickable && 'hover:bg-accent cursor-pointer',
-                      !isClickable && editable && 'cursor-not-allowed',
-                      isSelected && 'ring-2'
+                      !isClickable && editable && 'cursor-not-allowed'
                     )}
-                    style={isSelected ? { '--tw-ring-color': 'hsl(195 70% 30%)' } as React.CSSProperties : undefined}
                   >
                     {dayDate.getDate()}
                   </button>
