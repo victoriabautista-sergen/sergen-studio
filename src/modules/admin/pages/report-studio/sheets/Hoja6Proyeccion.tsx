@@ -182,7 +182,7 @@ const Hoja6Proyeccion = () => {
         </p>
 
         {itemsPotencia.map((item, i) => (
-          <div key={i} className="flex items-center justify-between rounded px-3 py-2 border-2 border-orange-400 bg-orange-50">
+          <div key={i} className="flex items-center justify-between rounded px-3 py-2 border bg-background">
             {editingIdx === i ? (
               <div className="flex items-center gap-2 flex-1">
                 <Input
