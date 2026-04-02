@@ -49,7 +49,7 @@ export const ModulationCalendarCard = ({
 
   return (
     <Card className="w-full h-full flex flex-col">
-      <CardHeader className="pb-2 pt-4">
+      <CardHeader className="pb-1 pt-2">
         <CardTitle className="text-2xl text-center w-full">Calendario</CardTitle>
       </CardHeader>
       <CardContent className="flex flex-col items-center flex-1 justify-center px-6 pb-4">
@@ -86,7 +86,7 @@ export const ModulationCalendarCard = ({
                     onClick={() => handleDayClick(dayDate)}
                     disabled={!isClickable && editable}
                     className={cn(
-                      'h-12 w-10 mx-auto p-0 font-normal flex items-center justify-center rounded-md transition-colors text-sm',
+                      'h-[3.3rem] w-10 mx-auto p-0 font-normal flex items-center justify-center rounded-md transition-colors text-sm',
                       getDateClassName(dayDate),
                       isClickable && 'hover:bg-accent cursor-pointer',
                       !isClickable && editable && 'cursor-not-allowed',
