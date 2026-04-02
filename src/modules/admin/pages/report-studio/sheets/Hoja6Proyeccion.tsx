@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
-import { X, Plus, Pencil, Check } from "lucide-react";
+import { X, Plus, Pencil, Check, Save, Loader2 } from "lucide-react";
 import { useReportContext } from "../context/ReportContext";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 const fmt = (n: number, decimals = 2) =>
   n.toLocaleString("es-PE", { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
@@ -13,16 +14,46 @@ const Hoja6Proyeccion = () => {
   const h6 = data.hoja6_data;
   const h3 = data.hoja3_data;
   const h5 = data.hoja5_data;
+  const concesionaria = data.datos_generales.concesionaria;
 
   const [nuevoItem, setNuevoItem] = useState("");
   const [editingIdx, setEditingIdx] = useState<number | null>(null);
   const [editValue, setEditValue] = useState("");
+  const [saving, setSaving] = useState(false);
+  const [loaded, setLoaded] = useState(false);
 
   const potenciaPromedio = h5.potencia_coincidente_promedio || 0;
 
-  // Auto-detect potencia items when hoja3 loads and no items_potencia set yet
+  // Load saved keywords for this concesionaria
   useEffect(() => {
-    if (h3.items.length > 0 && (!h6.items_potencia || h6.items_potencia.length === 0)) {
+    if (!concesionaria || loaded) return;
+
+    const loadKeywords = async () => {
+      const { data: row } = await supabase
+        .from("concesionaria_potencia_keywords" as any)
+        .select("keywords")
+        .eq("concesionaria", concesionaria.toUpperCase())
+        .maybeSingle();
+
+      if (row && (row as any).keywords?.length > 0) {
+        const savedKeywords = (row as any).keywords as string[];
+        // Only set if no items_potencia yet
+        if (!h6.items_potencia || h6.items_potencia.length === 0) {
+          updateSheet("hoja6_data", { ...h6, items_potencia: savedKeywords });
+        }
+        setLoaded(true);
+      } else {
+        // Fallback: auto-detect from invoice
+        setLoaded(true);
+      }
+    };
+
+    loadKeywords();
+  }, [concesionaria]);
+
+  // Auto-detect potencia items when hoja3 loads and no items_potencia set yet and no saved keywords
+  useEffect(() => {
+    if (h3.items.length > 0 && (!h6.items_potencia || h6.items_potencia.length === 0) && loaded) {
       const potenciaKeywords = ["POTENCIA ACTIVA", "POTENCIA HORA PUNTA", "POTENCIA FUERA PUNTA"];
       const detected = h3.items
         .filter(item => potenciaKeywords.some(k => item.descripcion.toUpperCase().includes(k)))
@@ -31,7 +62,7 @@ const Hoja6Proyeccion = () => {
         updateSheet("hoja6_data", { ...h6, items_potencia: detected });
       }
     }
-  }, [h3.items]);
+  }, [h3.items, loaded]);
 
   // Recalculate whenever inputs change
   useEffect(() => {
@@ -67,6 +98,25 @@ const Hoja6Proyeccion = () => {
       diferencia,
     });
   }, [h3.items, h3.importe_total, h3.subtotal, h5.potencia_coincidente_promedio, h6.items_potencia]);
+
+  const saveKeywords = async () => {
+    if (!concesionaria || !h6.items_potencia?.length) return;
+    setSaving(true);
+    try {
+      const { error } = await supabase
+        .from("concesionaria_potencia_keywords" as any)
+        .upsert(
+          { concesionaria: concesionaria.toUpperCase(), keywords: h6.items_potencia },
+          { onConflict: "concesionaria" }
+        );
+      if (error) throw error;
+      toast.success("Keywords guardadas para " + concesionaria);
+    } catch (e: any) {
+      toast.error("Error al guardar: " + e.message);
+    } finally {
+      setSaving(false);
+    }
+  };
 
   const agregarItem = () => {
     if (nuevoItem.trim()) {
@@ -110,15 +160,29 @@ const Hoja6Proyeccion = () => {
       <h3 className="font-semibold text-foreground flex items-center gap-2">📊 Factura Proyectada</h3>
 
       <div className="bg-muted/30 rounded-lg p-4 space-y-3">
-        <p className="text-sm text-muted-foreground">
-          Ítems de factura cuya cantidad se reemplaza por la potencia coincidente promedio
-        </p>
+        <div className="flex items-center justify-between">
+          <p className="text-sm text-muted-foreground">
+            Ítems de potencia a reemplazar
+            {concesionaria && <span className="ml-1 text-xs font-medium text-primary">({concesionaria})</span>}
+          </p>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={saveKeywords}
+            disabled={saving || !itemsPotencia.length || !concesionaria}
+            className="text-xs"
+          >
+            {saving ? <Loader2 className="h-3 w-3 mr-1 animate-spin" /> : <Save className="h-3 w-3 mr-1" />}
+            Guardar para concesionaria
+          </Button>
+        </div>
+
         <p className="text-sm">
           Potencia coincidente promedio: <strong>{potenciaPromedio ? `${fmt(potenciaPromedio)} kW` : "— kW"}</strong>
         </p>
 
         {itemsPotencia.map((item, i) => (
-          <div key={i} className="flex items-center justify-between bg-background rounded px-3 py-2 border">
+          <div key={i} className="flex items-center justify-between rounded px-3 py-2 border-2 border-orange-400 bg-orange-50">
             {editingIdx === i ? (
               <div className="flex items-center gap-2 flex-1">
                 <Input
@@ -134,7 +198,7 @@ const Hoja6Proyeccion = () => {
               </div>
             ) : (
               <>
-                <span className="text-sm font-medium">{item}</span>
+                <span className="text-sm font-semibold" style={{ color: "#E8792B" }}>{item}</span>
                 <div className="flex items-center gap-1">
                   <Button variant="ghost" size="icon" className="h-6 w-6 text-muted-foreground" onClick={() => startEdit(i)}>
                     <Pencil className="h-3 w-3" />
@@ -164,13 +228,13 @@ const Hoja6Proyeccion = () => {
 
       {/* Matched items summary */}
       {matchedItems.length > 0 && (
-        <div className="bg-muted/20 rounded-lg p-4 space-y-2">
-          <p className="text-sm font-medium">Ítems detectados en factura:</p>
+        <div className="rounded-lg p-4 space-y-2 border-2 border-orange-300 bg-orange-50/50">
+          <p className="text-sm font-medium" style={{ color: "#E8792B" }}>⚡ Ítems de potencia detectados en factura:</p>
           {matchedItems.map((item, i) => (
-            <div key={i} className="flex justify-between text-sm bg-background rounded px-3 py-1.5 border">
-              <span className="truncate">{item.descripcion}</span>
-              <span className="font-mono text-muted-foreground ml-2 whitespace-nowrap">
-                {fmt(item.cantidad)} → {fmt(potenciaPromedio)} kW
+            <div key={i} className="flex justify-between text-sm bg-background rounded px-3 py-1.5 border border-orange-200">
+              <span className="truncate font-medium">{item.descripcion}</span>
+              <span className="font-mono ml-2 whitespace-nowrap" style={{ color: "#E8792B" }}>
+                {fmt(item.cantidad)} → <strong>{fmt(potenciaPromedio)} kW</strong>
               </span>
             </div>
           ))}
