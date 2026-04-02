@@ -36,7 +36,7 @@ export interface FacturaItem {
   cantidad: number;
   valor_unitario: number;
   valor_venta: number;
-  tipo?: "gravado" | "inafecto";
+  tipo?: "gravado" | "exonerado";
 }
 
 export interface Hoja3Data {
@@ -69,7 +69,7 @@ export interface Hoja4Item {
   descripcion: string;
   unidad: string;
   cantidad: number;
-  tipo: "gravado" | "inafecto";
+  tipo: "gravado" | "exonerado";
   valor_unitario_original: number;
   valor_venta_original: number;
   valor_unitario_calc: number;
@@ -78,7 +78,7 @@ export interface Hoja4Item {
 }
 
 export interface Hoja4Data {
-  conceptos_inafectos: string[];
+  conceptos_exonerados: string[];
   items_recalculados: Hoja4Item[];
   subtotal_afecto: number;
   igv_recalculado: number;
@@ -210,7 +210,7 @@ export const defaultReportData: ReportData = {
     reglas_extraccion: "",
   },
   hoja4_data: {
-    conceptos_inafectos: [],
+    conceptos_exonerados: [],
     items_recalculados: [],
     subtotal_afecto: 0,
     igv_recalculado: 0,
