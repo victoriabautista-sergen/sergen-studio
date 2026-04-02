@@ -159,7 +159,13 @@ const ProyeccionPage = ({ data }: { data: ReportData }) => {
             </table>
 
             {/* Deviation analysis */}
-            <div className="border border-gray-300 rounded p-3 mt-4">
+            <div
+              className="rounded p-3 mt-4"
+              style={{
+                backgroundColor: desviacion < 0 ? "#fef2f2" : desviacion > 0 ? "#f0fdf4" : "#f9fafb",
+                border: `1px solid ${desviacion < 0 ? "#fecaca" : desviacion > 0 ? "#bbf7d0" : "#e5e7eb"}`,
+              }}
+            >
               <p className="text-[10px] font-semibold mb-2" style={{ color: "#1B3A5C" }}>Análisis de desviación</p>
               <div className="space-y-1 text-[10px]">
                 <div className="flex justify-between">
@@ -172,7 +178,7 @@ const ProyeccionPage = ({ data }: { data: ReportData }) => {
                 </div>
                 <div className="flex justify-between font-bold">
                   <span style={{ color: "#1B3A5C" }}>Desviación:</span>
-                  <span className="font-mono" style={{ color: desviacion < 0 ? "#16a34a" : "#dc2626" }}>
+                  <span className="font-mono" style={{ color: desviacion < 0 ? "#dc2626" : desviacion > 0 ? "#16a34a" : "#1B3A5C" }}>
                     {monedaSymbol} {fmt(desviacion)}
                   </span>
                 </div>
