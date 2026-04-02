@@ -229,6 +229,7 @@ export const defaultReportData: ReportData = {
     importacion: 0,
     exportacion: 0,
     potencia_coincidente_promedio: 0,
+    evidencia_alerta_url: "",
   },
   hoja6_data: {
     items_original: [],
