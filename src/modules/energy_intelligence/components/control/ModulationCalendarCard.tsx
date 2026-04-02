@@ -52,8 +52,8 @@ export const ModulationCalendarCard = ({
       <CardHeader className="pb-2 pt-4">
         <CardTitle className="text-2xl text-center w-full">Calendario</CardTitle>
       </CardHeader>
-      <CardContent className="flex flex-col items-center flex-1 justify-center px-4 pb-4">
-        <div className="w-full max-w-[350px] mx-auto">
+      <CardContent className="flex flex-col items-center flex-1 justify-center px-6 pb-4">
+        <div className="w-full max-w-[300px] mx-auto">
           <Calendar
             mode="single"
             selected={date}
