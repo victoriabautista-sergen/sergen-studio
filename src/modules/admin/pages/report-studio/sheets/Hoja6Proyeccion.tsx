@@ -198,7 +198,7 @@ const Hoja6Proyeccion = () => {
               </div>
             ) : (
               <>
-                <span className="text-sm font-semibold" style={{ color: "#E8792B" }}>{item}</span>
+                <span className="text-sm font-medium">{item}</span>
                 <div className="flex items-center gap-1">
                   <Button variant="ghost" size="icon" className="h-6 w-6 text-muted-foreground" onClick={() => startEdit(i)}>
                     <Pencil className="h-3 w-3" />
