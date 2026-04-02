@@ -5,7 +5,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useReportContext } from "../context/ReportContext";
 import { useAuthContext } from "@/core/auth/context/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
-import { Upload, Search, Loader2, MessageSquareWarning } from "lucide-react";
+import { Upload, Search, Loader2, MessageSquareWarning, X, Save } from "lucide-react";
 import { toast } from "sonner";
 import { useRef, useState, useEffect, useCallback } from "react";
 
@@ -19,6 +19,7 @@ const Hoja3Factura = () => {
   const { data, updateSheet } = useReportContext();
   const { session } = useAuthContext();
   const h3 = data.hoja3_data;
+  const h4 = data.hoja4_data;
   const dg = data.datos_generales;
   const concesionaria = dg.concesionaria || "";
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -26,6 +27,8 @@ const Hoja3Factura = () => {
   const [showFeedback, setShowFeedback] = useState(false);
   const [feedback, setFeedback] = useState("");
   const [adjusting, setAdjusting] = useState(false);
+  const [nuevoExonerado, setNuevoExonerado] = useState("");
+  const [savingKeywords, setSavingKeywords] = useState(false);
 
   const update = (field: string, value: any) => {
     updateSheet("hoja3_data", { ...h3, [field]: value });
@@ -55,6 +58,68 @@ const Hoja3Factura = () => {
         }
       });
   }, [concesionaria]);
+
+  // Auto-load exonerado keywords from DB for this concesionaria
+  useEffect(() => {
+    if (!concesionaria) return;
+    supabase
+      .from("concesionaria_potencia_keywords")
+      .select("inafecto_keywords")
+      .eq("concesionaria", concesionaria)
+      .maybeSingle()
+      .then(({ data: row }) => {
+        if (row && (row as any).inafecto_keywords?.length > 0 && (!h4.conceptos_exonerados || h4.conceptos_exonerados.length === 0)) {
+          updateSheet("hoja4_data", {
+            ...h4,
+            conceptos_exonerados: (row as any).inafecto_keywords,
+          });
+        }
+      });
+  }, [concesionaria]);
+
+  const saveKeywordsForConcesionaria = async () => {
+    if (!concesionaria || !h4.conceptos_exonerados?.length) return;
+    setSavingKeywords(true);
+    try {
+      const { data: existing } = await supabase
+        .from("concesionaria_potencia_keywords")
+        .select("id")
+        .eq("concesionaria", concesionaria)
+        .maybeSingle();
+
+      if (existing) {
+        await supabase
+          .from("concesionaria_potencia_keywords")
+          .update({ inafecto_keywords: h4.conceptos_exonerados } as any)
+          .eq("concesionaria", concesionaria);
+      } else {
+        await supabase
+          .from("concesionaria_potencia_keywords")
+          .insert({ concesionaria, inafecto_keywords: h4.conceptos_exonerados } as any);
+      }
+      toast.success(`Reglas exonerados guardadas para ${concesionaria}`);
+    } catch (err: any) {
+      toast.error("Error al guardar: " + (err.message || ""));
+    } finally {
+      setSavingKeywords(false);
+    }
+  };
+
+  const agregarExonerado = () => {
+    if (nuevoExonerado.trim()) {
+      updateSheet("hoja4_data", {
+        ...h4,
+        conceptos_exonerados: [...(h4.conceptos_exonerados || []), nuevoExonerado.trim().toUpperCase()],
+      });
+      setNuevoExonerado("");
+    }
+  };
+
+  const eliminarExonerado = (idx: number) => {
+    const updated = [...(h4.conceptos_exonerados || [])];
+    updated.splice(idx, 1);
+    updateSheet("hoja4_data", { ...h4, conceptos_exonerados: updated });
+  };
 
   const extractData = async (fileUrl: string, reglas?: string) => {
     updateSheet("hoja3_data", { ...h3, extracting: true });
@@ -287,6 +352,43 @@ const Hoja3Factura = () => {
           </div>
         )}
       </div>
+
+      {/* Reglas Exonerados por Concesionaria */}
+      <div className="border rounded-lg p-3 space-y-3 bg-muted/30">
+        <p className="text-xs font-semibold text-foreground uppercase tracking-wide">⚙ Reglas Exonerados</p>
+        <p className="text-[10px] text-muted-foreground">
+          Conceptos exonerados para <strong>{concesionaria || "esta concesionaria"}</strong>.
+        </p>
+        <div className="flex gap-2">
+          <Input
+            placeholder="Ej: FISE, INTERES MORATORIO"
+            value={nuevoExonerado}
+            onChange={(e) => setNuevoExonerado(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && agregarExonerado()}
+            className="h-8 text-sm"
+          />
+          <Button onClick={agregarExonerado} size="sm" className="h-8">Agregar</Button>
+        </div>
+        {(h4.conceptos_exonerados || []).length > 0 && (
+          <div className="space-y-2">
+            <div className="flex flex-wrap gap-1">
+              {h4.conceptos_exonerados.map((c, i) => (
+                <span key={i} className="bg-muted px-2 py-1 rounded text-xs flex items-center gap-1">
+                  {c}
+                  <X className="w-3 h-3 cursor-pointer" onClick={() => eliminarExonerado(i)} />
+                </span>
+              ))}
+            </div>
+            {concesionaria && (
+              <Button onClick={saveKeywordsForConcesionaria} size="sm" variant="outline" disabled={savingKeywords} className="text-xs h-7">
+                <Save className="w-3 h-3 mr-1" />
+                {savingKeywords ? "Guardando..." : `Guardar para ${concesionaria}`}
+              </Button>
+            )}
+          </div>
+        )}
+      </div>
+    </div>
     </div>
   );
 };
