@@ -168,14 +168,13 @@ const Hoja4Comparacion = () => {
           {(h4.items_recalculados || []).map((item, i) => (
             <div key={i} className="grid grid-cols-[1fr_90px_90px] gap-1 text-sm items-center bg-muted/30 rounded px-1 py-0.5">
               <span className="text-xs truncate font-medium">{item.descripcion}</span>
-              <Select value={item.tipo} onValueChange={(v) => updateItemTipo(i, v as "gravado" | "inafecto" | "exonerado")}>
+              <Select value={item.tipo} onValueChange={(v) => updateItemTipo(i, v as "gravado" | "inafecto")}>
                 <SelectTrigger className="h-7 text-xs">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="gravado">Gravado</SelectItem>
                   <SelectItem value="inafecto">Inafecto</SelectItem>
-                  <SelectItem value="exonerado">Exonerado</SelectItem>
                 </SelectContent>
               </Select>
               <span className="text-right font-mono text-xs">{item.cantidad.toLocaleString("es-PE")}</span>
