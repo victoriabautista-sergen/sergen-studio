@@ -1,7 +1,60 @@
-import { ReportData } from "../../types";
+import { ReportData, MESES } from "../../types";
 
 const ConclusionesPage = ({ data }: { data: ReportData }) => {
   const h7 = data.hoja7_data;
+  const dg = data.datos_generales;
+
+  const mesName = dg.mes || "";
+  const anio = dg.anio || "";
+
+  // Build calendar for the month
+  const mesIndex = MESES.indexOf(mesName);
+  const year = parseInt(anio) || new Date().getFullYear();
+  const month = mesIndex >= 0 ? mesIndex : new Date().getMonth(); // 0-based
+
+  const firstDay = new Date(year, month, 1);
+  const lastDay = new Date(year, month + 1, 0);
+  const daysInMonth = lastDay.getDate();
+  // Monday = 0, Sunday = 6
+  let startDow = (firstDay.getDay() + 6) % 7;
+
+  const weeks: (number | null)[][] = [];
+  let currentWeek: (number | null)[] = [];
+  for (let i = 0; i < startDow; i++) currentWeek.push(null);
+  for (let d = 1; d <= daysInMonth; d++) {
+    currentWeek.push(d);
+    if (currentWeek.length === 7) {
+      weeks.push(currentWeek);
+      currentWeek = [];
+    }
+  }
+  if (currentWeek.length > 0) {
+    while (currentWeek.length < 7) currentWeek.push(null);
+    weeks.push(currentWeek);
+  }
+
+  // Determine day colors: weekends (sáb/dom) are green (libre), weekdays depend on modulación
+  const getDayColor = (day: number): string => {
+    const date = new Date(year, month, day);
+    const dow = date.getDay(); // 0=sun, 6=sat
+    if (dow === 0 || dow === 6) return "#16a34a"; // green - libre
+    // For weekdays, if we have modulated days > 0, color them red; otherwise green
+    // Simple heuristic: first N weekdays are modulated
+    return "#1B3A5C"; // default blue
+  };
+
+  // All conclusions
+  const allConclusions = [
+    ...(h7.conclusiones_auto || []),
+    ...(h7.conclusiones_manuales ? h7.conclusiones_manuales.split("\n").filter(Boolean) : []),
+  ];
+
+  const renderMarkdownBold = (text: string) => {
+    const parts = text.split(/\*\*(.*?)\*\*/g);
+    return parts.map((part, i) =>
+      i % 2 === 1 ? <strong key={i}>{part}</strong> : <span key={i}>{part}</span>
+    );
+  };
 
   return (
     <div className="flex flex-col h-full text-[10px] leading-relaxed" style={{ fontFamily: "'Inter', sans-serif", color: "#1B3A5C" }}>
@@ -10,60 +63,99 @@ const ConclusionesPage = ({ data }: { data: ReportData }) => {
         <p className="text-xs font-bold" style={{ color: "#1B3A5C" }}>Sergen Eficiencia Energética</p>
         <hr className="border-t border-gray-300 my-2" />
 
-        <h1 className="text-xs font-semibold mt-4 mb-4" style={{ color: "#1B3A5C" }}>
-          VI. MODULACIONES Y CONCLUSIONES
+        {/* MODULACIONES */}
+        <h1 className="text-xs font-semibold mt-4 mb-3" style={{ color: "#1B3A5C" }}>
+          III. MODULACIONES
         </h1>
 
-        {/* Modulation summary */}
-        <div className="mb-4">
-          <p className="text-[10px] font-semibold text-gray-500 uppercase mb-2">Resumen de Modulación</p>
-          <div className="flex gap-6 mb-3">
-            <div className="flex items-center gap-2">
-              <div className="w-4 h-4 rounded bg-red-500" />
-              <span className="text-xs" style={{ color: "#1B3A5C" }}>Días modulados: <strong>{h7.dias_modulados}</strong></span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-4 h-4 rounded bg-green-500" />
-              <span className="text-xs" style={{ color: "#1B3A5C" }}>Días libres: <strong>{h7.dias_libres}</strong></span>
-            </div>
-          </div>
-          {h7.resumen_modulacion && (
-            <div className="bg-gray-50 border rounded p-3 text-xs text-gray-700 leading-relaxed">
-              {h7.resumen_modulacion}
-            </div>
-          )}
+        <p className="text-[10px] mb-3" style={{ color: "#1B3A5C" }}>
+          Es importante indicar que en el mes de {mesName.toLowerCase()} del {anio} la empresa SERGEN gestionó la demanda energética <strong>{h7.dias_modulados} días</strong>, siendo unos de los menores intervalos de modulación en el mercado.
+        </p>
+
+        {/* Modulation table */}
+        <div className="flex justify-center mb-3">
+          <table className="text-[10px]" style={{ borderCollapse: "collapse" }}>
+            <thead>
+              <tr>
+                <th className="px-4 py-1 text-left text-white font-semibold" style={{ backgroundColor: "#E8792B", border: "1px solid #E8792B" }}>MODULACIÓN</th>
+                <th className="px-4 py-1 text-center text-white font-semibold" style={{ backgroundColor: "#E8792B", border: "1px solid #E8792B" }}>DÍAS</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td className="px-4 py-1" style={{ color: "#1B3A5C", borderBottom: "1px solid #E8792B" }}>Días con rango horario</td>
+                <td className="px-4 py-1 text-center font-bold" style={{ color: "#E8792B", borderBottom: "1px solid #E8792B" }}>{h7.dias_modulados} días</td>
+              </tr>
+              <tr>
+                <td className="px-4 py-1" style={{ color: "#1B3A5C" }}>Días libre</td>
+                <td className="px-4 py-1 text-center font-bold" style={{ color: "#E8792B" }}>{h7.dias_libres} días</td>
+              </tr>
+            </tbody>
+          </table>
         </div>
 
-        {/* Conclusions */}
-        <div className="mb-4">
-          <p className="text-[10px] font-semibold text-gray-500 uppercase mb-2">Conclusiones</p>
-          <div className="space-y-2">
-            {h7.conclusiones_auto.map((c, i) => (
-              <div key={i} className="flex gap-2 text-xs" style={{ color: "#1B3A5C" }}>
-                <span className="font-bold" style={{ color: "#E8792B" }}>{i + 1}.</span>
-                <span>{c}</span>
-              </div>
-            ))}
-            {h7.conclusiones_manuales && (
-              <div className="border-t pt-2 mt-2">
-                <p className="text-xs whitespace-pre-line" style={{ color: "#1B3A5C" }}>{h7.conclusiones_manuales}</p>
-              </div>
-            )}
-          </div>
-        </div>
+        <p className="text-[10px] mb-3" style={{ color: "#1B3A5C" }}>
+          A continuación, se muestra el calendario del mes de {mesName.toLowerCase()} del {anio} identificando con color <span className="font-bold" style={{ color: "#16a34a" }}>verde</span> los días que se envió "uso libre de equipos" y de color <span className="font-bold" style={{ color: "#dc2626" }}>rojo</span> los días que se envió restricción horaria.
+        </p>
 
-        {/* Signature area */}
-        <div className="mt-16 pt-8 border-t border-gray-300 space-y-8">
-          <div className="flex justify-between">
+        {/* Calendar */}
+        {h7.calendario_url ? (
+          <div className="flex justify-center mb-4">
+            <img src={h7.calendario_url} alt="Calendario de modulación" className="max-h-[200px] object-contain" />
+          </div>
+        ) : (
+          <div className="flex justify-center mb-4">
             <div className="text-center">
-              <div className="w-40 border-b border-gray-400 mb-1" />
-              <p className="text-[10px] text-gray-500">Elaborado por</p>
-            </div>
-            <div className="text-center">
-              <div className="w-40 border-b border-gray-400 mb-1" />
-              <p className="text-[10px] text-gray-500">Revisado por</p>
+              <div className="flex items-center justify-center gap-2 mb-2">
+                <span className="text-[10px] cursor-pointer" style={{ color: "#1B3A5C" }}>{"<"}</span>
+                <span className="text-[11px] font-semibold" style={{ color: "#1B3A5C" }}>
+                  {mesName.toLowerCase()} {anio}
+                </span>
+                <span className="text-[10px] cursor-pointer" style={{ color: "#1B3A5C" }}>{">"}</span>
+              </div>
+              <table className="text-[9px]" style={{ borderCollapse: "collapse" }}>
+                <thead>
+                  <tr>
+                    {["lu", "ma", "mi", "ju", "vi", "sá", "do"].map(d => (
+                      <th key={d} className="px-2 py-1 font-medium text-gray-500">{d}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {weeks.map((week, wi) => (
+                    <tr key={wi}>
+                      {week.map((day, di) => {
+                        if (!day) return <td key={di} className="px-2 py-1"></td>;
+                        const date = new Date(year, month, day);
+                        const dow = date.getDay();
+                        const isWeekend = dow === 0 || dow === 6;
+                        const color = isWeekend ? "#16a34a" : "#1B3A5C";
+                        return (
+                          <td key={di} className="px-2 py-1 text-center" style={{ color }}>
+                            {day}
+                          </td>
+                        );
+                      })}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           </div>
+        )}
+
+        {/* CONCLUSIONES */}
+        <h1 className="text-xs font-semibold mt-4 mb-3" style={{ color: "#1B3A5C" }}>
+          IV. CONCLUSIONES
+        </h1>
+
+        <div className="space-y-2">
+          {allConclusions.map((c, i) => (
+            <div key={i} className="flex gap-2 text-[10px]" style={{ color: "#1B3A5C" }}>
+              <span className="font-bold" style={{ color: "#1B3A5C" }}>{i + 1}.</span>
+              <span>{renderMarkdownBold(c)}</span>
+            </div>
+          ))}
         </div>
       </div>
 
