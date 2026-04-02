@@ -4,15 +4,66 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useReportContext } from "../context/ReportContext";
 import { Hoja4Item } from "../types";
-import { X } from "lucide-react";
+import { X, Save } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 const Hoja4Comparacion = () => {
   const { data, updateSheet } = useReportContext();
   const h4 = data.hoja4_data;
   const h3 = data.hoja3_data;
   const h2 = data.hoja2_data;
+  const concesionaria = data.datos_generales.concesionaria || "";
 
   const [nuevoInafecto, setNuevoInafecto] = useState("");
+  const [savingKeywords, setSavingKeywords] = useState(false);
+
+  // Auto-load inafecto keywords from DB for this concesionaria
+  useEffect(() => {
+    if (!concesionaria) return;
+    supabase
+      .from("concesionaria_potencia_keywords")
+      .select("inafecto_keywords")
+      .eq("concesionaria", concesionaria)
+      .maybeSingle()
+      .then(({ data: row }) => {
+        if (row && (row as any).inafecto_keywords?.length > 0 && (!h4.conceptos_inafectos || h4.conceptos_inafectos.length === 0)) {
+          updateSheet("hoja4_data", {
+            ...h4,
+            conceptos_inafectos: (row as any).inafecto_keywords,
+          });
+        }
+      });
+  }, [concesionaria]);
+
+  // Save inafecto keywords to DB for concesionaria
+  const saveKeywordsForConcesionaria = async () => {
+    if (!concesionaria || !h4.conceptos_inafectos?.length) return;
+    setSavingKeywords(true);
+    try {
+      const { data: existing } = await supabase
+        .from("concesionaria_potencia_keywords")
+        .select("id")
+        .eq("concesionaria", concesionaria)
+        .maybeSingle();
+
+      if (existing) {
+        await supabase
+          .from("concesionaria_potencia_keywords")
+          .update({ inafecto_keywords: h4.conceptos_inafectos } as any)
+          .eq("concesionaria", concesionaria);
+      } else {
+        await supabase
+          .from("concesionaria_potencia_keywords")
+          .insert({ concesionaria, inafecto_keywords: h4.conceptos_inafectos } as any);
+      }
+      toast.success(`Conceptos inafectos guardados para ${concesionaria}`);
+    } catch (err: any) {
+      toast.error("Error al guardar: " + (err.message || ""));
+    } finally {
+      setSavingKeywords(false);
+    }
+  };
 
   // Build recalculated items from hoja3 items
   useEffect(() => {
