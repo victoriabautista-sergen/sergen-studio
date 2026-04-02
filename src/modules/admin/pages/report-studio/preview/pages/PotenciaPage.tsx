@@ -65,6 +65,20 @@ const PotenciaPage = ({ data }: { data: ReportData }) => {
             {h5.potencia_coincidente_promedio ? h5.potencia_coincidente_promedio.toFixed(2) : "—"}
           </span>
         </div>
+
+        {/* Evidencia de alerta */}
+        {h5.evidencia_alerta_url && (
+          <div className="mt-4">
+            <p className="text-[10px] mb-2 font-semibold" style={{ color: "#1B3A5C" }}>
+              Evidencia de envío de alerta:
+            </p>
+            <img
+              src={h5.evidencia_alerta_url}
+              alt="Evidencia de envío de alerta"
+              className="w-full max-h-[200px] object-contain border border-gray-300 rounded"
+            />
+          </div>
+        )}
       </div>
 
       {/* Footer */}
