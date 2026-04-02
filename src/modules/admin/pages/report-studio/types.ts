@@ -69,7 +69,7 @@ export interface Hoja4Item {
   descripcion: string;
   unidad: string;
   cantidad: number;
-  tipo: "gravado" | "inafecto" | "exonerado";
+  tipo: "gravado" | "inafecto";
   valor_unitario_original: number;
   valor_venta_original: number;
   valor_unitario_calc: number;
