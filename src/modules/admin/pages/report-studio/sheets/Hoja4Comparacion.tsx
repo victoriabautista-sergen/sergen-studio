@@ -161,21 +161,6 @@ const Hoja4Comparacion = () => {
     updateSheet("hoja4_data", { ...h4, conceptos_exonerados: updated });
   };
 
-  const updateItemTipo = (idx: number, tipo: "gravado" | "exonerado") => {
-    const updated = [...(h4.items_recalculados || [])];
-    if (updated[idx]) {
-      updated[idx] = { ...updated[idx], tipo };
-
-      const subtotal_afecto = +updated
-        .filter(i => i.tipo === "gravado")
-        .reduce((sum, i) => sum + i.valor_venta_calc, 0)
-        .toFixed(2);
-      const igv_recalculado = +(subtotal_afecto * 0.18).toFixed(2);
-      const total_recalculado = +(subtotal_afecto + igv_recalculado).toFixed(2);
-
-      updateSheet("hoja4_data", { ...h4, items_recalculados: updated, subtotal_afecto, igv_recalculado, total_recalculado });
-    }
-  };
 
   return (
     <div className="space-y-6">
