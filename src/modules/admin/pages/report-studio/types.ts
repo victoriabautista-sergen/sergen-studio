@@ -111,6 +111,7 @@ export interface Hoja6Item {
 }
 
 export interface Hoja6Data {
+  items_potencia: string[];
   items_original: Hoja6Item[];
   items_proyectado: Hoja6Item[];
   potencia_promedio: number;
