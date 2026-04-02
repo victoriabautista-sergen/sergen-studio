@@ -29,19 +29,14 @@ const Hoja4Comparacion = () => {
       const descUpper = item.descripcion.toUpperCase();
       const isHP = descUpper.includes(h3.nombre_hp.toUpperCase());
       const isHFP = descUpper.includes(h3.nombre_hfp.toUpperCase());
-      const isInafectoFromH3 = item.tipo === "inafecto";
-      const isExoneradoFromH3 = item.tipo === "exonerado";
+      const isInafectoFromH3 = item.tipo === "inafecto" || item.tipo === "exonerado";
       const isInafectoFromList = inafectos.some(c => descUpper.includes(c.toUpperCase()));
       const isEnergy = isHP || isHFP;
 
-      // Determine tipo: prioritize h3 item tipo, then conceptos_inafectos list, default gravado
-      let tipo: "gravado" | "inafecto" | "exonerado" = "gravado";
+      // Only gravado or inafecto - merge exonerado into inafecto
+      let tipo: "gravado" | "inafecto" = "gravado";
       if (isInafectoFromH3 || isInafectoFromList) {
         tipo = "inafecto";
-      } else if (isExoneradoFromH3) {
-        tipo = "exonerado";
-      } else if (item.tipo) {
-        tipo = item.tipo;
       }
 
       let valor_unitario_calc = item.valor_unitario;
