@@ -17,20 +17,8 @@ const ComparacionPage = ({ data }: { data: ReportData }) => {
   const borderStyle = "border border-[#1B3A5C]/20";
   const monedaSymbol = "S/";
 
-  const meses = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
-  const mesIndex = meses.indexOf(dg.mes || "");
-  const mesAnterior = mesIndex > 0 ? meses[mesIndex - 1] : mesIndex === 0 ? "Diciembre" : dg.mes;
-
   const items = h4.items_recalculados || [];
   const hasItems = items.length > 0;
-
-  // Find energy items for impact calc
-  const energiaHP = h3.items.find(i => i.descripcion.toUpperCase().includes(h3.nombre_hp.toUpperCase()));
-  const energiaHFP = h3.items.find(i => i.descripcion.toUpperCase().includes(h3.nombre_hfp.toUpperCase()));
-  const cantHP = energiaHP?.cantidad || 0;
-  const cantHFP = energiaHFP?.cantidad || 0;
-  const impactoHP = +(cantHP * h4.diferencia_hp).toFixed(2);
-  const impactoHFP = +(cantHFP * h4.diferencia_hfp).toFixed(2);
 
   return (
     <div className="flex flex-col h-full text-[10px] leading-relaxed" style={{ fontFamily: "'Inter', sans-serif", color: "#1B3A5C" }}>
