@@ -66,11 +66,23 @@ const ControlPage = () => {
         </div>
       ) : (
         <div className="grid grid-cols-12 gap-6">
-          <div className="col-span-12 lg:col-span-4 flex flex-col gap-6">
-            <RiskManagement date={date} setDate={setDate} />
+          {/* First row: Risk Management + Forecast Chart - same height */}
+          <div className="col-span-12 lg:col-span-4 flex">
+            <div className="w-full">
+              <RiskManagement date={date} setDate={setDate} firstRowOnly />
+            </div>
           </div>
-          <div className="col-span-12 lg:col-span-8 flex flex-col gap-6">
-            <PowerCharts />
+          <div className="col-span-12 lg:col-span-8 flex">
+            <div className="w-full flex flex-col">
+              <PowerCharts className="flex-1" />
+            </div>
+          </div>
+
+          {/* Second row: Calendar + Historical */}
+          <div className="col-span-12 lg:col-span-4">
+            <RiskManagement date={date} setDate={setDate} secondRowOnly />
+          </div>
+          <div className="col-span-12 lg:col-span-8">
             <HistoricalPowerMaximum />
           </div>
         </div>
