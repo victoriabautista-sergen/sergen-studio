@@ -100,6 +100,7 @@ export interface Hoja5Data {
   importacion: number;
   exportacion: number;
   potencia_coincidente_promedio: number;
+  evidencia_alerta_url: string;
 }
 
 export interface Hoja6Item {
