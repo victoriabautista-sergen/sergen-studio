@@ -60,6 +60,7 @@ const Hoja3Factura = () => {
     updateSheet("hoja3_data", { ...h3, extracting: true });
     try {
       const reglasToUse = reglas || getReglas();
+      const exoneradoKeywords = data.hoja4_data?.conceptos_exonerados || [];
       const { data: result, error } = await supabase.functions.invoke("extract-invoice-data", {
         body: {
           image_url: fileUrl,
@@ -67,6 +68,7 @@ const Hoja3Factura = () => {
           nombre_hfp: h3.nombre_hfp,
           reglas_concesionario: reglasToUse,
           concesionaria,
+          exonerado_keywords: exoneradoKeywords,
         },
       });
       if (error) throw error;
