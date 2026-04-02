@@ -69,11 +69,15 @@ const EnergyShell = ({ children }: EnergyShellProps) => {
         {/* Toggle button */}
         <button
           onClick={() => setCollapsed(prev => !prev)}
-          className="absolute top-3 z-20 flex items-center justify-center h-8 w-8 rounded-md transition-colors hover:bg-muted/80 bg-card border border-border shadow-sm"
-          style={{ left: collapsed ? '8px' : 'calc(18rem - 2.5rem)' }}
+          className="absolute top-3 z-20 flex items-center justify-center h-8 w-8 rounded-md transition-all shadow-md"
+          style={{
+            left: collapsed ? '8px' : 'calc(18rem - 2.5rem)',
+            background: collapsed ? 'hsl(195 70% 30%)' : 'hsla(0 0% 100% / 0.15)',
+            border: collapsed ? '1px solid hsl(195 60% 40%)' : '1px solid hsla(0 0% 100% / 0.25)',
+          }}
           title={collapsed ? 'Mostrar sidebar' : 'Ocultar sidebar'}
         >
-          {collapsed ? <PanelLeftOpen className="h-4 w-4 text-foreground" /> : <PanelLeftClose className="h-4 w-4 text-white" />}
+          {collapsed ? <PanelLeftOpen className="h-4 w-4 text-white" /> : <PanelLeftClose className="h-4 w-4 text-white" />}
         </button>
 
         {/* Main content */}
