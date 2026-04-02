@@ -131,7 +131,7 @@ IMPORTANTE:
 - El concepto de energía en hora punta puede aparecer como: "${nombre_hp || "ENERGÍA ACTIVA EN HORA PUNTA"}" o similar.
 - El concepto de energía fuera de hora punta puede aparecer como: "${nombre_hfp || "ENERGÍA ACTIVA EN HORA FUERA DE PUNTA"}" o similar.
 - Para precio_hp y precio_hfp, extrae el VALOR UNITARIO (no el valor de venta total) de esos conceptos.
-- Para cada item, clasifícalo como "gravado" (sujeto a IGV) o "exonerado" (no sujeto a IGV, como alumbrado público, electrificación rural, FISE, interés moratorio, etc.). NO uses "inafecto", solo "gravado" o "exonerado". Usa la información de la factura (OP. GRAVADAS, OP. EXONERADA) para determinar la clasificación. Todo lo que no sea gravado es "exonerado".
+- Para cada item, clasifícalo como "gravado" (sujeto a IGV) o "exonerado" (no sujeto a IGV). Para determinar la clasificación, usa los montos de la factura: OP. GRAVADAS y OP. EXONERADA. Los ítems cuya suma coincide con OP. EXONERADA son "exonerado", el resto son "gravado". NO asumas que alumbrado público es exonerado a menos que la factura lo indique explícitamente en OP. EXONERADA.
 
 Extrae este JSON:
 {
