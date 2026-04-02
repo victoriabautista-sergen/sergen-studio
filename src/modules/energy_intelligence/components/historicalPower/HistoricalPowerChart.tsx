@@ -56,8 +56,8 @@ export const HistoricalPowerChart = ({ data, showTime = true }: HistoricalPowerC
   };
 
   return (
-    <div className="w-full" style={{ minHeight: 520 }}>
-      <ResponsiveContainer width="100%" height={520}>
+    <div className="w-full flex-1" style={{ minHeight: 350 }}>
+      <ResponsiveContainer width="100%" height="100%">
         <BarChart data={chartData} margin={{ top: 10, right: 10, bottom: 30, left: 0 }}>
           <XAxis
             dataKey="date"
