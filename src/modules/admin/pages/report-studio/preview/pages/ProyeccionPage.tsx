@@ -108,7 +108,7 @@ const ProyeccionPage = ({ data }: { data: ReportData }) => {
                       className={!item.is_potencia ? (i % 2 === 0 ? "bg-white" : "bg-gray-50/50") : ""}
                       style={item.is_potencia ? { backgroundColor: "#FEE2E2" } : {}}
                     >
-                      <td className={`${borderStyle} px-1.5 py-0.5`} style={{ color: item.is_potencia ? "#ffffff" : "#1B3A5C", fontWeight: item.is_potencia ? 700 : 400 }}>
+                      <td className={`${borderStyle} px-1.5 py-0.5`} style={{ color: item.is_potencia ? "#dc2626" : "#1B3A5C", fontWeight: item.is_potencia ? 700 : 400 }}>
                         {toSentenceCase(item.descripcion)}
                       </td>
                       <td className={`${borderStyle} px-1.5 py-0.5 text-center`} style={{ color: item.is_potencia ? "#ffffff" : "#1B3A5C", fontWeight: item.is_potencia ? 700 : 400 }}>{item.unidad}</td>
