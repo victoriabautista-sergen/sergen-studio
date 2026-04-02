@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useReportContext } from "../context/ReportContext";
 import { Hoja4Item } from "../types";
 import { X, Save } from "lucide-react";
@@ -162,21 +161,6 @@ const Hoja4Comparacion = () => {
     updateSheet("hoja4_data", { ...h4, conceptos_exonerados: updated });
   };
 
-  const updateItemTipo = (idx: number, tipo: "gravado" | "exonerado") => {
-    const updated = [...(h4.items_recalculados || [])];
-    if (updated[idx]) {
-      updated[idx] = { ...updated[idx], tipo };
-
-      const subtotal_afecto = +updated
-        .filter(i => i.tipo === "gravado")
-        .reduce((sum, i) => sum + i.valor_venta_calc, 0)
-        .toFixed(2);
-      const igv_recalculado = +(subtotal_afecto * 0.18).toFixed(2);
-      const total_recalculado = +(subtotal_afecto + igv_recalculado).toFixed(2);
-
-      updateSheet("hoja4_data", { ...h4, items_recalculados: updated, subtotal_afecto, igv_recalculado, total_recalculado });
-    }
-  };
 
   return (
     <div className="space-y-6">
@@ -212,35 +196,6 @@ const Hoja4Comparacion = () => {
         </div>
       )}
 
-      <div className="border-t pt-4">
-        <h3 className="font-semibold text-foreground flex items-center gap-2 mb-3">📄 Factura recalculada</h3>
-        <div className="space-y-1 max-h-[300px] overflow-y-auto">
-          <div className="grid grid-cols-[1fr_90px_90px] gap-1 text-xs font-medium text-muted-foreground px-1">
-            <span>Descripción</span>
-            <span className="text-right">Tipo</span>
-            <span className="text-right">Cant.</span>
-          </div>
-          {(h4.items_recalculados || []).map((item, i) => (
-            <div key={i} className="grid grid-cols-[1fr_90px_90px] gap-1 text-sm items-center bg-muted/30 rounded px-1 py-0.5">
-              <span className="text-xs truncate font-medium">{item.descripcion}</span>
-              <Select value={item.tipo} onValueChange={(v) => updateItemTipo(i, v as "gravado" | "exonerado")}>
-                <SelectTrigger className="h-7 text-xs">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="gravado">Gravado</SelectItem>
-                  <SelectItem value="exonerado">Exonerado</SelectItem>
-                </SelectContent>
-              </Select>
-              <span className="text-right font-mono text-xs">{item.cantidad.toLocaleString("es-PE")}</span>
-            </div>
-          ))}
-        </div>
-        <div className="flex justify-between text-sm font-medium mt-3 pt-2 border-t">
-          <span>Base gravada</span>
-          <span className="font-mono">S/ {h4.subtotal_afecto?.toLocaleString("es-PE", { minimumFractionDigits: 2 })}</span>
-        </div>
-      </div>
     </div>
   );
 };
