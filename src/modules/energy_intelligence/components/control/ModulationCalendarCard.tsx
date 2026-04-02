@@ -49,10 +49,10 @@ export const ModulationCalendarCard = ({
 
   return (
     <Card className="w-full h-full flex flex-col">
-      <CardHeader className="pb-1 pt-2">
+      <CardHeader className="pb-4">
         <CardTitle className="text-2xl text-center w-full">Calendario</CardTitle>
       </CardHeader>
-      <CardContent className="flex flex-col items-center flex-1 justify-center px-6 pb-4">
+      <CardContent className="flex flex-col items-center flex-1 px-6 pb-4">
         <div className="w-full mx-auto">
           <Calendar
             mode="single"
