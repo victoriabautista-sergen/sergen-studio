@@ -86,7 +86,7 @@ export const ModulationCalendarCard = ({
                     onClick={() => handleDayClick(dayDate)}
                     disabled={!isClickable && editable}
                     className={cn(
-                      'h-[3.3rem] w-10 mx-auto p-0 font-normal flex items-center justify-center rounded-md transition-colors text-sm',
+                      'h-[3.5rem] w-10 mx-auto p-0 font-normal flex items-center justify-center rounded-md transition-colors text-sm',
                       getDateClassName(dayDate),
                       isClickable && 'hover:bg-accent cursor-pointer',
                       !isClickable && editable && 'cursor-not-allowed',
