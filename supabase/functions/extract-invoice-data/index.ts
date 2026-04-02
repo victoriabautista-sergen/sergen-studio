@@ -26,7 +26,7 @@ Deno.serve(async (req) => {
 
   try {
     const body = await req.json();
-    const { image_url, nombre_hp, nombre_hfp, reglas_concesionario, concesionaria, adjust_rules, current_rules, user_feedback } = body;
+    const { image_url, nombre_hp, nombre_hfp, reglas_concesionario, concesionaria, adjust_rules, current_rules, user_feedback, exonerado_keywords } = body;
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) {
