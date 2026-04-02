@@ -2,20 +2,74 @@ import { useEffect, useState, useCallback } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { Plus, Upload } from "lucide-react";
+import { Plus, RefreshCw } from "lucide-react";
 import { useReportContext } from "../context/ReportContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { MESES } from "../types";
+import { format, startOfMonth, endOfMonth, subMonths } from "date-fns";
 
 const Hoja7Conclusiones = () => {
   const { data, updateSheet } = useReportContext();
   const h7 = data.hoja7_data;
+  const dg = data.datos_generales;
   const [nuevaConclusion, setNuevaConclusion] = useState("");
-  const [uploading, setUploading] = useState(false);
+  const [loadingCalendar, setLoadingCalendar] = useState(false);
 
   const update = (field: string, value: any) => {
     updateSheet("hoja7_data", { ...h7, [field]: value });
   };
+
+  // Get previous month based on report date
+  const getPreviousMonth = useCallback(() => {
+    const mesIndex = MESES.indexOf(dg.mes || "");
+    const year = parseInt(dg.anio) || new Date().getFullYear();
+    const month = mesIndex >= 0 ? mesIndex : new Date().getMonth();
+    const reportDate = new Date(year, month, 1);
+    return subMonths(reportDate, 1);
+  }, [dg.mes, dg.anio]);
+
+  // Fetch modulation data from DB
+  const fetchModulationData = useCallback(async () => {
+    setLoadingCalendar(true);
+    try {
+      const prevMonth = getPreviousMonth();
+      const start = format(startOfMonth(prevMonth), 'yyyy-MM-dd');
+      const end = format(endOfMonth(prevMonth), 'yyyy-MM-dd');
+
+      const { data: modData, error } = await supabase
+        .from('modulation_days')
+        .select('date, is_modulated')
+        .gte('date', start)
+        .lte('date', end)
+        .order('date', { ascending: true });
+
+      if (error) throw error;
+
+      const days = (modData as any[]) || [];
+      const modulados = days.filter(d => d.is_modulated).length;
+      const libres = days.filter(d => !d.is_modulated).length;
+
+      updateSheet("hoja7_data", {
+        ...h7,
+        modulation_days: days,
+        dias_modulados: modulados,
+        dias_libres: libres,
+      });
+      toast.success(`Calendario cargado: ${modulados} días modulados, ${libres} días libres`);
+    } catch (err: any) {
+      toast.error("Error al cargar datos de modulación: " + err.message);
+    } finally {
+      setLoadingCalendar(false);
+    }
+  }, [getPreviousMonth, h7]);
+
+  // Auto-fetch on mount if no data
+  useEffect(() => {
+    if ((!h7.modulation_days || h7.modulation_days.length === 0) && dg.mes && dg.anio) {
+      fetchModulationData();
+    }
+  }, [dg.mes, dg.anio]);
 
   // Auto-generate conclusions
   useEffect(() => {
@@ -30,31 +84,13 @@ const Hoja7Conclusiones = () => {
     }
 
     if (h6.diferencia < 0) {
-      const mesStr = data.datos_generales.mes?.toLowerCase() || "";
-      const anioStr = data.datos_generales.anio || "";
+      const mesStr = dg.mes?.toLowerCase() || "";
+      const anioStr = dg.anio || "";
       conclusions.push(`Realizando el control de demanda **logramos ahorrar un promedio de S/ ${Math.abs(h6.diferencia).toFixed(2)}** para el periodo de ${mesStr}-${anioStr.slice(-2)}.`);
     }
 
     update("conclusiones_auto", conclusions);
-  }, [data.hoja4_data.impacto_economico, data.hoja6_data.diferencia, data.datos_generales.mes, data.datos_generales.anio]);
-
-  const handleCalendarioUpload = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    setUploading(true);
-    try {
-      const fileName = `calendario_${Date.now()}.${file.name.split(".").pop()}`;
-      const { error } = await supabase.storage.from("chart-images").upload(fileName, file);
-      if (error) throw error;
-      const { data: urlData } = supabase.storage.from("chart-images").getPublicUrl(fileName);
-      update("calendario_url", urlData.publicUrl);
-      toast.success("Imagen del calendario subida");
-    } catch (err: any) {
-      toast.error("Error al subir imagen: " + err.message);
-    } finally {
-      setUploading(false);
-    }
-  }, [h7]);
+  }, [data.hoja4_data.impacto_economico, data.hoja6_data.diferencia, dg.mes, dg.anio]);
 
   const agregarConclusion = () => {
     if (nuevaConclusion.trim()) {
@@ -66,13 +102,28 @@ const Hoja7Conclusiones = () => {
     }
   };
 
+  const prevMonth = getPreviousMonth();
+  const prevMonthName = MESES[prevMonth.getMonth()];
+  const prevMonthYear = prevMonth.getFullYear();
+
   return (
     <div className="space-y-6">
       <h3 className="font-semibold text-foreground flex items-center gap-2">📅 Modulaciones y Conclusiones</h3>
 
       {/* Modulación del mes */}
       <div className="bg-muted/30 rounded-lg p-4 space-y-3">
-        <p className="text-sm font-semibold">Modulación del mes</p>
+        <div className="flex items-center justify-between">
+          <p className="text-sm font-semibold">Modulación del mes</p>
+          <Button variant="outline" size="sm" className="text-xs" onClick={fetchModulationData} disabled={loadingCalendar}>
+            <RefreshCw className={`h-3 w-3 mr-1 ${loadingCalendar ? "animate-spin" : ""}`} />
+            {loadingCalendar ? "Cargando..." : "Sincronizar"}
+          </Button>
+        </div>
+
+        <p className="text-xs text-muted-foreground">
+          Datos del calendario de <strong>{prevMonthName} {prevMonthYear}</strong> (mes anterior a la factura)
+        </p>
+
         <div className="grid grid-cols-2 gap-3">
           <div>
             <Label className="text-xs">Días modulados (rojos)</Label>
@@ -94,25 +145,9 @@ const Hoja7Conclusiones = () => {
           </div>
         </div>
 
-        <div>
-          <Label className="text-xs">Imagen del calendario (se analizará automáticamente)</Label>
-          {h7.calendario_url ? (
-            <div className="mt-2 space-y-2">
-              <img src={h7.calendario_url} alt="Calendario" className="w-full rounded border max-h-[200px] object-contain" />
-              <Button variant="outline" size="sm" className="text-xs" onClick={() => update("calendario_url", "")}>
-                Cambiar imagen
-              </Button>
-            </div>
-          ) : (
-            <label className="mt-2 border-2 border-dashed border-muted-foreground/30 rounded-lg p-6 flex flex-col items-center justify-center cursor-pointer hover:border-primary/50 transition-colors">
-              <Upload className="h-6 w-6 text-muted-foreground mb-2" />
-              <span className="text-sm text-muted-foreground">
-                {uploading ? "Subiendo..." : "Subir imagen del calendario"}
-              </span>
-              <input type="file" accept="image/*" className="hidden" onChange={handleCalendarioUpload} disabled={uploading} />
-            </label>
-          )}
-        </div>
+        {(h7.modulation_days || []).length > 0 && (
+          <p className="text-xs text-green-600">✅ {h7.modulation_days.length} días cargados del calendario</p>
+        )}
       </div>
 
       {/* Conclusiones */}

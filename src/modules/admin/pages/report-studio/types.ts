@@ -127,6 +127,7 @@ export interface Hoja7Data {
   resumen_modulacion: string;
   conclusiones_auto: string[];
   conclusiones_manuales: string;
+  modulation_days: { date: string; is_modulated: boolean }[];
 }
 
 export interface ReportData {
@@ -248,5 +249,6 @@ export const defaultReportData: ReportData = {
     resumen_modulacion: "",
     conclusiones_auto: [],
     conclusiones_manuales: "",
+    modulation_days: [],
   },
 };

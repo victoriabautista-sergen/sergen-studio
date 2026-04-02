@@ -1,22 +1,25 @@
 import { ReportData, MESES } from "../../types";
+import { format, subMonths, startOfMonth, endOfMonth } from "date-fns";
 
 const ConclusionesPage = ({ data }: { data: ReportData }) => {
   const h7 = data.hoja7_data;
   const dg = data.datos_generales;
 
-  const mesName = dg.mes || "";
-  const anio = dg.anio || "";
+  // Previous month (relative to report date)
+  const mesIndex = MESES.indexOf(dg.mes || "");
+  const year = parseInt(dg.anio) || new Date().getFullYear();
+  const month = mesIndex >= 0 ? mesIndex : new Date().getMonth();
+  const reportDate = new Date(year, month, 1);
+  const prevMonth = subMonths(reportDate, 1);
+  const prevMonthName = MESES[prevMonth.getMonth()];
+  const prevYear = prevMonth.getFullYear();
+  const prevMonthIdx = prevMonth.getMonth();
 
-  // Build calendar for the month
-  const mesIndex = MESES.indexOf(mesName);
-  const year = parseInt(anio) || new Date().getFullYear();
-  const month = mesIndex >= 0 ? mesIndex : new Date().getMonth(); // 0-based
-
-  const firstDay = new Date(year, month, 1);
-  const lastDay = new Date(year, month + 1, 0);
+  // Build calendar
+  const firstDay = new Date(prevYear, prevMonthIdx, 1);
+  const lastDay = new Date(prevYear, prevMonthIdx + 1, 0);
   const daysInMonth = lastDay.getDate();
-  // Monday = 0, Sunday = 6
-  let startDow = (firstDay.getDay() + 6) % 7;
+  const startDow = (firstDay.getDay() + 6) % 7; // Mon=0
 
   const weeks: (number | null)[][] = [];
   let currentWeek: (number | null)[] = [];
@@ -33,14 +36,21 @@ const ConclusionesPage = ({ data }: { data: ReportData }) => {
     weeks.push(currentWeek);
   }
 
-  // Determine day colors: weekends (sáb/dom) are green (libre), weekdays depend on modulación
+  const modulationDays = h7.modulation_days || [];
+
   const getDayColor = (day: number): string => {
-    const date = new Date(year, month, day);
-    const dow = date.getDay(); // 0=sun, 6=sat
-    if (dow === 0 || dow === 6) return "#16a34a"; // green - libre
-    // For weekdays, if we have modulated days > 0, color them red; otherwise green
-    // Simple heuristic: first N weekdays are modulated
-    return "#1B3A5C"; // default blue
+    const dateStr = format(new Date(prevYear, prevMonthIdx, day), 'yyyy-MM-dd');
+    const modDay = modulationDays.find(d => d.date === dateStr);
+
+    if (modDay) {
+      return modDay.is_modulated ? "#dc2626" : "#16a34a";
+    }
+
+    // Default: weekends green, weekdays blue
+    const date = new Date(prevYear, prevMonthIdx, day);
+    const dow = date.getDay();
+    if (dow === 0 || dow === 6) return "#16a34a";
+    return "#1B3A5C";
   };
 
   // All conclusions
@@ -69,7 +79,7 @@ const ConclusionesPage = ({ data }: { data: ReportData }) => {
         </h1>
 
         <p className="text-[10px] mb-3" style={{ color: "#1B3A5C" }}>
-          Es importante indicar que en el mes de {mesName.toLowerCase()} del {anio} la empresa SERGEN gestionó la demanda energética <strong>{h7.dias_modulados} días</strong>, siendo unos de los menores intervalos de modulación en el mercado.
+          Es importante indicar que en el mes de {prevMonthName.toLowerCase()} del {prevYear} la empresa SERGEN gestionó la demanda energética <strong>{h7.dias_modulados} días</strong>, siendo unos de los menores intervalos de modulación en el mercado.
         </p>
 
         {/* Modulation table */}
@@ -95,54 +105,50 @@ const ConclusionesPage = ({ data }: { data: ReportData }) => {
         </div>
 
         <p className="text-[10px] mb-3" style={{ color: "#1B3A5C" }}>
-          A continuación, se muestra el calendario del mes de {mesName.toLowerCase()} del {anio} identificando con color <span className="font-bold" style={{ color: "#16a34a" }}>verde</span> los días que se envió "uso libre de equipos" y de color <span className="font-bold" style={{ color: "#dc2626" }}>rojo</span> los días que se envió restricción horaria.
+          A continuación, se muestra el calendario del mes de {prevMonthName.toLowerCase()} del {prevYear} identificando con color <span className="font-bold" style={{ color: "#16a34a" }}>verde</span> los días que se envió "uso libre de equipos" y de color <span className="font-bold" style={{ color: "#dc2626" }}>rojo</span> los días que se envió restricción horaria.
         </p>
 
         {/* Calendar */}
-        {h7.calendario_url ? (
-          <div className="flex justify-center mb-4">
-            <img src={h7.calendario_url} alt="Calendario de modulación" className="max-h-[200px] object-contain" />
-          </div>
-        ) : (
-          <div className="flex justify-center mb-4">
-            <div className="text-center">
-              <div className="flex items-center justify-center gap-2 mb-2">
-                <span className="text-[10px] cursor-pointer" style={{ color: "#1B3A5C" }}>{"<"}</span>
-                <span className="text-[11px] font-semibold" style={{ color: "#1B3A5C" }}>
-                  {mesName.toLowerCase()} {anio}
-                </span>
-                <span className="text-[10px] cursor-pointer" style={{ color: "#1B3A5C" }}>{">"}</span>
-              </div>
-              <table className="text-[9px]" style={{ borderCollapse: "collapse" }}>
-                <thead>
-                  <tr>
-                    {["lu", "ma", "mi", "ju", "vi", "sá", "do"].map(d => (
-                      <th key={d} className="px-2 py-1 font-medium text-gray-500">{d}</th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {weeks.map((week, wi) => (
-                    <tr key={wi}>
-                      {week.map((day, di) => {
-                        if (!day) return <td key={di} className="px-2 py-1"></td>;
-                        const date = new Date(year, month, day);
-                        const dow = date.getDay();
-                        const isWeekend = dow === 0 || dow === 6;
-                        const color = isWeekend ? "#16a34a" : "#1B3A5C";
-                        return (
-                          <td key={di} className="px-2 py-1 text-center" style={{ color }}>
-                            {day}
-                          </td>
-                        );
-                      })}
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+        <div className="flex justify-center mb-4">
+          <div className="text-center">
+            <div className="flex items-center justify-center gap-2 mb-2">
+              <span className="text-[10px]" style={{ color: "#1B3A5C" }}>{"<"}</span>
+              <span className="text-[11px] font-semibold" style={{ color: "#1B3A5C" }}>
+                {prevMonthName.toLowerCase()} {prevYear}
+              </span>
+              <span className="text-[10px]" style={{ color: "#1B3A5C" }}>{">"}</span>
             </div>
+            <table className="text-[9px]" style={{ borderCollapse: "collapse" }}>
+              <thead>
+                <tr>
+                  {["lu", "ma", "mi", "ju", "vi", "sá", "do"].map(d => (
+                    <th key={d} className="px-2 py-1 font-medium text-gray-500">{d}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {weeks.map((week, wi) => (
+                  <tr key={wi}>
+                    {week.map((day, di) => {
+                      if (!day) return <td key={di} className="px-2 py-1"></td>;
+                      const color = getDayColor(day);
+                      const isBold = color === "#dc2626";
+                      return (
+                        <td
+                          key={di}
+                          className={`px-2 py-1 text-center ${isBold ? "font-bold" : ""}`}
+                          style={{ color }}
+                        >
+                          {day}
+                        </td>
+                      );
+                    })}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
-        )}
+        </div>
 
         {/* CONCLUSIONES */}
         <h1 className="text-xs font-semibold mt-4 mb-3" style={{ color: "#1B3A5C" }}>
