@@ -389,7 +389,6 @@ const Hoja3Factura = () => {
         )}
       </div>
     </div>
-    </div>
   );
 };
 
