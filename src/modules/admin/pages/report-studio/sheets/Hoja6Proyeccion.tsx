@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { X, Plus } from "lucide-react";
+import { Label } from "@/components/ui/label";
+import { X, Plus, Pencil, Check } from "lucide-react";
 import { useReportContext } from "../context/ReportContext";
 
 const fmt = (n: number, decimals = 2) =>
@@ -14,23 +15,33 @@ const Hoja6Proyeccion = () => {
   const h5 = data.hoja5_data;
 
   const [nuevoItem, setNuevoItem] = useState("");
+  const [editingIdx, setEditingIdx] = useState<number | null>(null);
+  const [editValue, setEditValue] = useState("");
 
   const potenciaPromedio = h5.potencia_coincidente_promedio || 0;
+
+  // Auto-detect potencia items when hoja3 loads and no items_potencia set yet
+  useEffect(() => {
+    if (h3.items.length > 0 && (!h6.items_potencia || h6.items_potencia.length === 0)) {
+      const potenciaKeywords = ["POTENCIA ACTIVA", "POTENCIA HORA PUNTA", "POTENCIA FUERA PUNTA"];
+      const detected = h3.items
+        .filter(item => potenciaKeywords.some(k => item.descripcion.toUpperCase().includes(k)))
+        .map(item => item.descripcion.toUpperCase());
+      if (detected.length > 0) {
+        updateSheet("hoja6_data", { ...h6, items_potencia: detected });
+      }
+    }
+  }, [h3.items]);
 
   // Recalculate whenever inputs change
   useEffect(() => {
     if (!h3.items.length) return;
 
     const itemsPotencia = h6.items_potencia || [];
-
-    // Calculate original total (from hoja 3)
     const totalOriginal = h3.importe_total || 0;
 
-    // Find items to replace and calculate difference
     let sumaOriginalReemplazados = 0;
     let sumaRecalculados = 0;
-
-    const detalles: { descripcion: string; valorOriginal: number; valorNuevo: number }[] = [];
 
     h3.items.forEach((item) => {
       const descUpper = item.descripcion.toUpperCase();
@@ -39,15 +50,9 @@ const Hoja6Proyeccion = () => {
         const valorNuevo = +(item.valor_unitario * potenciaPromedio).toFixed(2);
         sumaOriginalReemplazados += item.valor_venta;
         sumaRecalculados += valorNuevo;
-        detalles.push({
-          descripcion: item.descripcion,
-          valorOriginal: item.valor_venta,
-          valorNuevo,
-        });
       }
     });
 
-    // New subtotal = original subtotal - original replaced + recalculated
     const subtotalOriginal = h3.subtotal || 0;
     const nuevoSubtotal = +(subtotalOriginal - sumaOriginalReemplazados + sumaRecalculados).toFixed(2);
     const nuevoIGV = +(nuevoSubtotal * 0.18).toFixed(2);
@@ -79,7 +84,22 @@ const Hoja6Proyeccion = () => {
     updateSheet("hoja6_data", { ...h6, items_potencia: updated });
   };
 
-  // Find matched items for display
+  const startEdit = (idx: number) => {
+    setEditingIdx(idx);
+    setEditValue(h6.items_potencia[idx]);
+  };
+
+  const confirmEdit = () => {
+    if (editingIdx !== null && editValue.trim()) {
+      const updated = [...(h6.items_potencia || [])];
+      updated[editingIdx] = editValue.trim().toUpperCase();
+      updateSheet("hoja6_data", { ...h6, items_potencia: updated });
+    }
+    setEditingIdx(null);
+    setEditValue("");
+  };
+
+  // Matched items for summary
   const itemsPotencia = h6.items_potencia || [];
   const matchedItems = h3.items.filter(item =>
     itemsPotencia.some(p => item.descripcion.toUpperCase().includes(p.toUpperCase()))
@@ -97,12 +117,34 @@ const Hoja6Proyeccion = () => {
           Potencia coincidente promedio: <strong>{potenciaPromedio ? `${fmt(potenciaPromedio)} kW` : "— kW"}</strong>
         </p>
 
-        {(h6.items_potencia || []).map((item, i) => (
+        {itemsPotencia.map((item, i) => (
           <div key={i} className="flex items-center justify-between bg-background rounded px-3 py-2 border">
-            <span className="text-sm font-medium">{item}</span>
-            <Button variant="ghost" size="icon" className="h-6 w-6 text-destructive" onClick={() => eliminarItem(i)}>
-              <X className="h-4 w-4" />
-            </Button>
+            {editingIdx === i ? (
+              <div className="flex items-center gap-2 flex-1">
+                <Input
+                  value={editValue}
+                  onChange={(e) => setEditValue(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && confirmEdit()}
+                  className="h-7 text-sm flex-1"
+                  autoFocus
+                />
+                <Button variant="ghost" size="icon" className="h-6 w-6 text-green-600" onClick={confirmEdit}>
+                  <Check className="h-4 w-4" />
+                </Button>
+              </div>
+            ) : (
+              <>
+                <span className="text-sm font-medium">{item}</span>
+                <div className="flex items-center gap-1">
+                  <Button variant="ghost" size="icon" className="h-6 w-6 text-muted-foreground" onClick={() => startEdit(i)}>
+                    <Pencil className="h-3 w-3" />
+                  </Button>
+                  <Button variant="ghost" size="icon" className="h-6 w-6 text-destructive" onClick={() => eliminarItem(i)}>
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
+              </>
+            )}
           </div>
         ))}
 
@@ -120,81 +162,36 @@ const Hoja6Proyeccion = () => {
         </div>
       </div>
 
-      {/* Calculation process */}
-      <div className="space-y-3">
-        <h4 className="text-sm font-semibold flex items-center gap-2">📋 Proceso de cálculo</h4>
-
-        <div className="bg-muted/20 rounded p-3 space-y-1 text-sm">
-          <p className="font-medium">Paso 1: Valores originales (Hoja 3)</p>
-          <p className="text-muted-foreground">Total Afecto (Subtotal): <strong className="text-foreground">S/ {fmt(h3.subtotal)}</strong></p>
-          <p className="text-muted-foreground">Importe Total Factura: <strong className="text-foreground">S/ {fmt(h3.importe_total)}</strong></p>
+      {/* Matched items summary */}
+      {matchedItems.length > 0 && (
+        <div className="bg-muted/20 rounded-lg p-4 space-y-2">
+          <p className="text-sm font-medium">Ítems detectados en factura:</p>
+          {matchedItems.map((item, i) => (
+            <div key={i} className="flex justify-between text-sm bg-background rounded px-3 py-1.5 border">
+              <span className="truncate">{item.descripcion}</span>
+              <span className="font-mono text-muted-foreground ml-2 whitespace-nowrap">
+                {fmt(item.cantidad)} → {fmt(potenciaPromedio)} kW
+              </span>
+            </div>
+          ))}
         </div>
+      )}
 
-        <div className="bg-muted/20 rounded p-3 space-y-1 text-sm">
-          <p className="font-medium">Paso 2: Ítems modificados</p>
-          {matchedItems.length > 0 ? matchedItems.map((item, i) => {
-            const valorNuevo = +(item.valor_unitario * potenciaPromedio).toFixed(2);
-            return (
-              <div key={i} className="ml-2 space-y-0.5">
-                <p className="font-medium">{item.descripcion}</p>
-                <p className="text-muted-foreground">Valor original: <strong className="text-foreground">S/ {fmt(item.valor_venta)}</strong></p>
-                <p className="text-muted-foreground">
-                  Nuevo: {fmt(item.valor_unitario, 4)} × {fmt(potenciaPromedio, 2)} = <strong className="text-foreground">S/ {fmt(valorNuevo)}</strong>
-                </p>
-              </div>
-            );
-          }) : (
-            <p className="text-muted-foreground ml-2">No hay ítems seleccionados</p>
-          )}
-          {matchedItems.length > 0 && (
-            <>
-              <p className="text-muted-foreground mt-2">Suma valores originales: <strong className="text-foreground">S/ {fmt(matchedItems.reduce((s, i) => s + i.valor_venta, 0))}</strong></p>
-              <p className="text-muted-foreground">Suma valores recalculados: <strong className="text-foreground">S/ {fmt(matchedItems.reduce((s, i) => s + +(i.valor_unitario * potenciaPromedio).toFixed(2), 0))}</strong></p>
-            </>
-          )}
+      {/* Totals summary */}
+      <div className="bg-muted/50 rounded-lg p-3 space-y-1">
+        <div className="flex justify-between text-sm">
+          <span>Factura original:</span>
+          <span className="font-semibold font-mono">S/ {fmt(h6.total_original)}</span>
         </div>
-
-        <div className="bg-muted/20 rounded p-3 space-y-1 text-sm">
-          <p className="font-medium">Paso 3: Nuevo Total Afecto</p>
-          {(() => {
-            const sumaOrig = matchedItems.reduce((s, i) => s + i.valor_venta, 0);
-            const sumaRecalc = matchedItems.reduce((s, i) => s + +(i.valor_unitario * potenciaPromedio).toFixed(2), 0);
-            const nuevoSubtotal = +(h3.subtotal - sumaOrig + sumaRecalc).toFixed(2);
-            return (
-              <p className="text-muted-foreground">
-                {fmt(h3.subtotal)} – {fmt(sumaOrig)} + {fmt(sumaRecalc)} = <strong className="text-foreground">S/ {fmt(nuevoSubtotal)}</strong>
-              </p>
-            );
-          })()}
+        <div className="flex justify-between text-sm">
+          <span>Factura proyectada:</span>
+          <span className="font-semibold font-mono">S/ {fmt(h6.total_proyectado)}</span>
         </div>
-
-        <div className="bg-muted/20 rounded p-3 space-y-1 text-sm">
-          <p className="font-medium">Paso 4: IGV e Importe Total</p>
-          {(() => {
-            const sumaOrig = matchedItems.reduce((s, i) => s + i.valor_venta, 0);
-            const sumaRecalc = matchedItems.reduce((s, i) => s + +(i.valor_unitario * potenciaPromedio).toFixed(2), 0);
-            const nuevoSubtotal = +(h3.subtotal - sumaOrig + sumaRecalc).toFixed(2);
-            const igv = +(nuevoSubtotal * 0.18).toFixed(2);
-            const total = +(nuevoSubtotal + igv).toFixed(2);
-            return (
-              <>
-                <p className="text-muted-foreground">IGV (18%): {fmt(nuevoSubtotal)} × 0.18 = <strong className="text-foreground">S/ {fmt(igv)}</strong></p>
-                <p className="text-muted-foreground">Importe Total: {fmt(nuevoSubtotal)} + {fmt(igv)} = <strong className="text-foreground">S/ {fmt(total)}</strong></p>
-              </>
-            );
-          })()}
-        </div>
-
-        <div className="bg-muted/20 rounded p-3 space-y-1 text-sm border-l-4 border-primary">
-          <p className="font-medium">Paso 5: Desviación</p>
-          <p className="text-muted-foreground">
-            Proyectado – Original: {fmt(h6.total_proyectado)} – {fmt(h6.total_original)} = <strong className="text-foreground">S/ {fmt(h6.diferencia)}</strong>
-          </p>
-          {h6.diferencia < 0 ? (
-            <p className="text-green-600 flex items-center gap-1">✅ Se redujo la factura</p>
-          ) : h6.diferencia > 0 ? (
-            <p className="text-destructive flex items-center gap-1">⚠️ Se incrementó la factura</p>
-          ) : null}
+        <div className="flex justify-between text-sm pt-1 border-t">
+          <span className="font-medium">Desviación:</span>
+          <span className={`font-bold font-mono ${h6.diferencia < 0 ? "text-green-600" : h6.diferencia > 0 ? "text-destructive" : ""}`}>
+            S/ {fmt(h6.diferencia)}
+          </span>
         </div>
       </div>
     </div>
