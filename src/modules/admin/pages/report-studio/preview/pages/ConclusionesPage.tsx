@@ -84,7 +84,7 @@ const ConclusionesPage = ({ data }: { data: ReportData }) => {
 
         {/* Modulation table */}
         <div className="flex justify-center mb-3">
-          <table className="text-[10px]" style={{ borderCollapse: "collapse" }}>
+          <table className="text-[10px]" style={{ borderCollapse: "collapse", border: "1px solid #E8792B" }}>
             <thead>
               <tr>
                 <th className="px-4 py-1 text-left text-white font-semibold" style={{ backgroundColor: "#E8792B", border: "1px solid #E8792B" }}>MODULACIÓN</th>
@@ -93,12 +93,12 @@ const ConclusionesPage = ({ data }: { data: ReportData }) => {
             </thead>
             <tbody>
               <tr>
-                <td className="px-4 py-1" style={{ color: "#1B3A5C", borderBottom: "1px solid #E8792B" }}>Días con rango horario</td>
-                <td className="px-4 py-1 text-center font-bold" style={{ color: "#E8792B", borderBottom: "1px solid #E8792B" }}>{h7.dias_modulados} días</td>
+                <td className="px-4 py-1" style={{ color: "#1B3A5C", border: "1px solid #E8792B" }}>Días con rango horario</td>
+                <td className="px-4 py-1 text-center font-bold" style={{ color: "#E8792B", border: "1px solid #E8792B" }}>{h7.dias_modulados} días</td>
               </tr>
               <tr>
-                <td className="px-4 py-1" style={{ color: "#1B3A5C" }}>Días libre</td>
-                <td className="px-4 py-1 text-center font-bold" style={{ color: "#E8792B" }}>{h7.dias_libres} días</td>
+                <td className="px-4 py-1" style={{ color: "#1B3A5C", border: "1px solid #E8792B" }}>Días libre</td>
+                <td className="px-4 py-1 text-center font-bold" style={{ color: "#E8792B", border: "1px solid #E8792B" }}>{h7.dias_libres} días</td>
               </tr>
             </tbody>
           </table>
