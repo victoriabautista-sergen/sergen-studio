@@ -115,7 +115,7 @@ const Hoja4Comparacion = () => {
     updateSheet("hoja4_data", { ...h4, conceptos_inafectos: updated });
   };
 
-  const updateItemTipo = (idx: number, tipo: "gravado" | "inafecto" | "exonerado") => {
+  const updateItemTipo = (idx: number, tipo: "gravado" | "inafecto") => {
     const updated = [...(h4.items_recalculados || [])];
     if (updated[idx]) {
       updated[idx] = { ...updated[idx], tipo };
