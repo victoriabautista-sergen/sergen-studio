@@ -29,7 +29,7 @@ const Hoja4Comparacion = () => {
       const descUpper = item.descripcion.toUpperCase();
       const isHP = descUpper.includes(h3.nombre_hp.toUpperCase());
       const isHFP = descUpper.includes(h3.nombre_hfp.toUpperCase());
-      const isInafectoFromH3 = item.tipo === "inafecto" || item.tipo === "exonerado";
+      const isInafectoFromH3 = item.tipo === "inafecto" || (item.tipo as string) === "exonerado";
       const isInafectoFromList = inafectos.some(c => descUpper.includes(c.toUpperCase()));
       const isEnergy = isHP || isHFP;
 
