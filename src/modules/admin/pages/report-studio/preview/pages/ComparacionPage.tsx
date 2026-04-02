@@ -102,13 +102,12 @@ const ComparacionPage = ({ data }: { data: ReportData }) => {
                 {/* Totals - same structure as Hoja 3 */}
                 {(() => {
                    const opExoneradaCalc = items.filter(i => i.tipo === "exonerado").reduce((s, i) => s + i.valor_venta_calc, 0);
-                   const opInafectas = opInafectasCalc || h3.op_inafectas || 0;
-                   const opExonerada = h3.op_exonerada || 0;
-                   const subtotal = h4.subtotal_afecto + opInafectas + opExonerada;
-                   const totalFinal = h4.total_recalculado + opInafectas + opExonerada;
+                   const opExonerada = opExoneradaCalc || (h3.op_inafectas || 0) + (h3.op_exonerada || 0);
+                   const subtotal = h4.subtotal_afecto + opExonerada;
+                   const totalFinal = h4.total_recalculado + opExonerada;
                    return [
                      ["OP. GRAVADAS", h4.subtotal_afecto, false],
-                     ["OP. INAFECTAS", opInafectas + opExonerada, false],
+                     ["OP. EXONERADA", opExonerada, false],
                      ["OP. GRATUITA", h3.op_gratuita || 0, false],
                      ["OTROS CARGOS", h3.otros_cargos || 0, false],
                      ["OTROS DESCUENTOS", h3.otros_descuentos || 0, false],

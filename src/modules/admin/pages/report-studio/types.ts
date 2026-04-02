@@ -210,7 +210,7 @@ export const defaultReportData: ReportData = {
     reglas_extraccion: "",
   },
   hoja4_data: {
-    conceptos_inafectos: [],
+    conceptos_exonerados: [],
     items_recalculados: [],
     subtotal_afecto: 0,
     igv_recalculado: 0,

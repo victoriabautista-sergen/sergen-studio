@@ -15,10 +15,10 @@ const Hoja4Comparacion = () => {
   const h2 = data.hoja2_data;
   const concesionaria = data.datos_generales.concesionaria || "";
 
-  const [nuevoInafecto, setNuevoInafecto] = useState("");
+  const [nuevoExonerado, setNuevoExonerado] = useState("");
   const [savingKeywords, setSavingKeywords] = useState(false);
 
-  // Auto-load inafecto keywords from DB for this concesionaria
+  // Auto-load exonerado keywords from DB for this concesionaria
   useEffect(() => {
     if (!concesionaria) return;
     supabase
@@ -27,18 +27,18 @@ const Hoja4Comparacion = () => {
       .eq("concesionaria", concesionaria)
       .maybeSingle()
       .then(({ data: row }) => {
-        if (row && (row as any).inafecto_keywords?.length > 0 && (!h4.conceptos_inafectos || h4.conceptos_inafectos.length === 0)) {
+        if (row && (row as any).inafecto_keywords?.length > 0 && (!h4.conceptos_exonerados || h4.conceptos_exonerados.length === 0)) {
           updateSheet("hoja4_data", {
             ...h4,
-            conceptos_inafectos: (row as any).inafecto_keywords,
+            conceptos_exonerados: (row as any).inafecto_keywords,
           });
         }
       });
   }, [concesionaria]);
 
-  // Save inafecto keywords to DB for concesionaria
+  // Save exonerado keywords to DB for concesionaria
   const saveKeywordsForConcesionaria = async () => {
-    if (!concesionaria || !h4.conceptos_inafectos?.length) return;
+    if (!concesionaria || !h4.conceptos_exonerados?.length) return;
     setSavingKeywords(true);
     try {
       const { data: existing } = await supabase
@@ -50,14 +50,14 @@ const Hoja4Comparacion = () => {
       if (existing) {
         await supabase
           .from("concesionaria_potencia_keywords")
-          .update({ inafecto_keywords: h4.conceptos_inafectos } as any)
+          .update({ inafecto_keywords: h4.conceptos_exonerados } as any)
           .eq("concesionaria", concesionaria);
       } else {
         await supabase
           .from("concesionaria_potencia_keywords")
-          .insert({ concesionaria, inafecto_keywords: h4.conceptos_inafectos } as any);
+          .insert({ concesionaria, inafecto_keywords: h4.conceptos_exonerados } as any);
       }
-      toast.success(`Conceptos inafectos guardados para ${concesionaria}`);
+      toast.success(`Conceptos exonerados guardados para ${concesionaria}`);
     } catch (err: any) {
       toast.error("Error al guardar: " + (err.message || ""));
     } finally {
@@ -74,20 +74,20 @@ const Hoja4Comparacion = () => {
     const diff_hp = +(fact_hp - calc_hp).toFixed(5);
     const diff_hfp = +(fact_hfp - calc_hfp).toFixed(5);
 
-    const inafectos = h4.conceptos_inafectos || [];
+    const exonerados = h4.conceptos_exonerados || [];
 
     const items_recalculados: Hoja4Item[] = h3.items.map((item) => {
       const descUpper = item.descripcion.toUpperCase();
       const isHP = descUpper.includes(h3.nombre_hp.toUpperCase());
       const isHFP = descUpper.includes(h3.nombre_hfp.toUpperCase());
-      const isInafectoFromH3 = item.tipo === "inafecto" || (item.tipo as string) === "exonerado";
-      const isInafectoFromList = inafectos.some(c => descUpper.includes(c.toUpperCase()));
+      // Use h3 tipo directly: if "inafecto" or "exonerado" from extraction, treat as exonerado
+      const isExoneradoFromH3 = item.tipo === "exonerado" || item.tipo === "inafecto";
+      const isExoneradoFromList = exonerados.some(c => descUpper.includes(c.toUpperCase()));
       const isEnergy = isHP || isHFP;
 
-      // Only gravado or inafecto - merge exonerado into inafecto
-      let tipo: "gravado" | "inafecto" = "gravado";
-      if (isInafectoFromH3 || isInafectoFromList) {
-        tipo = "inafecto";
+      let tipo: "gravado" | "exonerado" = "gravado";
+      if (isExoneradoFromH3 || isExoneradoFromList) {
+        tipo = "exonerado";
       }
 
       let valor_unitario_calc = item.valor_unitario;
@@ -148,25 +148,25 @@ const Hoja4Comparacion = () => {
       impacto_economico: impacto,
       conclusion,
     });
-  }, [h2.precio_actualizado_hp, h2.precio_actualizado_hfp, h3.precio_hp_facturado, h3.precio_hfp_facturado, h3.items, h4.conceptos_inafectos, h3.nombre_hp, h3.nombre_hfp]);
+  }, [h2.precio_actualizado_hp, h2.precio_actualizado_hfp, h3.precio_hp_facturado, h3.precio_hfp_facturado, h3.items, h4.conceptos_exonerados, h3.nombre_hp, h3.nombre_hfp]);
 
-  const agregarInafecto = () => {
-    if (nuevoInafecto.trim()) {
+  const agregarExonerado = () => {
+    if (nuevoExonerado.trim()) {
       updateSheet("hoja4_data", {
         ...h4,
-        conceptos_inafectos: [...(h4.conceptos_inafectos || []), nuevoInafecto.trim().toUpperCase()],
+        conceptos_exonerados: [...(h4.conceptos_exonerados || []), nuevoExonerado.trim().toUpperCase()],
       });
-      setNuevoInafecto("");
+      setNuevoExonerado("");
     }
   };
 
-  const eliminarInafecto = (idx: number) => {
-    const updated = [...(h4.conceptos_inafectos || [])];
+  const eliminarExonerado = (idx: number) => {
+    const updated = [...(h4.conceptos_exonerados || [])];
     updated.splice(idx, 1);
-    updateSheet("hoja4_data", { ...h4, conceptos_inafectos: updated });
+    updateSheet("hoja4_data", { ...h4, conceptos_exonerados: updated });
   };
 
-  const updateItemTipo = (idx: number, tipo: "gravado" | "inafecto") => {
+  const updateItemTipo = (idx: number, tipo: "gravado" | "exonerado") => {
     const updated = [...(h4.items_recalculados || [])];
     if (updated[idx]) {
       updated[idx] = { ...updated[idx], tipo };
@@ -184,23 +184,23 @@ const Hoja4Comparacion = () => {
 
   return (
     <div className="space-y-6">
-      <h3 className="font-semibold text-foreground flex items-center gap-2">⚙ Conceptos Inafectos IGV</h3>
+      <h3 className="font-semibold text-foreground flex items-center gap-2">⚙ Conceptos Exonerados IGV</h3>
       <div className="flex gap-2">
         <Input
           placeholder="Ej: ALUMBRADO"
-          value={nuevoInafecto}
-          onChange={(e) => setNuevoInafecto(e.target.value)}
-          onKeyDown={(e) => e.key === "Enter" && agregarInafecto()}
+          value={nuevoExonerado}
+          onChange={(e) => setNuevoExonerado(e.target.value)}
+          onKeyDown={(e) => e.key === "Enter" && agregarExonerado()}
         />
-        <Button onClick={agregarInafecto} size="sm">Agregar</Button>
+        <Button onClick={agregarExonerado} size="sm">Agregar</Button>
       </div>
-      {(h4.conceptos_inafectos || []).length > 0 && (
+      {(h4.conceptos_exonerados || []).length > 0 && (
         <div className="space-y-2">
           <div className="flex flex-wrap gap-1">
-            {h4.conceptos_inafectos.map((c, i) => (
+            {h4.conceptos_exonerados.map((c, i) => (
               <span key={i} className="bg-muted px-2 py-1 rounded text-xs flex items-center gap-1">
                 {c}
-                <X className="w-3 h-3 cursor-pointer" onClick={() => eliminarInafecto(i)} />
+                <X className="w-3 h-3 cursor-pointer" onClick={() => eliminarExonerado(i)} />
               </span>
             ))}
           </div>
@@ -213,9 +213,6 @@ const Hoja4Comparacion = () => {
         </div>
       )}
 
-
-
-
       <div className="border-t pt-4">
         <h3 className="font-semibold text-foreground flex items-center gap-2 mb-3">📄 Factura recalculada</h3>
         <div className="space-y-1 max-h-[300px] overflow-y-auto">
@@ -227,13 +224,13 @@ const Hoja4Comparacion = () => {
           {(h4.items_recalculados || []).map((item, i) => (
             <div key={i} className="grid grid-cols-[1fr_90px_90px] gap-1 text-sm items-center bg-muted/30 rounded px-1 py-0.5">
               <span className="text-xs truncate font-medium">{item.descripcion}</span>
-              <Select value={item.tipo} onValueChange={(v) => updateItemTipo(i, v as "gravado" | "inafecto")}>
+              <Select value={item.tipo} onValueChange={(v) => updateItemTipo(i, v as "gravado" | "exonerado")}>
                 <SelectTrigger className="h-7 text-xs">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="gravado">Gravado</SelectItem>
-                  <SelectItem value="inafecto">Inafecto</SelectItem>
+                  <SelectItem value="exonerado">Exonerado</SelectItem>
                 </SelectContent>
               </Select>
               <span className="text-right font-mono text-xs">{item.cantidad.toLocaleString("es-PE")}</span>
