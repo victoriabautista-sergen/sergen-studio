@@ -9,12 +9,12 @@ export const useRiskManagement = (energyData: EnergyData[], date: Date | undefin
 
   const settings = useForecastSettings();
   const maxPower = useMaxPower(date, energyData || []);
-  const { modulationData, modulatedDays, isLoading, isDateModulated } = useModulationData(selectedMonth);
+  const { modulationData, currentMonthModulatedDays, isLoading, isDateModulated } = useModulationData(selectedMonth);
 
   return {
     maxPower,
     settings,
-    modulatedDays,
+    modulatedDays: currentMonthModulatedDays,
     modulationData,
     isLoading,
     selectedMonth,
