@@ -81,7 +81,7 @@ const Hoja4Comparacion = () => {
       const isHP = descUpper.includes(h3.nombre_hp.toUpperCase());
       const isHFP = descUpper.includes(h3.nombre_hfp.toUpperCase());
       // Use h3 tipo directly: if "inafecto" or "exonerado" from extraction, treat as exonerado
-      const isExoneradoFromH3 = item.tipo === "exonerado" || item.tipo === "inafecto";
+      const isExoneradoFromH3 = item.tipo === "exonerado" || (item.tipo as string) === "inafecto";
       const isExoneradoFromList = exonerados.some(c => descUpper.includes(c.toUpperCase()));
       const isEnergy = isHP || isHFP;
 
