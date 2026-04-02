@@ -36,6 +36,7 @@ export interface FacturaItem {
   cantidad: number;
   valor_unitario: number;
   valor_venta: number;
+  tipo?: "gravado" | "inafecto" | "exonerado";
 }
 
 export interface Hoja3Data {
