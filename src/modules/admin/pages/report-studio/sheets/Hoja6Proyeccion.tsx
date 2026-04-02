@@ -182,7 +182,7 @@ const Hoja6Proyeccion = () => {
         </p>
 
         {itemsPotencia.map((item, i) => (
-          <div key={i} className="flex items-center justify-between rounded px-3 py-2 border-2 border-orange-400 bg-orange-50">
+          <div key={i} className="flex items-center justify-between rounded px-3 py-2 border bg-background">
             {editingIdx === i ? (
               <div className="flex items-center gap-2 flex-1">
                 <Input
@@ -198,7 +198,7 @@ const Hoja6Proyeccion = () => {
               </div>
             ) : (
               <>
-                <span className="text-sm font-semibold" style={{ color: "#E8792B" }}>{item}</span>
+                <span className="text-sm font-medium">{item}</span>
                 <div className="flex items-center gap-1">
                   <Button variant="ghost" size="icon" className="h-6 w-6 text-muted-foreground" onClick={() => startEdit(i)}>
                     <Pencil className="h-3 w-3" />
@@ -228,12 +228,12 @@ const Hoja6Proyeccion = () => {
 
       {/* Matched items summary */}
       {matchedItems.length > 0 && (
-        <div className="rounded-lg p-4 space-y-2 border-2 border-orange-300 bg-orange-50/50">
-          <p className="text-sm font-medium" style={{ color: "#E8792B" }}>⚡ Ítems de potencia detectados en factura:</p>
+        <div className="rounded-lg p-4 space-y-2 border bg-muted/20">
+          <p className="text-sm font-medium text-muted-foreground">Ítems de potencia detectados en factura:</p>
           {matchedItems.map((item, i) => (
-            <div key={i} className="flex justify-between text-sm bg-background rounded px-3 py-1.5 border border-orange-200">
+            <div key={i} className="flex justify-between text-sm bg-background rounded px-3 py-1.5 border">
               <span className="truncate font-medium">{item.descripcion}</span>
-              <span className="font-mono ml-2 whitespace-nowrap" style={{ color: "#E8792B" }}>
+              <span className="font-mono text-muted-foreground ml-2 whitespace-nowrap">
                 {fmt(item.cantidad)} → <strong>{fmt(potenciaPromedio)} kW</strong>
               </span>
             </div>
