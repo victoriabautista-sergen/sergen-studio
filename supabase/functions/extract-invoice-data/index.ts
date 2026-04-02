@@ -146,7 +146,8 @@ Extrae este JSON:
       "unidad": "unidad de medida",
       "cantidad": (número),
       "valor_unitario": (número),
-      "valor_venta": (número)
+      "valor_venta": (número),
+      "tipo": "gravado" | "inafecto" | "exonerado"
     }
   ],
   "op_gravadas": (número),
