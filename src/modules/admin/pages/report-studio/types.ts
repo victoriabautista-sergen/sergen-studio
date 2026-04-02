@@ -111,6 +111,7 @@ export interface Hoja6Item {
 }
 
 export interface Hoja6Data {
+  items_potencia: string[];
   items_original: Hoja6Item[];
   items_proyectado: Hoja6Item[];
   potencia_promedio: number;
@@ -232,6 +233,7 @@ export const defaultReportData: ReportData = {
     evidencia_alerta_url: "",
   },
   hoja6_data: {
+    items_potencia: [],
     items_original: [],
     items_proyectado: [],
     potencia_promedio: 0,
