@@ -54,52 +54,53 @@ export const ModulationCalendarCard = ({
       </CardHeader>
       <CardContent className="flex flex-col items-center flex-1 justify-center px-3 pb-4">
         <div className="w-[95%] mx-auto">
-        <Calendar
-          mode="single"
-          selected={date}
-          onSelect={() => {}}
-          month={selectedMonth}
-          onMonthChange={onMonthChange}
-          className="rounded-md border w-full"
-          locale={es}
-          classNames={{
-            months: "w-full",
-            month: "w-full space-y-4",
-            table: "w-full border-collapse",
-            head_row: "flex w-full",
-            head_cell: "text-muted-foreground rounded-md flex-1 font-normal text-sm text-center",
-            row: "flex w-full mt-3",
-            cell: "flex-1 text-center text-sm p-0 relative",
-            day_today: "",
-            nav_button: "h-9 w-9",
-            caption: "flex justify-center pt-1 relative items-center text-base font-medium",
-          }}
-          components={{
-            Day: ({ date: dayDate }: { date: Date; displayMonth: Date }) => {
-              const isFuture = isDateInFuture(dayDate);
-              const isCurrentMonth = isSameMonth(dayDate, selectedMonth);
-              const isClickable = editable && !isFuture && isCurrentMonth;
+          <Calendar
+            mode="single"
+            selected={date}
+            onSelect={() => {}}
+            month={selectedMonth}
+            onMonthChange={onMonthChange}
+            className="rounded-md border w-full"
+            locale={es}
+            classNames={{
+              months: "w-full",
+              month: "w-full space-y-4",
+              table: "w-full border-collapse",
+              head_row: "flex w-full",
+              head_cell: "text-muted-foreground rounded-md flex-1 font-normal text-sm text-center",
+              row: "flex w-full mt-3",
+              cell: "flex-1 text-center text-sm p-0 relative",
+              day_today: "",
+              nav_button: "h-9 w-9",
+              caption: "flex justify-center pt-1 relative items-center text-base font-medium",
+            }}
+            components={{
+              Day: ({ date: dayDate }: { date: Date; displayMonth: Date }) => {
+                const isFuture = isDateInFuture(dayDate);
+                const isCurrentMonth = isSameMonth(dayDate, selectedMonth);
+                const isClickable = editable && !isFuture && isCurrentMonth;
 
-              return (
-                <button
-                  type="button"
-                  onClick={() => handleDayClick(dayDate)}
-                  disabled={!isClickable && editable}
-                  className={cn(
-                    'h-12 w-10 mx-auto p-0 font-normal flex items-center justify-center rounded-md transition-colors text-sm',
-                    getDateClassName(dayDate),
-                    isClickable && 'hover:bg-accent cursor-pointer',
-                    !isClickable && editable && 'cursor-not-allowed',
-                    date && isSameDay(dayDate, date) && 'ring-2 ring-primary'
-                  )}
-                >
-                  {dayDate.getDate()}
-                </button>
-              );
-            },
-          }}
-        />
-        <ModulationLegend />
+                return (
+                  <button
+                    type="button"
+                    onClick={() => handleDayClick(dayDate)}
+                    disabled={!isClickable && editable}
+                    className={cn(
+                      'h-12 w-10 mx-auto p-0 font-normal flex items-center justify-center rounded-md transition-colors text-sm',
+                      getDateClassName(dayDate),
+                      isClickable && 'hover:bg-accent cursor-pointer',
+                      !isClickable && editable && 'cursor-not-allowed',
+                      date && isSameDay(dayDate, date) && 'ring-2 ring-primary'
+                    )}
+                  >
+                    {dayDate.getDate()}
+                  </button>
+                );
+              },
+            }}
+          />
+          <ModulationLegend />
+        </div>
       </CardContent>
     </Card>
   );
