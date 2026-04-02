@@ -70,7 +70,7 @@ export const HistoricalPowerChart = ({ data, showTime = true }: HistoricalPowerC
           />
           <YAxis type="number" domain={[7000, 8500]} width={55} allowDataOverflow={true} fontSize={11} tickLine={false} tickFormatter={(v: number) => `${v}`} />
           <Tooltip formatter={formatTooltip} labelFormatter={formatTooltipLabel} />
-          <Bar dataKey="value" name="Potencia Máxima">
+          <Bar dataKey="value" name="Potencia Máxima" maxBarSize={60}>
             {chartData.map((entry, index) => (
               <Cell key={`cell-${index}`} fill={entry.color} />
             ))}
