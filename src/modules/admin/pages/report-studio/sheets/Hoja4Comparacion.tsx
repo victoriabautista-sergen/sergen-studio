@@ -36,7 +36,7 @@ const Hoja4Comparacion = () => {
       });
   }, [concesionaria]);
 
-  // Save exonerado keywords to DB for concesionaria
+  // Save exonerado keywords to DB for concesionaria (used as rules for AI extraction)
   const saveKeywordsForConcesionaria = async () => {
     if (!concesionaria || !h4.conceptos_exonerados?.length) return;
     setSavingKeywords(true);
@@ -57,7 +57,7 @@ const Hoja4Comparacion = () => {
           .from("concesionaria_potencia_keywords")
           .insert({ concesionaria, inafecto_keywords: h4.conceptos_exonerados } as any);
       }
-      toast.success(`Conceptos exonerados guardados para ${concesionaria}`);
+      toast.success(`Reglas exonerados guardadas para ${concesionaria}`);
     } catch (err: any) {
       toast.error("Error al guardar: " + (err.message || ""));
     } finally {
@@ -65,7 +65,7 @@ const Hoja4Comparacion = () => {
     }
   };
 
-  // Build recalculated items from hoja3 items
+  // Build recalculated items from hoja3 items — use h3 tipo directly (no reclassification)
   useEffect(() => {
     const calc_hp = h2.precio_calculado_hp;
     const calc_hfp = h2.precio_calculado_hfp;
@@ -74,19 +74,15 @@ const Hoja4Comparacion = () => {
     const diff_hp = +(fact_hp - calc_hp).toFixed(5);
     const diff_hfp = +(fact_hfp - calc_hfp).toFixed(5);
 
-    const exonerados = h4.conceptos_exonerados || [];
-
     const items_recalculados: Hoja4Item[] = h3.items.map((item) => {
       const descUpper = item.descripcion.toUpperCase();
       const isHP = descUpper.includes(h3.nombre_hp.toUpperCase());
       const isHFP = descUpper.includes(h3.nombre_hfp.toUpperCase());
-      // Use h3 tipo directly: if "inafecto" or "exonerado" from extraction, treat as exonerado
-      const isExoneradoFromH3 = item.tipo === "exonerado" || (item.tipo as string) === "inafecto";
-      const isExoneradoFromList = exonerados.some(c => descUpper.includes(c.toUpperCase()));
       const isEnergy = isHP || isHFP;
 
+      // Use classification directly from Hoja 3 extraction
       let tipo: "gravado" | "exonerado" = "gravado";
-      if (isExoneradoFromH3 || isExoneradoFromList) {
+      if (item.tipo === "exonerado" || (item.tipo as string) === "inafecto") {
         tipo = "exonerado";
       }
 
@@ -148,7 +144,7 @@ const Hoja4Comparacion = () => {
       impacto_economico: impacto,
       conclusion,
     });
-  }, [h2.precio_actualizado_hp, h2.precio_actualizado_hfp, h3.precio_hp_facturado, h3.precio_hfp_facturado, h3.items, h4.conceptos_exonerados, h3.nombre_hp, h3.nombre_hfp]);
+  }, [h2.precio_actualizado_hp, h2.precio_actualizado_hfp, h3.precio_hp_facturado, h3.precio_hfp_facturado, h3.items, h3.nombre_hp, h3.nombre_hfp]);
 
   const agregarExonerado = () => {
     if (nuevoExonerado.trim()) {
@@ -184,10 +180,13 @@ const Hoja4Comparacion = () => {
 
   return (
     <div className="space-y-6">
-      <h3 className="font-semibold text-foreground flex items-center gap-2">⚙ Conceptos Exonerados IGV</h3>
+      <h3 className="font-semibold text-foreground flex items-center gap-2">⚙ Reglas Exonerados por Concesionaria</h3>
+      <p className="text-xs text-muted-foreground">
+        Estos conceptos se usan como regla para la extracción IA de futuras facturas de <strong>{concesionaria || "esta concesionaria"}</strong>.
+      </p>
       <div className="flex gap-2">
         <Input
-          placeholder="Ej: ALUMBRADO"
+          placeholder="Ej: FISE, INTERES MORATORIO"
           value={nuevoExonerado}
           onChange={(e) => setNuevoExonerado(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && agregarExonerado()}

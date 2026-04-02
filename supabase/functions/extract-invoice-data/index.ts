@@ -26,7 +26,7 @@ Deno.serve(async (req) => {
 
   try {
     const body = await req.json();
-    const { image_url, nombre_hp, nombre_hfp, reglas_concesionario, concesionaria, adjust_rules, current_rules, user_feedback } = body;
+    const { image_url, nombre_hp, nombre_hfp, reglas_concesionario, concesionaria, adjust_rules, current_rules, user_feedback, exonerado_keywords } = body;
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) {
@@ -131,7 +131,7 @@ IMPORTANTE:
 - El concepto de energía en hora punta puede aparecer como: "${nombre_hp || "ENERGÍA ACTIVA EN HORA PUNTA"}" o similar.
 - El concepto de energía fuera de hora punta puede aparecer como: "${nombre_hfp || "ENERGÍA ACTIVA EN HORA FUERA DE PUNTA"}" o similar.
 - Para precio_hp y precio_hfp, extrae el VALOR UNITARIO (no el valor de venta total) de esos conceptos.
-- Para cada item, clasifícalo como "gravado" (sujeto a IGV) o "exonerado" (no sujeto a IGV). Para determinar la clasificación, usa los montos de la factura: OP. GRAVADAS y OP. EXONERADA. Los ítems cuya suma coincide con OP. EXONERADA son "exonerado", el resto son "gravado". NO asumas que alumbrado público es exonerado a menos que la factura lo indique explícitamente en OP. EXONERADA.
+- Para cada item, clasifícalo como "gravado" (sujeto a IGV) o "exonerado" (no sujeto a IGV). Para determinar la clasificación, usa los montos de la factura: OP. GRAVADAS y OP. EXONERADA. Los ítems cuya suma coincide con OP. EXONERADA son "exonerado", el resto son "gravado".${exonerado_keywords?.length ? `\n- REGLA DE CONCESIONARIA: Los siguientes conceptos son SIEMPRE "exonerado" para esta concesionaria: ${(exonerado_keywords as string[]).join(", ")}. NO clasifiques otros conceptos como exonerado a menos que la factura lo indique.` : " NO asumas que un concepto es exonerado a menos que la factura lo indique explícitamente."}
 
 Extrae este JSON:
 {
