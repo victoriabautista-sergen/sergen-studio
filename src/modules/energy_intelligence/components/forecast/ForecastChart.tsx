@@ -146,7 +146,6 @@ export const ForecastChart = forwardRef<HTMLDivElement, ForecastChartProps>(({ d
             cursor={{ stroke: '#9ca3af', strokeWidth: 1, strokeDasharray: '4 4' }}
             isAnimationActive={false}
             offset={20}
-            position={undefined}
           />
           <Legend verticalAlign="bottom" height={36} />
           {chartData.map((entry, index) =>
