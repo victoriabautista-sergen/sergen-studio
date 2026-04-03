@@ -30,11 +30,12 @@ interface PeakPoint {
 }
 
 // Custom tooltip – single, hover-only, positioned above cursor
-const CustomTooltip = ({ active, payload, label }: any) => {
+const CustomTooltip = React.forwardRef<HTMLDivElement, any>(({ active, payload, label }, ref) => {
   if (!active || !payload?.length) return null;
   const entry = payload[0]?.payload;
   return (
     <div
+      ref={ref}
       style={{
         background: 'rgba(255,255,255,0.97)',
         border: '1px solid #d1d5db',
@@ -59,7 +60,8 @@ const CustomTooltip = ({ active, payload, label }: any) => {
       ))}
     </div>
   );
-};
+});
+CustomTooltip.displayName = 'CustomTooltip';
 
 export const ForecastChart = forwardRef<HTMLDivElement, ForecastChartProps>(({ data, showPeakLabel = true, onPeakValueChange }, ref) => {
   const formatTime = (isoString: string): string => {
