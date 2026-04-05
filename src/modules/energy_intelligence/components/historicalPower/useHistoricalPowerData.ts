@@ -52,34 +52,70 @@ export const useHistoricalPowerData = (viewMode: ViewMode = "current") => {
     setError(null);
 
     try {
-      const { from, to } = getMonthRange(viewMode);
+      if (viewMode === "current") {
+        const { from, to } = getMonthRange("current");
 
-      const { data: rows, error: dbError } = await externalSupabase
-        .from("potencia_hora_punta" as any)
-        .select("fecha, max_demanda, hora, minuto")
-        .gte("fecha", from)
-        .lte("fecha", to)
-        .order("fecha", { ascending: true });
+        const { data: rows, error: dbError } = await externalSupabase
+          .from("potencia_hora_punta" as any)
+          .select("fecha, max_demanda, hora, minuto")
+          .gte("fecha", from)
+          .lte("fecha", to)
+          .order("fecha", { ascending: true });
 
-      if (dbError) throw new Error(dbError.message);
+        if (dbError) throw new Error(dbError.message);
 
-      if (!rows || rows.length === 0) {
-        setError("No se encontraron datos de potencia en hora punta");
-        return;
+        if (!rows || rows.length === 0) {
+          setError("Sin datos disponibles");
+          return;
+        }
+
+        const seen = new Set<string>();
+        const converted: PowerDataPoint[] = [];
+        for (const item of rows as any[]) {
+          const fecha = item.fecha.split("T")[0];
+          if (seen.has(fecha)) continue;
+          seen.add(fecha);
+          converted.push({
+            fecha,
+            ejecutado: Number(item.max_demanda),
+            hora: item.hora != null ? Number(item.hora) : undefined,
+            minuto: item.minuto != null ? Number(item.minuto) : undefined,
+          });
+        }
+        setData(converted);
+      } else {
+        // Mes anterior: tabla potencia_hora_punta_historica
+        const { data: rows, error: dbError } = await externalSupabase
+          .from("potencia_hora_punta_historica" as any)
+          .select("fecha, potencia_maxima, hora, minuto")
+          .order("fecha", { ascending: true });
+
+        if (dbError) throw new Error(dbError.message);
+
+        if (!rows || rows.length === 0) {
+          setError("Sin datos disponibles");
+          return;
+        }
+
+        const seen = new Set<string>();
+        const converted: PowerDataPoint[] = [];
+        for (const item of rows as any[]) {
+          const fecha = String(item.fecha).split("T")[0];
+          if (seen.has(fecha)) continue;
+          seen.add(fecha);
+          converted.push({
+            fecha,
+            ejecutado: Number(item.potencia_maxima),
+            hora: item.hora != null ? Number(item.hora) : undefined,
+            minuto: item.minuto != null ? Number(item.minuto) : undefined,
+          });
+        }
+        setData(converted);
       }
-
-      const converted: PowerDataPoint[] = (rows as any[]).map((item) => ({
-        fecha: item.fecha.split("T")[0],
-        ejecutado: Number(item.max_demanda),
-        hora: item.hora != null ? Number(item.hora) : undefined,
-        minuto: item.minuto != null ? Number(item.minuto) : undefined,
-      }));
-
-      setData(converted);
     } catch (err: any) {
-      console.error("Error fetching potencia_hora_punta:", err);
+      console.error("Error fetching power data:", err);
       setError(`Error: ${err.message}`);
-      toast.error("Error al cargar datos de potencia en hora punta");
+      toast.error("Error al cargar datos de potencia");
     } finally {
       setIsLoading(false);
     }
