@@ -42,9 +42,9 @@ export const useMaxPower = (date: Date | undefined) => {
     try {
       const { data, error } = await externalSupabase
         .from('potencia_hora_punta' as any)
-        .select('potencia_maxima')
+        .select('max_demanda')
         .eq('fecha', formattedDate)
-        .order('potencia_maxima', { ascending: false })
+        .order('max_demanda', { ascending: false })
         .limit(1);
 
       if (error) {
@@ -54,7 +54,7 @@ export const useMaxPower = (date: Date | undefined) => {
       }
 
       if (data && data.length > 0) {
-        const value = Number((data[0] as any).potencia_maxima);
+        const value = Number((data[0] as any).max_demanda);
         if (value > 0) {
           setMaxPower(Number(value.toFixed(2)));
           return;
