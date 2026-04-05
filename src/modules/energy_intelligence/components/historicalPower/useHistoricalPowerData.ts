@@ -56,7 +56,7 @@ export const useHistoricalPowerData = (viewMode: ViewMode = "current") => {
 
       const { data: rows, error: dbError } = await externalSupabase
         .from("potencia_hora_punta" as any)
-        .select("fecha, potencia_maxima, hora, minuto")
+        .select("fecha, max_demanda, hora, minuto")
         .gte("fecha", from)
         .lte("fecha", to)
         .order("fecha", { ascending: true });
