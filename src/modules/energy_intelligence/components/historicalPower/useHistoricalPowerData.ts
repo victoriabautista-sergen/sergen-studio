@@ -70,7 +70,7 @@ export const useHistoricalPowerData = (viewMode: ViewMode = "current") => {
 
       const converted: PowerDataPoint[] = (rows as any[]).map((item) => ({
         fecha: item.fecha.split("T")[0],
-        ejecutado: Number(item.potencia_maxima),
+        ejecutado: Number(item.max_demanda),
         hora: item.hora != null ? Number(item.hora) : undefined,
         minuto: item.minuto != null ? Number(item.minuto) : undefined,
       }));

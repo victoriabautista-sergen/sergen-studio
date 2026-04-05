@@ -54,7 +54,7 @@ export const useMaxPower = (date: Date | undefined) => {
       }
 
       if (data && data.length > 0) {
-        const value = Number((data[0] as any).potencia_maxima);
+        const value = Number((data[0] as any).max_demanda);
         if (value > 0) {
           setMaxPower(Number(value.toFixed(2)));
           return;
