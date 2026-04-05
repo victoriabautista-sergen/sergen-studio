@@ -36,8 +36,7 @@ export const getMonthLabel = (mode: ViewMode): string => {
   let month = now.getMonth();
   let year = now.getFullYear();
   if (mode === "previous") {
-    month = month === 0 ? 11 : month - 1;
-    year = month === 11 && now.getMonth() === 0 ? year - 1 : year;
+    return "Mes Anterior";
   }
   return `${MONTH_NAMES[month]} ${year}`;
 };
