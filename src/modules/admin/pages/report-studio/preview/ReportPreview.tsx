@@ -159,7 +159,7 @@ const ReportPreview = ({ zoom = 1 }: { zoom?: number }) => {
           }}
         >
           <div className="px-10 py-8" style={{ height: "100%" }}>
-            <PageComponent data={data} />
+            {PageComponent ? <PageComponent data={data} /> : <p className="text-muted-foreground">Página no disponible</p>}
           </div>
         </div>
       </div>
