@@ -100,7 +100,7 @@ const ReportStudioContent = () => {
 
             <div className="flex-1 overflow-y-auto px-5 pb-5 min-w-0">
               <div className="bg-white rounded-lg border p-4 overflow-hidden">
-                <ActiveComponent />
+                {ActiveComponent ? <ActiveComponent /> : <p className="text-muted-foreground">Hoja no disponible</p>}
               </div>
             </div>
           </div>
