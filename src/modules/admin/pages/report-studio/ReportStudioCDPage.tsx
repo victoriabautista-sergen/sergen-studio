@@ -75,19 +75,32 @@ const ReportStudioContent = () => {
 
             <div className="px-5 pb-3">
             <div className="flex flex-wrap gap-2">
-                {SHEETS.map(s => (
-                  <button
-                    key={s.id}
-                    onClick={() => setActiveSheet(s.id)}
-                    className={`px-4 py-2 text-base rounded-md transition-colors font-medium ${
-                      activeSheet === s.id
-                        ? "bg-[#1a2744] text-white"
-                        : "text-muted-foreground hover:bg-muted hover:text-foreground"
-                    }`}
-                  >
-                    {s.label}
-                  </button>
-                ))}
+                {SHEETS.map(s => {
+                  const isHidden = hiddenPages.has(s.id);
+                  const isActive = activeSheet === s.id;
+                  return (
+                    <button
+                      key={s.id}
+                      onClick={() => setActiveSheet(s.id)}
+                      onDoubleClick={() => togglePageVisibility(s.id)}
+                      title={isHidden ? "Doble clic para incluir en PDF" : "Doble clic para excluir del PDF"}
+                      className={`relative px-4 py-2 text-base rounded-md transition-colors font-medium ${
+                        isActive
+                          ? isHidden
+                            ? "bg-[#1a2744]/50 text-white/60 border border-dashed border-white/30"
+                            : "bg-[#1a2744] text-white"
+                          : isHidden
+                            ? "text-muted-foreground/40 bg-muted/40 line-through"
+                            : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                      }`}
+                    >
+                      {s.label}
+                      {isHidden && (
+                        <EyeOff className="absolute -top-1 -right-1 h-3 w-3 text-destructive" />
+                      )}
+                    </button>
+                  );
+                })}
               </div>
             </div>
 
