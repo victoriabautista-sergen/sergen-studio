@@ -48,6 +48,12 @@ const Navigation = () => {
     return Array.from({ length: TOTAL_PAGES }, (_, i) => i + 1);
   }, []);
 
+  const visibleCount = TOTAL_PAGES - hiddenPages.size;
+  const visibleIndex = Array.from({ length: TOTAL_PAGES }, (_, i) => i + 1)
+    .filter(p => !hiddenPages.has(p))
+    .indexOf(activeSheet);
+  const displayPageNum = hiddenPages.has(activeSheet) ? "—" : visibleIndex + 1;
+
   const currentIndex = visiblePages.indexOf(activeSheet);
   const isCurrentHidden = hiddenPages.has(activeSheet);
 
@@ -64,7 +70,7 @@ const Navigation = () => {
         <ChevronLeft className="h-4 w-4" /> Anterior
       </Button>
       <span className="text-sm text-muted-foreground whitespace-nowrap">
-        Página {activeSheet} de {TOTAL_PAGES}
+        Página {displayPageNum} de {visibleCount}
       </span>
       <Button variant="outline" size="default" onClick={goToNext} disabled={activeSheet === TOTAL_PAGES} className="gap-1">
         Siguiente <ChevronRight className="h-4 w-4" />
