@@ -186,12 +186,42 @@ const Hoja7Conclusiones = () => {
         )}
       </div>
 
-      {/* Conclusiones */}
+      {/* Conclusiones auto-generadas (editables) */}
+      <div className="bg-muted/30 rounded-lg p-4 space-y-3">
+        <div className="flex items-center justify-between">
+          <p className="text-sm font-semibold">Conclusiones principales</p>
+          <Button variant="outline" size="sm" className="text-xs" onClick={regenerarConclusiones}>
+            <RefreshCw className="h-3 w-3 mr-1" />
+            Regenerar
+          </Button>
+        </div>
+        <p className="text-xs text-muted-foreground">
+          Se generan automáticamente la primera vez. Puede editarlas o eliminarlas libremente.
+        </p>
+
+        <div className="space-y-2">
+          {(h7.conclusiones_auto || []).map((c, i) => (
+            <div key={i} className="flex gap-2 items-start">
+              <span className="text-xs font-bold text-muted-foreground mt-2 min-w-[1.2rem]">{i + 1}.</span>
+              <Input
+                value={c}
+                onChange={(e) => updateAutoConclusion(i, e.target.value)}
+                className="text-sm flex-1"
+              />
+              <Button variant="ghost" size="sm" className="text-destructive shrink-0 h-9 w-9 p-0" onClick={() => removeAutoConclusion(i)}>
+                ✕
+              </Button>
+            </div>
+          ))}
+          {(!h7.conclusiones_auto || h7.conclusiones_auto.length === 0) && (
+            <p className="text-xs text-muted-foreground italic">Sin conclusiones. Haga clic en "Regenerar" o agregue manualmente.</p>
+          )}
+        </div>
+      </div>
+
+      {/* Conclusiones adicionales */}
       <div className="bg-muted/30 rounded-lg p-4 space-y-3">
         <p className="text-sm font-semibold">Conclusiones adicionales</p>
-        <p className="text-xs text-muted-foreground">
-          Las conclusiones 1 (factura) y 2 (ahorro) se generan automáticamente. Aquí puede agregar más.
-        </p>
 
         <div className="flex gap-2">
           <Input
