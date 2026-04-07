@@ -131,7 +131,7 @@ const PreciosPage = ({ data }: { data: ReportData }) => {
       {/* Footer */}
       <div className="flex justify-between text-[8px] text-gray-400 border-t border-gray-200 pt-2 mt-auto">
         <span>Sergen Eficiencia Energética S.A.C. - Documento confidencial</span>
-        <span>Página 2</span>
+        <span>Página {pageNumber ?? 2}</span>
       </div>
     </div>
   );
