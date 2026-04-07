@@ -71,8 +71,10 @@ const Hoja7Conclusiones = () => {
     }
   }, [dg.mes, dg.anio]);
 
-  // Auto-generate conclusions
+  // Auto-generate conclusions ONLY if empty (initial seed)
   useEffect(() => {
+    if (h7.conclusiones_auto && h7.conclusiones_auto.length > 0) return; // Already has content, don't overwrite
+
     const conclusions: string[] = [];
     const h4 = data.hoja4_data;
     const h6 = data.hoja6_data;
@@ -89,7 +91,9 @@ const Hoja7Conclusiones = () => {
       conclusions.push(`Realizando el control de demanda **logramos ahorrar un promedio de S/ ${Math.abs(h6.diferencia).toFixed(2)}** para el periodo de ${mesStr}-${anioStr.slice(-2)}.`);
     }
 
-    update("conclusiones_auto", conclusions);
+    if (conclusions.length > 0) {
+      update("conclusiones_auto", conclusions);
+    }
   }, [data.hoja4_data.impacto_economico, data.hoja6_data.diferencia, dg.mes, dg.anio]);
 
   const agregarConclusion = () => {
