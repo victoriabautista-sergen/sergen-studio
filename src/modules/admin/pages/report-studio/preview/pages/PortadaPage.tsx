@@ -59,10 +59,10 @@ const PortadaPage = ({ data }: { data: ReportData }) => {
         </p>
       </div>
 
-      {/* Large spacer */}
-      <div style={{ flex: "4 1 0", minHeight: "350px" }} />
+      {/* Large spacer - pushes LIMA to bottom */}
+      <div style={{ flex: "1 1 auto" }} />
 
-      {/* Footer */}
+      {/* Footer - LIMA at very bottom, centered */}
       <p
         style={{
           fontSize: "16px",
@@ -70,7 +70,9 @@ const PortadaPage = ({ data }: { data: ReportData }) => {
           color: "#1a2744",
           letterSpacing: "0.06em",
           margin: 0,
-          paddingBottom: "16px",
+          paddingBottom: "8px",
+          textAlign: "center",
+          width: "100%",
         }}
       >
         LIMA-{data.anio}
