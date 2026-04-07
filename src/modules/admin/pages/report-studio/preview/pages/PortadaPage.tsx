@@ -19,7 +19,7 @@ const PortadaPage = ({ data }: { data: ReportData }) => {
         />
       </div>
 
-      {/* Spacer - bigger to push content down */}
+      {/* Spacer top - positions title slightly above center */}
       <div style={{ flex: "1.3 1 0", minHeight: "130px" }} />
 
       {/* Title block */}
@@ -59,8 +59,8 @@ const PortadaPage = ({ data }: { data: ReportData }) => {
         </p>
       </div>
 
-      {/* Large spacer - pushes LIMA to bottom */}
-      <div style={{ flex: "1 1 auto" }} />
+      {/* Large spacer - pushes LIMA to very bottom */}
+      <div style={{ flex: "4 1 0", minHeight: "350px" }} />
 
       {/* Footer - LIMA at very bottom, centered */}
       <p
