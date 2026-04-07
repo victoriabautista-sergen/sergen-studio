@@ -71,8 +71,32 @@ const Hoja7Conclusiones = () => {
     }
   }, [dg.mes, dg.anio]);
 
-  // Auto-generate conclusions
+  // Auto-generate conclusions ONLY if empty (initial seed)
   useEffect(() => {
+    if (h7.conclusiones_auto && h7.conclusiones_auto.length > 0) return; // Already has content, don't overwrite
+
+    const conclusions: string[] = [];
+    const h4 = data.hoja4_data;
+    const h6 = data.hoja6_data;
+
+    if (Math.abs(h4.impacto_economico) < 500) {
+      conclusions.push("El precio de la energía facturado coincide con el cálculo efectuado según contrato para el periodo evaluado.");
+    } else {
+      conclusions.push(`Se identificó una diferencia de S/ ${h4.impacto_economico.toFixed(2)} en la facturación que requiere atención.`);
+    }
+
+    if (h6.diferencia < 0) {
+      const mesStr = dg.mes?.toLowerCase() || "";
+      const anioStr = dg.anio || "";
+      conclusions.push(`Realizando el control de demanda **logramos ahorrar un promedio de S/ ${Math.abs(h6.diferencia).toFixed(2)}** para el periodo de ${mesStr}-${anioStr.slice(-2)}.`);
+    }
+
+    if (conclusions.length > 0) {
+      update("conclusiones_auto", conclusions);
+    }
+  }, [data.hoja4_data.impacto_economico, data.hoja6_data.diferencia, dg.mes, dg.anio]);
+
+  const regenerarConclusiones = () => {
     const conclusions: string[] = [];
     const h4 = data.hoja4_data;
     const h6 = data.hoja6_data;
@@ -90,7 +114,19 @@ const Hoja7Conclusiones = () => {
     }
 
     update("conclusiones_auto", conclusions);
-  }, [data.hoja4_data.impacto_economico, data.hoja6_data.diferencia, dg.mes, dg.anio]);
+    toast.success("Conclusiones regeneradas");
+  };
+
+  const updateAutoConclusion = (index: number, value: string) => {
+    const updated = [...(h7.conclusiones_auto || [])];
+    updated[index] = value;
+    update("conclusiones_auto", updated);
+  };
+
+  const removeAutoConclusion = (index: number) => {
+    const updated = (h7.conclusiones_auto || []).filter((_, i) => i !== index);
+    update("conclusiones_auto", updated);
+  };
 
   const agregarConclusion = () => {
     if (nuevaConclusion.trim()) {
@@ -150,12 +186,42 @@ const Hoja7Conclusiones = () => {
         )}
       </div>
 
-      {/* Conclusiones */}
+      {/* Conclusiones auto-generadas (editables) */}
+      <div className="bg-muted/30 rounded-lg p-4 space-y-3">
+        <div className="flex items-center justify-between">
+          <p className="text-sm font-semibold">Conclusiones principales</p>
+          <Button variant="outline" size="sm" className="text-xs" onClick={regenerarConclusiones}>
+            <RefreshCw className="h-3 w-3 mr-1" />
+            Regenerar
+          </Button>
+        </div>
+        <p className="text-xs text-muted-foreground">
+          Se generan automáticamente la primera vez. Puede editarlas o eliminarlas libremente.
+        </p>
+
+        <div className="space-y-2">
+          {(h7.conclusiones_auto || []).map((c, i) => (
+            <div key={i} className="flex gap-2 items-start">
+              <span className="text-xs font-bold text-muted-foreground mt-2 min-w-[1.2rem]">{i + 1}.</span>
+              <Input
+                value={c}
+                onChange={(e) => updateAutoConclusion(i, e.target.value)}
+                className="text-sm flex-1"
+              />
+              <Button variant="ghost" size="sm" className="text-destructive shrink-0 h-9 w-9 p-0" onClick={() => removeAutoConclusion(i)}>
+                ✕
+              </Button>
+            </div>
+          ))}
+          {(!h7.conclusiones_auto || h7.conclusiones_auto.length === 0) && (
+            <p className="text-xs text-muted-foreground italic">Sin conclusiones. Haga clic en "Regenerar" o agregue manualmente.</p>
+          )}
+        </div>
+      </div>
+
+      {/* Conclusiones adicionales */}
       <div className="bg-muted/30 rounded-lg p-4 space-y-3">
         <p className="text-sm font-semibold">Conclusiones adicionales</p>
-        <p className="text-xs text-muted-foreground">
-          Las conclusiones 1 (factura) y 2 (ahorro) se generan automáticamente. Aquí puede agregar más.
-        </p>
 
         <div className="flex gap-2">
           <Input
