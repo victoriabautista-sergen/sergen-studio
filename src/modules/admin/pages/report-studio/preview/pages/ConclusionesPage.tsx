@@ -39,18 +39,19 @@ const ConclusionesPage = ({ data }: { data: ReportData }) => {
   const modulationDays = h7.modulation_days || [];
 
   const getDayColor = (day: number): string => {
-    const dateStr = format(new Date(prevYear, prevMonthIdx, day), 'yyyy-MM-dd');
-    const modDay = modulationDays.find(d => d.date === dateStr);
+    const d = new Date(prevYear, prevMonthIdx, day);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
 
-    if (modDay) {
-      return modDay.is_modulated ? "#dc2626" : "#16a34a";
-    }
+    // Future days show as muted/gray
+    if (isAfter(d, today)) return "#9ca3af";
 
-    // Default: weekends green, weekdays blue
-    const date = new Date(prevYear, prevMonthIdx, day);
-    const dow = date.getDay();
-    if (dow === 0 || dow === 6) return "#16a34a";
-    return "#1B3A5C";
+    const dateStr = format(d, 'yyyy-MM-dd');
+    const modDay = modulationDays.find(md => md.date === dateStr);
+
+    // Modulated → red, everything else (including no record) → green (libre)
+    if (modDay?.is_modulated) return "#dc2626";
+    return "#16a34a";
   };
 
   // All conclusions
