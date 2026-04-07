@@ -5,7 +5,6 @@ const ConclusionesPage = ({ data, pageNumber }: { data: ReportData; pageNumber?:
   const h7 = data.hoja7_data;
   const dg = data.datos_generales;
 
-  // Previous month (relative to report date)
   const mesIndex = MESES.indexOf(dg.mes || "");
   const year = parseInt(dg.anio) || new Date().getFullYear();
   const month = mesIndex >= 0 ? mesIndex : new Date().getMonth();
@@ -15,11 +14,10 @@ const ConclusionesPage = ({ data, pageNumber }: { data: ReportData; pageNumber?:
   const prevYear = prevMonth.getFullYear();
   const prevMonthIdx = prevMonth.getMonth();
 
-  // Build calendar
   const firstDay = new Date(prevYear, prevMonthIdx, 1);
   const lastDay = new Date(prevYear, prevMonthIdx + 1, 0);
   const daysInMonth = lastDay.getDate();
-  const startDow = (firstDay.getDay() + 6) % 7; // Mon=0
+  const startDow = (firstDay.getDay() + 6) % 7;
 
   const weeks: (number | null)[][] = [];
   let currentWeek: (number | null)[] = [];
@@ -42,19 +40,13 @@ const ConclusionesPage = ({ data, pageNumber }: { data: ReportData; pageNumber?:
     const d = new Date(prevYear, prevMonthIdx, day);
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-
-    // Future days show as muted/gray
     if (isAfter(d, today)) return "#9ca3af";
-
     const dateStr = format(d, 'yyyy-MM-dd');
     const modDay = modulationDays.find(md => md.date === dateStr);
-
-    // Modulated → red, everything else (including no record) → green (libre)
     if (modDay?.is_modulated) return "#dc2626";
     return "#16a34a";
   };
 
-  // All conclusions
   const allConclusions = [
     ...(h7.conclusiones_auto || []),
     ...(h7.conclusiones_manuales ? h7.conclusiones_manuales.split("\n").filter(Boolean) : []),
@@ -68,24 +60,24 @@ const ConclusionesPage = ({ data, pageNumber }: { data: ReportData; pageNumber?:
   };
 
   return (
-    <div className="flex flex-col h-full text-[10px] leading-relaxed" style={{ fontFamily: "'Inter', sans-serif", color: "#1B3A5C" }}>
+    <div className="flex flex-col h-full text-[12px] leading-relaxed" style={{ fontFamily: "'Inter', sans-serif", color: "#1B3A5C" }}>
       <div className="flex-1">
         {/* Header */}
-        <p className="text-xs font-bold" style={{ color: "#1B3A5C" }}>Sergen Eficiencia Energética</p>
+        <p className="text-[14px] font-bold" style={{ color: "#1B3A5C" }}>Sergen Eficiencia Energética</p>
         <hr className="border-t border-gray-300 my-2" />
 
         {/* MODULACIONES */}
-        <h1 className="text-xs font-semibold mt-4 mb-3" style={{ color: "#1B3A5C" }}>
+        <h1 className="text-[14px] font-semibold mt-4 mb-3" style={{ color: "#1B3A5C" }}>
           III. MODULACIONES
         </h1>
 
-        <p className="text-[10px] mb-3" style={{ color: "#1B3A5C" }}>
+        <p className="text-[12px] mb-3" style={{ color: "#1B3A5C" }}>
           Es importante indicar que en el mes de {prevMonthName.toLowerCase()} del {prevYear} la empresa SERGEN gestionó la demanda energética <strong>{h7.dias_modulados} días</strong>, siendo unos de los menores intervalos de modulación en el mercado.
         </p>
 
         {/* Modulation table */}
         <div className="flex justify-center mb-3">
-          <table className="text-[10px]" style={{ borderCollapse: "collapse", border: "0.5px solid #E8792B" }}>
+          <table className="text-[12px]" style={{ borderCollapse: "collapse", border: "0.5px solid #E8792B" }}>
             <thead>
               <tr>
                 <th className="px-4 py-1 text-left text-white font-semibold" style={{ backgroundColor: "#E8792B", border: "0.5px solid #E8792B" }}>MODULACIÓN</th>
@@ -105,7 +97,7 @@ const ConclusionesPage = ({ data, pageNumber }: { data: ReportData; pageNumber?:
           </table>
         </div>
 
-        <p className="text-[10px] mb-3" style={{ color: "#1B3A5C" }}>
+        <p className="text-[12px] mb-3" style={{ color: "#1B3A5C" }}>
           A continuación, se muestra el calendario del mes de {prevMonthName.toLowerCase()} del {prevYear} identificando con color <span className="font-bold" style={{ color: "#16a34a" }}>verde</span> los días que se envió "uso libre de equipos" y de color <span className="font-bold" style={{ color: "#dc2626" }}>rojo</span> los días que se envió restricción horaria.
         </p>
 
@@ -113,13 +105,13 @@ const ConclusionesPage = ({ data, pageNumber }: { data: ReportData; pageNumber?:
         <div className="flex justify-center mb-4">
           <div className="text-center">
             <div className="flex items-center justify-center gap-2 mb-2">
-              <span className="text-[10px]" style={{ color: "#1B3A5C" }}>{"<"}</span>
-              <span className="text-[11px] font-semibold" style={{ color: "#1B3A5C" }}>
+              <span className="text-[12px]" style={{ color: "#1B3A5C" }}>{"<"}</span>
+              <span className="text-[13px] font-semibold" style={{ color: "#1B3A5C" }}>
                 {prevMonthName.toLowerCase()} {prevYear}
               </span>
-              <span className="text-[10px]" style={{ color: "#1B3A5C" }}>{">"}</span>
+              <span className="text-[12px]" style={{ color: "#1B3A5C" }}>{">"}</span>
             </div>
-            <table className="text-[9px] border-0" style={{ borderCollapse: "collapse", border: "none" }}>
+            <table className="text-[11px] border-0" style={{ borderCollapse: "collapse", border: "none" }}>
               <thead>
                 <tr>
                   {["lu", "ma", "mi", "ju", "vi", "sá", "do"].map(d => (
@@ -152,13 +144,13 @@ const ConclusionesPage = ({ data, pageNumber }: { data: ReportData; pageNumber?:
         </div>
 
         {/* CONCLUSIONES */}
-        <h1 className="text-xs font-semibold mt-4 mb-3" style={{ color: "#1B3A5C" }}>
+        <h1 className="text-[14px] font-semibold mt-4 mb-3" style={{ color: "#1B3A5C" }}>
           IV. CONCLUSIONES
         </h1>
 
         <div className="space-y-2">
           {allConclusions.map((c, i) => (
-            <div key={i} className="flex gap-2 text-[10px]" style={{ color: "#1B3A5C" }}>
+            <div key={i} className="flex gap-2 text-[12px]" style={{ color: "#1B3A5C" }}>
               <span className="font-bold" style={{ color: "#1B3A5C" }}>{i + 1}.</span>
               <span>{renderMarkdownBold(c)}</span>
             </div>
@@ -167,7 +159,7 @@ const ConclusionesPage = ({ data, pageNumber }: { data: ReportData; pageNumber?:
       </div>
 
       {/* Footer */}
-      <div className="pdf-footer flex justify-between text-[9px] text-gray-500 border-t border-gray-200 pt-2 mt-auto">
+      <div className="pdf-footer flex justify-between text-[11px] text-gray-500 border-t border-gray-200 pt-2 mt-auto">
         <span>Sergen Eficiencia Energética S.A.C. - Documento confidencial</span>
         <span>Página {pageNumber ?? 7}</span>
       </div>

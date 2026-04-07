@@ -21,17 +21,17 @@ const ComparacionPage = ({ data, pageNumber }: { data: ReportData; pageNumber?: 
   const hasItems = items.length > 0;
 
   return (
-    <div className="flex flex-col h-full text-[10px] leading-relaxed" style={{ fontFamily: "'Inter', sans-serif", color: "#1B3A5C" }}>
+    <div className="flex flex-col h-full text-[12px] leading-relaxed" style={{ fontFamily: "'Inter', sans-serif", color: "#1B3A5C" }}>
       <div className="flex-1">
         {/* Header */}
-        <p className="text-xs font-bold" style={{ color: "#1B3A5C" }}>Sergen Eficiencia Energética</p>
+        <p className="text-[14px] font-bold" style={{ color: "#1B3A5C" }}>Sergen Eficiencia Energética</p>
         <hr className="border-t border-gray-300 my-2" />
 
-        <h1 className="text-xs font-semibold mt-4 mb-3" style={{ color: "#1B3A5C" }}>
+        <h1 className="text-[14px] font-semibold mt-4 mb-3" style={{ color: "#1B3A5C" }}>
           III. COMPARACIÓN CON FACTURA
         </h1>
 
-        <p className="text-[11px] mb-4" style={{ color: "#1B3A5C" }}>
+        <p className="text-[13px] mb-4" style={{ color: "#1B3A5C" }}>
           A continuación se presenta la factura con los precios de energía recalculados según contrato. El precio calculado es de <strong>{fmt(h2.precio_calculado_hp, 4)} S/kWh (HP)</strong> y <strong>{fmt(h2.precio_calculado_hfp, 4)} S/kWh (HFP)</strong>. Los ítems de energía resaltados muestran el precio calculado por Sergen.
         </p>
 
@@ -40,17 +40,17 @@ const ComparacionPage = ({ data, pageNumber }: { data: ReportData; pageNumber?: 
             {/* Invoice header box - same as Hoja 3 */}
             <div className="border border-gray-300 rounded p-3 mb-3 flex justify-between items-start">
               <div>
-                <p className="text-[10px] font-bold" style={{ color: "#1B3A5C" }}>{h3.razon_social || dg.concesionaria || "[Concesionaria]"}</p>
-                <p className="text-[9px] text-gray-500">RUC: {h3.ruc || "—"}</p>
+                <p className="text-[12px] font-bold" style={{ color: "#1B3A5C" }}>{h3.razon_social || dg.concesionaria || "[Concesionaria]"}</p>
+                <p className="text-[11px] text-gray-500">RUC: {h3.ruc || "—"}</p>
               </div>
               <div className="text-right">
-                <p className="text-[10px] font-bold" style={{ color: "#1B3A5C" }}>FACTURA ELECTRÓNICA</p>
-                <p className="text-[10px] font-bold" style={{ color: "#dc2626" }}>SIMULACIÓN</p>
-                <p className="text-[9px]" style={{ color: "#1B3A5C" }}>{h3.fecha_factura || "—"}</p>
+                <p className="text-[12px] font-bold" style={{ color: "#1B3A5C" }}>FACTURA ELECTRÓNICA</p>
+                <p className="text-[12px] font-bold" style={{ color: "#dc2626" }}>SIMULACIÓN</p>
+                <p className="text-[11px]" style={{ color: "#1B3A5C" }}>{h3.fecha_factura || "—"}</p>
               </div>
             </div>
 
-            <table className="w-full text-[9px] border-collapse mb-3" style={{ tableLayout: "fixed" }}>
+            <table className="w-full text-[11px] border-collapse mb-3" style={{ tableLayout: "fixed" }}>
               <colgroup>
                 <col style={{ width: "46%" }} />
                 <col style={{ width: "12%" }} />
@@ -89,7 +89,6 @@ const ComparacionPage = ({ data, pageNumber }: { data: ReportData; pageNumber?: 
                 <tr><td colSpan={5} className="py-1 border-0"></td></tr>
                 {/* Totals - same structure as Hoja 3 */}
                 {(() => {
-                   // Use the same exonerada value as Hoja 3 (original invoice)
                    const opExonerada = (h3.op_inafectas || 0) + (h3.op_exonerada || 0);
                    const subtotal = h4.subtotal_afecto + opExonerada;
                    const totalFinal = h4.total_recalculado + opExonerada;
@@ -107,10 +106,10 @@ const ComparacionPage = ({ data, pageNumber }: { data: ReportData; pageNumber?: 
                 })().map(([label, val, isBold], i) => (
                   <tr key={`total-${i}`}>
                     <td className="p-0 border-0"></td>
-                    <td colSpan={2} className={`${borderStyle} px-1.5 py-0.5 text-left ${isBold ? "font-bold text-white text-[10px]" : "font-semibold"}`} style={isBold ? { backgroundColor: "#1B3A5C" } : { color: "#1B3A5C" }}>
+                    <td colSpan={2} className={`${borderStyle} px-1.5 py-0.5 text-left ${isBold ? "font-bold text-white text-[12px]" : "font-semibold"}`} style={isBold ? { backgroundColor: "#1B3A5C" } : { color: "#1B3A5C" }}>
                       {label as string}
                     </td>
-                    <td colSpan={2} className={`${borderStyle} px-1.5 py-0.5 text-right font-mono ${isBold ? "font-bold text-white text-[11px]" : ""}`} style={isBold ? { backgroundColor: "#1B3A5C" } : { color: "#1B3A5C" }}>
+                    <td colSpan={2} className={`${borderStyle} px-1.5 py-0.5 text-right font-mono ${isBold ? "font-bold text-white text-[13px]" : ""}`} style={isBold ? { backgroundColor: "#1B3A5C" } : { color: "#1B3A5C" }}>
                       {monedaSymbol} {fmt((val as number) || 0)}
                     </td>
                   </tr>
@@ -118,25 +117,25 @@ const ComparacionPage = ({ data, pageNumber }: { data: ReportData; pageNumber?: 
               </tbody>
             </table>
 
-            <p className="text-[8px] italic text-gray-400 text-right mb-3">
+            <p className="text-[10px] italic text-gray-400 text-right mb-3">
               Fuente: Factura recalculada con precios según contrato
             </p>
           </>
         ) : (
           <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 flex flex-col items-center justify-center text-gray-400 min-h-[150px]">
-            <p className="text-xs">Completa la Hoja 3 para generar la factura simulada</p>
+            <p className="text-[14px]">Completa la Hoja 3 para generar la factura simulada</p>
           </div>
         )}
 
 
         {/* Conclusion box */}
-        <div className="border-l-4 rounded p-3 mt-3 text-[10px] leading-relaxed" style={{ borderColor: "#E8792B", backgroundColor: "#FFF7ED", color: "#1B3A5C" }}>
+        <div className="border-l-4 rounded p-3 mt-3 text-[12px] leading-relaxed" style={{ borderColor: "#E8792B", backgroundColor: "#FFF7ED", color: "#1B3A5C" }}>
           {h4.conclusion || "—"}
         </div>
       </div>
 
       {/* Footer */}
-      <div className="pdf-footer flex justify-between text-[9px] text-gray-500 border-t border-gray-200 pt-2 mt-auto">
+      <div className="pdf-footer flex justify-between text-[11px] text-gray-500 border-t border-gray-200 pt-2 mt-auto">
         <span>Sergen Eficiencia Energética S.A.C. - Documento confidencial</span>
         <span>Página {pageNumber ?? 4}</span>
       </div>

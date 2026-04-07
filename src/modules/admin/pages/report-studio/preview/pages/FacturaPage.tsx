@@ -19,17 +19,17 @@ const FacturaPage = ({ data, pageNumber }: { data: ReportData; pageNumber?: numb
   const hasItems = h3.items && h3.items.length > 0;
 
   return (
-    <div className="flex flex-col h-full text-[10px] leading-relaxed" style={{ fontFamily: "'Inter', sans-serif", color: "#1B3A5C" }}>
+    <div className="flex flex-col h-full text-[12px] leading-relaxed" style={{ fontFamily: "'Inter', sans-serif", color: "#1B3A5C" }}>
       <div className="flex-1">
         {/* Header */}
-        <p className="text-xs font-bold" style={{ color: "#1B3A5C" }}>Sergen Eficiencia Energética</p>
+        <p className="text-[14px] font-bold" style={{ color: "#1B3A5C" }}>Sergen Eficiencia Energética</p>
         <hr className="border-t border-gray-300 my-2" />
 
-        <h1 className="text-xs font-semibold mt-4 mb-3" style={{ color: "#1B3A5C" }}>
+        <h1 className="text-[14px] font-semibold mt-4 mb-3" style={{ color: "#1B3A5C" }}>
           II. FACTURA EMITIDA
         </h1>
 
-        <p className="text-[11px] mb-4" style={{ color: "#1B3A5C" }}>
+        <p className="text-[13px] mb-4" style={{ color: "#1B3A5C" }}>
           Se presenta la factura <strong>{h3.numero_factura || "[N° Factura]"}</strong> de fecha <strong>{h3.fecha_factura || "[Fecha]"}</strong>, correspondiente al periodo de <strong>{mesAnterior?.toLowerCase()} del {anioAnterior}</strong>, con los importes originales emitidos por <strong>{dg.concesionaria || "[Concesionaria]"}</strong>.
         </p>
 
@@ -38,17 +38,17 @@ const FacturaPage = ({ data, pageNumber }: { data: ReportData; pageNumber?: numb
             {/* Invoice header box */}
             <div className="border border-gray-300 rounded p-3 mb-3 flex justify-between items-start">
               <div>
-                <p className="text-[10px] font-bold" style={{ color: "#1B3A5C" }}>{h3.razon_social || dg.concesionaria || "[Concesionaria]"}</p>
-                <p className="text-[9px] text-gray-500">RUC: {h3.ruc || "—"}</p>
+                <p className="text-[12px] font-bold" style={{ color: "#1B3A5C" }}>{h3.razon_social || dg.concesionaria || "[Concesionaria]"}</p>
+                <p className="text-[11px] text-gray-500">RUC: {h3.ruc || "—"}</p>
               </div>
               <div className="text-right">
-                <p className="text-[10px] font-bold" style={{ color: "#1B3A5C" }}>FACTURA ELECTRÓNICA</p>
-                <p className="text-[9px]" style={{ color: "#1B3A5C" }}>{h3.numero_factura || "—"}</p>
-                <p className="text-[9px]" style={{ color: "#1B3A5C" }}>{h3.fecha_factura || "—"}</p>
+                <p className="text-[12px] font-bold" style={{ color: "#1B3A5C" }}>FACTURA ELECTRÓNICA</p>
+                <p className="text-[11px]" style={{ color: "#1B3A5C" }}>{h3.numero_factura || "—"}</p>
+                <p className="text-[11px]" style={{ color: "#1B3A5C" }}>{h3.fecha_factura || "—"}</p>
               </div>
             </div>
 
-            <table className="w-full text-[9px] border-collapse mb-3" style={{ tableLayout: "fixed" }}>
+            <table className="w-full text-[11px] border-collapse mb-3" style={{ tableLayout: "fixed" }}>
               <colgroup>
                 <col style={{ width: "46%" }} />
                 <col style={{ width: "12%" }} />
@@ -97,10 +97,10 @@ const FacturaPage = ({ data, pageNumber }: { data: ReportData; pageNumber?: numb
                 ].filter(([, val, isBold]) => isBold || (val as number) !== 0).map(([label, val, isBold], i) => (
                   <tr key={`total-${i}`}>
                     <td className="p-0 border-0"></td>
-                    <td colSpan={2} className={`${borderStyle} px-1.5 py-0.5 text-left ${isBold ? "font-bold text-white text-[10px]" : "font-semibold"}`} style={isBold ? { backgroundColor: "#1B3A5C" } : { color: "#1B3A5C" }}>
+                    <td colSpan={2} className={`${borderStyle} px-1.5 py-0.5 text-left ${isBold ? "font-bold text-white text-[12px]" : "font-semibold"}`} style={isBold ? { backgroundColor: "#1B3A5C" } : { color: "#1B3A5C" }}>
                       {label as string}
                     </td>
-                    <td colSpan={2} className={`${borderStyle} px-1.5 py-0.5 text-right font-mono ${isBold ? "font-bold text-white text-[11px]" : ""}`} style={isBold ? { backgroundColor: "#1B3A5C" } : { color: "#1B3A5C" }}>
+                    <td colSpan={2} className={`${borderStyle} px-1.5 py-0.5 text-right font-mono ${isBold ? "font-bold text-white text-[13px]" : ""}`} style={isBold ? { backgroundColor: "#1B3A5C" } : { color: "#1B3A5C" }}>
                       {monedaSymbol} {((val as number) || 0).toLocaleString("es-PE", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                     </td>
                   </tr>
@@ -108,7 +108,7 @@ const FacturaPage = ({ data, pageNumber }: { data: ReportData; pageNumber?: numb
               </tbody>
             </table>
 
-            <p className="text-[8px] italic text-gray-400 text-right">
+            <p className="text-[10px] italic text-gray-400 text-right">
               Fuente: Factura emitida por {dg.concesionaria || "[Concesionaria]"}
             </p>
           </>
@@ -118,13 +118,13 @@ const FacturaPage = ({ data, pageNumber }: { data: ReportData; pageNumber?: numb
             <svg className="w-12 h-12 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
             </svg>
-            <p className="text-xs">Sube una factura y extrae los datos para mostrar aquí</p>
+            <p className="text-[14px]">Sube una factura y extrae los datos para mostrar aquí</p>
           </div>
         )}
       </div>
 
       {/* Footer */}
-      <div className="pdf-footer flex justify-between text-[9px] text-gray-500 border-t border-gray-200 pt-2 mt-auto">
+      <div className="pdf-footer flex justify-between text-[11px] text-gray-500 border-t border-gray-200 pt-2 mt-auto">
         <span>Sergen Eficiencia Energética S.A.C. - Documento confidencial</span>
         <span>Página {pageNumber ?? 3}</span>
       </div>
