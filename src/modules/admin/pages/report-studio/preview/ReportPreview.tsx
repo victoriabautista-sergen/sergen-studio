@@ -13,7 +13,7 @@ import { generateReportPDF } from "../utils/pdfExport";
 
 const TOTAL_PAGES = 7;
 
-const pageComponents: Record<number, React.FC<{ data: any }>> = {
+const pageComponents: Record<number, React.FC<{ data: any; pageNumber?: number }>> = {
   1: PortadaPage,
   2: PreciosPage,
   3: FacturaPage,
@@ -48,6 +48,12 @@ const Navigation = () => {
     return Array.from({ length: TOTAL_PAGES }, (_, i) => i + 1);
   }, []);
 
+  const visibleCount = TOTAL_PAGES - hiddenPages.size;
+  const visibleIndex = Array.from({ length: TOTAL_PAGES }, (_, i) => i + 1)
+    .filter(p => !hiddenPages.has(p))
+    .indexOf(activeSheet);
+  const displayPageNum = hiddenPages.has(activeSheet) ? "—" : visibleIndex + 1;
+
   const currentIndex = visiblePages.indexOf(activeSheet);
   const isCurrentHidden = hiddenPages.has(activeSheet);
 
@@ -64,7 +70,7 @@ const Navigation = () => {
         <ChevronLeft className="h-4 w-4" /> Anterior
       </Button>
       <span className="text-sm text-muted-foreground whitespace-nowrap">
-        Página {activeSheet} de {TOTAL_PAGES}
+        Página {displayPageNum} de {visibleCount}
       </span>
       <Button variant="outline" size="default" onClick={goToNext} disabled={activeSheet === TOTAL_PAGES} className="gap-1">
         Siguiente <ChevronRight className="h-4 w-4" />
@@ -84,6 +90,9 @@ const Navigation = () => {
 
 // Hidden component that renders ALL visible pages for PDF export
 const AllPagesForExport = React.forwardRef<HTMLDivElement, { data: any; hiddenPages: Set<number> }>(({ data, hiddenPages }, ref) => {
+  const visibleEntries = Object.entries(pageComponents)
+    .filter(([pageNum]) => !hiddenPages.has(Number(pageNum)));
+
   return (
     <div
       ref={ref}
@@ -95,9 +104,7 @@ const AllPagesForExport = React.forwardRef<HTMLDivElement, { data: any; hiddenPa
         pointerEvents: "none",
       }}
     >
-      {Object.entries(pageComponents)
-        .filter(([pageNum]) => !hiddenPages.has(Number(pageNum)))
-        .map(([pageNum, Component]) => (
+      {visibleEntries.map(([pageNum, Component], idx) => (
         <div
           key={pageNum}
           data-pdf-page={pageNum}
@@ -111,7 +118,7 @@ const AllPagesForExport = React.forwardRef<HTMLDivElement, { data: any; hiddenPa
           }}
         >
           <div style={{ padding: "24px 32px", minHeight: "800px" }}>
-            <Component data={data} />
+            <Component data={data} pageNumber={idx + 1} />
           </div>
         </div>
       ))}
@@ -125,6 +132,14 @@ const ReportPreview = ({ zoom = 1 }: { zoom?: number }) => {
   const PageComponent = pageComponents[activeSheet];
   const allPagesRef = useRef<HTMLDivElement>(null);
   const isCurrentHidden = hiddenPages.has(activeSheet);
+
+  // Compute visible page number for current sheet
+  const currentVisiblePageNum = useMemo(() => {
+    if (hiddenPages.has(activeSheet)) return undefined;
+    const visibleBefore = Array.from({ length: activeSheet }, (_, i) => i + 1)
+      .filter(p => !hiddenPages.has(p));
+    return visibleBefore.length;
+  }, [activeSheet, hiddenPages]);
 
   const handleExport = useCallback(async () => {
     if (!allPagesRef.current || _isExporting) return;
@@ -159,7 +174,7 @@ const ReportPreview = ({ zoom = 1 }: { zoom?: number }) => {
           }}
         >
           <div className="px-10 py-8" style={{ height: "100%" }}>
-            {PageComponent ? <PageComponent data={data} /> : <p className="text-muted-foreground">Página no disponible</p>}
+            {PageComponent ? <PageComponent data={data} pageNumber={currentVisiblePageNum} /> : <p className="text-muted-foreground">Página no disponible</p>}
           </div>
         </div>
       </div>

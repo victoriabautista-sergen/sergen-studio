@@ -1,7 +1,7 @@
 import { ReportData, MESES } from "../../types";
 import { format, subMonths, isAfter } from "date-fns";
 
-const ConclusionesPage = ({ data }: { data: ReportData }) => {
+const ConclusionesPage = ({ data, pageNumber }: { data: ReportData; pageNumber?: number }) => {
   const h7 = data.hoja7_data;
   const dg = data.datos_generales;
 
@@ -169,7 +169,7 @@ const ConclusionesPage = ({ data }: { data: ReportData }) => {
       {/* Footer */}
       <div className="flex justify-between text-[8px] text-gray-400 border-t border-gray-200 pt-2 mt-auto">
         <span>Sergen Eficiencia Energética S.A.C. - Documento confidencial</span>
-        <span>Página 7</span>
+        <span>Página {pageNumber ?? 7}</span>
       </div>
     </div>
   );

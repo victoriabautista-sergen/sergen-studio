@@ -8,7 +8,7 @@ const toSentenceCase = (s: string) => {
 const fmt = (n: number, decimals = 2) =>
   n.toLocaleString("es-PE", { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
 
-const ProyeccionPage = ({ data }: { data: ReportData }) => {
+const ProyeccionPage = ({ data, pageNumber }: { data: ReportData; pageNumber?: number }) => {
   const h3 = data.hoja3_data;
   const h5 = data.hoja5_data;
   const h6 = data.hoja6_data;
@@ -195,7 +195,7 @@ const ProyeccionPage = ({ data }: { data: ReportData }) => {
       {/* Footer */}
       <div className="flex justify-between text-[8px] text-gray-400 border-t border-gray-200 pt-2 mt-auto">
         <span>Sergen Eficiencia Energética S.A.C. - Documento confidencial</span>
-        <span>Página 6</span>
+        <span>Página {pageNumber ?? 6}</span>
       </div>
     </div>
   );

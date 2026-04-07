@@ -8,7 +8,7 @@ const toSentenceCase = (s: string) => {
 const fmt = (n: number, decimals = 2) =>
   n.toLocaleString("es-PE", { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
 
-const ComparacionPage = ({ data }: { data: ReportData }) => {
+const ComparacionPage = ({ data, pageNumber }: { data: ReportData; pageNumber?: number }) => {
   const h4 = data.hoja4_data;
   const h3 = data.hoja3_data;
   const h2 = data.hoja2_data;
@@ -138,7 +138,7 @@ const ComparacionPage = ({ data }: { data: ReportData }) => {
       {/* Footer */}
       <div className="flex justify-between text-[8px] text-gray-400 border-t border-gray-200 pt-2 mt-auto">
         <span>Sergen Eficiencia Energética S.A.C. - Documento confidencial</span>
-        <span>Página 4</span>
+        <span>Página {pageNumber ?? 4}</span>
       </div>
     </div>
   );
