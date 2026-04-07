@@ -8,7 +8,7 @@ const PortadaPage = ({ data }: { data: ReportData }) => {
   return (
     <div
       className="flex flex-col items-center"
-      style={{ minHeight: "700px", fontFamily: "'Segoe UI', 'Helvetica Neue', Arial, sans-serif" }}
+      style={{ height: "100%", fontFamily: "'Segoe UI', 'Helvetica Neue', Arial, sans-serif" }}
     >
       {/* Logo centered */}
       <div className="flex justify-center pt-10">
