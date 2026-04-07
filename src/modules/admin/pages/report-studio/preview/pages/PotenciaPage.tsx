@@ -12,22 +12,22 @@ const PotenciaPage = ({ data, pageNumber }: { data: ReportData; pageNumber?: num
   const borderStyle = "border border-gray-300";
 
   return (
-    <div className="flex flex-col h-full text-[10px] leading-relaxed" style={{ fontFamily: "'Inter', sans-serif", color: "#1B3A5C" }}>
+    <div className="flex flex-col h-full text-[12px] leading-relaxed" style={{ fontFamily: "'Inter', sans-serif", color: "#1B3A5C" }}>
       <div className="flex-1">
         {/* Header */}
-        <p className="text-xs font-bold" style={{ color: "#1B3A5C" }}>Sergen Eficiencia Energética</p>
+        <p className="text-[14px] font-bold" style={{ color: "#1B3A5C" }}>Sergen Eficiencia Energética</p>
         <hr className="border-t border-gray-300 my-2" />
 
-        <h1 className="text-xs font-semibold mt-4 mb-3" style={{ color: "#1B3A5C" }}>
+        <h1 className="text-[14px] font-semibold mt-4 mb-3" style={{ color: "#1B3A5C" }}>
           II. POTENCIA COINCIDENTE
         </h1>
 
-        <p className="text-[10px] mb-3" style={{ color: "#1B3A5C" }}>
+        <p className="text-[12px] mb-3" style={{ color: "#1B3A5C" }}>
           Para el periodo <strong>{mesAnterior?.toLowerCase()} {anioAnterior}</strong> la potencia coincidente publicada por el COES fue la siguiente:
         </p>
 
         {/* Multi-header table matching reference */}
-        <table className="w-full text-[9px] border-collapse mb-4" style={{ tableLayout: "fixed" }}>
+        <table className="w-full text-[11px] border-collapse mb-4" style={{ tableLayout: "fixed" }}>
           <thead>
             <tr style={{ backgroundColor: "#f3f4f6" }}>
               <th className={`${borderStyle} px-1.5 py-1 text-center font-semibold`} style={{ color: "#1B3A5C" }} colSpan={2}>Máxima demanda en hora punta</th>
@@ -52,16 +52,16 @@ const PotenciaPage = ({ data, pageNumber }: { data: ReportData; pageNumber?: num
           </tbody>
         </table>
 
-        <p className="text-[10px] mb-3" style={{ color: "#1B3A5C" }}>
+        <p className="text-[12px] mb-3" style={{ color: "#1B3A5C" }}>
           De las facturas analizadas de <strong>{dg.client_name || "—"}</strong> tenemos el siguiente cuadro:
         </p>
 
         {/* Potencia coincidente promedio box */}
         <div className="flex justify-between items-center rounded px-3 py-2" style={{ backgroundColor: "#f3f4f6", border: "1px solid #d0d8e0" }}>
-          <span className="text-[10px] font-semibold" style={{ color: "#1B3A5C" }}>
+          <span className="text-[12px] font-semibold" style={{ color: "#1B3A5C" }}>
             POTENCIA COINCIDENTE PROMEDIO DEL CLIENTE (kW):
           </span>
-          <span className="text-sm font-bold font-mono" style={{ color: "#E8792B" }}>
+          <span className="text-[16px] font-bold font-mono" style={{ color: "#E8792B" }}>
             {h5.potencia_coincidente_promedio ? h5.potencia_coincidente_promedio.toFixed(2) : "—"}
           </span>
         </div>
@@ -69,7 +69,7 @@ const PotenciaPage = ({ data, pageNumber }: { data: ReportData; pageNumber?: num
         {/* Evidencia de alerta */}
         {h5.evidencia_alerta_url && (
           <div className="mt-4">
-            <p className="text-[10px] mb-2 font-semibold" style={{ color: "#1B3A5C" }}>
+            <p className="text-[12px] mb-2 font-semibold" style={{ color: "#1B3A5C" }}>
               Evidencia de envío de alerta:
             </p>
             <img
@@ -82,7 +82,7 @@ const PotenciaPage = ({ data, pageNumber }: { data: ReportData; pageNumber?: num
       </div>
 
       {/* Footer */}
-      <div className="pdf-footer flex justify-between text-[9px] text-gray-500 border-t border-gray-200 pt-2 mt-auto">
+      <div className="pdf-footer flex justify-between text-[11px] text-gray-500 border-t border-gray-200 pt-2 mt-auto">
         <span>Sergen Eficiencia Energética S.A.C. - Documento confidencial</span>
         <span>Página {pageNumber ?? 5}</span>
       </div>
