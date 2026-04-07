@@ -133,6 +133,14 @@ const ReportPreview = ({ zoom = 1 }: { zoom?: number }) => {
   const allPagesRef = useRef<HTMLDivElement>(null);
   const isCurrentHidden = hiddenPages.has(activeSheet);
 
+  // Compute visible page number for current sheet
+  const currentVisiblePageNum = useMemo(() => {
+    if (hiddenPages.has(activeSheet)) return undefined;
+    const visibleBefore = Array.from({ length: activeSheet }, (_, i) => i + 1)
+      .filter(p => !hiddenPages.has(p));
+    return visibleBefore.length;
+  }, [activeSheet, hiddenPages]);
+
   const handleExport = useCallback(async () => {
     if (!allPagesRef.current || _isExporting) return;
     _isExporting = true;
@@ -166,7 +174,7 @@ const ReportPreview = ({ zoom = 1 }: { zoom?: number }) => {
           }}
         >
           <div className="px-10 py-8" style={{ height: "100%" }}>
-            {PageComponent ? <PageComponent data={data} /> : <p className="text-muted-foreground">Página no disponible</p>}
+            {PageComponent ? <PageComponent data={data} pageNumber={currentVisiblePageNum} /> : <p className="text-muted-foreground">Página no disponible</p>}
           </div>
         </div>
       </div>
