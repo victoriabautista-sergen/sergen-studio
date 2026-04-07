@@ -82,7 +82,7 @@ const PotenciaPage = ({ data, pageNumber }: { data: ReportData; pageNumber?: num
       </div>
 
       {/* Footer */}
-      <div className="flex justify-between text-[8px] text-gray-400 border-t border-gray-200 pt-2 mt-auto">
+      <div className="pdf-footer flex justify-between text-[9px] text-gray-500 border-t border-gray-200 pt-2 mt-auto">
         <span>Sergen Eficiencia Energética S.A.C. - Documento confidencial</span>
         <span>Página {pageNumber ?? 5}</span>
       </div>

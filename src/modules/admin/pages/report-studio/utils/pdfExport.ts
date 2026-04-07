@@ -53,7 +53,6 @@ export async function generateReportPDF(
     .pdf-page {
       width: 210mm;
       height: 297mm;
-      padding: 12mm 14mm;
       box-sizing: border-box;
       background: #ffffff !important;
       overflow: hidden;
@@ -65,12 +64,43 @@ export async function generateReportPDF(
       page-break-before: always;
       break-before: page;
     }
+    /* Page content wrapper - fills the page with flex to push footer down */
+    .pdf-page-inner {
+      width: 100%;
+      height: 100%;
+      padding: 12mm 14mm;
+      box-sizing: border-box;
+      display: flex;
+      flex-direction: column;
+    }
     /* Ensure thin borders in print */
     table {
       border-collapse: collapse;
     }
     td, th {
       border-width: 0.5px !important;
+    }
+    /* Hide structural spacer rows borders completely */
+    tr.spacer-row td,
+    td.border-0, th.border-0,
+    td[class*="border-0"], th[class*="border-0"] {
+      border: none !important;
+      border-width: 0 !important;
+    }
+    /* Footer styling - always at bottom */
+    .pdf-footer {
+      margin-top: auto;
+      flex-shrink: 0;
+      font-size: 9px !important;
+      color: #6b7280 !important;
+      border-top: 1px solid #e5e7eb;
+      padding-top: 6px;
+      display: flex;
+      justify-content: space-between;
+    }
+    .pdf-footer span {
+      font-size: 9px !important;
+      color: #6b7280 !important;
     }
   </style>
 </head>
@@ -83,7 +113,12 @@ export async function generateReportPDF(
   for (let i = 0; i < pageEls.length; i++) {
     const pageWrapper = iframeDoc.createElement("div");
     pageWrapper.className = "pdf-page";
-    pageWrapper.innerHTML = pageEls[i].innerHTML;
+    
+    const innerWrapper = iframeDoc.createElement("div");
+    innerWrapper.className = "pdf-page-inner";
+    innerWrapper.innerHTML = pageEls[i].innerHTML;
+    
+    pageWrapper.appendChild(innerWrapper);
     iframeDoc.body.appendChild(pageWrapper);
   }
 
