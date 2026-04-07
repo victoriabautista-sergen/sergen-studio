@@ -85,21 +85,21 @@ const ConclusionesPage = ({ data, pageNumber }: { data: ReportData; pageNumber?:
 
         {/* Modulation table */}
         <div className="flex justify-center mb-3">
-          <table className="text-[10px]" style={{ borderCollapse: "collapse", border: "1px solid #E8792B" }}>
+          <table className="text-[10px]" style={{ borderCollapse: "collapse", border: "0.5px solid #E8792B" }}>
             <thead>
               <tr>
-                <th className="px-4 py-1 text-left text-white font-semibold" style={{ backgroundColor: "#E8792B", border: "1px solid #E8792B" }}>MODULACIÓN</th>
-                <th className="px-4 py-1 text-center text-white font-semibold" style={{ backgroundColor: "#E8792B", border: "1px solid #E8792B" }}>DÍAS</th>
+                <th className="px-4 py-1 text-left text-white font-semibold" style={{ backgroundColor: "#E8792B", border: "0.5px solid #E8792B" }}>MODULACIÓN</th>
+                <th className="px-4 py-1 text-center text-white font-semibold" style={{ backgroundColor: "#E8792B", border: "0.5px solid #E8792B" }}>DÍAS</th>
               </tr>
             </thead>
             <tbody>
               <tr>
-                <td className="px-4 py-1" style={{ color: "#1B3A5C", border: "1px solid #E8792B" }}>Días con rango horario</td>
-                <td className="px-4 py-1 text-center font-bold" style={{ color: "#E8792B", border: "1px solid #E8792B" }}>{h7.dias_modulados} días</td>
+                <td className="px-4 py-1" style={{ color: "#1B3A5C", border: "0.5px solid #E8792B" }}>Días con rango horario</td>
+                <td className="px-4 py-1 text-center font-bold" style={{ color: "#E8792B", border: "0.5px solid #E8792B" }}>{h7.dias_modulados} días</td>
               </tr>
               <tr>
-                <td className="px-4 py-1" style={{ color: "#1B3A5C", border: "1px solid #E8792B" }}>Días libre</td>
-                <td className="px-4 py-1 text-center font-bold" style={{ color: "#E8792B", border: "1px solid #E8792B" }}>{h7.dias_libres} días</td>
+                <td className="px-4 py-1" style={{ color: "#1B3A5C", border: "0.5px solid #E8792B" }}>Días libre</td>
+                <td className="px-4 py-1 text-center font-bold" style={{ color: "#E8792B", border: "0.5px solid #E8792B" }}>{h7.dias_libres} días</td>
               </tr>
             </tbody>
           </table>
@@ -119,26 +119,26 @@ const ConclusionesPage = ({ data, pageNumber }: { data: ReportData; pageNumber?:
               </span>
               <span className="text-[10px]" style={{ color: "#1B3A5C" }}>{">"}</span>
             </div>
-            <table className="text-[9px]" style={{ borderCollapse: "collapse" }}>
+            <table className="text-[9px] border-0" style={{ borderCollapse: "collapse", border: "none" }}>
               <thead>
                 <tr>
                   {["lu", "ma", "mi", "ju", "vi", "sá", "do"].map(d => (
-                    <th key={d} className="px-2 py-1 font-medium text-gray-500">{d}</th>
+                    <th key={d} className="px-2 py-1 font-medium text-gray-500 border-0" style={{ border: "none" }}>{d}</th>
                   ))}
                 </tr>
               </thead>
               <tbody>
                 {weeks.map((week, wi) => (
-                  <tr key={wi}>
+                  <tr key={wi} className="border-0">
                     {week.map((day, di) => {
-                      if (!day) return <td key={di} className="px-2 py-1"></td>;
+                      if (!day) return <td key={di} className="px-2 py-1 border-0" style={{ border: "none" }}></td>;
                       const color = getDayColor(day);
                       const isBold = color === "#dc2626";
                       return (
                         <td
                           key={di}
-                          className={`px-2 py-1 text-center ${isBold ? "font-bold" : ""}`}
-                          style={{ color }}
+                          className={`px-2 py-1 text-center border-0 ${isBold ? "font-bold" : ""}`}
+                          style={{ color, border: "none" }}
                         >
                           {day}
                         </td>

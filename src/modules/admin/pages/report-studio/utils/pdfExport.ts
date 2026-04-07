@@ -83,7 +83,9 @@ export async function generateReportPDF(
     /* Hide structural spacer rows borders completely */
     tr.spacer-row td,
     td.border-0, th.border-0,
-    td[class*="border-0"], th[class*="border-0"] {
+    td[class*="border-0"], th[class*="border-0"],
+    tr.border-0 td, tr.border-0 th,
+    table.border-0 td, table.border-0 th {
       border: none !important;
       border-width: 0 !important;
     }
