@@ -109,15 +109,17 @@ const AllPagesForExport = React.forwardRef<HTMLDivElement, { data: any; hiddenPa
           key={pageNum}
           data-pdf-page={pageNum}
           style={{
-            width: "595px",
-            height: "842px",
+            width: "210mm",
+            minHeight: "297mm",
             backgroundColor: "#ffffff",
             fontFamily: "'Inter', sans-serif",
             overflow: "hidden",
             position: "relative",
+            display: "flex",
+            flexDirection: "column",
           }}
         >
-          <div style={{ padding: "24px 32px", minHeight: "800px" }}>
+          <div style={{ flex: 1, display: "flex", flexDirection: "column", padding: "0" }}>
             <Component data={data} pageNumber={idx + 1} />
           </div>
         </div>
