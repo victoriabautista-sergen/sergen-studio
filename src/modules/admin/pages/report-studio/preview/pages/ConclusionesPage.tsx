@@ -1,5 +1,5 @@
 import { ReportData, MESES } from "../../types";
-import { format, subMonths, startOfMonth, endOfMonth } from "date-fns";
+import { format, subMonths, isAfter } from "date-fns";
 
 const ConclusionesPage = ({ data }: { data: ReportData }) => {
   const h7 = data.hoja7_data;
