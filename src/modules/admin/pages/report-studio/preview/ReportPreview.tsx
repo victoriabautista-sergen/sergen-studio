@@ -90,6 +90,9 @@ const Navigation = () => {
 
 // Hidden component that renders ALL visible pages for PDF export
 const AllPagesForExport = React.forwardRef<HTMLDivElement, { data: any; hiddenPages: Set<number> }>(({ data, hiddenPages }, ref) => {
+  const visibleEntries = Object.entries(pageComponents)
+    .filter(([pageNum]) => !hiddenPages.has(Number(pageNum)));
+
   return (
     <div
       ref={ref}
@@ -101,9 +104,7 @@ const AllPagesForExport = React.forwardRef<HTMLDivElement, { data: any; hiddenPa
         pointerEvents: "none",
       }}
     >
-      {Object.entries(pageComponents)
-        .filter(([pageNum]) => !hiddenPages.has(Number(pageNum)))
-        .map(([pageNum, Component]) => (
+      {visibleEntries.map(([pageNum, Component], idx) => (
         <div
           key={pageNum}
           data-pdf-page={pageNum}
@@ -117,7 +118,7 @@ const AllPagesForExport = React.forwardRef<HTMLDivElement, { data: any; hiddenPa
           }}
         >
           <div style={{ padding: "24px 32px", minHeight: "800px" }}>
-            <Component data={data} />
+            <Component data={data} pageNumber={idx + 1} />
           </div>
         </div>
       ))}
