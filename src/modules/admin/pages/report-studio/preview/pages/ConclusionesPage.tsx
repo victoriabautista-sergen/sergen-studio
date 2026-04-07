@@ -1,7 +1,7 @@
 import { ReportData, MESES } from "../../types";
 import { format, subMonths, isAfter } from "date-fns";
 
-const ConclusionesPage = ({ data }: { data: ReportData }) => {
+const ConclusionesPage = ({ data, pageNumber }: { data: ReportData; pageNumber?: number }) => {
   const h7 = data.hoja7_data;
   const dg = data.datos_generales;
 

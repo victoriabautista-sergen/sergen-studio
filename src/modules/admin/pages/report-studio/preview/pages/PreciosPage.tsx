@@ -13,7 +13,7 @@ const renderFormula = (text: string): React.ReactNode => {
   });
 };
 
-const PreciosPage = ({ data }: { data: ReportData }) => {
+const PreciosPage = ({ data, pageNumber }: { data: ReportData; pageNumber?: number }) => {
   const h2 = data.hoja2_data;
   const dg = data.datos_generales;
   const monedaSymbol = h2.moneda === "USD" ? "$" : "S/";

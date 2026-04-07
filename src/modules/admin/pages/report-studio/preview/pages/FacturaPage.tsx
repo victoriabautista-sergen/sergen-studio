@@ -5,7 +5,7 @@ const toSentenceCase = (s: string) => {
   return s.charAt(0).toUpperCase() + s.slice(1).toLowerCase();
 };
 
-const FacturaPage = ({ data }: { data: ReportData }) => {
+const FacturaPage = ({ data, pageNumber }: { data: ReportData; pageNumber?: number }) => {
   const h3 = data.hoja3_data;
   const dg = data.datos_generales;
 

@@ -1,6 +1,6 @@
 import { ReportData } from "../../types";
 
-const PotenciaPage = ({ data }: { data: ReportData }) => {
+const PotenciaPage = ({ data, pageNumber }: { data: ReportData; pageNumber?: number }) => {
   const h5 = data.hoja5_data;
   const dg = data.datos_generales;
 

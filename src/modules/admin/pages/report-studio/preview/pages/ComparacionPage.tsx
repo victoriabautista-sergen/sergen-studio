@@ -8,7 +8,7 @@ const toSentenceCase = (s: string) => {
 const fmt = (n: number, decimals = 2) =>
   n.toLocaleString("es-PE", { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
 
-const ComparacionPage = ({ data }: { data: ReportData }) => {
+const ComparacionPage = ({ data, pageNumber }: { data: ReportData; pageNumber?: number }) => {
   const h4 = data.hoja4_data;
   const h3 = data.hoja3_data;
   const h2 = data.hoja2_data;
