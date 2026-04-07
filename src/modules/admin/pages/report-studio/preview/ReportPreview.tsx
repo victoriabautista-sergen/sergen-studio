@@ -13,7 +13,7 @@ import { generateReportPDF } from "../utils/pdfExport";
 
 const TOTAL_PAGES = 7;
 
-const pageComponents: Record<number, React.FC<{ data: any }>> = {
+const pageComponents: Record<number, React.FC<{ data: any; pageNumber?: number }>> = {
   1: PortadaPage,
   2: PreciosPage,
   3: FacturaPage,
