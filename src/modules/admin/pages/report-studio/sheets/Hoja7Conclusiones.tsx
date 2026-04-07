@@ -96,6 +96,38 @@ const Hoja7Conclusiones = () => {
     }
   }, [data.hoja4_data.impacto_economico, data.hoja6_data.diferencia, dg.mes, dg.anio]);
 
+  const regenerarConclusiones = () => {
+    const conclusions: string[] = [];
+    const h4 = data.hoja4_data;
+    const h6 = data.hoja6_data;
+
+    if (Math.abs(h4.impacto_economico) < 500) {
+      conclusions.push("El precio de la energía facturado coincide con el cálculo efectuado según contrato para el periodo evaluado.");
+    } else {
+      conclusions.push(`Se identificó una diferencia de S/ ${h4.impacto_economico.toFixed(2)} en la facturación que requiere atención.`);
+    }
+
+    if (h6.diferencia < 0) {
+      const mesStr = dg.mes?.toLowerCase() || "";
+      const anioStr = dg.anio || "";
+      conclusions.push(`Realizando el control de demanda **logramos ahorrar un promedio de S/ ${Math.abs(h6.diferencia).toFixed(2)}** para el periodo de ${mesStr}-${anioStr.slice(-2)}.`);
+    }
+
+    update("conclusiones_auto", conclusions);
+    toast.success("Conclusiones regeneradas");
+  };
+
+  const updateAutoConclusion = (index: number, value: string) => {
+    const updated = [...(h7.conclusiones_auto || [])];
+    updated[index] = value;
+    update("conclusiones_auto", updated);
+  };
+
+  const removeAutoConclusion = (index: number) => {
+    const updated = (h7.conclusiones_auto || []).filter((_, i) => i !== index);
+    update("conclusiones_auto", updated);
+  };
+
   const agregarConclusion = () => {
     if (nuevaConclusion.trim()) {
       const manuales = h7.conclusiones_manuales
