@@ -153,10 +153,19 @@ const Hoja1DatosGenerales = () => {
     }
   };
 
-  const handleCreateClient = (name: string) => {
-    // For now just add to local list — creating in DB would need additional logic
-    const fakeId = `new-${Date.now()}`;
-    setClients((prev) => [...prev, { id: fakeId, company_name: name }]);
+  const handleCreateClient = async (name: string) => {
+    const { data: newClient, error } = await supabase
+      .from("clients")
+      .insert({ company_name: name.trim() })
+      .select("id, company_name")
+      .single();
+    if (error || !newClient) {
+      toast({ title: "Error al crear cliente", variant: "destructive" });
+      return;
+    }
+    setClients((prev) => [...prev, newClient]);
+    handleClientChange(newClient.id);
+    toast({ title: "Cliente creado" });
   };
 
   const handleCreateConcesionaria = (name: string) => {
