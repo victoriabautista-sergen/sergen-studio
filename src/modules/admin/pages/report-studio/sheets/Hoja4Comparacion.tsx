@@ -216,18 +216,23 @@ const Hoja4Comparacion = () => {
       )}
 
       {/* Show only exonerado items */}
-      {h3.items.filter(item => item.tipo === "exonerado" || (item.tipo as string) === "inafecto").length > 0 && (
+      {h3.items.filter(item => item.tipo === "exonerado" || item.tipo === "inafecta" || (item.tipo as string) === "inafecto").length > 0 && (
         <div className="space-y-2">
-          <h3 className="font-semibold text-foreground flex items-center gap-2">📋 Ítems Exonerados Detectados</h3>
+          <h3 className="font-semibold text-foreground flex items-center gap-2">📋 Ítems No Gravados Detectados</h3>
           <p className="text-xs text-muted-foreground">
-            Ítems clasificados como exonerados/inafectos en la factura actual. Esta clasificación puede variar entre concesionarias.
+            Ítems clasificados como exonerados o inafectos en la factura actual. Esta clasificación puede variar entre concesionarias.
           </p>
           <div className="space-y-1">
             {h3.items
-              .filter(item => item.tipo === "exonerado" || (item.tipo as string) === "inafecto")
+              .filter(item => item.tipo === "exonerado" || item.tipo === "inafecta" || (item.tipo as string) === "inafecto")
               .map((item, i) => (
-                <div key={i} className="flex items-center justify-between bg-blue-50 rounded px-2 py-1.5 text-xs">
-                  <span className="truncate max-w-[250px]" title={item.descripcion}>{item.descripcion}</span>
+                <div key={i} className="flex items-center justify-between bg-muted rounded px-2 py-1.5 text-xs">
+                  <div className="flex items-center gap-2 truncate max-w-[250px]">
+                    <span className="bg-accent text-accent-foreground px-1.5 py-0.5 rounded text-[10px] font-medium uppercase">
+                      {item.tipo === "inafecta" || (item.tipo as string) === "inafecto" ? "inafecta" : "exonerado"}
+                    </span>
+                    <span title={item.descripcion}>{item.descripcion}</span>
+                  </div>
                   <span className="font-mono ml-2 whitespace-nowrap">{item.valor_venta?.toLocaleString("es-PE", { minimumFractionDigits: 2 })}</span>
                 </div>
               ))}
