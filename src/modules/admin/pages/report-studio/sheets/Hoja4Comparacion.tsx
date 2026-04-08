@@ -120,16 +120,20 @@ const Hoja4Comparacion = () => {
     const igv_recalculado = +(subtotal_afecto * 0.18).toFixed(2);
     const total_recalculado = +(subtotal_afecto + igv_recalculado).toFixed(2);
 
+    // Calculate total of hoja4 the same way as shown in preview
+    const opExonerada = subtotal_exonerado;
+    const total_hoja4 = +(subtotal_afecto + igv_recalculado + opExonerada).toFixed(2);
+
+    // Impacto = difference between hoja3 total and hoja4 total (verified cross-check)
+    const total_hoja3 = h3.importe_total || 0;
+    const impacto = +Math.abs(total_hoja3 - total_hoja4).toFixed(2);
+    const pagoMas = total_hoja3 > total_hoja4;
+
     const energiaHP = h3.items.find(i => i.descripcion.toUpperCase().includes(h3.nombre_hp.toUpperCase()));
     const energiaHFP = h3.items.find(i => i.descripcion.toUpperCase().includes(h3.nombre_hfp.toUpperCase()));
     const cantHP = energiaHP?.cantidad || 0;
     const cantHFP = energiaHFP?.cantidad || 0;
 
-    const impactoHP = +(cantHP * diff_hp).toFixed(2);
-    const impactoHFP = +(cantHFP * diff_hfp).toFixed(2);
-    const impacto = +(Math.abs(impactoHP) + Math.abs(impactoHFP)).toFixed(3);
-
-    const pagoMas = impacto > 0;
     const conclusion = `Considerando las cantidades facturadas de ${cantHP.toLocaleString("es-PE")} kWh (HP) y ${cantHFP.toLocaleString("es-PE")} kWh (HFP), la diferencia de precios representa un impacto económico de S/ ${impacto.toLocaleString("es-PE", { minimumFractionDigits: 2 })} que el cliente ${pagoMas ? "pagó de más" : "ahorró"} respecto al precio calculado según contrato.`;
 
     updateSheet("hoja4_data", {
@@ -148,7 +152,7 @@ const Hoja4Comparacion = () => {
       impacto_economico: impacto,
       conclusion,
     });
-  }, [h2.precio_actualizado_hp, h2.precio_actualizado_hfp, h3.precio_hp_facturado, h3.precio_hfp_facturado, h3.items, h3.nombre_hp, h3.nombre_hfp]);
+  }, [h2.precio_actualizado_hp, h2.precio_actualizado_hfp, h3.precio_hp_facturado, h3.precio_hfp_facturado, h3.items, h3.nombre_hp, h3.nombre_hfp, h3.importe_total]);
 
   const agregarExonerado = () => {
     if (nuevoExonerado.trim()) {
