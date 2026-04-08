@@ -1,5 +1,7 @@
+import { useEffect, useState } from "react";
 import { ReportData, MESES } from "../../types";
-import { format, subMonths, isAfter } from "date-fns";
+import { format, subMonths, isAfter, startOfMonth, endOfMonth } from "date-fns";
+import { supabase } from "@/integrations/supabase/client";
 
 const ConclusionesPage = ({ data, pageNumber }: { data: ReportData; pageNumber?: number }) => {
   const h7 = data.hoja7_data;
@@ -13,6 +15,41 @@ const ConclusionesPage = ({ data, pageNumber }: { data: ReportData; pageNumber?:
   const prevMonthName = MESES[prevMonth.getMonth()];
   const prevYear = prevMonth.getFullYear();
   const prevMonthIdx = prevMonth.getMonth();
+
+  // Fetch live modulation data from DB
+  const [liveModulationDays, setLiveModulationDays] = useState<{ date: string; is_modulated: boolean }[]>([]);
+  const [liveCounts, setLiveCounts] = useState<{ modulados: number; libres: number } | null>(null);
+
+  useEffect(() => {
+    const fetchLiveData = async () => {
+      try {
+        const start = format(startOfMonth(prevMonth), 'yyyy-MM-dd');
+        const end = format(endOfMonth(prevMonth), 'yyyy-MM-dd');
+
+        const { data: modData, error } = await supabase
+          .from('modulation_days')
+          .select('date, is_modulated')
+          .gte('date', start)
+          .lte('date', end)
+          .order('date', { ascending: true });
+
+        if (!error && modData) {
+          setLiveModulationDays(modData);
+          const totalDaysInMonth = endOfMonth(prevMonth).getDate();
+          const modulados = modData.filter(d => d.is_modulated).length;
+          setLiveCounts({ modulados, libres: totalDaysInMonth - modulados });
+        }
+      } catch (err) {
+        console.error('Error fetching live modulation data:', err);
+      }
+    };
+    fetchLiveData();
+  }, [prevYear, prevMonthIdx]);
+
+  // Use live data if available, otherwise fallback to saved h7 data
+  const modulationDays = liveModulationDays.length > 0 ? liveModulationDays : (h7.modulation_days || []);
+  const diasModulados = liveCounts?.modulados ?? h7.dias_modulados;
+  const diasLibres = liveCounts?.libres ?? h7.dias_libres;
 
   const firstDay = new Date(prevYear, prevMonthIdx, 1);
   const lastDay = new Date(prevYear, prevMonthIdx + 1, 0);
@@ -33,8 +70,6 @@ const ConclusionesPage = ({ data, pageNumber }: { data: ReportData; pageNumber?:
     while (currentWeek.length < 7) currentWeek.push(null);
     weeks.push(currentWeek);
   }
-
-  const modulationDays = h7.modulation_days || [];
 
   const getDayColor = (day: number): string => {
     const d = new Date(prevYear, prevMonthIdx, day);
@@ -72,7 +107,7 @@ const ConclusionesPage = ({ data, pageNumber }: { data: ReportData; pageNumber?:
         </h1>
 
         <p className="text-[12px] mb-3" style={{ color: "#1B3A5C" }}>
-          Es importante indicar que en el mes de {prevMonthName.toLowerCase()} del {prevYear} la empresa SERGEN gestionó la demanda energética <strong>{h7.dias_modulados} días</strong>, siendo unos de los menores intervalos de modulación en el mercado.
+          Es importante indicar que en el mes de {prevMonthName.toLowerCase()} del {prevYear} la empresa SERGEN gestionó la demanda energética <strong>{diasModulados} días</strong>, siendo unos de los menores intervalos de modulación en el mercado.
         </p>
 
         {/* Modulation table */}
@@ -87,11 +122,11 @@ const ConclusionesPage = ({ data, pageNumber }: { data: ReportData; pageNumber?:
             <tbody>
               <tr>
                 <td className="px-4 py-1" style={{ color: "#1B3A5C", border: "0.5px solid #E8792B" }}>Días con rango horario</td>
-                <td className="px-4 py-1 text-center font-bold" style={{ color: "#E8792B", border: "0.5px solid #E8792B" }}>{h7.dias_modulados} días</td>
+                <td className="px-4 py-1 text-center font-bold" style={{ color: "#E8792B", border: "0.5px solid #E8792B" }}>{diasModulados} días</td>
               </tr>
               <tr>
                 <td className="px-4 py-1" style={{ color: "#1B3A5C", border: "0.5px solid #E8792B" }}>Días libre</td>
-                <td className="px-4 py-1 text-center font-bold" style={{ color: "#E8792B", border: "0.5px solid #E8792B" }}>{h7.dias_libres} días</td>
+                <td className="px-4 py-1 text-center font-bold" style={{ color: "#E8792B", border: "0.5px solid #E8792B" }}>{diasLibres} días</td>
               </tr>
             </tbody>
           </table>
