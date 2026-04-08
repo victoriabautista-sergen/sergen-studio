@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useCallback, useRef, useEffect } from "react";
+import React, { createContext, useContext, useState, useCallback, useRef, useEffect } from "react"; // v2
 import { ReportData, defaultReportData, Hoja4Item } from "../types";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuthContext } from "@/core/auth/context/AuthContext";
