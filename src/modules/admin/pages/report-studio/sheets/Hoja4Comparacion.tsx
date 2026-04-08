@@ -113,6 +113,10 @@ const Hoja4Comparacion = () => {
       .filter(i => i.tipo === "gravado")
       .reduce((sum, i) => sum + i.valor_venta_calc, 0)
       .toFixed(2);
+    const subtotal_exonerado = +items_recalculados
+      .filter(i => i.tipo === "exonerado")
+      .reduce((sum, i) => sum + i.valor_venta_calc, 0)
+      .toFixed(2);
     const igv_recalculado = +(subtotal_afecto * 0.18).toFixed(2);
     const total_recalculado = +(subtotal_afecto + igv_recalculado).toFixed(2);
 
@@ -132,6 +136,7 @@ const Hoja4Comparacion = () => {
       ...h4,
       items_recalculados,
       subtotal_afecto,
+      subtotal_exonerado,
       igv_recalculado,
       total_recalculado,
       precio_calculado_hp: calc_hp,

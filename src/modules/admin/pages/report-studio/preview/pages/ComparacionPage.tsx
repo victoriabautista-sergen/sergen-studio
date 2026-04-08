@@ -89,9 +89,9 @@ const ComparacionPage = ({ data, pageNumber }: { data: ReportData; pageNumber?: 
                 <tr><td colSpan={5} className="py-1 border-0"></td></tr>
                 {/* Totals - same structure as Hoja 3 */}
                 {(() => {
-                   const opExonerada = (h3.op_inafectas || 0) + (h3.op_exonerada || 0);
+                   const opExonerada = h4.subtotal_exonerado || 0;
                    const subtotal = h4.subtotal_afecto + opExonerada;
-                   const totalFinal = h4.total_recalculado + opExonerada;
+                   const totalFinal = h4.subtotal_afecto + h4.igv_recalculado + opExonerada;
                    return [
                      ["OP. GRAVADAS", h4.subtotal_afecto, false],
                      ["OP. EXONERADA", opExonerada, false],
