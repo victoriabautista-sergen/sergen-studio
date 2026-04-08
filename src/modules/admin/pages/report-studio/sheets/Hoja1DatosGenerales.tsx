@@ -96,6 +96,7 @@ const Hoja1DatosGenerales = () => {
         .single();
 
       const ci = (clientRow?.contract_info as any) || {};
+      let hasDefaults = !!ci.concesionaria || !!ci.hoja2_defaults;
 
       if (ci.concesionaria) {
         updated.concesionaria = ci.concesionaria;
@@ -119,6 +120,40 @@ const Hoja1DatosGenerales = () => {
           formula_calculo: d.formula_calculo ?? "Factor_A = (PNG / PNG_o) × (TC / TC_o) × (IPP / IPP_o)",
         };
         updateSheet("hoja2_data", { ...data.hoja2_data, ...baseFields });
+      }
+
+      // Fallback: if no contract_info yet, load from last report (migration path)
+      if (!hasDefaults) {
+        const { data: lastReports } = await supabase
+          .from("reportes_control_demanda" as any)
+          .select("datos_generales, hoja2_data")
+          .eq("client_id", clientId)
+          .order("created_at", { ascending: false })
+          .limit(1);
+        if (lastReports && lastReports.length > 0) {
+          const last = lastReports[0] as any;
+          if (last.datos_generales?.concesionaria) {
+            updated.concesionaria = last.datos_generales.concesionaria;
+          }
+          const lastH2 = last.hoja2_data;
+          if (lastH2) {
+            const baseFields = {
+              precio_base_hp: lastH2.precio_base_hp ?? 0,
+              precio_base_hfp: lastH2.precio_base_hfp ?? 0,
+              precio_potencia: lastH2.precio_potencia ?? 0,
+              moneda: lastH2.moneda ?? "PEN",
+              png_moneda: lastH2.png_moneda ?? "USD",
+              png_actual_moneda: lastH2.png_actual_moneda ?? lastH2.png_moneda ?? "USD",
+              pngo: lastH2.pngo ?? 0,
+              tco: lastH2.tco ?? 0,
+              ippo: lastH2.ippo ?? 0,
+              factor_perdida: lastH2.factor_perdida ?? 1.0,
+              formula: lastH2.formula ?? "PB × (PNG/PNGo) × (TC/TCo) × (IPP/IPPo) × FP",
+              formula_calculo: lastH2.formula_calculo ?? "Factor_A = (PNG / PNG_o) × (TC / TC_o) × (IPP / IPP_o)",
+            };
+            updateSheet("hoja2_data", { ...data.hoja2_data, ...baseFields });
+          }
+        }
       }
 
       // Get last correlativo from previous reports
