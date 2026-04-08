@@ -18,9 +18,39 @@ const CONCESIONARIAS_DEFAULT = ["Luz del Sur", "Enel", "Electrocentro"];
 
 const Hoja1DatosGenerales = () => {
   const { data, updateSheet } = useReportContext();
+  const { toast } = useToast();
   const dg = data.datos_generales;
   const [clients, setClients] = useState<Client[]>([]);
   const [concesionarias, setConcesionarias] = useState<string[]>(CONCESIONARIAS_DEFAULT);
+  const [editingClient, setEditingClient] = useState(false);
+  const [editName, setEditName] = useState("");
+  const [savingClient, setSavingClient] = useState(false);
+
+  const handleEditClient = () => {
+    const client = clients.find(c => c.id === dg.client_id);
+    if (client) {
+      setEditName(client.company_name);
+      setEditingClient(true);
+    }
+  };
+
+  const handleSaveClientName = async () => {
+    if (!editName.trim() || !dg.client_id) return;
+    setSavingClient(true);
+    const { error } = await supabase
+      .from("clients")
+      .update({ company_name: editName.trim() })
+      .eq("id", dg.client_id);
+    setSavingClient(false);
+    if (error) {
+      toast({ title: "Error al actualizar nombre", variant: "destructive" });
+      return;
+    }
+    setClients(prev => prev.map(c => c.id === dg.client_id ? { ...c, company_name: editName.trim() } : c));
+    updateSheet("datos_generales", { ...dg, client_name: editName.trim() });
+    setEditingClient(false);
+    toast({ title: "Nombre de cliente actualizado" });
+  };
 
   // Load clients
   useEffect(() => {
