@@ -1,10 +1,13 @@
 import { useEffect, useState, useCallback } from "react";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Button } from "@/components/ui/button";
+import { Pencil, Check, X, Loader2 } from "lucide-react";
 import { useReportContext } from "../context/ReportContext";
 import { MESES } from "../types";
 import { supabase } from "@/integrations/supabase/client";
 import SearchableCombobox from "../components/SearchableCombobox";
+import { useToast } from "@/hooks/use-toast";
 
 interface Client {
   id: string;
@@ -15,9 +18,39 @@ const CONCESIONARIAS_DEFAULT = ["Luz del Sur", "Enel", "Electrocentro"];
 
 const Hoja1DatosGenerales = () => {
   const { data, updateSheet } = useReportContext();
+  const { toast } = useToast();
   const dg = data.datos_generales;
   const [clients, setClients] = useState<Client[]>([]);
   const [concesionarias, setConcesionarias] = useState<string[]>(CONCESIONARIAS_DEFAULT);
+  const [editingClient, setEditingClient] = useState(false);
+  const [editName, setEditName] = useState("");
+  const [savingClient, setSavingClient] = useState(false);
+
+  const handleEditClient = () => {
+    const client = clients.find(c => c.id === dg.client_id);
+    if (client) {
+      setEditName(client.company_name);
+      setEditingClient(true);
+    }
+  };
+
+  const handleSaveClientName = async () => {
+    if (!editName.trim() || !dg.client_id) return;
+    setSavingClient(true);
+    const { error } = await supabase
+      .from("clients")
+      .update({ company_name: editName.trim() })
+      .eq("id", dg.client_id);
+    setSavingClient(false);
+    if (error) {
+      toast({ title: "Error al actualizar nombre", variant: "destructive" });
+      return;
+    }
+    setClients(prev => prev.map(c => c.id === dg.client_id ? { ...c, company_name: editName.trim() } : c));
+    updateSheet("datos_generales", { ...dg, client_name: editName.trim() });
+    setEditingClient(false);
+    toast({ title: "Nombre de cliente actualizado" });
+  };
 
   // Load clients
   useEffect(() => {
@@ -148,15 +181,42 @@ const Hoja1DatosGenerales = () => {
       <div className="space-y-4 min-w-0" style={{ maxWidth: "420px" }}>
         <div className="flex items-center gap-4 min-w-0">
           <span className="text-sm font-medium text-foreground w-28 shrink-0">Cliente</span>
-          <div className="flex-1 min-w-0">
-            <SearchableCombobox
-              options={clientOptions}
-              value={dg.client_id}
-              onSelect={handleClientChange}
-              onCreate={handleCreateClient}
-              placeholder="Seleccionar"
-              createLabel="Crear cliente"
-            />
+          <div className="flex-1 min-w-0 flex items-center gap-1">
+            {editingClient ? (
+              <>
+                <Input
+                  value={editName}
+                  onChange={(e) => setEditName(e.target.value)}
+                  className="flex-1"
+                  autoFocus
+                  onKeyDown={(e) => e.key === "Enter" && handleSaveClientName()}
+                />
+                <Button size="icon" variant="ghost" className="h-8 w-8 shrink-0" onClick={handleSaveClientName} disabled={savingClient || !editName.trim()}>
+                  {savingClient ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4 text-green-600" />}
+                </Button>
+                <Button size="icon" variant="ghost" className="h-8 w-8 shrink-0" onClick={() => setEditingClient(false)}>
+                  <X className="h-4 w-4 text-destructive" />
+                </Button>
+              </>
+            ) : (
+              <>
+                <div className="flex-1 min-w-0">
+                  <SearchableCombobox
+                    options={clientOptions}
+                    value={dg.client_id}
+                    onSelect={handleClientChange}
+                    onCreate={handleCreateClient}
+                    placeholder="Seleccionar"
+                    createLabel="Crear cliente"
+                  />
+                </div>
+                {dg.client_id && (
+                  <Button size="icon" variant="ghost" className="h-8 w-8 shrink-0" onClick={handleEditClient} title="Editar nombre del cliente">
+                    <Pencil className="h-3.5 w-3.5" />
+                  </Button>
+                )}
+              </>
+            )}
           </div>
         </div>
 
