@@ -1,10 +1,13 @@
 import { useEffect, useState, useCallback } from "react";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Button } from "@/components/ui/button";
+import { Pencil, Check, X, Loader2 } from "lucide-react";
 import { useReportContext } from "../context/ReportContext";
 import { MESES } from "../types";
 import { supabase } from "@/integrations/supabase/client";
 import SearchableCombobox from "../components/SearchableCombobox";
+import { useToast } from "@/hooks/use-toast";
 
 interface Client {
   id: string;
