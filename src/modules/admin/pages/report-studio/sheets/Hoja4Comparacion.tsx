@@ -109,20 +109,28 @@ const Hoja4Comparacion = () => {
       };
     });
 
-    const subtotal_afecto = +items_recalculados
-      .filter(i => i.tipo === "gravado")
-      .reduce((sum, i) => sum + i.valor_venta_calc, 0)
-      .toFixed(2);
-    const subtotal_exonerado = +items_recalculados
-      .filter(i => i.tipo === "exonerado")
-      .reduce((sum, i) => sum + i.valor_venta_calc, 0)
-      .toFixed(2);
-    const igv_recalculado = +(subtotal_afecto * 0.18).toFixed(2);
-    const total_recalculado = +(subtotal_afecto + igv_recalculado).toFixed(2);
+    // Calculate the energy price difference impact on valor_venta
+    let diff_gravado = 0;
+    let diff_exonerado = 0;
+    items_recalculados.forEach((item) => {
+      if (item.is_energy) {
+        const diff_venta = item.valor_venta_calc - item.valor_venta_original;
+        if (item.tipo === "exonerado") {
+          diff_exonerado += diff_venta;
+        } else {
+          diff_gravado += diff_venta;
+        }
+      }
+    });
 
-    // Calculate total of hoja4 the same way as shown in preview
-    const opExonerada = subtotal_exonerado;
-    const total_hoja4 = +(subtotal_afecto + igv_recalculado + opExonerada).toFixed(2);
+    // Start from hoja3's original totals and only adjust for energy difference
+    const subtotal_afecto = +(h3.op_gravadas + diff_gravado).toFixed(2);
+    const subtotal_exonerado = +((h3.op_inafectas || 0) + (h3.op_exonerada || 0) + diff_exonerado).toFixed(2);
+    const igv_recalculado = +(subtotal_afecto * 0.18).toFixed(2);
+    const total_recalculado = +(subtotal_afecto + igv_recalculado + subtotal_exonerado).toFixed(2);
+
+    // Total hoja4 for impacto calculation
+    const total_hoja4 = total_recalculado;
 
     // Impacto = difference between hoja3 total and hoja4 total (verified cross-check)
     const total_hoja3 = h3.importe_total || 0;
@@ -152,7 +160,7 @@ const Hoja4Comparacion = () => {
       impacto_economico: impacto,
       conclusion,
     });
-  }, [h2.precio_actualizado_hp, h2.precio_actualizado_hfp, h3.precio_hp_facturado, h3.precio_hfp_facturado, h3.items, h3.nombre_hp, h3.nombre_hfp, h3.importe_total]);
+  }, [h2.precio_actualizado_hp, h2.precio_actualizado_hfp, h3.precio_hp_facturado, h3.precio_hfp_facturado, h3.items, h3.nombre_hp, h3.nombre_hfp, h3.importe_total, h3.op_gravadas, h3.op_inafectas, h3.op_exonerada]);
 
   const agregarExonerado = () => {
     if (nuevoExonerado.trim()) {
