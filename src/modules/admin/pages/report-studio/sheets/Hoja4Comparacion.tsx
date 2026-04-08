@@ -160,7 +160,7 @@ const Hoja4Comparacion = () => {
       impacto_economico: impacto,
       conclusion,
     });
-  }, [h2.precio_actualizado_hp, h2.precio_actualizado_hfp, h3.precio_hp_facturado, h3.precio_hfp_facturado, h3.items, h3.nombre_hp, h3.nombre_hfp, h3.importe_total]);
+  }, [h2.precio_actualizado_hp, h2.precio_actualizado_hfp, h3.precio_hp_facturado, h3.precio_hfp_facturado, h3.items, h3.nombre_hp, h3.nombre_hfp, h3.importe_total, h3.op_gravadas, h3.op_inafectas, h3.op_exonerada]);
 
   const agregarExonerado = () => {
     if (nuevoExonerado.trim()) {
