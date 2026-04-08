@@ -113,12 +113,12 @@ const Hoja4Comparacion = () => {
 
     // Calculate the energy price difference impact on valor_venta
     let diff_gravado = 0;
-    let diff_exonerado = 0;
+    let diff_no_gravado = 0;
     items_recalculados.forEach((item) => {
       if (item.is_energy) {
         const diff_venta = item.valor_venta_calc - item.valor_venta_original;
-        if (item.tipo === "exonerado") {
-          diff_exonerado += diff_venta;
+        if (item.tipo === "exonerado" || item.tipo === "inafecta") {
+          diff_no_gravado += diff_venta;
         } else {
           diff_gravado += diff_venta;
         }
