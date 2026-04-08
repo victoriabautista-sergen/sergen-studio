@@ -213,6 +213,43 @@ const Hoja4Comparacion = () => {
         </div>
       )}
 
+      {/* Items classification view */}
+      {h3.items.length > 0 && (
+        <div className="space-y-2">
+          <h3 className="font-semibold text-foreground flex items-center gap-2">📋 Clasificación de Ítems de Factura</h3>
+          <p className="text-xs text-muted-foreground">
+            Muestra cómo se clasificó cada ítem extraído de la factura.
+          </p>
+          <div className="border rounded-md overflow-hidden">
+            <table className="w-full text-xs">
+              <thead>
+                <tr className="bg-muted">
+                  <th className="text-left px-2 py-1.5 font-medium">Descripción</th>
+                  <th className="text-right px-2 py-1.5 font-medium">V. Venta</th>
+                  <th className="text-center px-2 py-1.5 font-medium">Tipo</th>
+                </tr>
+              </thead>
+              <tbody>
+                {h3.items.map((item, i) => {
+                  const isExo = item.tipo === "exonerado" || (item.tipo as string) === "inafecto";
+                  return (
+                    <tr key={i} className={`border-t ${isExo ? "bg-blue-50" : ""}`}>
+                      <td className="px-2 py-1 truncate max-w-[200px]" title={item.descripcion}>{item.descripcion}</td>
+                      <td className="px-2 py-1 text-right font-mono">{item.valor_venta?.toLocaleString("es-PE", { minimumFractionDigits: 2 })}</td>
+                      <td className="px-2 py-1 text-center">
+                        <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded ${isExo ? "bg-blue-100 text-blue-700" : "bg-green-100 text-green-700"}`}>
+                          {isExo ? "EXONERADO" : "GRAVADO"}
+                        </span>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 };
