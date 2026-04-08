@@ -47,8 +47,9 @@ const Hoja7Conclusiones = () => {
       if (error) throw error;
 
       const days = (modData as any[]) || [];
+      const totalDaysInMonth = endOfMonth(prevMonth).getDate();
       const modulados = days.filter(d => d.is_modulated).length;
-      const libres = days.filter(d => !d.is_modulated).length;
+      const libres = totalDaysInMonth - modulados;
 
       updateSheet("hoja7_data", {
         ...h7,
