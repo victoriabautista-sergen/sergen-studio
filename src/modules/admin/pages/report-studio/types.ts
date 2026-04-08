@@ -214,6 +214,7 @@ export const defaultReportData: ReportData = {
     conceptos_exonerados: [],
     items_recalculados: [],
     subtotal_afecto: 0,
+    subtotal_exonerado: 0,
     igv_recalculado: 0,
     total_recalculado: 0,
     precio_calculado_hp: 0,
