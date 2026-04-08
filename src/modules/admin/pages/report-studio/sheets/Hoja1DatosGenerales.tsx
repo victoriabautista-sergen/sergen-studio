@@ -181,15 +181,42 @@ const Hoja1DatosGenerales = () => {
       <div className="space-y-4 min-w-0" style={{ maxWidth: "420px" }}>
         <div className="flex items-center gap-4 min-w-0">
           <span className="text-sm font-medium text-foreground w-28 shrink-0">Cliente</span>
-          <div className="flex-1 min-w-0">
-            <SearchableCombobox
-              options={clientOptions}
-              value={dg.client_id}
-              onSelect={handleClientChange}
-              onCreate={handleCreateClient}
-              placeholder="Seleccionar"
-              createLabel="Crear cliente"
-            />
+          <div className="flex-1 min-w-0 flex items-center gap-1">
+            {editingClient ? (
+              <>
+                <Input
+                  value={editName}
+                  onChange={(e) => setEditName(e.target.value)}
+                  className="flex-1"
+                  autoFocus
+                  onKeyDown={(e) => e.key === "Enter" && handleSaveClientName()}
+                />
+                <Button size="icon" variant="ghost" className="h-8 w-8 shrink-0" onClick={handleSaveClientName} disabled={savingClient || !editName.trim()}>
+                  {savingClient ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4 text-green-600" />}
+                </Button>
+                <Button size="icon" variant="ghost" className="h-8 w-8 shrink-0" onClick={() => setEditingClient(false)}>
+                  <X className="h-4 w-4 text-destructive" />
+                </Button>
+              </>
+            ) : (
+              <>
+                <div className="flex-1 min-w-0">
+                  <SearchableCombobox
+                    options={clientOptions}
+                    value={dg.client_id}
+                    onSelect={handleClientChange}
+                    onCreate={handleCreateClient}
+                    placeholder="Seleccionar"
+                    createLabel="Crear cliente"
+                  />
+                </div>
+                {dg.client_id && (
+                  <Button size="icon" variant="ghost" className="h-8 w-8 shrink-0" onClick={handleEditClient} title="Editar nombre del cliente">
+                    <Pencil className="h-3.5 w-3.5" />
+                  </Button>
+                )}
+              </>
+            )}
           </div>
         </div>
 
