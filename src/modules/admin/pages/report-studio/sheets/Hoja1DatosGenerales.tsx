@@ -76,7 +76,7 @@ const Hoja1DatosGenerales = () => {
       });
   }, []);
 
-  // When client changes: load last report defaults (concesionaria + auto correlative)
+  // When client changes: load base defaults from clients.contract_info (per-company)
   const handleClientChange = useCallback(
     async (clientId: string) => {
       const client = clients.find((c) => c.id === clientId);
@@ -87,49 +87,57 @@ const Hoja1DatosGenerales = () => {
         client_id: clientId,
         client_name: client.company_name,
       };
-      let ultimoCorrelativo: string | null = null;
 
-      // Get last report for this client to pre-fill concesionaria + base values
-      const { data: lastReports } = await supabase
-        .from("reportes_control_demanda" as any)
-        .select("datos_generales, hoja2_data")
-        .eq("client_id", clientId)
-        .order("created_at", { ascending: false })
-        .limit(1);
+      // Load saved base data from clients.contract_info
+      const { data: clientRow } = await supabase
+        .from("clients")
+        .select("contract_info")
+        .eq("id", clientId)
+        .single();
 
-      if (lastReports && lastReports.length > 0) {
-        const last = lastReports[0] as any;
-        const lastDg = last.datos_generales;
-        if (lastDg?.concesionaria) {
-          updated.concesionaria = lastDg.concesionaria;
-        }
-        if (lastDg?.numero_informe) {
-          ultimoCorrelativo = String(lastDg.numero_informe).trim();
-        }
+      const ci = (clientRow?.contract_info as any) || {};
 
-        // Pre-fill base values from last report
-        const lastH2 = last.hoja2_data;
-        if (lastH2) {
-          const baseFields = {
-            precio_base_hp: lastH2.precio_base_hp ?? 0,
-            precio_base_hfp: lastH2.precio_base_hfp ?? 0,
-            precio_potencia: lastH2.precio_potencia ?? 0,
-            moneda: lastH2.moneda ?? "PEN",
-            png_moneda: lastH2.png_moneda ?? "USD",
-            png_actual_moneda: lastH2.png_actual_moneda ?? lastH2.png_moneda ?? "USD",
-            pngo: lastH2.pngo ?? 0,
-            tco: lastH2.tco ?? 0,
-            ippo: lastH2.ippo ?? 0,
-            factor_perdida: lastH2.factor_perdida ?? 1.0,
-            formula: lastH2.formula ?? "PB × (PNG/PNGo) × (TC/TCo) × (IPP/IPPo) × FP",
-            formula_calculo: lastH2.formula_calculo ?? "Factor_A = (PNG / PNG_o) × (TC / TC_o) × (IPP / IPP_o)",
-          };
-          updateSheet("hoja2_data", { ...data.hoja2_data, ...baseFields });
+      if (ci.concesionaria) {
+        updated.concesionaria = ci.concesionaria;
+      }
+
+      // Pre-fill base values from contract_info
+      if (ci.hoja2_defaults) {
+        const d = ci.hoja2_defaults;
+        const baseFields = {
+          precio_base_hp: d.precio_base_hp ?? 0,
+          precio_base_hfp: d.precio_base_hfp ?? 0,
+          precio_potencia: d.precio_potencia ?? 0,
+          moneda: d.moneda ?? "PEN",
+          png_moneda: d.png_moneda ?? "USD",
+          png_actual_moneda: d.png_actual_moneda ?? d.png_moneda ?? "USD",
+          pngo: d.pngo ?? 0,
+          tco: d.tco ?? 0,
+          ippo: d.ippo ?? 0,
+          factor_perdida: d.factor_perdida ?? 1.0,
+          formula: d.formula ?? "PB × (PNG/PNGo) × (TC/TCo) × (IPP/IPPo) × FP",
+          formula_calculo: d.formula_calculo ?? "Factor_A = (PNG / PNG_o) × (TC / TC_o) × (IPP / IPP_o)",
+        };
+        updateSheet("hoja2_data", { ...data.hoja2_data, ...baseFields });
+      }
+
+      // Get last correlativo from previous reports
+      let ultimoCorrelativo: string | null = ci.ultimo_correlativo || null;
+      if (!ultimoCorrelativo) {
+        const { data: lastReports } = await supabase
+          .from("reportes_control_demanda" as any)
+          .select("datos_generales")
+          .eq("client_id", clientId)
+          .order("created_at", { ascending: false })
+          .limit(1);
+        if (lastReports && lastReports.length > 0) {
+          const lastDg = (lastReports[0] as any).datos_generales;
+          if (lastDg?.numero_informe) {
+            ultimoCorrelativo = String(lastDg.numero_informe).trim();
+          }
         }
       }
 
-      // Auto-correlative: set the current baseline only for new reports.
-      // It must increase exclusively when clicking "Descargar PDF".
       if (!data.id) {
         updated.numero_informe = ultimoCorrelativo || "01";
       }
