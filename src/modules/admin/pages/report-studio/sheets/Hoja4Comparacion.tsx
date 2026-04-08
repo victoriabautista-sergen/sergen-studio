@@ -80,9 +80,11 @@ const Hoja4Comparacion = () => {
       const isEnergy = isHP || isHFP;
 
       // Use classification directly from Hoja 3 extraction
-      let tipo: "gravado" | "exonerado" = "gravado";
-      if (item.tipo === "exonerado" || (item.tipo as string) === "inafecto") {
+      let tipo: "gravado" | "exonerado" | "inafecta" = "gravado";
+      if (item.tipo === "exonerado") {
         tipo = "exonerado";
+      } else if (item.tipo === "inafecta" || (item.tipo as string) === "inafecto") {
+        tipo = "inafecta";
       }
 
       let valor_unitario_calc = item.valor_unitario;
@@ -111,12 +113,12 @@ const Hoja4Comparacion = () => {
 
     // Calculate the energy price difference impact on valor_venta
     let diff_gravado = 0;
-    let diff_exonerado = 0;
+    let diff_no_gravado = 0;
     items_recalculados.forEach((item) => {
       if (item.is_energy) {
         const diff_venta = item.valor_venta_calc - item.valor_venta_original;
-        if (item.tipo === "exonerado") {
-          diff_exonerado += diff_venta;
+        if (item.tipo === "exonerado" || item.tipo === "inafecta") {
+          diff_no_gravado += diff_venta;
         } else {
           diff_gravado += diff_venta;
         }
@@ -125,7 +127,7 @@ const Hoja4Comparacion = () => {
 
     // Start from hoja3's original totals and only adjust for energy difference
     const subtotal_afecto = +(h3.op_gravadas + diff_gravado).toFixed(2);
-    const subtotal_exonerado = +((h3.op_inafectas || 0) + (h3.op_exonerada || 0) + diff_exonerado).toFixed(2);
+    const subtotal_exonerado = +((h3.op_inafectas || 0) + (h3.op_exonerada || 0) + diff_no_gravado).toFixed(2);
     const igv_recalculado = +(subtotal_afecto * 0.18).toFixed(2);
     const total_recalculado = +(subtotal_afecto + igv_recalculado + subtotal_exonerado).toFixed(2);
 
@@ -214,18 +216,23 @@ const Hoja4Comparacion = () => {
       )}
 
       {/* Show only exonerado items */}
-      {h3.items.filter(item => item.tipo === "exonerado" || (item.tipo as string) === "inafecto").length > 0 && (
+      {h3.items.filter(item => item.tipo === "exonerado" || item.tipo === "inafecta" || (item.tipo as string) === "inafecto").length > 0 && (
         <div className="space-y-2">
-          <h3 className="font-semibold text-foreground flex items-center gap-2">📋 Ítems Exonerados Detectados</h3>
+          <h3 className="font-semibold text-foreground flex items-center gap-2">📋 Ítems No Gravados Detectados</h3>
           <p className="text-xs text-muted-foreground">
-            Ítems clasificados como exonerados/inafectos en la factura actual. Esta clasificación puede variar entre concesionarias.
+            Ítems clasificados como exonerados o inafectos en la factura actual. Esta clasificación puede variar entre concesionarias.
           </p>
           <div className="space-y-1">
             {h3.items
-              .filter(item => item.tipo === "exonerado" || (item.tipo as string) === "inafecto")
+              .filter(item => item.tipo === "exonerado" || item.tipo === "inafecta" || (item.tipo as string) === "inafecto")
               .map((item, i) => (
-                <div key={i} className="flex items-center justify-between bg-blue-50 rounded px-2 py-1.5 text-xs">
-                  <span className="truncate max-w-[250px]" title={item.descripcion}>{item.descripcion}</span>
+                <div key={i} className="flex items-center justify-between bg-muted rounded px-2 py-1.5 text-xs">
+                  <div className="flex items-center gap-2 truncate max-w-[250px]">
+                    <span className="bg-accent text-accent-foreground px-1.5 py-0.5 rounded text-[10px] font-medium uppercase">
+                      {item.tipo === "inafecta" || (item.tipo as string) === "inafecto" ? "inafecta" : "exonerado"}
+                    </span>
+                    <span title={item.descripcion}>{item.descripcion}</span>
+                  </div>
                   <span className="font-mono ml-2 whitespace-nowrap">{item.valor_venta?.toLocaleString("es-PE", { minimumFractionDigits: 2 })}</span>
                 </div>
               ))}
