@@ -80,9 +80,11 @@ const Hoja4Comparacion = () => {
       const isEnergy = isHP || isHFP;
 
       // Use classification directly from Hoja 3 extraction
-      let tipo: "gravado" | "exonerado" = "gravado";
-      if (item.tipo === "exonerado" || (item.tipo as string) === "inafecto") {
+      let tipo: "gravado" | "exonerado" | "inafecta" = "gravado";
+      if (item.tipo === "exonerado") {
         tipo = "exonerado";
+      } else if (item.tipo === "inafecta" || (item.tipo as string) === "inafecto") {
+        tipo = "inafecta";
       }
 
       let valor_unitario_calc = item.valor_unitario;
