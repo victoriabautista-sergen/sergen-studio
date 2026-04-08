@@ -173,6 +173,31 @@ export const ReportProvider = ({ children }: { children: React.ReactNode }) => {
             setData(prev => ({ ...prev, id: (inserted as any).id }));
           }
         }
+
+        // Persist base values to clients.contract_info for this company
+        const h2 = data.hoja2_data;
+        const contractInfo = {
+          concesionaria: data.datos_generales.concesionaria || "",
+          ultimo_correlativo: data.datos_generales.numero_informe || "",
+          hoja2_defaults: {
+            precio_base_hp: h2.precio_base_hp,
+            precio_base_hfp: h2.precio_base_hfp,
+            precio_potencia: h2.precio_potencia,
+            moneda: h2.moneda,
+            png_moneda: h2.png_moneda,
+            png_actual_moneda: h2.png_actual_moneda,
+            pngo: h2.pngo,
+            tco: h2.tco,
+            ippo: h2.ippo,
+            factor_perdida: h2.factor_perdida,
+            formula: h2.formula,
+            formula_calculo: h2.formula_calculo,
+          },
+        };
+        await supabase
+          .from("clients")
+          .update({ contract_info: contractInfo })
+          .eq("id", data.client_id);
       } catch (e) {
         console.error("Autosave error:", e);
       } finally {
