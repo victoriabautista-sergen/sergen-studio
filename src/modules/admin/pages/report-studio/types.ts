@@ -81,6 +81,7 @@ export interface Hoja4Data {
   conceptos_exonerados: string[];
   items_recalculados: Hoja4Item[];
   subtotal_afecto: number;
+  subtotal_exonerado: number;
   igv_recalculado: number;
   total_recalculado: number;
   precio_calculado_hp: number;

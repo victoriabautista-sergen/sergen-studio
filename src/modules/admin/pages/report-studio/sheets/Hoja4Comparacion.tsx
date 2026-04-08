@@ -136,6 +136,7 @@ const Hoja4Comparacion = () => {
       ...h4,
       items_recalculados,
       subtotal_afecto,
+      subtotal_exonerado,
       igv_recalculado,
       total_recalculado,
       precio_calculado_hp: calc_hp,
