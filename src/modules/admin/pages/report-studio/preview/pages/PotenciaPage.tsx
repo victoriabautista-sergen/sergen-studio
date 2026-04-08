@@ -1,4 +1,5 @@
 import { ReportData } from "../../types";
+import { format, parse } from "date-fns";
 
 const PotenciaPage = ({ data, pageNumber }: { data: ReportData; pageNumber?: number }) => {
   const h5 = data.hoja5_data;
