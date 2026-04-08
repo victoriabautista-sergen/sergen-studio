@@ -1,4 +1,5 @@
 import { ReportData } from "../../types";
+import { format, parse } from "date-fns";
 
 const PotenciaPage = ({ data, pageNumber }: { data: ReportData; pageNumber?: number }) => {
   const h5 = data.hoja5_data;
@@ -43,7 +44,7 @@ const PotenciaPage = ({ data, pageNumber }: { data: ReportData; pageNumber?: num
           </thead>
           <tbody>
             <tr className="bg-white">
-              <td className={`${borderStyle} px-1.5 py-1 text-center`} style={{ color: "#1B3A5C" }}>{h5.fecha || "—"}</td>
+              <td className={`${borderStyle} px-1.5 py-1 text-center`} style={{ color: "#1B3A5C" }}>{h5.fecha ? (() => { try { const d = parse(h5.fecha, 'yyyy-MM-dd', new Date()); return format(d, 'dd/MM/yyyy'); } catch { return h5.fecha; } })() : "—"}</td>
               <td className={`${borderStyle} px-1.5 py-1 text-center`} style={{ color: "#1B3A5C" }}>{h5.hora || "—"}</td>
               <td className={`${borderStyle} px-1.5 py-1 text-center font-mono`} style={{ color: "#1B3A5C" }}>{h5.exportacion ? h5.exportacion.toFixed(3) : "0.000"}</td>
               <td className={`${borderStyle} px-1.5 py-1 text-center font-mono`} style={{ color: "#1B3A5C" }}>{h5.importacion ? h5.importacion.toFixed(3) : "0.000"}</td>
