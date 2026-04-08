@@ -66,21 +66,27 @@ const FacturaPage = ({ data, pageNumber }: { data: ReportData; pageNumber?: numb
                 </tr>
               </thead>
               <tbody>
-                {h3.items.map((item, i) => (
-                  <tr key={i} className={i % 2 === 0 ? "bg-white" : "bg-gray-50/50"}>
-                    <td className={`${borderStyle} px-1.5 py-0.5`} style={{ color: "#1B3A5C" }}>{toSentenceCase(item.descripcion)}</td>
-                    <td className={`${borderStyle} px-1.5 py-0.5 text-center`} style={{ color: "#1B3A5C" }}>{item.unidad}</td>
-                    <td className={`${borderStyle} px-1.5 py-0.5 text-right font-mono`} style={{ color: "#1B3A5C" }}>
-                      {typeof item.cantidad === "number" ? item.cantidad.toLocaleString("es-PE", { minimumFractionDigits: 2 }) : item.cantidad}
-                    </td>
-                    <td className={`${borderStyle} px-1.5 py-0.5 text-right font-mono`} style={{ color: "#1B3A5C" }}>
-                      {typeof item.valor_unitario === "number" ? item.valor_unitario.toLocaleString("es-PE", { minimumFractionDigits: 2 }) : item.valor_unitario || "—"}
-                    </td>
-                    <td className={`${borderStyle} px-1.5 py-0.5 text-right font-mono`} style={{ color: "#1B3A5C" }}>
-                      {typeof item.valor_venta === "number" ? item.valor_venta.toLocaleString("es-PE", { minimumFractionDigits: 2 }) : item.valor_venta || "—"}
-                    </td>
-                  </tr>
-                ))}
+                {h3.items.map((item, i) => {
+                  const isExonerado = item.tipo === "exonerado" || (item.tipo as string) === "inafecto";
+                  return (
+                    <tr key={i} className={i % 2 === 0 ? "bg-white" : "bg-gray-50/50"} style={isExonerado ? { backgroundColor: "#EFF6FF" } : {}}>
+                      <td className={`${borderStyle} px-1.5 py-0.5 flex items-center gap-1`} style={{ color: isExonerado ? "#2563EB" : "#1B3A5C" }}>
+                        {toSentenceCase(item.descripcion)}
+                        {isExonerado && <span className="text-[8px] font-semibold px-1 rounded" style={{ backgroundColor: "#DBEAFE", color: "#1D4ED8" }}>EXO</span>}
+                      </td>
+                      <td className={`${borderStyle} px-1.5 py-0.5 text-center`} style={{ color: isExonerado ? "#2563EB" : "#1B3A5C" }}>{item.unidad}</td>
+                      <td className={`${borderStyle} px-1.5 py-0.5 text-right font-mono`} style={{ color: isExonerado ? "#2563EB" : "#1B3A5C" }}>
+                        {typeof item.cantidad === "number" ? item.cantidad.toLocaleString("es-PE", { minimumFractionDigits: 2 }) : item.cantidad}
+                      </td>
+                      <td className={`${borderStyle} px-1.5 py-0.5 text-right font-mono`} style={{ color: isExonerado ? "#2563EB" : "#1B3A5C" }}>
+                        {typeof item.valor_unitario === "number" ? item.valor_unitario.toLocaleString("es-PE", { minimumFractionDigits: 2 }) : item.valor_unitario || "—"}
+                      </td>
+                      <td className={`${borderStyle} px-1.5 py-0.5 text-right font-mono`} style={{ color: isExonerado ? "#2563EB" : "#1B3A5C" }}>
+                        {typeof item.valor_venta === "number" ? item.valor_venta.toLocaleString("es-PE", { minimumFractionDigits: 2 }) : item.valor_venta || "—"}
+                      </td>
+                    </tr>
+                  );
+                })}
                 {/* Spacer */}
                 <tr><td colSpan={5} className="py-1 border-0"></td></tr>
                 {/* Totals using same 5-column grid */}
