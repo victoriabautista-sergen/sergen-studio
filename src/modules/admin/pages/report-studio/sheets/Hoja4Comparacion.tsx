@@ -127,7 +127,7 @@ const Hoja4Comparacion = () => {
 
     // Start from hoja3's original totals and only adjust for energy difference
     const subtotal_afecto = +(h3.op_gravadas + diff_gravado).toFixed(2);
-    const subtotal_exonerado = +((h3.op_inafectas || 0) + (h3.op_exonerada || 0) + diff_exonerado).toFixed(2);
+    const subtotal_exonerado = +((h3.op_inafectas || 0) + (h3.op_exonerada || 0) + diff_no_gravado).toFixed(2);
     const igv_recalculado = +(subtotal_afecto * 0.18).toFixed(2);
     const total_recalculado = +(subtotal_afecto + igv_recalculado + subtotal_exonerado).toFixed(2);
 
