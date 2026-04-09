@@ -84,12 +84,24 @@ const Hoja6Proyeccion = () => {
       }
     });
 
-    const subtotalOriginal = h3.subtotal || 0;
-    const nuevoSubtotal = +(subtotalOriginal - sumaOriginalReemplazados + sumaRecalculados).toFixed(2);
-    const nuevoIGV = +(nuevoSubtotal * 0.18).toFixed(2);
-    const nuevoTotal = +(nuevoSubtotal + nuevoIGV).toFixed(2);
+    // Recalculate gravadas from items with tipo gravado (or no tipo)
+    const opGravadas = +h3.items.reduce((sum, item) => {
+      const descUpper = item.descripcion.toUpperCase();
+      const isMatch = itemsPotencia.some(p => descUpper.includes(p.toUpperCase()));
+      const tipo = item.tipo || "gravado";
+      if (tipo !== "gravado") return sum;
+      if (isMatch) {
+        return sum + +(item.valor_unitario * potenciaPromedio).toFixed(2);
+      }
+      return sum + item.valor_venta;
+    }, 0).toFixed(2);
+    const opInafectas = h3.op_inafectas || 0;
+    const opExonerada = h3.op_exonerada || 0;
+    const nuevoSubtotal = +(opGravadas + opInafectas + opExonerada).toFixed(2);
+    const nuevoIGV = +(opGravadas * 0.18).toFixed(2);
+    const nuevoTotal = +(nuevoSubtotal + nuevoIGV + (h3.otros_cargos || 0) - (h3.otros_descuentos || 0) + (h3.isc || 0)).toFixed(2);
     const diferencia = +(nuevoTotal - totalOriginal).toFixed(2);
-
+    
     updateSheet("hoja6_data", {
       ...h6,
       potencia_promedio: potenciaPromedio,
