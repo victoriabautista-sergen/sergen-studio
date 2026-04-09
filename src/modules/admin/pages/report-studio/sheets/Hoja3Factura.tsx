@@ -29,6 +29,8 @@ const Hoja3Factura = () => {
   const [adjusting, setAdjusting] = useState(false);
   const [nuevoExonerado, setNuevoExonerado] = useState("");
   const [savingKeywords, setSavingKeywords] = useState(false);
+  const keywordsLoadedRef = useRef(false);
+  const rulesLoadedRef = useRef(false);
 
   const update = (field: string, value: any) => {
     updateSheet("hoja3_data", { ...h3, [field]: value });
