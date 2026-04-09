@@ -13,7 +13,7 @@ describe("invoiceExtractionRules", () => {
     expect(result.ruleHints).toEqual(["AMBOS PRECIOS DEBEN SER MAYOR A 0.10"]);
   });
 
-  it("corrige precios cuando la regla exige que ambos sean mayores a 0.10", () => {
+  it("corrige solo el precio inválido cuando la regla exige que ambos sean mayores a 0.10", () => {
     const result = resolveExtractedInvoicePrices({
       items: [
         { descripcion: "ENERGÍA ACTIVA SST HORA PUNTA", unidad: "NIU", cantidad: 1, valor_unitario: 0.1381, valor_venta: 1 },
@@ -27,7 +27,7 @@ describe("invoiceExtractionRules", () => {
     });
 
     expect(result.adjusted).toBe(true);
-    expect(result.precioHp).toBeCloseTo(0.161986, 6);
+    expect(result.precioHp).toBeCloseTo(0.1381, 6);
     expect(result.precioHfp).toBeCloseTo(0.161986, 6);
   });
 });
