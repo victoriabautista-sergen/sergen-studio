@@ -86,7 +86,8 @@ const FacturaPage = ({ data, pageNumber }: { data: ReportData; pageNumber?: numb
                 {/* Totals using same 5-column grid */}
                 {[
                   ["OP. GRAVADAS", h3.op_gravadas, false],
-                  ["OP. EXONERADA", (h3.op_inafectas || 0) + (h3.op_exonerada || 0), false],
+                  ["OP. INAFECTAS", h3.op_inafectas || 0, false],
+                  ["OP. EXONERADA", h3.op_exonerada || 0, false],
                   ["OP. GRATUITA", h3.op_gratuita, false],
                   ["OTROS CARGOS", h3.otros_cargos, false],
                   ["OTROS DESCUENTOS", h3.otros_descuentos, false],

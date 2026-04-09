@@ -89,12 +89,35 @@ const ComparacionPage = ({ data, pageNumber }: { data: ReportData; pageNumber?: 
                 <tr><td colSpan={5} className="py-1 border-0"></td></tr>
                 {/* Totals - same structure as Hoja 3 */}
                 {(() => {
-                   const opExonerada = h4.subtotal_exonerado || 0;
-                   const subtotal = h4.subtotal_afecto + opExonerada;
-                   const totalFinal = h4.subtotal_afecto + h4.igv_recalculado + opExonerada;
+                   // Separate inafecta and exonerada based on original invoice structure
+                   const origInafectas = h3.op_inafectas || 0;
+                   const origExonerada = h3.op_exonerada || 0;
+                   const totalNoGravado = h4.subtotal_exonerado || 0;
+                   
+                   // Distribute the recalculated non-taxable total proportionally
+                   const origNoGravTotal = origInafectas + origExonerada;
+                   let calcInafectas = 0;
+                   let calcExonerada = 0;
+                   if (origNoGravTotal > 0) {
+                     calcInafectas = +(totalNoGravado * origInafectas / origNoGravTotal).toFixed(2);
+                     calcExonerada = +(totalNoGravado - calcInafectas).toFixed(2);
+                   } else if (origInafectas > 0) {
+                     calcInafectas = totalNoGravado;
+                   } else if (origExonerada > 0) {
+                     calcExonerada = totalNoGravado;
+                   } else {
+                     // If both are 0 but we have non-taxable items, check item types
+                     const hasInafecta = items.some(it => it.tipo === "inafecta");
+                     if (hasInafecta) calcInafectas = totalNoGravado;
+                     else calcExonerada = totalNoGravado;
+                   }
+                   
+                   const subtotal = h4.subtotal_afecto + totalNoGravado;
+                   const totalFinal = h4.subtotal_afecto + h4.igv_recalculado + totalNoGravado;
                    return [
                      ["OP. GRAVADAS", h4.subtotal_afecto, false],
-                     ["OP. EXONERADA", opExonerada, false],
+                     ["OP. INAFECTAS", calcInafectas, false],
+                     ["OP. EXONERADA", calcExonerada, false],
                      ["OP. GRATUITA", h3.op_gratuita || 0, false],
                      ["OTROS CARGOS", h3.otros_cargos || 0, false],
                      ["OTROS DESCUENTOS", h3.otros_descuentos || 0, false],
