@@ -29,6 +29,8 @@ const Hoja3Factura = () => {
   const [adjusting, setAdjusting] = useState(false);
   const [nuevoExonerado, setNuevoExonerado] = useState("");
   const [savingKeywords, setSavingKeywords] = useState(false);
+  const keywordsLoadedRef = useRef(false);
+  const rulesLoadedRef = useRef(false);
 
   const update = (field: string, value: any) => {
     updateSheet("hoja3_data", { ...h3, [field]: value });
@@ -40,9 +42,14 @@ const Hoja3Factura = () => {
     return REGLAS_DEFAULT[concesionaria] || "";
   }, [h3.reglas_extraccion, concesionaria]);
 
-  // Load rules from last report of same concesionaria
+  // Load rules from last report of same concesionaria (only once per concesionaria)
   useEffect(() => {
-    if (!concesionaria || h3.reglas_extraccion) return;
+    rulesLoadedRef.current = false;
+  }, [concesionaria]);
+
+  useEffect(() => {
+    if (!concesionaria || h3.reglas_extraccion || rulesLoadedRef.current) return;
+    rulesLoadedRef.current = true;
     supabase
       .from("reportes_control_demanda" as any)
       .select("hoja3_data, datos_generales")
@@ -59,9 +66,14 @@ const Hoja3Factura = () => {
       });
   }, [concesionaria]);
 
-  // Auto-load exonerado keywords from DB for this concesionaria
+  // Auto-load exonerado keywords from DB for this concesionaria (only once)
   useEffect(() => {
-    if (!concesionaria) return;
+    keywordsLoadedRef.current = false;
+  }, [concesionaria]);
+
+  useEffect(() => {
+    if (!concesionaria || keywordsLoadedRef.current) return;
+    keywordsLoadedRef.current = true;
     supabase
       .from("concesionaria_potencia_keywords")
       .select("inafecto_keywords")
@@ -115,10 +127,25 @@ const Hoja3Factura = () => {
     }
   };
 
-  const eliminarExonerado = (idx: number) => {
+  const eliminarExonerado = async (idx: number) => {
     const updated = [...(h4.conceptos_exonerados || [])];
     updated.splice(idx, 1);
     updateSheet("hoja4_data", { ...h4, conceptos_exonerados: updated });
+    // If all removed, also clear in DB so they don't reload
+    if (updated.length === 0 && concesionaria) {
+      const { data: existing } = await supabase
+        .from("concesionaria_potencia_keywords")
+        .select("id")
+        .eq("concesionaria", concesionaria)
+        .maybeSingle();
+      if (existing) {
+        await supabase
+          .from("concesionaria_potencia_keywords")
+          .update({ inafecto_keywords: [] } as any)
+          .eq("concesionaria", concesionaria);
+        toast.info("Reglas eliminadas para " + concesionaria);
+      }
+    }
   };
 
   const extractData = async (fileUrl: string, reglas?: string) => {
