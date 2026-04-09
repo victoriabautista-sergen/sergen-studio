@@ -70,14 +70,34 @@ const Hoja4Comparacion = () => {
     const calc_hfp = h2.precio_calculado_hfp;
     const fact_hp = h3.precio_hp_facturado;
     const fact_hfp = h3.precio_hfp_facturado;
+
+    console.log("[Hoja4] Precios calculados HP:", calc_hp, "HFP:", calc_hfp);
+    console.log("[Hoja4] Precios facturados HP:", fact_hp, "HFP:", fact_hfp);
+    console.log("[Hoja4] nombre_hp:", h3.nombre_hp, "nombre_hfp:", h3.nombre_hfp);
+
+    // If calculated prices are 0, skip recalculation
+    if (!calc_hp && !calc_hfp) {
+      console.log("[Hoja4] Precios calculados son 0, no se recalcula");
+      return;
+    }
+
     const diff_hp = +(fact_hp - calc_hp).toFixed(5);
     const diff_hfp = +(fact_hfp - calc_hfp).toFixed(5);
 
+    const nombreHP = (h3.nombre_hp || "").toUpperCase().trim();
+    const nombreHFP = (h3.nombre_hfp || "").toUpperCase().trim();
+
     const items_recalculados: Hoja4Item[] = h3.items.map((item) => {
-      const descUpper = item.descripcion.toUpperCase();
-      const isHP = descUpper.includes(h3.nombre_hp.toUpperCase());
-      const isHFP = descUpper.includes(h3.nombre_hfp.toUpperCase());
+      const descUpper = (item.descripcion || "").toUpperCase().trim();
+      
+      // Match using includes in both directions for flexibility
+      const isHP = nombreHP.length > 0 && (descUpper.includes(nombreHP) || nombreHP.includes(descUpper));
+      const isHFP = nombreHFP.length > 0 && (descUpper.includes(nombreHFP) || nombreHFP.includes(descUpper));
       const isEnergy = isHP || isHFP;
+
+      if (isEnergy) {
+        console.log("[Hoja4] Matched energy item:", item.descripcion, "isHP:", isHP, "isHFP:", isHFP);
+      }
 
       // Use classification directly from Hoja 3 extraction
       let tipo: "gravado" | "exonerado" | "inafecta" = "gravado";
