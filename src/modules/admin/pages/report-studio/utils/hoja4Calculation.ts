@@ -2,6 +2,9 @@ import type { Hoja4Data, Hoja4Item, ReportData } from "../types";
 
 type Hoja2Data = ReportData["hoja2_data"];
 type Hoja3Data = ReportData["hoja3_data"];
+type EnergyType = "hp" | "hfp";
+
+const PRICE_TOLERANCE = 0.000001;
 
 const normalizeText = (value: string) =>
   (value || "")
@@ -30,11 +33,24 @@ const looksLikeHp = (normalizedDescription: string) =>
   /\bHP\b/.test(normalizedDescription) ||
   (normalizedDescription.includes(" PUNTA") && !normalizedDescription.includes("FUERA"));
 
+const matchesPrice = (itemPrice: number, targetPrice: number) =>
+  itemPrice > 0 && targetPrice > 0 && Math.abs(itemPrice - targetPrice) <= PRICE_TOLERANCE;
+
+const getHeuristicEnergyItemType = (descripcion: string): EnergyType | null => {
+  const normalizedDescription = normalizeText(descripcion);
+  if (!normalizedDescription || !isEnergyDescription(normalizedDescription)) return null;
+
+  if (looksLikeHfp(normalizedDescription)) return "hfp";
+  if (looksLikeHp(normalizedDescription)) return "hp";
+
+  return null;
+};
+
 export const getEnergyItemType = (
   descripcion: string,
   nombreHp: string,
   nombreHfp: string
-): "hp" | "hfp" | null => {
+): EnergyType | null => {
   const normalizedDescription = normalizeText(descripcion);
   if (!normalizedDescription) return null;
 
@@ -43,22 +59,80 @@ export const getEnergyItemType = (
   if (matchesConfiguredName(normalizedDescription, nombreHfp)) return "hfp";
   if (matchesConfiguredName(normalizedDescription, nombreHp)) return "hp";
 
-  // If user explicitly configured HP/HFP names, only match those — skip heuristics
   if (hasConfiguredNames) return null;
 
-  if (!isEnergyDescription(normalizedDescription)) return null;
+  return getHeuristicEnergyItemType(descripcion);
+};
 
-  if (looksLikeHfp(normalizedDescription)) return "hfp";
-  if (looksLikeHp(normalizedDescription)) return "hp";
+const selectEnergyItemIndex = ({
+  items,
+  type,
+  configuredName,
+  facturadoPrice,
+}: {
+  items: Hoja3Data["items"];
+  type: EnergyType;
+  configuredName: string;
+  facturadoPrice: number;
+}) => {
+  const candidates = (items ?? [])
+    .map((item, index) => ({ item, index }))
+    .filter(({ item }) => getHeuristicEnergyItemType(item.descripcion) === type);
+
+  if (!candidates.length) return null;
+
+  if (configuredName && facturadoPrice > 0) {
+    const byNameAndPrice = candidates.find(
+      ({ item }) =>
+        matchesConfiguredName(normalizeText(item.descripcion), configuredName) &&
+        matchesPrice(item.valor_unitario, facturadoPrice)
+    );
+
+    if (byNameAndPrice) return byNameAndPrice.index;
+  }
+
+  if (facturadoPrice > 0) {
+    const byPrice = candidates.find(({ item }) => matchesPrice(item.valor_unitario, facturadoPrice));
+    if (byPrice) return byPrice.index;
+  }
+
+  if (configuredName) {
+    const byName = candidates.find(({ item }) =>
+      matchesConfiguredName(normalizeText(item.descripcion), configuredName)
+    );
+
+    if (byName) return byName.index;
+  }
+
+  if (candidates.length === 1) return candidates[0].index;
 
   return null;
 };
 
-const buildRecalculatedItems = (h2: Hoja2Data, h3: Hoja3Data): Hoja4Item[] => {
+const getSelectedEnergyItemIndexes = (h3: Hoja3Data) => ({
+  hp: selectEnergyItemIndex({
+    items: h3.items ?? [],
+    type: "hp",
+    configuredName: h3.nombre_hp,
+    facturadoPrice: h3.precio_hp_facturado || 0,
+  }),
+  hfp: selectEnergyItemIndex({
+    items: h3.items ?? [],
+    type: "hfp",
+    configuredName: h3.nombre_hfp,
+    facturadoPrice: h3.precio_hfp_facturado || 0,
+  }),
+});
+
+const buildRecalculatedItems = (
+  h2: Hoja2Data,
+  h3: Hoja3Data,
+  selectedIndexes: { hp: number | null; hfp: number | null }
+): Hoja4Item[] => {
   const items = h3.items ?? [];
 
-  return items.map((item) => {
-    const energyType = getEnergyItemType(item.descripcion, h3.nombre_hp, h3.nombre_hfp);
+  return items.map((item, index) => {
+    const energyType = selectedIndexes.hp === index ? "hp" : selectedIndexes.hfp === index ? "hfp" : null;
     const isHP = energyType === "hp";
     const isHFP = energyType === "hfp";
     const isEnergy = isHP || isHFP;
@@ -114,7 +188,8 @@ export const calculateHoja4Data = ({
   const diff_hp = +(fact_hp - calc_hp).toFixed(5);
   const diff_hfp = +(fact_hfp - calc_hfp).toFixed(5);
 
-  const items_recalculados = buildRecalculatedItems(h2, h3);
+  const selectedIndexes = getSelectedEnergyItemIndexes(h3);
+  const items_recalculados = buildRecalculatedItems(h2, h3, selectedIndexes);
 
   let diff_gravado = 0;
   let diff_no_gravado = 0;
@@ -135,12 +210,8 @@ export const calculateHoja4Data = ({
   const igv_recalculado = +(subtotal_afecto * 0.18).toFixed(2);
   const total_recalculado = +(subtotal_afecto + igv_recalculado + subtotal_exonerado).toFixed(2);
 
-  const energiaHP = h3.items.find(
-    (item) => getEnergyItemType(item.descripcion, h3.nombre_hp, h3.nombre_hfp) === "hp"
-  );
-  const energiaHFP = h3.items.find(
-    (item) => getEnergyItemType(item.descripcion, h3.nombre_hp, h3.nombre_hfp) === "hfp"
-  );
+  const energiaHP = selectedIndexes.hp !== null ? h3.items[selectedIndexes.hp] : undefined;
+  const energiaHFP = selectedIndexes.hfp !== null ? h3.items[selectedIndexes.hfp] : undefined;
   const cantHP = energiaHP?.cantidad || 0;
   const cantHFP = energiaHFP?.cantidad || 0;
 
