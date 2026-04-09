@@ -94,11 +94,11 @@ const CotizacionPreviewContent = () => {
         <tbody>
           {data.items.map((item, idx) => (
             <tr key={idx}>
-              <td style={{ padding: "4px 6px", verticalAlign: "top", whiteSpace: "pre-wrap", border: B }}>{item.descripcion}</td>
-              <td style={{ padding: "4px", textAlign: "center", verticalAlign: "middle", border: B }}>{item.codigo}</td>
-              <td style={{ padding: "4px", textAlign: "right", verticalAlign: "middle", border: B }}>S/ {fmt(item.precio_unitario)}</td>
-              <td style={{ padding: "4px", textAlign: "center", verticalAlign: "middle", border: B }}>{item.cantidad}</td>
-              <td style={{ padding: "4px", textAlign: "right", verticalAlign: "middle", border: B }}>S/ {fmt(item.total)}</td>
+              <td style={{ padding: "2px 6px", verticalAlign: "middle", whiteSpace: "pre-wrap", lineHeight: 1.2, border: B }}>{item.descripcion}</td>
+              <td style={{ padding: "2px 4px", textAlign: "center", verticalAlign: "middle", lineHeight: 1.2, border: B }}>{item.codigo}</td>
+              <td style={{ padding: "2px 4px", textAlign: "right", verticalAlign: "middle", lineHeight: 1.2, border: B }}>S/ {fmt(item.precio_unitario)}</td>
+              <td style={{ padding: "2px 4px", textAlign: "center", verticalAlign: "middle", lineHeight: 1.2, border: B }}>{item.cantidad}</td>
+              <td style={{ padding: "2px 4px", textAlign: "right", verticalAlign: "middle", lineHeight: 1.2, border: B }}>S/ {fmt(item.total)}</td>
             </tr>
           ))}
         </tbody>
