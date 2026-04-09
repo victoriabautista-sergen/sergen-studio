@@ -169,7 +169,7 @@ const ReportPreview = ({ zoom = 1 }: { zoom?: number }) => {
           style={{
             width: "595px",
             minWidth: "595px",
-            height: "1010px",
+            height: "1123px",
             fontFamily: "'Inter', sans-serif",
             position: "relative",
             overflow: "hidden",
