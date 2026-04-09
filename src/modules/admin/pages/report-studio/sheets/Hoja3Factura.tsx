@@ -36,13 +36,13 @@ const Hoja3Factura = () => {
     updateSheet("hoja3_data", { ...h3, [field]: value });
   };
 
-  // Load saved rules from past reports for this concesionaria
+  // Load saved rules from DB for this concesionaria
   const getReglas = useCallback((): string => {
     if (h3.reglas_extraccion) return h3.reglas_extraccion;
     return REGLAS_DEFAULT[concesionaria] || "";
   }, [h3.reglas_extraccion, concesionaria]);
 
-  // Load rules from last report of same concesionaria (only once per concesionaria)
+  // Load rules from concesionaria_potencia_keywords table (persisted per concesionaria)
   useEffect(() => {
     rulesLoadedRef.current = false;
   }, [concesionaria]);
@@ -51,17 +51,14 @@ const Hoja3Factura = () => {
     if (!concesionaria || h3.reglas_extraccion || rulesLoadedRef.current) return;
     rulesLoadedRef.current = true;
     supabase
-      .from("reportes_control_demanda" as any)
-      .select("hoja3_data, datos_generales")
-      .order("created_at", { ascending: false })
-      .limit(50)
-      .then(({ data: rows }) => {
-        if (!rows) return;
-        const match = (rows as any[]).find(
-          (r) => r.datos_generales?.concesionaria === concesionaria && r.hoja3_data?.reglas_extraccion
-        );
-        if (match) {
-          update("reglas_extraccion", match.hoja3_data.reglas_extraccion);
+      .from("concesionaria_potencia_keywords")
+      .select("reglas_extraccion")
+      .eq("concesionaria", concesionaria)
+      .maybeSingle()
+      .then(({ data: row }) => {
+        const saved = (row as any)?.reglas_extraccion;
+        if (saved && saved.trim().length > 0) {
+          update("reglas_extraccion", saved);
         }
       });
   }, [concesionaria]);
@@ -222,6 +219,31 @@ const Hoja3Factura = () => {
     }
   };
 
+  // Save extraction rules to concesionaria_potencia_keywords
+  const saveRulesToDB = async (rules: string) => {
+    if (!concesionaria) return;
+    try {
+      const { data: existing } = await supabase
+        .from("concesionaria_potencia_keywords")
+        .select("id")
+        .eq("concesionaria", concesionaria)
+        .maybeSingle();
+
+      if (existing) {
+        await supabase
+          .from("concesionaria_potencia_keywords")
+          .update({ reglas_extraccion: rules } as any)
+          .eq("concesionaria", concesionaria);
+      } else {
+        await supabase
+          .from("concesionaria_potencia_keywords")
+          .insert({ concesionaria, reglas_extraccion: rules } as any);
+      }
+    } catch (err) {
+      console.error("Error saving rules to DB:", err);
+    }
+  };
+
   // Use AI to auto-adjust rules based on user feedback
   const handleAdjustRules = async () => {
     if (!feedback.trim()) {
@@ -242,7 +264,8 @@ const Hoja3Factura = () => {
       if (error) throw error;
       const newRules = result?.new_rules || currentRules;
       update("reglas_extraccion", newRules);
-      toast.success("Reglas actualizadas. Re-extrayendo datos...");
+      await saveRulesToDB(newRules);
+      toast.success("Reglas actualizadas y guardadas. Re-extrayendo datos...");
       setShowFeedback(false);
       setFeedback("");
 

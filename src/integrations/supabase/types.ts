@@ -268,6 +268,7 @@ export type Database = {
           id: string
           inafecto_keywords: string[]
           keywords: string[]
+          reglas_extraccion: string | null
           updated_at: string
         }
         Insert: {
@@ -276,6 +277,7 @@ export type Database = {
           id?: string
           inafecto_keywords?: string[]
           keywords?: string[]
+          reglas_extraccion?: string | null
           updated_at?: string
         }
         Update: {
@@ -284,6 +286,7 @@ export type Database = {
           id?: string
           inafecto_keywords?: string[]
           keywords?: string[]
+          reglas_extraccion?: string | null
           updated_at?: string
         }
         Relationships: []
