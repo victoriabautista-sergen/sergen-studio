@@ -211,7 +211,7 @@ const CotizacionEditor = () => {
           <Upload className="h-3.5 w-3.5" /> Cargar datos desde Excel
         </Button>
         <p className="text-[10px] text-muted-foreground mt-1">
-          Excel con columnas: Empresa, Contacto, Ubicación, y tabla de items (Descripción, Código, Precio, Cantidad)
+          Tabla con columnas: Descripción, Código, Precio, Cantidad
         </p>
       </div>
 
