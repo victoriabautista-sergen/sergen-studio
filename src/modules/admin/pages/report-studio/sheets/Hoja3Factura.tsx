@@ -8,6 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Upload, Search, Loader2, MessageSquareWarning, X, Save } from "lucide-react";
 import { toast } from "sonner";
 import { useRef, useState, useEffect, useCallback } from "react";
+import { mergeExtractionRules, resolveExtractedInvoicePrices, splitStoredRuleEntries } from "../utils/invoiceExtractionRules";
 
 const REGLAS_DEFAULT: Record<string, string> = {
   "Luz del Sur": `Factura de Luz del Sur S.A.A. El concepto de energía en hora punta aparece como "CARGO POR ENERGÍA ACTIVA EN HORAS PUNTA". Fuera de punta: "CARGO POR ENERGÍA ACTIVA EN HORAS FUERA DE PUNTA". Totales: OP. GRAVADAS, OP. INAFECTAS, OP. EXONERADA, OP. GRATUITA, OTROS CARGOS, OTROS DESCUENTOS, SUBTOTAL, ISC, IGV, IMPORTE TOTAL DE LA VENTA.`,
@@ -29,8 +30,8 @@ const Hoja3Factura = () => {
   const [adjusting, setAdjusting] = useState(false);
   const [nuevoExonerado, setNuevoExonerado] = useState("");
   const [savingKeywords, setSavingKeywords] = useState(false);
+  const [savingRules, setSavingRules] = useState(false);
   const keywordsLoadedRef = useRef(false);
-  const rulesLoadedRef = useRef(false);
 
   const update = (field: string, value: any) => {
     updateSheet("hoja3_data", { ...h3, [field]: value });
@@ -42,28 +43,7 @@ const Hoja3Factura = () => {
     return REGLAS_DEFAULT[concesionaria] || "";
   }, [h3.reglas_extraccion, concesionaria]);
 
-  // Load rules from concesionaria_potencia_keywords table (persisted per concesionaria)
-  useEffect(() => {
-    rulesLoadedRef.current = false;
-  }, [concesionaria]);
-
-  useEffect(() => {
-    if (!concesionaria || h3.reglas_extraccion || rulesLoadedRef.current) return;
-    rulesLoadedRef.current = true;
-    supabase
-      .from("concesionaria_potencia_keywords")
-      .select("reglas_extraccion")
-      .eq("concesionaria", concesionaria)
-      .maybeSingle()
-      .then(({ data: row }) => {
-        const saved = (row as any)?.reglas_extraccion;
-        if (saved && saved.trim().length > 0) {
-          update("reglas_extraccion", saved);
-        }
-      });
-  }, [concesionaria]);
-
-  // Auto-load exonerado keywords from DB for this concesionaria (only once)
+  // Auto-load persisted config for this concesionaria (only once)
   useEffect(() => {
     keywordsLoadedRef.current = false;
   }, [concesionaria]);
@@ -73,14 +53,24 @@ const Hoja3Factura = () => {
     keywordsLoadedRef.current = true;
     supabase
       .from("concesionaria_potencia_keywords")
-      .select("inafecto_keywords")
+      .select("inafecto_keywords, reglas_extraccion")
       .eq("concesionaria", concesionaria)
       .maybeSingle()
       .then(({ data: row }) => {
-        if (row && (row as any).inafecto_keywords?.length > 0 && (!h4.conceptos_exonerados || h4.conceptos_exonerados.length === 0)) {
+        if (!row) return;
+
+        const savedRules = typeof (row as any).reglas_extraccion === "string" ? (row as any).reglas_extraccion : "";
+        const { taxKeywords, ruleHints } = splitStoredRuleEntries((row as any).inafecto_keywords || []);
+        const mergedRules = mergeExtractionRules(savedRules, ...ruleHints);
+
+        if (mergedRules && !h3.reglas_extraccion) {
+          update("reglas_extraccion", mergedRules);
+        }
+
+        if (taxKeywords.length > 0 && (!h4.conceptos_exonerados || h4.conceptos_exonerados.length === 0)) {
           updateSheet("hoja4_data", {
             ...h4,
-            conceptos_exonerados: (row as any).inafecto_keywords,
+            conceptos_exonerados: taxKeywords,
           });
         }
       });
@@ -106,7 +96,7 @@ const Hoja3Factura = () => {
           .from("concesionaria_potencia_keywords")
           .insert({ concesionaria, inafecto_keywords: h4.conceptos_exonerados } as any);
       }
-      toast.success(`Reglas exonerados guardadas para ${concesionaria}`);
+      toast.success(`Conceptos no gravados guardados para ${concesionaria}`);
     } catch (err: any) {
       toast.error("Error al guardar: " + (err.message || ""));
     } finally {
@@ -145,11 +135,52 @@ const Hoja3Factura = () => {
     }
   };
 
+  async function saveRulesToDB(rules: string, showToast = false) {
+    if (!concesionaria) return;
+
+    const cleanedRules = rules.trim();
+    setSavingRules(true);
+
+    try {
+      const { data: existing } = await supabase
+        .from("concesionaria_potencia_keywords")
+        .select("id")
+        .eq("concesionaria", concesionaria)
+        .maybeSingle();
+
+      if (existing) {
+        await supabase
+          .from("concesionaria_potencia_keywords")
+          .update({ reglas_extraccion: cleanedRules } as any)
+          .eq("concesionaria", concesionaria);
+      } else if (cleanedRules) {
+        await supabase
+          .from("concesionaria_potencia_keywords")
+          .insert({ concesionaria, reglas_extraccion: cleanedRules } as any);
+      }
+
+      if (showToast) {
+        toast.success(cleanedRules ? `Reglas de extracción guardadas para ${concesionaria}` : `Reglas de extracción limpiadas para ${concesionaria}`);
+      }
+    } catch (err: any) {
+      if (showToast) {
+        toast.error("Error al guardar reglas: " + (err.message || ""));
+      } else {
+        console.error("Error saving rules to DB:", err);
+      }
+    } finally {
+      setSavingRules(false);
+    }
+  }
+
   const extractData = async (fileUrl: string, reglas?: string) => {
     updateSheet("hoja3_data", { ...h3, extracting: true });
     try {
-      const reglasToUse = reglas || getReglas();
-      const exoneradoKeywords = data.hoja4_data?.conceptos_exonerados || [];
+      const { taxKeywords, ruleHints } = splitStoredRuleEntries(data.hoja4_data?.conceptos_exonerados || []);
+      const reglasToUse = mergeExtractionRules(reglas || getReglas(), ...ruleHints);
+
+      await saveRulesToDB(reglasToUse);
+
       const { data: result, error } = await supabase.functions.invoke("extract-invoice-data", {
         body: {
           image_url: fileUrl,
@@ -157,11 +188,18 @@ const Hoja3Factura = () => {
           nombre_hfp: h3.nombre_hfp,
           reglas_concesionario: reglasToUse,
           concesionaria,
-          exonerado_keywords: exoneradoKeywords,
+          exonerado_keywords: taxKeywords,
         },
       });
       if (error) throw error;
       const extracted = result?.data || {};
+      const { precioHp, precioHfp, adjusted } = resolveExtractedInvoicePrices({
+        items: extracted.items,
+        precioHp: extracted.precio_hp,
+        precioHfp: extracted.precio_hfp,
+        rules: reglasToUse,
+      });
+
       updateSheet("hoja3_data", {
         ...h3,
         extracting: false,
@@ -170,8 +208,8 @@ const Hoja3Factura = () => {
         fecha_factura: extracted.fecha_factura || h3.fecha_factura,
         ruc: extracted.ruc || h3.ruc,
         razon_social: extracted.razon_social || h3.razon_social,
-        precio_hp_facturado: extracted.precio_hp ?? h3.precio_hp_facturado,
-        precio_hfp_facturado: extracted.precio_hfp ?? h3.precio_hfp_facturado,
+        precio_hp_facturado: precioHp ?? extracted.precio_hp ?? h3.precio_hp_facturado,
+        precio_hfp_facturado: precioHfp ?? extracted.precio_hfp ?? h3.precio_hfp_facturado,
         items: extracted.items || h3.items,
         op_gravadas: extracted.op_gravadas ?? h3.op_gravadas,
         op_inafectas: extracted.op_inafectas ?? h3.op_inafectas,
@@ -185,6 +223,9 @@ const Hoja3Factura = () => {
         importe_total: extracted.importe_total ?? h3.importe_total,
         reglas_extraccion: reglasToUse,
       });
+      if (adjusted) {
+        toast.info("Se ajustaron los precios HP/HFP según tus reglas de extracción");
+      }
       toast.success("Datos extraídos correctamente");
     } catch (err: any) {
       updateSheet("hoja3_data", { ...h3, extracting: false, factura_file_url: fileUrl });
@@ -216,31 +257,6 @@ const Hoja3Factura = () => {
     } finally {
       setUploading(false);
       if (fileInputRef.current) fileInputRef.current.value = "";
-    }
-  };
-
-  // Save extraction rules to concesionaria_potencia_keywords
-  const saveRulesToDB = async (rules: string) => {
-    if (!concesionaria) return;
-    try {
-      const { data: existing } = await supabase
-        .from("concesionaria_potencia_keywords")
-        .select("id")
-        .eq("concesionaria", concesionaria)
-        .maybeSingle();
-
-      if (existing) {
-        await supabase
-          .from("concesionaria_potencia_keywords")
-          .update({ reglas_extraccion: rules } as any)
-          .eq("concesionaria", concesionaria);
-      } else {
-        await supabase
-          .from("concesionaria_potencia_keywords")
-          .insert({ concesionaria, reglas_extraccion: rules } as any);
-      }
-    } catch (err) {
-      console.error("Error saving rules to DB:", err);
     }
   };
 
@@ -403,11 +419,42 @@ const Hoja3Factura = () => {
         )}
       </div>
 
+      <div className="border rounded-lg p-3 space-y-3 bg-muted/30">
+        <div className="flex items-center justify-between gap-2">
+          <div>
+            <p className="text-xs font-semibold text-foreground uppercase tracking-wide">⚙ Reglas de extracción</p>
+            <p className="text-[10px] text-muted-foreground">
+              Estas reglas sí afectan los precios HP/HFP y se guardan por concesionaria.
+            </p>
+          </div>
+          {concesionaria && (
+            <Button
+              type="button"
+              size="sm"
+              variant="outline"
+              onClick={() => saveRulesToDB(h3.reglas_extraccion, true)}
+              disabled={savingRules}
+              className="h-7 text-xs"
+            >
+              <Save className="w-3 h-3 mr-1" />
+              {savingRules ? "Guardando..." : `Guardar para ${concesionaria}`}
+            </Button>
+          )}
+        </div>
+        <Textarea
+          value={h3.reglas_extraccion}
+          onChange={(e) => update("reglas_extraccion", e.target.value)}
+          rows={4}
+          className="text-xs"
+          placeholder={REGLAS_DEFAULT[concesionaria] || "Ej: ambos precios deben ser mayores a 0.10 y si hay varios cargos de energía debe sumarse el valor unitario del bloque correspondiente."}
+        />
+      </div>
+
       {/* Reglas Exonerados por Concesionaria */}
       <div className="border rounded-lg p-3 space-y-3 bg-muted/30">
-        <p className="text-xs font-semibold text-foreground uppercase tracking-wide">⚙ Reglas Exonerados</p>
+        <p className="text-xs font-semibold text-foreground uppercase tracking-wide">⚙ Conceptos no gravados</p>
         <p className="text-[10px] text-muted-foreground">
-          Conceptos exonerados para <strong>{concesionaria || "esta concesionaria"}</strong>.
+          Estos conceptos solo clasifican ítems como inafecta/exonerado para <strong>{concesionaria || "esta concesionaria"}</strong>. No cambian los precios HP/HFP.
         </p>
         <div className="flex gap-2">
           <Input
