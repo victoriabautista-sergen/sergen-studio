@@ -66,9 +66,14 @@ const Hoja3Factura = () => {
       });
   }, [concesionaria]);
 
-  // Auto-load exonerado keywords from DB for this concesionaria
+  // Auto-load exonerado keywords from DB for this concesionaria (only once)
   useEffect(() => {
-    if (!concesionaria) return;
+    keywordsLoadedRef.current = false;
+  }, [concesionaria]);
+
+  useEffect(() => {
+    if (!concesionaria || keywordsLoadedRef.current) return;
+    keywordsLoadedRef.current = true;
     supabase
       .from("concesionaria_potencia_keywords")
       .select("inafecto_keywords")
