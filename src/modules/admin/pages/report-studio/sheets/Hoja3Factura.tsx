@@ -36,13 +36,13 @@ const Hoja3Factura = () => {
     updateSheet("hoja3_data", { ...h3, [field]: value });
   };
 
-  // Load saved rules from past reports for this concesionaria
+  // Load saved rules from DB for this concesionaria
   const getReglas = useCallback((): string => {
     if (h3.reglas_extraccion) return h3.reglas_extraccion;
     return REGLAS_DEFAULT[concesionaria] || "";
   }, [h3.reglas_extraccion, concesionaria]);
 
-  // Load rules from last report of same concesionaria (only once per concesionaria)
+  // Load rules from concesionaria_potencia_keywords table (persisted per concesionaria)
   useEffect(() => {
     rulesLoadedRef.current = false;
   }, [concesionaria]);
@@ -51,17 +51,14 @@ const Hoja3Factura = () => {
     if (!concesionaria || h3.reglas_extraccion || rulesLoadedRef.current) return;
     rulesLoadedRef.current = true;
     supabase
-      .from("reportes_control_demanda" as any)
-      .select("hoja3_data, datos_generales")
-      .order("created_at", { ascending: false })
-      .limit(50)
-      .then(({ data: rows }) => {
-        if (!rows) return;
-        const match = (rows as any[]).find(
-          (r) => r.datos_generales?.concesionaria === concesionaria && r.hoja3_data?.reglas_extraccion
-        );
-        if (match) {
-          update("reglas_extraccion", match.hoja3_data.reglas_extraccion);
+      .from("concesionaria_potencia_keywords")
+      .select("reglas_extraccion")
+      .eq("concesionaria", concesionaria)
+      .maybeSingle()
+      .then(({ data: row }) => {
+        const saved = (row as any)?.reglas_extraccion;
+        if (saved && saved.trim().length > 0) {
+          update("reglas_extraccion", saved);
         }
       });
   }, [concesionaria]);
