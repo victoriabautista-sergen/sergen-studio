@@ -66,7 +66,10 @@ const CotizacionEditor = () => {
         for (let i = startRow; i < rows.length; i++) {
           const row = rows[i];
           if (!row) continue;
-          const desc = String(row[colDesc] ?? "").trim();
+          const rawDesc = String(row[colDesc] ?? "").trim();
+          const desc = rawDesc.length > 0
+            ? rawDesc.charAt(0).toUpperCase() + rawDesc.slice(1).toLowerCase()
+            : "";
           if (!desc) continue;
 
           const precio = colPrecio >= 0 ? (parseFloat(String(row[colPrecio] ?? 0)) || 0) : 0;
