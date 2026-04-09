@@ -81,7 +81,7 @@ const CotizacionPreviewContent = () => {
       </table>
 
       {/* Items table */}
-      <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "10px", marginBottom: "4px", border: B }}>
+      <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "10px", marginBottom: "4px", border: B, tableLayout: "fixed" }}>
         <thead>
           <tr style={{ backgroundColor: ORANGE, color: "#fff", height: "16px" }}>
             <th style={{ padding: "0 4px 0 6px", textAlign: "left", fontWeight: 600, verticalAlign: "middle", lineHeight: 1, border: B }}>Descripción</th>
@@ -92,15 +92,22 @@ const CotizacionPreviewContent = () => {
           </tr>
         </thead>
         <tbody>
-          {data.items.map((item, idx) => (
-            <tr key={idx}>
-              <td style={{ padding: "2px 6px", verticalAlign: "middle", whiteSpace: "pre-wrap", lineHeight: 1.2, border: B }}>{item.descripcion}</td>
-              <td style={{ padding: "2px 4px", textAlign: "center", verticalAlign: "middle", lineHeight: 1.2, border: B }}>{item.codigo}</td>
-              <td style={{ padding: "2px 4px", textAlign: "right", verticalAlign: "middle", lineHeight: 1.2, border: B }}>S/ {fmt(item.precio_unitario)}</td>
-              <td style={{ padding: "2px 4px", textAlign: "center", verticalAlign: "middle", lineHeight: 1.2, border: B }}>{item.cantidad}</td>
-              <td style={{ padding: "2px 4px", textAlign: "right", verticalAlign: "middle", lineHeight: 1.2, border: B }}>S/ {fmt(item.total)}</td>
-            </tr>
-          ))}
+          {data.items.map((item, idx) => {
+            const descripcionCompacta = item.descripcion
+              .replace(/[\r\n\t]+/g, " ")
+              .replace(/\s{2,}/g, " ")
+              .trim();
+
+            return (
+              <tr key={idx} style={{ height: "18px" }}>
+                <td style={{ padding: "2px 6px", verticalAlign: "middle", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", lineHeight: 1.1, border: B }}>{descripcionCompacta}</td>
+                <td style={{ padding: "2px 4px", textAlign: "center", verticalAlign: "middle", lineHeight: 1.1, border: B }}>{item.codigo}</td>
+                <td style={{ padding: "2px 4px", textAlign: "right", verticalAlign: "middle", lineHeight: 1.1, border: B }}>S/ {fmt(item.precio_unitario)}</td>
+                <td style={{ padding: "2px 4px", textAlign: "center", verticalAlign: "middle", lineHeight: 1.1, border: B }}>{item.cantidad}</td>
+                <td style={{ padding: "2px 4px", textAlign: "right", verticalAlign: "middle", lineHeight: 1.1, border: B }}>S/ {fmt(item.total)}</td>
+              </tr>
+            );
+          })}
         </tbody>
       </table>
 

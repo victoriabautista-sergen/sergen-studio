@@ -66,7 +66,10 @@ const CotizacionEditor = () => {
         for (let i = startRow; i < rows.length; i++) {
           const row = rows[i];
           if (!row) continue;
-          const rawDesc = String(row[colDesc] ?? "").trim();
+          const rawDesc = String(row[colDesc] ?? "")
+            .replace(/[\r\n\t]+/g, " ")
+            .replace(/\s{2,}/g, " ")
+            .trim();
           const desc = rawDesc.length > 0
             ? rawDesc.charAt(0).toUpperCase() + rawDesc.slice(1).toLowerCase()
             : "";
