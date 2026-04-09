@@ -42,9 +42,14 @@ const Hoja3Factura = () => {
     return REGLAS_DEFAULT[concesionaria] || "";
   }, [h3.reglas_extraccion, concesionaria]);
 
-  // Load rules from last report of same concesionaria
+  // Load rules from last report of same concesionaria (only once per concesionaria)
   useEffect(() => {
-    if (!concesionaria || h3.reglas_extraccion) return;
+    rulesLoadedRef.current = false;
+  }, [concesionaria]);
+
+  useEffect(() => {
+    if (!concesionaria || h3.reglas_extraccion || rulesLoadedRef.current) return;
+    rulesLoadedRef.current = true;
     supabase
       .from("reportes_control_demanda" as any)
       .select("hoja3_data, datos_generales")
