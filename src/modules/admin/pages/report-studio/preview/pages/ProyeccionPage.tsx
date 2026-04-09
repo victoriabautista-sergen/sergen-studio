@@ -38,9 +38,15 @@ const ProyeccionPage = ({ data, pageNumber }: { data: ReportData; pageNumber?: n
     return { ...item, is_potencia: false };
   });
 
-  const opGravadas = +projectedItems.reduce((sum, i) => sum + i.valor_venta, 0).toFixed(2);
-  const opInafectas = h3.op_inafectas || 0;
-  const opExonerada = h3.op_exonerada || 0;
+  const opGravadas = +projectedItems
+    .filter(i => !i.tipo || i.tipo === "gravado")
+    .reduce((sum, i) => sum + i.valor_venta, 0).toFixed(2);
+  const opInafectas = +projectedItems
+    .filter(i => i.tipo === "inafecta")
+    .reduce((sum, i) => sum + i.valor_venta, 0).toFixed(2);
+  const opExonerada = +projectedItems
+    .filter(i => i.tipo === "exonerado")
+    .reduce((sum, i) => sum + i.valor_venta, 0).toFixed(2);
   const opGratuita = h3.op_gratuita || 0;
   const otrosCargos = h3.otros_cargos || 0;
   const otrosDescuentos = h3.otros_descuentos || 0;
