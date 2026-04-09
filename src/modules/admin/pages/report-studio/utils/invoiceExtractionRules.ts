@@ -128,14 +128,14 @@ export const resolveExtractedInvoicePrices = ({
 
   const nextHp = currentHp !== null && currentHp >= minPrice
     ? currentHp
-    : summedHp !== null && summedHp >= minPrice
-      ? summedHp
+    : foundHp !== null && foundHp >= minPrice
+      ? foundHp
       : currentHp;
 
   const nextHfp = currentHfp !== null && currentHfp >= minPrice
     ? currentHfp
-    : summedHfp !== null && summedHfp >= minPrice
-      ? summedHfp
+    : foundHfp !== null && foundHfp >= minPrice
+      ? foundHfp
       : currentHfp;
 
   return {
