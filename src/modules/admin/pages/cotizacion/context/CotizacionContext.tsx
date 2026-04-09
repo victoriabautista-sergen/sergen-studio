@@ -20,8 +20,6 @@ export const useCotizacionContext = (): CotizacionContextType => {
   return ctx;
 };
 
-export default CotizacionContext;
-
 // Generate default validity: 15 days from today
 const getDefaultValidez = () => {
   const d = new Date();
