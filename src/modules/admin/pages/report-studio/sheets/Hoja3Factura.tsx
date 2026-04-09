@@ -380,8 +380,8 @@ const Hoja3Factura = () => {
                 ¿Hay errores en la extracción? Reportar
               </Button>
             ) : (
-              <div className="border border-orange-300 bg-orange-50 dark:bg-orange-900/20 rounded-lg p-3 space-y-2">
-                <p className="text-[10px] text-orange-700 dark:text-orange-400 font-medium">
+              <div className="border border-border bg-muted/40 rounded-lg p-3 space-y-2">
+                <p className="text-[10px] text-foreground font-medium">
                   Describe qué datos no se extrajeron bien o qué nombre tiene el concepto en la factura:
                 </p>
                 <Textarea
