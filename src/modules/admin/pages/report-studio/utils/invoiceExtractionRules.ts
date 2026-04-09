@@ -123,8 +123,8 @@ export const resolveExtractedInvoicePrices = ({
     return { precioHp: currentHp, precioHfp: currentHfp, adjusted: false };
   }
 
-  const summedHp = sumPrices(items, isHpItem);
-  const summedHfp = sumPrices(items, isHfpItem);
+  const foundHp = findPrice(items, isHpItem);
+  const foundHfp = findPrice(items, isHfpItem);
 
   const nextHp = currentHp !== null && currentHp >= minPrice
     ? currentHp
