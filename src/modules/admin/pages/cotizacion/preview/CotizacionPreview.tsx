@@ -208,7 +208,7 @@ const CotizacionPreview = React.forwardRef<HTMLDivElement>((_, ref) => {
     <div
       ref={containerRef}
       data-pdf-page="1"
-      data-filename={`Cotizacion_${data.empresa_cliente || "doc"}_${data.numero_cotizacion || "sin_numero"}.pdf`.replace(/\s+/g, "_")}
+      data-filename={`${data.numero_cotizacion || "cotizacion"}.pdf`}
       style={{
         width: "595px",
         height: "842px",
