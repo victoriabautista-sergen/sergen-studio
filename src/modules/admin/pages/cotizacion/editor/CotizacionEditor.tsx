@@ -195,6 +195,28 @@ const CotizacionEditor = () => {
         </Select>
       </div>
 
+      {/* Subir Excel */}
+      <div>
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept=".xlsx,.xls,.csv"
+          onChange={handleExcelUpload}
+          className="hidden"
+        />
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => fileInputRef.current?.click()}
+          className="w-full h-8 text-xs gap-2"
+        >
+          <Upload className="h-3.5 w-3.5" /> Cargar datos desde Excel
+        </Button>
+        <p className="text-[10px] text-muted-foreground mt-1">
+          Excel con columnas: Empresa, Contacto, Ubicación, y tabla de items (Descripción, Código, Precio, Cantidad)
+        </p>
+      </div>
+
       {/* Datos de Cotización */}
       <div>
         <h3 className="text-sm font-semibold text-foreground mb-3">Datos de Cotización</h3>
