@@ -219,6 +219,31 @@ const Hoja3Factura = () => {
     }
   };
 
+  // Save extraction rules to concesionaria_potencia_keywords
+  const saveRulesToDB = async (rules: string) => {
+    if (!concesionaria) return;
+    try {
+      const { data: existing } = await supabase
+        .from("concesionaria_potencia_keywords")
+        .select("id")
+        .eq("concesionaria", concesionaria)
+        .maybeSingle();
+
+      if (existing) {
+        await supabase
+          .from("concesionaria_potencia_keywords")
+          .update({ reglas_extraccion: rules } as any)
+          .eq("concesionaria", concesionaria);
+      } else {
+        await supabase
+          .from("concesionaria_potencia_keywords")
+          .insert({ concesionaria, reglas_extraccion: rules } as any);
+      }
+    } catch (err) {
+      console.error("Error saving rules to DB:", err);
+    }
+  };
+
   // Use AI to auto-adjust rules based on user feedback
   const handleAdjustRules = async () => {
     if (!feedback.trim()) {
@@ -239,7 +264,8 @@ const Hoja3Factura = () => {
       if (error) throw error;
       const newRules = result?.new_rules || currentRules;
       update("reglas_extraccion", newRules);
-      toast.success("Reglas actualizadas. Re-extrayendo datos...");
+      await saveRulesToDB(newRules);
+      toast.success("Reglas actualizadas y guardadas. Re-extrayendo datos...");
       setShowFeedback(false);
       setFeedback("");
 
