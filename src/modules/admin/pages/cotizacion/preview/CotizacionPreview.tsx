@@ -98,7 +98,6 @@ const CotizacionPreviewContent = () => {
               <td style={{ padding: "4px", textAlign: "center", verticalAlign: "middle", border: B }}>{item.codigo}</td>
               <td style={{ padding: "4px", textAlign: "right", verticalAlign: "middle", border: B }}>S/ {fmt(item.precio_unitario)}</td>
               <td style={{ padding: "4px", textAlign: "center", verticalAlign: "middle", border: B }}>{item.cantidad}</td>
-              <td style={{ padding: "4px", textAlign: "right", verticalAlign: "middle", border: B }}>S/ {fmt(item.precio_venta)}</td>
               <td style={{ padding: "4px", textAlign: "right", verticalAlign: "middle", border: B }}>S/ {fmt(item.total)}</td>
             </tr>
           ))}
