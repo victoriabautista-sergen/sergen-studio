@@ -38,6 +38,8 @@ export interface CotizacionData {
   terminos_items: string[];
   cuenta_bancaria: string;
   cci: string;
+  // Visibility
+  ocultarDatosEmpresa: boolean;
 }
 
 export const BRAND_CONFIG: Record<CotizacionMarca, { razon_social: string; cuenta_bancaria: string; cci: string; direccion: string }> = {
