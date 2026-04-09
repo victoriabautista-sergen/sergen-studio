@@ -21,6 +21,96 @@ interface SergenUser {
 const CotizacionEditor = () => {
   const { data, updateData, setData } = useCotizacionContext();
   const [sergenUsers, setSergenUsers] = useState<SergenUser[]>([]);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleExcelUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (evt) => {
+      try {
+        const wb = XLSX.read(evt.target?.result, { type: "array" });
+        const ws = wb.Sheets[wb.SheetNames[0]];
+        const rows: any[][] = XLSX.utils.sheet_to_json(ws, { header: 1 });
+
+        // Build a key-value map from first two columns
+        const kvMap: Record<string, string> = {};
+        const itemRows: any[][] = [];
+        let inItems = false;
+
+        for (const row of rows) {
+          const col0 = String(row[0] ?? "").trim().toLowerCase();
+          const col1 = row[1] !== undefined ? String(row[1]).trim() : "";
+
+          if (col0.includes("descripcion") || col0.includes("descripción")) {
+            inItems = true;
+            continue;
+          }
+
+          if (inItems) {
+            if (!row[0] && !row[1]) continue; // skip empty rows
+            itemRows.push(row);
+          } else if (col0 && col1) {
+            kvMap[col0] = col1;
+          }
+        }
+
+        // Helper to find value
+        const find = (...keys: string[]) => {
+          for (const k of keys) {
+            for (const [mk, mv] of Object.entries(kvMap)) {
+              if (mk.includes(k)) return mv;
+            }
+          }
+          return "";
+        };
+
+        // Parse items
+        const items: CotizacionItem[] = itemRows
+          .filter(r => r[0])
+          .map(r => {
+            const precio = parseFloat(String(r[2] ?? r[1] ?? 0)) || 0;
+            const cantidad = parseInt(String(r[3] ?? r[2] ?? 1)) || 1;
+            return {
+              descripcion: String(r[0] ?? ""),
+              codigo: String(r[1] ?? ""),
+              precio_unitario: precio,
+              cantidad,
+              precio_venta: precio,
+              total: precio * cantidad,
+            };
+          });
+
+        setData(prev => ({
+          ...prev,
+          empresa_cliente: find("empresa", "cliente", "razón", "razon") || prev.empresa_cliente,
+          contacto_cliente: find("contacto", "atención", "atencion") || prev.contacto_cliente,
+          ubicacion_cliente: find("ubicación", "ubicacion", "dirección cliente", "direccion cliente") || prev.ubicacion_cliente,
+          validez: find("validez", "vigencia") || prev.validez,
+          ...(items.length > 0 ? { items } : {}),
+        }));
+
+        // Recalculate totals
+        if (items.length > 0) {
+          const subtotal = items.reduce((s, i) => s + i.total, 0);
+          setData(prev => ({
+            ...prev,
+            subtotal,
+            imponible: subtotal,
+            total_impuesto: subtotal * (prev.impuesto_pct / 100),
+            total: subtotal + subtotal * (prev.impuesto_pct / 100) + prev.otros,
+          }));
+        }
+
+        toast.success(`Datos cargados: ${items.length} items encontrados`);
+      } catch (err: any) {
+        toast.error("Error al leer el archivo: " + (err.message || "formato inválido"));
+      }
+    };
+    reader.readAsArrayBuffer(file);
+    if (e.target) e.target.value = "";
+  };
 
   // Fetch Sergen users (super_admin + technical_user)
   useEffect(() => {
