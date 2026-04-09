@@ -93,9 +93,9 @@ const isHfpItem = (descripcion: string) => {
 
 const roundPrice = (value: number) => Number(value.toFixed(6));
 
-const sumPrices = (items: FacturaItem[], predicate: (descripcion: string) => boolean) => {
-  const total = items.reduce((sum, item) => (predicate(item.descripcion) ? sum + item.valor_unitario : sum), 0);
-  return total > 0 ? roundPrice(total) : null;
+const findPrice = (items: FacturaItem[], predicate: (descripcion: string) => boolean) => {
+  const match = items.find((item) => predicate(item.descripcion) && item.valor_unitario > 0);
+  return match ? roundPrice(match.valor_unitario) : null;
 };
 
 interface ResolveExtractedInvoicePricesInput {
@@ -123,19 +123,19 @@ export const resolveExtractedInvoicePrices = ({
     return { precioHp: currentHp, precioHfp: currentHfp, adjusted: false };
   }
 
-  const summedHp = sumPrices(items, isHpItem);
-  const summedHfp = sumPrices(items, isHfpItem);
+  const foundHp = findPrice(items, isHpItem);
+  const foundHfp = findPrice(items, isHfpItem);
 
   const nextHp = currentHp !== null && currentHp >= minPrice
     ? currentHp
-    : summedHp !== null && summedHp >= minPrice
-      ? summedHp
+    : foundHp !== null && foundHp >= minPrice
+      ? foundHp
       : currentHp;
 
   const nextHfp = currentHfp !== null && currentHfp >= minPrice
     ? currentHfp
-    : summedHfp !== null && summedHfp >= minPrice
-      ? summedHfp
+    : foundHfp !== null && foundHfp >= minPrice
+      ? foundHfp
       : currentHfp;
 
   return {
