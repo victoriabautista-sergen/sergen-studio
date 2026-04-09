@@ -84,11 +84,11 @@ const CotizacionPreviewContent = () => {
       <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "10px", marginBottom: "4px", border: B, tableLayout: "fixed" }}>
         <thead>
           <tr style={{ backgroundColor: ORANGE, color: "#fff", height: "16px" }}>
-            <th style={{ padding: "0 4px 0 6px", textAlign: "left", fontWeight: 600, verticalAlign: "middle", lineHeight: 1, border: B }}>Descripción</th>
-            <th style={{ padding: "0 4px", textAlign: "center", fontWeight: 600, width: "50px", verticalAlign: "middle", lineHeight: 1, border: B }}>Código</th>
-            <th style={{ padding: "0 4px", textAlign: "center", fontWeight: 600, width: "60px", verticalAlign: "middle", lineHeight: 1, border: B }}>Precio Unit</th>
-            <th style={{ padding: "0 4px", textAlign: "center", fontWeight: 600, width: "30px", verticalAlign: "middle", lineHeight: 1, border: B }}>Cant.</th>
-            <th style={{ padding: "0 4px", textAlign: "center", fontWeight: 600, width: "55px", verticalAlign: "middle", lineHeight: 1, border: B }}>Total</th>
+            <th style={{ padding: "0 4px 0 6px", textAlign: "left", fontWeight: 600, width: "58%", verticalAlign: "middle", lineHeight: 1, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", border: B }}>Descripción</th>
+            <th style={{ padding: "0 4px", textAlign: "center", fontWeight: 600, width: "48px", verticalAlign: "middle", lineHeight: 1, whiteSpace: "nowrap", border: B }}>Código</th>
+            <th style={{ padding: "0 4px", textAlign: "center", fontWeight: 600, width: "68px", verticalAlign: "middle", lineHeight: 1, whiteSpace: "nowrap", border: B }}>Precio Unit</th>
+            <th style={{ padding: "0 4px", textAlign: "center", fontWeight: 600, width: "32px", verticalAlign: "middle", lineHeight: 1, whiteSpace: "nowrap", border: B }}>Cant.</th>
+            <th style={{ padding: "0 4px", textAlign: "center", fontWeight: 600, width: "72px", verticalAlign: "middle", lineHeight: 1, whiteSpace: "nowrap", border: B }}>Total</th>
           </tr>
         </thead>
         <tbody>
@@ -99,12 +99,12 @@ const CotizacionPreviewContent = () => {
               .trim();
 
             return (
-              <tr key={idx} style={{ height: "18px" }}>
-                <td style={{ padding: "2px 6px", verticalAlign: "middle", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", lineHeight: 1.1, border: B }}>{descripcionCompacta}</td>
-                <td style={{ padding: "2px 4px", textAlign: "center", verticalAlign: "middle", lineHeight: 1.1, border: B }}>{item.codigo}</td>
-                <td style={{ padding: "2px 4px", textAlign: "right", verticalAlign: "middle", lineHeight: 1.1, border: B }}>S/ {fmt(item.precio_unitario)}</td>
-                <td style={{ padding: "2px 4px", textAlign: "center", verticalAlign: "middle", lineHeight: 1.1, border: B }}>{item.cantidad}</td>
-                <td style={{ padding: "2px 4px", textAlign: "right", verticalAlign: "middle", lineHeight: 1.1, border: B }}>S/ {fmt(item.total)}</td>
+              <tr key={idx} style={{ height: "16px" }}>
+                <td style={{ padding: "1px 6px", verticalAlign: "middle", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", lineHeight: 1, border: B }}>{descripcionCompacta}</td>
+                <td style={{ padding: "1px 4px", textAlign: "center", verticalAlign: "middle", whiteSpace: "nowrap", lineHeight: 1, border: B }}>{item.codigo}</td>
+                <td style={{ padding: "1px 4px", textAlign: "right", verticalAlign: "middle", whiteSpace: "nowrap", lineHeight: 1, border: B }}>S/ {fmt(item.precio_unitario)}</td>
+                <td style={{ padding: "1px 4px", textAlign: "center", verticalAlign: "middle", whiteSpace: "nowrap", lineHeight: 1, border: B }}>{item.cantidad}</td>
+                <td style={{ padding: "1px 4px", textAlign: "right", verticalAlign: "middle", whiteSpace: "nowrap", lineHeight: 1, border: B }}>S/ {fmt(item.total)}</td>
               </tr>
             );
           })}
