@@ -239,7 +239,18 @@ const CotizacionEditor = () => {
 
       {/* Datos de Empresa */}
       <div>
-        <h3 className="text-sm font-semibold text-foreground mb-3">Datos de Empresa</h3>
+        <div className="flex items-center justify-between mb-3">
+          <h3 className="text-sm font-semibold text-foreground">Datos de Empresa</h3>
+          <label className="flex items-center gap-2 cursor-pointer">
+            <span className="text-[10px] text-muted-foreground">{data.ocultarDatosEmpresa ? "Oculto" : "Visible"}</span>
+            <input
+              type="checkbox"
+              checked={data.ocultarDatosEmpresa}
+              onChange={e => updateData("ocultarDatosEmpresa", e.target.checked)}
+              className="h-3.5 w-3.5 accent-primary"
+            />
+          </label>
+        </div>
         <div className="grid grid-cols-2 gap-3">
           <div className="col-span-2">
             <Label className="text-xs">Dirección</Label>
