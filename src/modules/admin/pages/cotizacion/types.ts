@@ -91,4 +91,5 @@ export const defaultCotizacionData: CotizacionData = {
   ],
   cuenta_bancaria: BRAND_CONFIG.sergen.cuenta_bancaria,
   cci: BRAND_CONFIG.sergen.cci,
+  ocultarDatosEmpresa: false,
 };
