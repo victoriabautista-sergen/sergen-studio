@@ -34,76 +34,74 @@ const CotizacionEditor = () => {
         const ws = wb.Sheets[wb.SheetNames[0]];
         const rows: any[][] = XLSX.utils.sheet_to_json(ws, { header: 1 });
 
-        // Build a key-value map from first two columns
-        const kvMap: Record<string, string> = {};
-        const itemRows: any[][] = [];
-        let inItems = false;
+        // Find header row with "descripcion" to locate the items table
+        let headerIdx = -1;
+        let colDesc = 0, colCod = -1, colPrecio = -1, colCant = -1;
 
-        for (const row of rows) {
-          const col0 = String(row[0] ?? "").trim().toLowerCase();
-          const col1 = row[1] !== undefined ? String(row[1]).trim() : "";
-
-          if (col0.includes("descripcion") || col0.includes("descripción")) {
-            inItems = true;
-            continue;
-          }
-
-          if (inItems) {
-            if (!row[0] && !row[1]) continue; // skip empty rows
-            itemRows.push(row);
-          } else if (col0 && col1) {
-            kvMap[col0] = col1;
-          }
-        }
-
-        // Helper to find value
-        const find = (...keys: string[]) => {
-          for (const k of keys) {
-            for (const [mk, mv] of Object.entries(kvMap)) {
-              if (mk.includes(k)) return mv;
+        for (let i = 0; i < rows.length; i++) {
+          const row = rows[i];
+          if (!row) continue;
+          for (let j = 0; j < row.length; j++) {
+            const cell = String(row[j] ?? "").trim().toLowerCase();
+            if (cell.includes("descripci")) {
+              headerIdx = i;
+              colDesc = j;
+              // Scan rest of header for other columns
+              for (let k = 0; k < row.length; k++) {
+                const h = String(row[k] ?? "").trim().toLowerCase();
+                if (h.includes("codigo") || h.includes("código")) colCod = k;
+                if (h.includes("precio") || h.includes("p.unit") || h.includes("unitario")) colPrecio = k;
+                if (h.includes("cant") || h.includes("qty")) colCant = k;
+              }
+              break;
             }
           }
-          return "";
-        };
+          if (headerIdx >= 0) break;
+        }
 
-        // Parse items
-        const items: CotizacionItem[] = itemRows
-          .filter(r => r[0])
-          .map(r => {
-            const precio = parseFloat(String(r[2] ?? r[1] ?? 0)) || 0;
-            const cantidad = parseInt(String(r[3] ?? r[2] ?? 1)) || 1;
-            return {
-              descripcion: String(r[0] ?? ""),
-              codigo: String(r[1] ?? ""),
-              precio_unitario: precio,
-              cantidad,
-              precio_venta: precio,
-              total: precio * cantidad,
-            };
+        // Parse items from rows after header
+        const items: CotizacionItem[] = [];
+        const startRow = headerIdx >= 0 ? headerIdx + 1 : 0;
+
+        for (let i = startRow; i < rows.length; i++) {
+          const row = rows[i];
+          if (!row) continue;
+          const desc = String(row[colDesc] ?? "").trim();
+          if (!desc) continue;
+
+          const precio = colPrecio >= 0 ? (parseFloat(String(row[colPrecio] ?? 0)) || 0) : 0;
+          const cantidad = colCant >= 0 ? (parseInt(String(row[colCant] ?? 1)) || 1) : 1;
+          const codigo = colCod >= 0 ? String(row[colCod] ?? "") : "";
+
+          items.push({
+            descripcion: desc,
+            codigo,
+            precio_unitario: precio,
+            cantidad,
+            precio_venta: precio,
+            total: precio * cantidad,
           });
+        }
 
-        setData(prev => ({
-          ...prev,
-          empresa_cliente: find("empresa", "cliente", "razón", "razon") || prev.empresa_cliente,
-          contacto_cliente: find("contacto", "atención", "atencion") || prev.contacto_cliente,
-          ubicacion_cliente: find("ubicación", "ubicacion", "dirección cliente", "direccion cliente") || prev.ubicacion_cliente,
-          validez: find("validez", "vigencia") || prev.validez,
-          ...(items.length > 0 ? { items } : {}),
-        }));
+        if (items.length === 0) {
+          toast.error("No se encontraron items en el archivo");
+          return;
+        }
 
-        // Recalculate totals
-        if (items.length > 0) {
+        // Only update items and recalculate totals
+        setData(prev => {
           const subtotal = items.reduce((s, i) => s + i.total, 0);
-          setData(prev => ({
+          return {
             ...prev,
+            items,
             subtotal,
             imponible: subtotal,
             total_impuesto: subtotal * (prev.impuesto_pct / 100),
             total: subtotal + subtotal * (prev.impuesto_pct / 100) + prev.otros,
-          }));
-        }
+          };
+        });
 
-        toast.success(`Datos cargados: ${items.length} items encontrados`);
+        toast.success(`${items.length} items cargados desde Excel`);
       } catch (err: any) {
         toast.error("Error al leer el archivo: " + (err.message || "formato inválido"));
       }
@@ -213,7 +211,7 @@ const CotizacionEditor = () => {
           <Upload className="h-3.5 w-3.5" /> Cargar datos desde Excel
         </Button>
         <p className="text-[10px] text-muted-foreground mt-1">
-          Excel con columnas: Empresa, Contacto, Ubicación, y tabla de items (Descripción, Código, Precio, Cantidad)
+          Tabla con columnas: Descripción, Código, Precio, Cantidad
         </p>
       </div>
 
