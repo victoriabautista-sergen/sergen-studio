@@ -15,16 +15,20 @@ const Hoja4Comparacion = () => {
   const [nuevoExonerado, setNuevoExonerado] = useState("");
   const [savingKeywords, setSavingKeywords] = useState(false);
 
-  // Auto-load exonerado keywords from DB for this concesionaria
   useEffect(() => {
     if (!concesionaria) return;
+
     supabase
       .from("concesionaria_potencia_keywords")
       .select("inafecto_keywords")
       .eq("concesionaria", concesionaria)
       .maybeSingle()
       .then(({ data: row }) => {
-        if (row && (row as any).inafecto_keywords?.length > 0 && (!h4.conceptos_exonerados || h4.conceptos_exonerados.length === 0)) {
+        if (
+          row &&
+          (row as any).inafecto_keywords?.length > 0 &&
+          (!h4.conceptos_exonerados || h4.conceptos_exonerados.length === 0)
+        ) {
           updateSheet("hoja4_data", {
             ...h4,
             conceptos_exonerados: (row as any).inafecto_keywords,
@@ -33,9 +37,9 @@ const Hoja4Comparacion = () => {
       });
   }, [concesionaria]);
 
-  // Save exonerado keywords to DB for concesionaria (used as rules for AI extraction)
   const saveKeywordsForConcesionaria = async () => {
     if (!concesionaria || !h4.conceptos_exonerados?.length) return;
+
     setSavingKeywords(true);
     try {
       const { data: existing } = await supabase
@@ -54,6 +58,7 @@ const Hoja4Comparacion = () => {
           .from("concesionaria_potencia_keywords")
           .insert({ concesionaria, inafecto_keywords: h4.conceptos_exonerados } as any);
       }
+
       toast.success(`Reglas exonerados guardadas para ${concesionaria}`);
     } catch (err: any) {
       toast.error("Error al guardar: " + (err.message || ""));
@@ -63,13 +68,13 @@ const Hoja4Comparacion = () => {
   };
 
   const agregarExonerado = () => {
-    if (nuevoExonerado.trim()) {
-      updateSheet("hoja4_data", {
-        ...h4,
-        conceptos_exonerados: [...(h4.conceptos_exonerados || []), nuevoExonerado.trim().toUpperCase()],
-      });
-      setNuevoExonerado("");
-    }
+    if (!nuevoExonerado.trim()) return;
+
+    updateSheet("hoja4_data", {
+      ...h4,
+      conceptos_exonerados: [...(h4.conceptos_exonerados || []), nuevoExonerado.trim().toUpperCase()],
+    });
+    setNuevoExonerado("");
   };
 
   const eliminarExonerado = (idx: number) => {
@@ -78,6 +83,9 @@ const Hoja4Comparacion = () => {
     updateSheet("hoja4_data", { ...h4, conceptos_exonerados: updated });
   };
 
+  const itemsNoGravados = h3.items.filter(
+    (item) => item.tipo === "exonerado" || item.tipo === "inafecta" || (item.tipo as string) === "inafecto"
+  );
 
   return (
     <div className="space-y-6">
@@ -85,6 +93,7 @@ const Hoja4Comparacion = () => {
       <p className="text-xs text-muted-foreground">
         Estos conceptos se usan como regla para la extracción IA de futuras facturas de <strong>{concesionaria || "esta concesionaria"}</strong>.
       </p>
+
       <div className="flex gap-2">
         <Input
           placeholder="Ej: FISE, INTERES MORATORIO"
@@ -94,6 +103,7 @@ const Hoja4Comparacion = () => {
         />
         <Button onClick={agregarExonerado} size="sm">Agregar</Button>
       </div>
+
       {(h4.conceptos_exonerados || []).length > 0 && (
         <div className="space-y-2">
           <div className="flex flex-wrap gap-1">
@@ -104,8 +114,15 @@ const Hoja4Comparacion = () => {
               </span>
             ))}
           </div>
+
           {concesionaria && (
-            <Button onClick={saveKeywordsForConcesionaria} size="sm" variant="outline" disabled={savingKeywords} className="text-xs h-7">
+            <Button
+              onClick={saveKeywordsForConcesionaria}
+              size="sm"
+              variant="outline"
+              disabled={savingKeywords}
+              className="text-xs h-7"
+            >
               <Save className="w-3 h-3 mr-1" />
               {savingKeywords ? "Guardando..." : `Guardar para ${concesionaria}`}
             </Button>
@@ -113,107 +130,29 @@ const Hoja4Comparacion = () => {
         </div>
       )}
 
-      {/* Show only exonerado items */}
-      {h3.items.filter(item => item.tipo === "exonerado" || item.tipo === "inafecta" || (item.tipo as string) === "inafecto").length > 0 && (
+      {itemsNoGravados.length > 0 && (
         <div className="space-y-2">
           <h3 className="font-semibold text-foreground flex items-center gap-2">📋 Ítems No Gravados Detectados</h3>
           <p className="text-xs text-muted-foreground">
             Ítems clasificados como exonerados o inafectos en la factura actual. Esta clasificación puede variar entre concesionarias.
           </p>
           <div className="space-y-1">
-            {h3.items
-              .filter(item => item.tipo === "exonerado" || item.tipo === "inafecta" || (item.tipo as string) === "inafecto")
-              .map((item, i) => (
-                <div key={i} className="flex items-center justify-between bg-muted rounded px-2 py-1.5 text-xs">
-                  <div className="flex items-center gap-2 truncate max-w-[250px]">
-                    <span className="bg-accent text-accent-foreground px-1.5 py-0.5 rounded text-[10px] font-medium uppercase">
-                      {item.tipo === "inafecta" || (item.tipo as string) === "inafecto" ? "inafecta" : "exonerado"}
-                    </span>
-                    <span title={item.descripcion}>{item.descripcion}</span>
-                  </div>
-                  <span className="font-mono ml-2 whitespace-nowrap">{item.valor_venta?.toLocaleString("es-PE", { minimumFractionDigits: 2 })}</span>
+            {itemsNoGravados.map((item, i) => (
+              <div key={i} className="flex items-center justify-between bg-muted rounded px-2 py-1.5 text-xs">
+                <div className="flex items-center gap-2 truncate max-w-[250px]">
+                  <span className="bg-accent text-accent-foreground px-1.5 py-0.5 rounded text-[10px] font-medium uppercase">
+                    {item.tipo === "inafecta" || (item.tipo as string) === "inafecto" ? "inafecta" : "exonerado"}
+                  </span>
+                  <span title={item.descripcion}>{item.descripcion}</span>
                 </div>
-              ))}
-          </div>
-        </div>
-      )}
-
-  const agregarExonerado = () => {
-    if (nuevoExonerado.trim()) {
-      updateSheet("hoja4_data", {
-        ...h4,
-        conceptos_exonerados: [...(h4.conceptos_exonerados || []), nuevoExonerado.trim().toUpperCase()],
-      });
-      setNuevoExonerado("");
-    }
-  };
-
-  const eliminarExonerado = (idx: number) => {
-    const updated = [...(h4.conceptos_exonerados || [])];
-    updated.splice(idx, 1);
-    updateSheet("hoja4_data", { ...h4, conceptos_exonerados: updated });
-  };
-
-
-  return (
-    <div className="space-y-6">
-      <h3 className="font-semibold text-foreground flex items-center gap-2">⚙ Reglas Exonerados por Concesionaria</h3>
-      <p className="text-xs text-muted-foreground">
-        Estos conceptos se usan como regla para la extracción IA de futuras facturas de <strong>{concesionaria || "esta concesionaria"}</strong>.
-      </p>
-      <div className="flex gap-2">
-        <Input
-          placeholder="Ej: FISE, INTERES MORATORIO"
-          value={nuevoExonerado}
-          onChange={(e) => setNuevoExonerado(e.target.value)}
-          onKeyDown={(e) => e.key === "Enter" && agregarExonerado()}
-        />
-        <Button onClick={agregarExonerado} size="sm">Agregar</Button>
-      </div>
-      {(h4.conceptos_exonerados || []).length > 0 && (
-        <div className="space-y-2">
-          <div className="flex flex-wrap gap-1">
-            {h4.conceptos_exonerados.map((c, i) => (
-              <span key={i} className="bg-muted px-2 py-1 rounded text-xs flex items-center gap-1">
-                {c}
-                <X className="w-3 h-3 cursor-pointer" onClick={() => eliminarExonerado(i)} />
-              </span>
+                <span className="font-mono ml-2 whitespace-nowrap">
+                  {item.valor_venta?.toLocaleString("es-PE", { minimumFractionDigits: 2 })}
+                </span>
+              </div>
             ))}
           </div>
-          {concesionaria && (
-            <Button onClick={saveKeywordsForConcesionaria} size="sm" variant="outline" disabled={savingKeywords} className="text-xs h-7">
-              <Save className="w-3 h-3 mr-1" />
-              {savingKeywords ? "Guardando..." : `Guardar para ${concesionaria}`}
-            </Button>
-          )}
         </div>
       )}
-
-      {/* Show only exonerado items */}
-      {h3.items.filter(item => item.tipo === "exonerado" || item.tipo === "inafecta" || (item.tipo as string) === "inafecto").length > 0 && (
-        <div className="space-y-2">
-          <h3 className="font-semibold text-foreground flex items-center gap-2">📋 Ítems No Gravados Detectados</h3>
-          <p className="text-xs text-muted-foreground">
-            Ítems clasificados como exonerados o inafectos en la factura actual. Esta clasificación puede variar entre concesionarias.
-          </p>
-          <div className="space-y-1">
-            {h3.items
-              .filter(item => item.tipo === "exonerado" || item.tipo === "inafecta" || (item.tipo as string) === "inafecto")
-              .map((item, i) => (
-                <div key={i} className="flex items-center justify-between bg-muted rounded px-2 py-1.5 text-xs">
-                  <div className="flex items-center gap-2 truncate max-w-[250px]">
-                    <span className="bg-accent text-accent-foreground px-1.5 py-0.5 rounded text-[10px] font-medium uppercase">
-                      {item.tipo === "inafecta" || (item.tipo as string) === "inafecto" ? "inafecta" : "exonerado"}
-                    </span>
-                    <span title={item.descripcion}>{item.descripcion}</span>
-                  </div>
-                  <span className="font-mono ml-2 whitespace-nowrap">{item.valor_venta?.toLocaleString("es-PE", { minimumFractionDigits: 2 })}</span>
-                </div>
-              ))}
-          </div>
-        </div>
-      )}
-
     </div>
   );
 };
