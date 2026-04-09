@@ -88,7 +88,6 @@ const CotizacionPreviewContent = () => {
             <th style={{ padding: "0 4px", textAlign: "center", fontWeight: 600, width: "50px", verticalAlign: "middle", lineHeight: 1, border: B }}>Código</th>
             <th style={{ padding: "0 4px", textAlign: "center", fontWeight: 600, width: "60px", verticalAlign: "middle", lineHeight: 1, border: B }}>Precio Unit</th>
             <th style={{ padding: "0 4px", textAlign: "center", fontWeight: 600, width: "30px", verticalAlign: "middle", lineHeight: 1, border: B }}>Cant.</th>
-            <th style={{ padding: "0 4px", textAlign: "center", fontWeight: 600, width: "55px", verticalAlign: "middle", lineHeight: 1, border: B }}>P.venta</th>
             <th style={{ padding: "0 4px", textAlign: "center", fontWeight: 600, width: "55px", verticalAlign: "middle", lineHeight: 1, border: B }}>Total</th>
           </tr>
         </thead>
@@ -99,7 +98,6 @@ const CotizacionPreviewContent = () => {
               <td style={{ padding: "4px", textAlign: "center", verticalAlign: "middle", border: B }}>{item.codigo}</td>
               <td style={{ padding: "4px", textAlign: "right", verticalAlign: "middle", border: B }}>S/ {fmt(item.precio_unitario)}</td>
               <td style={{ padding: "4px", textAlign: "center", verticalAlign: "middle", border: B }}>{item.cantidad}</td>
-              <td style={{ padding: "4px", textAlign: "right", verticalAlign: "middle", border: B }}>S/ {fmt(item.precio_venta)}</td>
               <td style={{ padding: "4px", textAlign: "right", verticalAlign: "middle", border: B }}>S/ {fmt(item.total)}</td>
             </tr>
           ))}
