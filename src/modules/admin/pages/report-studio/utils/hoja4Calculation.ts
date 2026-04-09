@@ -38,8 +38,13 @@ export const getEnergyItemType = (
   const normalizedDescription = normalizeText(descripcion);
   if (!normalizedDescription) return null;
 
+  const hasConfiguredNames = normalizeText(nombreHp).length > 0 || normalizeText(nombreHfp).length > 0;
+
   if (matchesConfiguredName(normalizedDescription, nombreHfp)) return "hfp";
   if (matchesConfiguredName(normalizedDescription, nombreHp)) return "hp";
+
+  // If user explicitly configured HP/HFP names, only match those — skip heuristics
+  if (hasConfiguredNames) return null;
 
   if (!isEnergyDescription(normalizedDescription)) return null;
 
