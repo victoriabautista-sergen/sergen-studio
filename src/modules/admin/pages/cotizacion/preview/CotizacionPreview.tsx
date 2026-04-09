@@ -88,7 +88,6 @@ const CotizacionPreviewContent = () => {
             <th style={{ padding: "0 4px", textAlign: "center", fontWeight: 600, width: "50px", verticalAlign: "middle", lineHeight: 1, border: B }}>Código</th>
             <th style={{ padding: "0 4px", textAlign: "center", fontWeight: 600, width: "60px", verticalAlign: "middle", lineHeight: 1, border: B }}>Precio Unit</th>
             <th style={{ padding: "0 4px", textAlign: "center", fontWeight: 600, width: "30px", verticalAlign: "middle", lineHeight: 1, border: B }}>Cant.</th>
-            <th style={{ padding: "0 4px", textAlign: "center", fontWeight: 600, width: "55px", verticalAlign: "middle", lineHeight: 1, border: B }}>P.venta</th>
             <th style={{ padding: "0 4px", textAlign: "center", fontWeight: 600, width: "55px", verticalAlign: "middle", lineHeight: 1, border: B }}>Total</th>
           </tr>
         </thead>
