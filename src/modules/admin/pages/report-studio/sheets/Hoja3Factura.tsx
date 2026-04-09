@@ -127,10 +127,25 @@ const Hoja3Factura = () => {
     }
   };
 
-  const eliminarExonerado = (idx: number) => {
+  const eliminarExonerado = async (idx: number) => {
     const updated = [...(h4.conceptos_exonerados || [])];
     updated.splice(idx, 1);
     updateSheet("hoja4_data", { ...h4, conceptos_exonerados: updated });
+    // If all removed, also clear in DB so they don't reload
+    if (updated.length === 0 && concesionaria) {
+      const { data: existing } = await supabase
+        .from("concesionaria_potencia_keywords")
+        .select("id")
+        .eq("concesionaria", concesionaria)
+        .maybeSingle();
+      if (existing) {
+        await supabase
+          .from("concesionaria_potencia_keywords")
+          .update({ inafecto_keywords: [] } as any)
+          .eq("concesionaria", concesionaria);
+        toast.info("Reglas eliminadas para " + concesionaria);
+      }
+    }
   };
 
   const extractData = async (fileUrl: string, reglas?: string) => {
