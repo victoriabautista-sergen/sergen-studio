@@ -20,10 +20,13 @@ const ProyeccionPage = ({ data, pageNumber }: { data: ReportData; pageNumber?: n
   const itemsPotencia = h6.items_potencia || [];
   const potenciaPromedio = h5.potencia_coincidente_promedio || 0;
 
-  const potenciaOrigItem = h3.items.find(i =>
-    i.descripcion.toUpperCase().includes("POTENCIA ACTIVA")
+  // Get original potencia from matched items (average of their quantities)
+  const matchedOrigItems = h3.items.filter(i =>
+    itemsPotencia.some(p => i.descripcion.toUpperCase().includes(p.toUpperCase()))
   );
-  const potenciaOriginal = potenciaOrigItem?.cantidad || 0;
+  const potenciaOriginal = matchedOrigItems.length > 0
+    ? matchedOrigItems.reduce((sum, i) => sum + i.cantidad, 0) / matchedOrigItems.length
+    : 0;
 
   const hasItems = h3.items.length > 0;
 
