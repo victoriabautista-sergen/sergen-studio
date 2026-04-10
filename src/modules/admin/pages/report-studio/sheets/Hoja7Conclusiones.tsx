@@ -1,5 +1,6 @@
 import { useEffect, useState, useCallback } from "react";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Plus, RefreshCw } from "lucide-react";
@@ -203,13 +204,19 @@ const Hoja7Conclusiones = () => {
         <div className="space-y-2">
           {(h7.conclusiones_auto || []).map((c, i) => (
             <div key={i} className="flex gap-2 items-start">
-              <span className="text-xs font-bold text-muted-foreground mt-2 min-w-[1.2rem]">{i + 1}.</span>
-              <Input
+              <span className="text-xs font-bold text-muted-foreground mt-3 min-w-[1.2rem]">{i + 1}.</span>
+              <Textarea
                 value={c}
                 onChange={(e) => updateAutoConclusion(i, e.target.value)}
-                className="text-sm flex-1"
+                className="text-sm flex-1 min-h-[72px] resize-y"
+                style={{
+                  backgroundImage: "repeating-linear-gradient(0deg, transparent, transparent 23px, hsl(var(--border)) 23px, hsl(var(--border)) 24px)",
+                  backgroundSize: "100% 24px",
+                  lineHeight: "24px",
+                  paddingTop: "0px",
+                }}
               />
-              <Button variant="ghost" size="sm" className="text-destructive shrink-0 h-9 w-9 p-0" onClick={() => removeAutoConclusion(i)}>
+              <Button variant="ghost" size="sm" className="text-destructive shrink-0 h-9 w-9 p-0 mt-1" onClick={() => removeAutoConclusion(i)}>
                 ✕
               </Button>
             </div>
