@@ -71,8 +71,11 @@ export const ModulationCalendarCard = ({
               row: "flex w-full mt-3",
               cell: "flex-1 text-center text-sm p-0 relative",
               day_today: "",
-              nav_button: "h-9 w-9",
-              caption: "flex justify-center pt-1 relative items-center text-base font-medium",
+              nav_button: "h-9 w-9 text-white hover:bg-white/20 hover:text-white",
+              nav_button_previous: "absolute left-1",
+              nav_button_next: "absolute right-1",
+              caption: "flex justify-center pt-1 relative items-center text-base font-medium bg-[hsl(195,70%,30%)] text-white rounded-md px-10 py-2",
+              caption_label: "text-white font-semibold",
             }}
             components={{
               Day: ({ date: dayDate }: { date: Date; displayMonth: Date }) => {
