@@ -422,6 +422,24 @@ Deno.serve(async (req) => {
         })
         .gte("chat_id", -999999999999);
       console.log(`[EMAIL] ✅ telegram_bot_state actualizado: correo_enviado=true`);
+
+      // ── Sync modulation_days: mark today based on risk level ──
+      const peruToday = new Date(new Date().toLocaleString("en-US", { timeZone: "America/Lima" }));
+      const todayStr = `${peruToday.getFullYear()}-${String(peruToday.getMonth() + 1).padStart(2, "0")}-${String(peruToday.getDate()).padStart(2, "0")}`;
+      const isModulated = riskLevel ? riskLevel.toUpperCase() !== "BAJO" : true;
+
+      const { error: modulationError } = await supabaseAdmin
+        .from("modulation_days")
+        .upsert(
+          { date: todayStr, is_modulated: isModulated },
+          { onConflict: "date" }
+        );
+
+      if (modulationError) {
+        console.error("[EMAIL] Error actualizando modulation_days:", modulationError.message);
+      } else {
+        console.log(`[EMAIL] ✅ modulation_days: ${todayStr} -> is_modulated=${isModulated} (riskLevel=${riskLevel})`);
+      }
     }
 
     return new Response(JSON.stringify({ success, data, hasChart: true }), {
