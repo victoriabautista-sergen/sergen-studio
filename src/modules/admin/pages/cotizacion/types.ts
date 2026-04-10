@@ -50,7 +50,7 @@ export const BRAND_CONFIG: Record<CotizacionMarca, { razon_social: string; cuent
     direccion: "Platinium Plaza - San Isidro - Lima",
   },
   incoser: {
-    razon_social: "Ingeniería y Consultoría SERGEN E.I.R.L. [INCOSER]",
+    razon_social: "Ingeniería y Consultoría SERGEN E.I.R.L.",
     cuenta_bancaria: "BCP SOLES: 194-1053206-0-43",
     cci: "CCI BCP SOLES: 00219400105320604390",
     direccion: "Platinium Plaza - San Isidro - Lima",
