@@ -2,24 +2,24 @@ import { useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { LogOut } from "lucide-react";
+import { LogOut, ChevronRight } from "lucide-react";
 import { useAuthContext } from "@/core/auth/context/AuthContext";
 import PrivateRoute from "@/core/auth/components/PrivateRoute";
 import { moduleRegistry } from "@/modules/registry";
 
-// Import illustrations
-import controlDemandaImg from "@/assets/module-control-demanda.png";
-import billingImg from "@/assets/module-billing.png";
-import induvexImg from "@/assets/module-induvex.png";
-import companyImg from "@/assets/module-company.png";
-import adminImg from "@/assets/module-admin.png";
+// Import new illustrations
+import cardControlDemanda from "@/assets/card-control-demanda.png";
+import cardBilling from "@/assets/card-billing.png";
+import cardInduvex from "@/assets/card-induvex.png";
+import cardCompany from "@/assets/card-company.png";
+import cardAdmin from "@/assets/card-admin.png";
 
 const illustrationMap: Record<string, string> = {
-  "energy-intelligence": controlDemandaImg,
-  "billing-optimization": billingImg,
-  induvex: induvexImg,
-  "company-management": companyImg,
-  "admin-panel": adminImg,
+  "energy-intelligence": cardControlDemanda,
+  "billing-optimization": cardBilling,
+  induvex: cardInduvex,
+  "company-management": cardCompany,
+  "admin-panel": cardAdmin,
 };
 
 const DashboardContent = () => {
@@ -30,7 +30,6 @@ const DashboardContent = () => {
     if (role === "super_admin") {
       return moduleRegistry;
     }
-    // technical_user and other roles: no admin panel
     const appModules = moduleRegistry.filter((m) => m.id !== "admin-panel");
     if (role === "technical_user") {
       return appModules;
@@ -91,44 +90,43 @@ const DashboardContent = () => {
                     <h3 className="text-xs font-semibold tracking-widest text-muted-foreground mb-4 uppercase">
                       {category}
                     </h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                       {modules.map((module, index) => {
                         const Icon = module.icon;
                         const illustration = illustrationMap[module.id];
                         return (
                           <Card
                             key={module.id}
-                            className="group cursor-pointer transition-all duration-300 hover:shadow-lg hover:-translate-y-1 animate-fade-in overflow-hidden border-0 shadow-sm"
+                            className="group cursor-pointer transition-all duration-300 hover:shadow-lg hover:-translate-y-1 animate-fade-in overflow-hidden border-0 shadow-sm rounded-xl"
                             style={{ animationDelay: `${index * 80}ms` }}
                             onClick={() => navigate(module.basePath)}
                           >
-                            {/* Gradient banner */}
-                            <div className={`relative bg-gradient-to-r ${module.gradient} px-6 py-4`}>
-                              <div className="absolute inset-0 opacity-10 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMjAiIGN5PSIyMCIgcj0iMSIgZmlsbD0id2hpdGUiLz48L3N2Zz4=')]" />
-                              <div className="relative flex items-center gap-3">
-                                <div className="w-9 h-9 rounded-lg bg-white/20 backdrop-blur-sm flex items-center justify-center">
-                                  <Icon className="h-4 w-4 text-white" />
-                                </div>
-                                <span className="font-heading font-bold text-lg text-white">{module.name}</span>
+                            {/* Teal header bar */}
+                            <div className="bg-[hsl(195,70%,30%)] px-4 py-2.5 flex items-center gap-2.5 rounded-t-xl">
+                              <div className="w-7 h-7 rounded-md bg-white/20 flex items-center justify-center">
+                                <Icon className="h-4 w-4 text-white" />
                               </div>
+                              <span className="font-heading font-bold text-white text-sm">{module.name}</span>
                             </div>
-                            {/* Content with illustration */}
-                            <div className="bg-card px-6 py-5 flex flex-col items-center text-center space-y-3">
+
+                            {/* Content area */}
+                            <div className="bg-card px-5 py-5 flex flex-col items-center text-center space-y-3">
                               {illustration && (
                                 <img
                                   src={illustration}
                                   alt={module.name}
-                                  className="w-28 h-28 object-contain group-hover:scale-105 transition-transform duration-300"
+                                  loading="lazy"
+                                  width={512}
+                                  height={512}
+                                  className="w-32 h-32 object-contain group-hover:scale-105 transition-transform duration-300"
                                 />
                               )}
-                              <p className="text-sm text-muted-foreground leading-relaxed">{module.description}</p>
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                className="group-hover:border-primary group-hover:text-primary transition-colors"
-                              >
-                                Abrir módulo →
-                              </Button>
+                              <p className="text-sm text-muted-foreground leading-relaxed">
+                                {module.description}
+                              </p>
+                              <button className="inline-flex items-center gap-1 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
+                                Ver Detalles <ChevronRight className="h-4 w-4" />
+                              </button>
                             </div>
                           </Card>
                         );
