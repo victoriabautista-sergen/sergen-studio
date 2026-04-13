@@ -45,7 +45,7 @@ const LadderGeneratorContent = () => {
           <Textarea
             value={stCode}
             onChange={(e) => setStCode(e.target.value)}
-            placeholder={`// Ejemplo:\nMotor1 := (Start1 OR Motor1) AND NOT Stop1;\nOutput1 := Input1 AND Input2;`}
+            placeholder={`// Ejemplo:\nMotor1 := (Start1 OR Motor1) AND NOT Stop1;\nOutput1 := Input1 AND Input2;\n\n// Bobinas SET/RESET:\nSET S4 := S3 AND A AND B;\nRESET S4 := NOT (S3 AND A AND B);`}
             className="font-mono text-sm min-h-[300px] resize-y"
             maxLength={MAX_INPUT_LENGTH}
           />

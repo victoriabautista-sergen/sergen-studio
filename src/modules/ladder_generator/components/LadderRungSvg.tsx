@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import type { JSX } from "react";
-import type { LadderBlock, LadderContact, LadderRung } from "../utils/convertToLadder";
+import type { CoilType, LadderBlock, LadderContact, LadderRung } from "../utils/convertToLadder";
 
 const CONTACT_W = 90;
 const CONTACT_H = 40;
@@ -39,10 +39,12 @@ const drawContact = (x: number, y: number, contact: LadderContact, key: string) 
   );
 };
 
-const drawCoil = (x: number, y: number, name: string, key: string) => {
+const drawCoil = (x: number, y: number, name: string, coilType: CoilType, key: string) => {
   const cx = x + COIL_W / 2;
   const wireY = y + WIRE_Y_OFFSET;
   const r = 12;
+
+  const label = coilType === "set" ? "S" : coilType === "reset" ? "R" : "";
 
   return (
     <g key={key}>
@@ -52,6 +54,11 @@ const drawCoil = (x: number, y: number, name: string, key: string) => {
       <line x1={x} y1={wireY} x2={cx - r} y2={wireY} stroke="currentColor" strokeWidth={STROKE} />
       <path d={`M ${cx - r} ${wireY - r} Q ${cx - r - 5} ${wireY} ${cx - r} ${wireY + r}`} fill="none" stroke="currentColor" strokeWidth={STROKE} />
       <path d={`M ${cx + r} ${wireY - r} Q ${cx + r + 5} ${wireY} ${cx + r} ${wireY + r}`} fill="none" stroke="currentColor" strokeWidth={STROKE} />
+      {label && (
+        <text x={cx} y={wireY + 4} textAnchor="middle" className="fill-foreground" fontSize={11} fontWeight={700}>
+          {label}
+        </text>
+      )}
       <line x1={cx + r} y1={wireY} x2={x + COIL_W} y2={wireY} stroke="currentColor" strokeWidth={STROKE} />
     </g>
   );
@@ -177,7 +184,7 @@ const LadderRungSvg = ({ rung }: { rung: LadderRung }) => {
       <line key="wire-start" x1={0} y1={mainWireY} x2={LEFT_PAD} y2={mainWireY} stroke="currentColor" strokeWidth={STROKE} />,
       ...renderBlock(rung.block, LEFT_PAD, 0, `${rung.output}-block`),
       <line key="wire-to-coil" x1={blockEndX} y1={mainWireY} x2={coilX} y2={mainWireY} stroke="currentColor" strokeWidth={STROKE} />,
-      drawCoil(coilX, 0, rung.output, "coil"),
+      drawCoil(coilX, 0, rung.output, rung.coilType, "coil"),
       <line key="wire-end" x1={coilX + COIL_W} y1={mainWireY} x2={totalW} y2={mainWireY} stroke="currentColor" strokeWidth={STROKE} />,
     ];
 
