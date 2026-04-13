@@ -12,7 +12,7 @@ const WIRE_Y_OFFSET = LABEL_H + CONTACT_H / 2;
 const STROKE = 2;
 const GAP_BETWEEN_SEGMENTS = 0;
 const GAP_TO_COIL = 30;
-const PARALLEL_BRANCH_PADDING = 18;
+const PARALLEL_BRANCH_PADDING = 0;
 
 /* ── Draw a single contact symbol ── */
 const drawContact = (x: number, y: number, contact: LadderContact, key: string) => {
