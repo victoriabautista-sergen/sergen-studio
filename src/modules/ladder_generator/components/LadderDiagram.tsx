@@ -12,7 +12,7 @@ const WIRE_Y_OFFSET = LABEL_H + CONTACT_H / 2;
 const STROKE = 2;
 const GAP_BETWEEN_SEGMENTS = 0;
 const GAP_TO_COIL = 30;
-const JUNCTION_R = 3; // Junction dot radius
+const JUNCTION_R = 4; // Junction dot radius
 const JUNCTION_GAP = 16; // Gap before/after junction for vertical bar
 
 /* ── Draw a single contact symbol ── */
