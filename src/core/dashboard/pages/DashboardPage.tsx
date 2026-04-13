@@ -110,7 +110,7 @@ const DashboardContent = () => {
                             </div>
 
                             {/* Content area */}
-                            <div className="bg-card px-5 py-5 flex flex-col items-center text-center space-y-3">
+                            <div className="bg-card px-5 py-6 flex flex-col items-center text-center space-y-4">
                               {illustration && (
                                 <img
                                   src={illustration}
@@ -118,12 +118,9 @@ const DashboardContent = () => {
                                   loading="lazy"
                                   width={512}
                                   height={512}
-                                  className="w-32 h-32 object-contain group-hover:scale-105 transition-transform duration-300"
+                                  className="w-44 h-44 object-contain group-hover:scale-105 transition-transform duration-300"
                                 />
                               )}
-                              <p className="text-sm text-muted-foreground leading-relaxed">
-                                {module.description}
-                              </p>
                               <button className="inline-flex items-center gap-1 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
                                 Ver Detalles <ChevronRight className="h-4 w-4" />
                               </button>
