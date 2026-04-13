@@ -13,7 +13,7 @@ const STROKE = 2;
 const GAP_BETWEEN_SEGMENTS = 0;
 const GAP_TO_COIL = 30;
 const JUNCTION_R = 4; // Junction dot radius
-const JUNCTION_GAP = 16; // Gap before/after junction for vertical bar
+const JUNCTION_GAP = 30; // Clear gap before/after junction vertical bar
 
 /* ── Draw a single contact symbol ── */
 const drawContact = (x: number, y: number, contact: LadderContact, key: string) => {
