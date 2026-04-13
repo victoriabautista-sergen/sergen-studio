@@ -58,6 +58,10 @@ const drawCoil = (x: number, y: number, name: string, key: string) => {
 };
 
 function getBlockMetrics(block: LadderBlock): BlockMetrics {
+  if (!block || !block.type) {
+    return { width: CONTACT_W, height: ROW_H };
+  }
+
   if (block.type === "contact") {
     return { width: CONTACT_W, height: ROW_H };
   }
@@ -78,6 +82,10 @@ function getBlockMetrics(block: LadderBlock): BlockMetrics {
 }
 
 function renderBlock(block: LadderBlock, x: number, y: number, key: string): JSX.Element[] {
+  if (!block || !block.type) {
+    return [];
+  }
+
   if (block.type === "contact") {
     return [drawContact(x, y, block.contact, key)];
   }
