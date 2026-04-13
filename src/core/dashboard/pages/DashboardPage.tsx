@@ -116,7 +116,7 @@ const DashboardContent = () => {
                                 loading="lazy"
                                 width={1024}
                                 height={1024}
-                                className="w-36 h-36 object-contain group-hover:scale-105 transition-transform duration-300 drop-shadow-md"
+                                className="w-48 h-48 object-contain group-hover:scale-105 transition-transform duration-300 drop-shadow-md"
                               />
                               <button className="inline-flex items-center gap-1 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
                                 Ver Detalles <ChevronRight className="h-4 w-4" />
