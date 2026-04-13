@@ -28,9 +28,12 @@ export interface LadderParallelBlock {
 
 export type LadderBlock = LadderContactBlock | LadderSeriesBlock | LadderParallelBlock;
 
+export type CoilType = "normal" | "set" | "reset";
+
 export interface LadderRung {
   output: string;
   block: LadderBlock;
+  coilType: CoilType;
   comment?: string;
 }
 
@@ -232,14 +235,27 @@ function astToBlock(ast: ASTNode): LadderBlock {
   return branches.length === 1 ? branches[0] : { type: "parallel", branches };
 }
 
-function parseLine(line: string): { output: string; expression: string } {
+function parseLine(line: string): { output: string; expression: string; coilType: CoilType } {
   const trimmed = line.trim().replace(/;$/, "").trim();
   const idx = trimmed.indexOf(":=");
   if (idx === -1) throw new Error(`Línea inválida (falta ":="): ${line.trim()}`);
 
+  let leftSide = trimmed.slice(0, idx).trim();
+  let coilType: CoilType = "normal";
+
+  const upperLeft = leftSide.toUpperCase();
+  if (upperLeft.startsWith("SET ")) {
+    coilType = "set";
+    leftSide = leftSide.slice(4).trim();
+  } else if (upperLeft.startsWith("RESET ")) {
+    coilType = "reset";
+    leftSide = leftSide.slice(6).trim();
+  }
+
   return {
-    output: trimmed.slice(0, idx).trim(),
+    output: leftSide,
     expression: trimmed.slice(idx + 2).trim(),
+    coilType,
   };
 }
 
@@ -260,10 +276,10 @@ export function convertToLadder(inputText: string): LadderResult {
 
   for (const line of lines) {
     try {
-      const { output, expression } = parseLine(line);
+      const { output, expression, coilType } = parseLine(line);
       const ast = buildAST(expression);
       const block = astToBlock(ast);
-      rungs.push({ output, block });
+      rungs.push({ output, block, coilType });
     } catch (error: any) {
       errors.push(`${line}: ${error.message}`);
     }
