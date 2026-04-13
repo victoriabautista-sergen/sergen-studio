@@ -152,13 +152,13 @@ const RungSVG = ({ rung }: { rung: LadderRung }) => {
         const topBranchY = WIRE_Y_OFFSET;
         const botBranchY = (seg.branches.length - 1) * ROW_H + WIRE_Y_OFFSET;
 
-        // Left vertical bar (junction)
+        // Left vertical bar (junction) - thick for visibility
         elements.push(
-          <line key={`vl-${si}`} x1={leftBarX} y1={topBranchY} x2={leftBarX} y2={botBranchY} stroke="currentColor" strokeWidth={STROKE} />
+          <line key={`vl-${si}`} x1={leftBarX} y1={topBranchY} x2={leftBarX} y2={botBranchY} stroke="currentColor" strokeWidth={STROKE + 1} />
         );
-        // Right vertical bar (junction)
+        // Right vertical bar (junction) - thick for visibility
         elements.push(
-          <line key={`vr-${si}`} x1={rightBarX} y1={topBranchY} x2={rightBarX} y2={botBranchY} stroke="currentColor" strokeWidth={STROKE} />
+          <line key={`vr-${si}`} x1={rightBarX} y1={topBranchY} x2={rightBarX} y2={botBranchY} stroke="currentColor" strokeWidth={STROKE + 1} />
         );
 
         // Horizontal wire from segment start to left bar (on main wire)
