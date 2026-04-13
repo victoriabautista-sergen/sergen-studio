@@ -3,53 +3,28 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Card } from "@/components/ui/card";
 import { Cable, Loader2, AlertCircle } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import PrivateRoute from "@/core/auth/components/PrivateRoute";
 import ModuleLayout from "@/shared/components/ModuleLayout";
+import { convertToLadder } from "../utils/convertToLadder";
 
 const MAX_INPUT_LENGTH = 5000;
 
 const LadderGeneratorContent = () => {
   const [stCode, setStCode] = useState("");
   const [ladderOutput, setLadderOutput] = useState("");
-  const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const handleGenerate = async () => {
+  const handleGenerate = () => {
     setError("");
     setLadderOutput("");
 
-    const trimmed = stCode.trim();
-    if (!trimmed) {
-      setError("El campo de código ST no puede estar vacío.");
-      return;
-    }
-    if (trimmed.length > MAX_INPUT_LENGTH) {
-      setError(`El código no debe exceder ${MAX_INPUT_LENGTH} caracteres.`);
-      return;
-    }
-
-    setLoading(true);
     try {
-      const { data, error: fnError } = await supabase.functions.invoke(
-        "generate-ladder",
-        { body: { st_code: trimmed } }
-      );
-
-      if (fnError) throw fnError;
-
-      if (data?.error) {
-        setError(data.error);
-      } else {
-        setLadderOutput(data.ladder || "");
-        toast.success("Ladder generado correctamente");
-      }
+      const result = convertToLadder(stCode);
+      setLadderOutput(result);
+      toast.success("Ladder generado correctamente");
     } catch (err: any) {
       setError(err.message || "Error al generar el Ladder.");
-      toast.error("Error al generar el Ladder");
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -76,12 +51,8 @@ const LadderGeneratorContent = () => {
             <span className="text-xs text-muted-foreground">
               {stCode.length}/{MAX_INPUT_LENGTH}
             </span>
-            <Button onClick={handleGenerate} disabled={loading}>
-              {loading ? (
-                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-              ) : (
-                <Cable className="h-4 w-4 mr-2" />
-              )}
+            <Button onClick={handleGenerate}>
+              <Cable className="h-4 w-4 mr-2" />
               Generar Ladder
             </Button>
           </div>
