@@ -12,6 +12,7 @@ import iconBilling from "@/assets/icon-billing.png";
 import iconInduvex from "@/assets/icon-induvex.png";
 import iconCompany from "@/assets/icon-company.png";
 import iconAdmin from "@/assets/icon-admin.png";
+import iconLadder from "@/assets/icon-ladder.png";
 
 const illustrationMap: Record<string, string> = {
   "energy-intelligence": iconControlDemanda,
@@ -19,6 +20,7 @@ const illustrationMap: Record<string, string> = {
   induvex: iconInduvex,
   "company-management": iconCompany,
   "admin-panel": iconAdmin,
+  "ladder_generator": iconLadder,
 };
 
 const DashboardContent = () => {
