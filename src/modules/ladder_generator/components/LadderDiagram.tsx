@@ -10,8 +10,9 @@ const COIL_W = 90;
 const LEFT_PAD = 12;
 const WIRE_Y_OFFSET = LABEL_H + CONTACT_H / 2;
 const STROKE = 2;
-const GAP_BETWEEN_SEGMENTS = 10;
+const GAP_BETWEEN_SEGMENTS = 0;
 const GAP_TO_COIL = 30;
+const PARALLEL_BRANCH_PADDING = 18;
 
 /* ── Draw a single contact symbol ── */
 const drawContact = (x: number, y: number, contact: LadderContact, key: string) => {
@@ -64,7 +65,7 @@ const drawCoil = (x: number, y: number, name: string, key: string) => {
 function segmentWidth(seg: LadderSegment): number {
   if (seg.type === "contact") return CONTACT_W;
   const maxContacts = Math.max(...seg.branches.map((b) => b.length));
-  return maxContacts * CONTACT_W;
+  return maxContacts * CONTACT_W + PARALLEL_BRANCH_PADDING * 2;
 }
 
 function segmentRows(seg: LadderSegment): number {
@@ -121,24 +122,35 @@ const RungSVG = ({ rung }: { rung: LadderRung }) => {
       // ── Parallel block ──
       const blockStartX = curX;
       const blockEndX = curX + w;
+      const branchStartX = blockStartX + PARALLEL_BRANCH_PADDING;
 
       seg.branches.forEach((branch, bi) => {
         const rowY = bi * ROW_H;
         const wireY = rowY + WIRE_Y_OFFSET;
+        const branchEndX = branchStartX + branch.length * CONTACT_W;
 
-        // Draw each contact in this branch
+        elements.push(
+          <line
+            key={`pw-start-${si}-${bi}`}
+            x1={blockStartX}
+            y1={wireY}
+            x2={branchStartX}
+            y2={wireY}
+            stroke="currentColor"
+            strokeWidth={STROKE}
+          />
+        );
+
         branch.forEach((contact, ci) => {
           elements.push(
-            drawContact(blockStartX + ci * CONTACT_W, rowY, contact, `p-${si}-${bi}-${ci}`)
+            drawContact(branchStartX + ci * CONTACT_W, rowY, contact, `p-${si}-${bi}-${ci}`)
           );
         });
 
-        // Fill remaining horizontal wire to blockEndX
-        const branchEndX = blockStartX + branch.length * CONTACT_W;
         if (branchEndX < blockEndX) {
           elements.push(
             <line
-              key={`pw-${si}-${bi}`}
+              key={`pw-end-${si}-${bi}`}
               x1={branchEndX}
               y1={wireY}
               x2={blockEndX}
@@ -150,16 +162,13 @@ const RungSVG = ({ rung }: { rung: LadderRung }) => {
         }
       });
 
-      // Vertical connectors joining all branches
       if (seg.branches.length > 1) {
         const topY = mainWireY;
         const botY = (seg.branches.length - 1) * ROW_H + WIRE_Y_OFFSET;
 
-        // Left vertical bar
         elements.push(
           <line key={`vl-${si}`} x1={blockStartX} y1={topY} x2={blockStartX} y2={botY} stroke="currentColor" strokeWidth={STROKE} />
         );
-        // Right vertical bar
         elements.push(
           <line key={`vr-${si}`} x1={blockEndX} y1={topY} x2={blockEndX} y2={botY} stroke="currentColor" strokeWidth={STROKE} />
         );
@@ -167,8 +176,7 @@ const RungSVG = ({ rung }: { rung: LadderRung }) => {
     }
 
     curX += w;
-    // Add gap between segments
-    if (si < rung.segments.length - 1) {
+    if (si < rung.segments.length - 1 && GAP_BETWEEN_SEGMENTS > 0) {
       elements.push(
         <line key={`gap-${si}`} x1={curX} y1={mainWireY} x2={curX + GAP_BETWEEN_SEGMENTS} y2={mainWireY} stroke="currentColor" strokeWidth={STROKE} />
       );
