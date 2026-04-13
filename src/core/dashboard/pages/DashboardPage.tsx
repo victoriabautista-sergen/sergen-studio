@@ -7,6 +7,20 @@ import { useAuthContext } from "@/core/auth/context/AuthContext";
 import PrivateRoute from "@/core/auth/components/PrivateRoute";
 import { moduleRegistry } from "@/modules/registry";
 
+import iconControlDemanda from "@/assets/icon-control-demanda.png";
+import iconBilling from "@/assets/icon-billing.png";
+import iconInduvex from "@/assets/icon-induvex.png";
+import iconCompany from "@/assets/icon-company.png";
+import iconAdmin from "@/assets/icon-admin.png";
+
+const illustrationMap: Record<string, string> = {
+  "energy-intelligence": iconControlDemanda,
+  "billing-optimization": iconBilling,
+  induvex: iconInduvex,
+  "company-management": iconCompany,
+  "admin-panel": iconAdmin,
+};
+
 const DashboardContent = () => {
   const navigate = useNavigate();
   const { session, logout, role, enabledModuleSlugs } = useAuthContext();
@@ -78,6 +92,7 @@ const DashboardContent = () => {
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                       {modules.map((module, index) => {
                         const Icon = module.icon;
+                        const illustration = illustrationMap[module.id];
                         return (
                           <Card
                             key={module.id}
@@ -94,10 +109,15 @@ const DashboardContent = () => {
                             </div>
 
                             {/* Icon area */}
-                            <div className="bg-card px-5 py-10 flex flex-col items-center text-center space-y-5">
-                              <div className="w-32 h-32 rounded-2xl bg-orange-50 flex items-center justify-center group-hover:scale-105 transition-transform duration-300 shadow-sm">
-                                <Icon className="h-16 w-16 text-orange-500" strokeWidth={1.5} />
-                              </div>
+                            <div className="bg-card px-5 py-8 flex flex-col items-center text-center space-y-4">
+                              <img
+                                src={illustration}
+                                alt={module.name}
+                                loading="lazy"
+                                width={1024}
+                                height={1024}
+                                className="w-36 h-36 object-contain group-hover:scale-105 transition-transform duration-300 drop-shadow-md"
+                              />
                               <button className="inline-flex items-center gap-1 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
                                 Ver Detalles <ChevronRight className="h-4 w-4" />
                               </button>
