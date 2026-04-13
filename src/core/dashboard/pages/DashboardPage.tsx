@@ -7,21 +7,6 @@ import { useAuthContext } from "@/core/auth/context/AuthContext";
 import PrivateRoute from "@/core/auth/components/PrivateRoute";
 import { moduleRegistry } from "@/modules/registry";
 
-// Import new illustrations
-import cardControlDemanda from "@/assets/card-control-demanda.png";
-import cardBilling from "@/assets/card-billing.png";
-import cardInduvex from "@/assets/card-induvex.png";
-import cardCompany from "@/assets/card-company.png";
-import cardAdmin from "@/assets/card-admin.png";
-
-const illustrationMap: Record<string, string> = {
-  "energy-intelligence": cardControlDemanda,
-  "billing-optimization": cardBilling,
-  induvex: cardInduvex,
-  "company-management": cardCompany,
-  "admin-panel": cardAdmin,
-};
-
 const DashboardContent = () => {
   const navigate = useNavigate();
   const { session, logout, role, enabledModuleSlugs } = useAuthContext();
@@ -93,7 +78,6 @@ const DashboardContent = () => {
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                       {modules.map((module, index) => {
                         const Icon = module.icon;
-                        const illustration = illustrationMap[module.id];
                         return (
                           <Card
                             key={module.id}
@@ -109,18 +93,11 @@ const DashboardContent = () => {
                               <span className="font-heading font-bold text-white text-sm">{module.name}</span>
                             </div>
 
-                            {/* Content area */}
-                            <div className="bg-card px-5 py-6 flex flex-col items-center text-center space-y-4">
-                              {illustration && (
-                                <img
-                                  src={illustration}
-                                  alt={module.name}
-                                  loading="lazy"
-                                  width={512}
-                                  height={512}
-                                  className="w-44 h-44 object-contain group-hover:scale-105 transition-transform duration-300"
-                                />
-                              )}
+                            {/* Icon area */}
+                            <div className="bg-card px-5 py-10 flex flex-col items-center text-center space-y-5">
+                              <div className="w-32 h-32 rounded-2xl bg-orange-50 flex items-center justify-center group-hover:scale-105 transition-transform duration-300 shadow-sm">
+                                <Icon className="h-16 w-16 text-orange-500" strokeWidth={1.5} />
+                              </div>
                               <button className="inline-flex items-center gap-1 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
                                 Ver Detalles <ChevronRight className="h-4 w-4" />
                               </button>
