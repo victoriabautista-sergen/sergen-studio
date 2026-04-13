@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -29,26 +30,26 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <AuthProvider>
-          <Routes>
-            <Route path="/render/pronostico" element={<RenderPronosticoPage />} />
-            <Route path="/" element={<Index />} />
+          <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><span className="text-muted-foreground">Cargando...</span></div>}>
+            <Routes>
+              <Route path="/render/pronostico" element={<RenderPronosticoPage />} />
+              <Route path="/" element={<Index />} />
 
-            {/* Public routes (login, reset-password) */}
-            {authRoutes.map((route) => (
-              <Route key={route.path} path={route.path} element={route.element} />
-            ))}
+              {authRoutes.map((route) => (
+                <Route key={route.path} path={route.path} element={route.element} />
+              ))}
 
-            {/* Protected routes — all require authentication */}
-            {[...dashboardRoutes, ...moduleRoutes].map((route) => (
-              <Route
-                key={route.path}
-                path={route.path}
-                element={<PrivateRoute>{route.element}</PrivateRoute>}
-              />
-            ))}
+              {[...dashboardRoutes, ...moduleRoutes].map((route) => (
+                <Route
+                  key={route.path}
+                  path={route.path}
+                  element={<PrivateRoute>{route.element}</PrivateRoute>}
+                />
+              ))}
 
-            <Route path="*" element={<NotFound />} />
-          </Routes>
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </Suspense>
         </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>
