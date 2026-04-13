@@ -56,7 +56,6 @@ const LadderGeneratorContent = () => {
   return (
     <ModuleLayout
       title="Generador de Ladder"
-      subtitle="Convierte lógica Structured Text (ST) a formato Ladder para PLCs"
       icon={Cable}
     >
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
