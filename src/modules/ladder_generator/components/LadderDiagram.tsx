@@ -1,25 +1,25 @@
 import type { LadderRung, LadderContact } from "../utils/convertToLadder";
 
 const ContactSymbol = ({ contact }: { contact: LadderContact }) => (
-  <div className="flex flex-col items-center mx-1">
-    <span className="text-xs font-semibold text-blue-500 mb-0.5 whitespace-nowrap">
+  <div className="flex flex-col items-center mx-1 flex-shrink-0">
+    <span className="text-xs font-semibold text-primary mb-0.5 whitespace-nowrap">
       {contact.name}
     </span>
     <div className="flex items-center h-8">
-      <div className="w-6 border-t-2 border-foreground" />
-      <div className="flex items-center justify-center w-8 h-8 border-l-2 border-r-2 border-foreground relative">
+      <div className="w-5 border-t-2 border-foreground" />
+      <div className="flex items-center justify-center w-7 h-8 border-l-2 border-r-2 border-foreground relative">
         {contact.negated && (
-          <span className="text-foreground font-bold text-lg leading-none">/</span>
+          <span className="text-foreground font-bold text-base leading-none">/</span>
         )}
       </div>
-      <div className="w-6 border-t-2 border-foreground" />
+      <div className="w-5 border-t-2 border-foreground" />
     </div>
   </div>
 );
 
 const CoilSymbol = ({ name }: { name: string }) => (
-  <div className="flex flex-col items-center mx-1">
-    <span className="text-xs font-semibold text-blue-500 mb-0.5 whitespace-nowrap">
+  <div className="flex flex-col items-center mx-1 flex-shrink-0">
+    <span className="text-xs font-semibold text-primary mb-0.5 whitespace-nowrap">
       {name}
     </span>
     <div className="flex items-center h-8">
@@ -34,7 +34,7 @@ const CoilSymbol = ({ name }: { name: string }) => (
   </div>
 );
 
-const BranchContacts = ({ contacts }: { contacts: LadderContact[] }) => (
+const BranchRow = ({ contacts }: { contacts: LadderContact[] }) => (
   <div className="flex items-end">
     {contacts.map((c, i) => (
       <ContactSymbol key={i} contact={c} />
@@ -45,53 +45,57 @@ const BranchContacts = ({ contacts }: { contacts: LadderContact[] }) => (
 const Rung = ({ rung }: { rung: LadderRung }) => {
   const isParallel = rung.branches.length > 1;
 
-  return (
-    <div className="flex items-stretch my-2">
-      {/* Left power rail */}
-      <div className="w-1 bg-foreground flex-shrink-0" />
-
-      {/* Rung content */}
-      <div className="flex items-center flex-1">
-        {isParallel ? (
-          <div className="flex items-center">
-            {/* Parallel branches */}
-            <div className="flex flex-col relative">
-              {/* Vertical connector line on left */}
-              <div className="absolute left-0 top-4 bottom-4 w-0.5 bg-foreground" style={{ left: '0px' }} />
-              {/* Vertical connector line on right of branch area */}
-
-              {rung.branches.map((branch, i) => (
-                <div key={i} className="flex items-end relative">
-                  {/* Horizontal stub from rail */}
-                  <div className="w-4 border-t-2 border-foreground self-center mb-4" />
-                  <BranchContacts contacts={branch.contacts} />
-                  {i === 0 && (
-                    <div className="flex items-end">
-                      {/* Connection line to coil */}
-                      <div className="w-8 border-t-2 border-foreground self-center mb-4" />
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
-
-            {/* Coil */}
-            <div className="flex items-center">
-              <CoilSymbol name={rung.output} />
-            </div>
-          </div>
-        ) : (
-          <div className="flex items-end">
-            <div className="w-4 border-t-2 border-foreground self-center mb-4" />
-            <BranchContacts contacts={rung.branches[0].contacts} />
-            <div className="w-8 border-t-2 border-foreground self-center mb-4" />
-            <CoilSymbol name={rung.output} />
-          </div>
-        )}
+  if (!isParallel) {
+    return (
+      <div className="flex items-stretch">
+        <div className="w-0.5 bg-foreground flex-shrink-0" />
+        <div className="flex items-end flex-1 py-1">
+          <div className="w-3 border-t-2 border-foreground self-center mb-4" />
+          <BranchRow contacts={rung.branches[0].contacts} />
+          <div className="flex-1 border-t-2 border-foreground self-center mb-4 min-w-4" />
+          <CoilSymbol name={rung.output} />
+        </div>
+        <div className="w-0.5 bg-foreground flex-shrink-0" />
       </div>
+    );
+  }
 
-      {/* Right power rail */}
-      <div className="w-1 bg-foreground flex-shrink-0" />
+  // Parallel branches
+  return (
+    <div className="flex items-stretch">
+      <div className="w-0.5 bg-foreground flex-shrink-0" />
+      <div className="flex-1 py-1 relative">
+        {rung.branches.map((branch, i) => (
+          <div key={i} className="flex items-end relative">
+            {/* Left vertical connector */}
+            {i > 0 && (
+              <div
+                className="absolute bg-foreground"
+                style={{ left: '12px', top: 0, bottom: '50%', width: '2px' }}
+              />
+            )}
+            {i < rung.branches.length - 1 && (
+              <div
+                className="absolute bg-foreground"
+                style={{ left: '12px', top: '50%', bottom: 0, width: '2px' }}
+              />
+            )}
+
+            <div className="w-3 border-t-2 border-foreground self-center mb-4" />
+            <BranchRow contacts={branch.contacts} />
+
+            {i === 0 ? (
+              <>
+                <div className="flex-1 border-t-2 border-foreground self-center mb-4 min-w-4" />
+                <CoilSymbol name={rung.output} />
+              </>
+            ) : (
+              <div className="flex-1 self-center mb-4" />
+            )}
+          </div>
+        ))}
+      </div>
+      <div className="w-0.5 bg-foreground flex-shrink-0" />
     </div>
   );
 };
@@ -100,28 +104,12 @@ interface LadderDiagramProps {
   rungs: LadderRung[];
 }
 
-const LadderDiagram = ({ rungs }: LadderDiagramProps) => {
-  return (
-    <div className="bg-background border border-border rounded-lg p-4 overflow-auto">
-      {/* Top rail */}
-      <div className="flex">
-        <div className="w-1 h-2 bg-foreground" />
-        <div className="flex-1" />
-        <div className="w-1 h-2 bg-foreground" />
-      </div>
-
-      {rungs.map((rung, i) => (
-        <Rung key={i} rung={rung} />
-      ))}
-
-      {/* Bottom rail */}
-      <div className="flex">
-        <div className="w-1 h-2 bg-foreground" />
-        <div className="flex-1" />
-        <div className="w-1 h-2 bg-foreground" />
-      </div>
-    </div>
-  );
-};
+const LadderDiagram = ({ rungs }: LadderDiagramProps) => (
+  <div className="bg-background border border-border rounded-lg p-4 overflow-auto">
+    {rungs.map((rung, i) => (
+      <Rung key={i} rung={rung} />
+    ))}
+  </div>
+);
 
 export default LadderDiagram;
