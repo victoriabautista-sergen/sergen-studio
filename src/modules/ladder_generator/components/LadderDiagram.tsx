@@ -1,146 +1,229 @@
+import { useMemo } from "react";
 import type { LadderRung, LadderContact, LadderBranch } from "../utils/convertToLadder";
 
-const ContactSymbol = ({ contact }: { contact: LadderContact }) => (
-  <div className="flex flex-col items-center flex-shrink-0" style={{ width: 70 }}>
-    <span className="text-xs font-bold text-primary mb-1 whitespace-nowrap truncate max-w-full">
-      {contact.name}
-    </span>
-    <div className="flex items-center h-7 w-full">
-      {/* Left wire */}
-      <div className="flex-1 h-0 border-t-2 border-foreground" />
-      {/* Contact box */}
-      <div className="flex items-center justify-center w-6 h-7 border-l-2 border-r-2 border-foreground">
-        {contact.negated && (
-          <span className="text-foreground font-bold text-sm leading-none">/</span>
-        )}
-      </div>
-      {/* Right wire */}
-      <div className="flex-1 h-0 border-t-2 border-foreground" />
-    </div>
-  </div>
-);
+// Layout constants
+const CONTACT_W = 80;
+const CONTACT_H = 40;
+const LABEL_H = 16;
+const ROW_H = CONTACT_H + LABEL_H + 8; // total height per branch row
+const COIL_W = 80;
+const RAIL_X = 0;
+const LEFT_PAD = 10;
+const WIRE_Y_OFFSET = LABEL_H + CONTACT_H / 2; // vertical center of the contact box
+const STROKE = 2;
 
-const CoilSymbol = ({ name }: { name: string }) => (
-  <div className="flex flex-col items-center flex-shrink-0" style={{ width: 70 }}>
-    <span className="text-xs font-bold text-primary mb-1 whitespace-nowrap truncate max-w-full">
-      {name}
-    </span>
-    <div className="flex items-center h-7 w-full">
-      <div className="flex-1 h-0 border-t-2 border-foreground" />
-      <div className="flex items-center justify-center">
-        <span className="text-foreground text-lg leading-none">(</span>
-        <span className="w-2" />
-        <span className="text-foreground text-lg leading-none">)</span>
-      </div>
-      <div className="w-1 h-0 border-t-2 border-foreground" />
-    </div>
-  </div>
-);
-
-const BranchContacts = ({ contacts }: { contacts: LadderContact[] }) => (
-  <div className="flex items-end">
-    {contacts.map((c, i) => (
-      <ContactSymbol key={i} contact={c} />
-    ))}
-  </div>
-);
-
-/** Compute max number of contacts in any branch for alignment */
-function maxContactsWidth(branches: LadderBranch[]): number {
-  return Math.max(...branches.map(b => b.contacts.length));
-}
-
-const SingleRung = ({ rung }: { rung: LadderRung }) => (
-  <div className="flex items-stretch">
-    {/* Left rail */}
-    <div className="w-0.5 bg-foreground flex-shrink-0" />
-    <div className="flex items-end flex-1 py-2">
-      {/* Wire from left rail */}
-      <div className="w-2 border-t-2 border-foreground self-center mb-[14px]" />
-      <BranchContacts contacts={rung.branches[0].contacts} />
-      {/* Wire to coil */}
-      <div className="flex-1 border-t-2 border-foreground self-center mb-[14px] min-w-6" />
-      <CoilSymbol name={rung.output} />
-      {/* Wire to right rail */}
-      <div className="w-2 border-t-2 border-foreground self-center mb-[14px]" />
-    </div>
-    {/* Right rail */}
-    <div className="w-0.5 bg-foreground flex-shrink-0" />
-  </div>
-);
-
-const ParallelRung = ({ rung }: { rung: LadderRung }) => {
-  const maxW = maxContactsWidth(rung.branches);
-  // Each contact is 70px wide
-  const contactAreaWidth = maxW * 70;
+const drawContact = (
+  x: number,
+  y: number,
+  contact: LadderContact,
+  key: string
+) => {
+  const cx = x + CONTACT_W / 2;
+  const boxW = 20;
+  const boxX = cx - boxW / 2;
+  const wireY = y + WIRE_Y_OFFSET;
 
   return (
-    <div className="flex items-stretch">
-      {/* Left rail */}
-      <div className="w-0.5 bg-foreground flex-shrink-0" />
-
-      <div className="flex-1 relative py-2">
-        {/* Left vertical connector for parallel branches */}
-        <div
-          className="absolute bg-foreground"
-          style={{
-            left: 8,
-            top: `calc(50% - ${(rung.branches.length - 1) * 24}px)`,
-            bottom: `calc(50% - ${(rung.branches.length - 1) * 24}px)`,
-            width: 2,
-          }}
+    <g key={key}>
+      {/* Label */}
+      <text
+        x={cx}
+        y={y + LABEL_H - 2}
+        textAnchor="middle"
+        className="fill-primary"
+        fontSize={12}
+        fontWeight={700}
+      >
+        {contact.name}
+      </text>
+      {/* Left wire */}
+      <line x1={x} y1={wireY} x2={boxX} y2={wireY} stroke="currentColor" strokeWidth={STROKE} />
+      {/* Contact box (two vertical lines) */}
+      <line x1={boxX} y1={wireY - 12} x2={boxX} y2={wireY + 12} stroke="currentColor" strokeWidth={STROKE} />
+      <line x1={boxX + boxW} y1={wireY - 12} x2={boxX + boxW} y2={wireY + 12} stroke="currentColor" strokeWidth={STROKE} />
+      {/* Negation slash */}
+      {contact.negated && (
+        <line
+          x1={boxX + 4}
+          y1={wireY + 10}
+          x2={boxX + boxW - 4}
+          y2={wireY - 10}
+          stroke="currentColor"
+          strokeWidth={STROKE}
         />
-
-        {rung.branches.map((branch, i) => {
-          const emptySlots = maxW - branch.contacts.length;
-          return (
-            <div key={i} className="flex items-end">
-              {/* Wire from left connector */}
-              <div className="w-2 border-t-2 border-foreground self-center mb-[14px]" />
-
-              <BranchContacts contacts={branch.contacts} />
-
-              {/* Spacer for shorter branches */}
-              {emptySlots > 0 && (
-                <div style={{ width: emptySlots * 70 }} className="border-t-2 border-foreground self-center mb-[14px]" />
-              )}
-
-              {i === 0 ? (
-                <>
-                  {/* Wire + right junction + coil */}
-                  <div className="flex-1 border-t-2 border-foreground self-center mb-[14px] min-w-6" />
-                  <CoilSymbol name={rung.output} />
-                  <div className="w-2 border-t-2 border-foreground self-center mb-[14px]" />
-                </>
-              ) : (
-                /* Lower branches: just end wire connecting back up */
-                <div className="flex-1 self-center mb-[14px]" />
-              )}
-            </div>
-          );
-        })}
-
-        {/* Right vertical connector for parallel branches (before coil) */}
-        <div
-          className="absolute bg-foreground"
-          style={{
-            left: contactAreaWidth + 10,
-            top: `calc(50% - ${(rung.branches.length - 1) * 24}px)`,
-            bottom: `calc(50% - ${(rung.branches.length - 1) * 24}px)`,
-            width: 2,
-          }}
-        />
-      </div>
-
-      {/* Right rail */}
-      <div className="w-0.5 bg-foreground flex-shrink-0" />
-    </div>
+      )}
+      {/* Right wire */}
+      <line x1={boxX + boxW} y1={wireY} x2={x + CONTACT_W} y2={wireY} stroke="currentColor" strokeWidth={STROKE} />
+    </g>
   );
 };
 
-const Rung = ({ rung }: { rung: LadderRung }) => {
-  if (rung.branches.length <= 1) return <SingleRung rung={rung} />;
-  return <ParallelRung rung={rung} />;
+const drawCoil = (x: number, y: number, name: string, key: string) => {
+  const cx = x + COIL_W / 2;
+  const wireY = y + WIRE_Y_OFFSET;
+  const r = 12;
+
+  return (
+    <g key={key}>
+      {/* Label */}
+      <text
+        x={cx}
+        y={y + LABEL_H - 2}
+        textAnchor="middle"
+        className="fill-primary"
+        fontSize={12}
+        fontWeight={700}
+      >
+        {name}
+      </text>
+      {/* Left wire */}
+      <line x1={x} y1={wireY} x2={cx - r} y2={wireY} stroke="currentColor" strokeWidth={STROKE} />
+      {/* Coil arcs - left paren */}
+      <path
+        d={`M ${cx - r} ${wireY - r} Q ${cx - r - 5} ${wireY} ${cx - r} ${wireY + r}`}
+        fill="none"
+        stroke="currentColor"
+        strokeWidth={STROKE}
+      />
+      {/* Coil arcs - right paren */}
+      <path
+        d={`M ${cx + r} ${wireY - r} Q ${cx + r + 5} ${wireY} ${cx + r} ${wireY + r}`}
+        fill="none"
+        stroke="currentColor"
+        strokeWidth={STROKE}
+      />
+      {/* Right wire */}
+      <line x1={cx + r} y1={wireY} x2={x + COIL_W} y2={wireY} stroke="currentColor" strokeWidth={STROKE} />
+    </g>
+  );
+};
+
+function computeRungLayout(rung: LadderRung) {
+  const maxContacts = Math.max(...rung.branches.map((b) => b.contacts.length));
+  const contactsEndX = LEFT_PAD + maxContacts * CONTACT_W;
+  const gapToCoil = 40;
+  const coilX = contactsEndX + gapToCoil;
+  const totalW = coilX + COIL_W + LEFT_PAD;
+  const totalH = rung.branches.length * ROW_H;
+  return { maxContacts, contactsEndX, coilX, totalW, totalH };
+}
+
+const RungSVG = ({ rung }: { rung: LadderRung }) => {
+  const { maxContacts, contactsEndX, coilX, totalW, totalH } = useMemo(
+    () => computeRungLayout(rung),
+    [rung]
+  );
+
+  const isParallel = rung.branches.length > 1;
+  const railRight = totalW;
+
+  return (
+    <svg
+      viewBox={`0 0 ${totalW} ${totalH}`}
+      className="w-full text-foreground"
+      style={{ maxWidth: totalW, minWidth: 300 }}
+      preserveAspectRatio="xMidYMid meet"
+    >
+      {/* Left rail */}
+      <line x1={RAIL_X} y1={0} x2={RAIL_X} y2={totalH} stroke="currentColor" strokeWidth={STROKE} />
+      {/* Right rail */}
+      <line x1={railRight} y1={0} x2={railRight} y2={totalH} stroke="currentColor" strokeWidth={STROKE} />
+
+      {rung.branches.map((branch, bi) => {
+        const rowY = bi * ROW_H;
+        const wireY = rowY + WIRE_Y_OFFSET;
+        const elements: JSX.Element[] = [];
+
+        // Wire from left rail to first contact
+        elements.push(
+          <line
+            key={`lw-${bi}`}
+            x1={RAIL_X}
+            y1={wireY}
+            x2={LEFT_PAD}
+            y2={wireY}
+            stroke="currentColor"
+            strokeWidth={STROKE}
+          />
+        );
+
+        // Draw contacts
+        branch.contacts.forEach((c, ci) => {
+          const cx = LEFT_PAD + ci * CONTACT_W;
+          elements.push(drawContact(cx, rowY, c, `c-${bi}-${ci}`));
+        });
+
+        // Wire from last contact to junction point
+        const lastContactEnd = LEFT_PAD + branch.contacts.length * CONTACT_W;
+        elements.push(
+          <line
+            key={`rw-${bi}`}
+            x1={lastContactEnd}
+            y1={wireY}
+            x2={contactsEndX}
+            y2={wireY}
+            stroke="currentColor"
+            strokeWidth={STROKE}
+          />
+        );
+
+        if (!isParallel || bi === 0) {
+          // Wire from junction to coil
+          elements.push(
+            <line
+              key={`jw-${bi}`}
+              x1={contactsEndX}
+              y1={wireY}
+              x2={coilX}
+              y2={wireY}
+              stroke="currentColor"
+              strokeWidth={STROKE}
+            />
+          );
+          // Coil
+          elements.push(drawCoil(coilX, rowY, rung.output, `coil-${bi}`));
+          // Wire from coil to right rail
+          elements.push(
+            <line
+              key={`rrw-${bi}`}
+              x1={coilX + COIL_W}
+              y1={wireY}
+              x2={railRight}
+              y2={wireY}
+              stroke="currentColor"
+              strokeWidth={STROKE}
+            />
+          );
+        }
+
+        return <g key={`branch-${bi}`}>{elements}</g>;
+      })}
+
+      {/* Vertical connectors for parallel branches */}
+      {isParallel && (
+        <>
+          {/* Left junction */}
+          <line
+            x1={LEFT_PAD}
+            y1={0 * ROW_H + WIRE_Y_OFFSET}
+            x2={LEFT_PAD}
+            y2={(rung.branches.length - 1) * ROW_H + WIRE_Y_OFFSET}
+            stroke="currentColor"
+            strokeWidth={STROKE}
+          />
+          {/* Right junction */}
+          <line
+            x1={contactsEndX}
+            y1={0 * ROW_H + WIRE_Y_OFFSET}
+            x2={contactsEndX}
+            y2={(rung.branches.length - 1) * ROW_H + WIRE_Y_OFFSET}
+            stroke="currentColor"
+            strokeWidth={STROKE}
+          />
+        </>
+      )}
+    </svg>
+  );
 };
 
 interface LadderDiagramProps {
@@ -148,9 +231,9 @@ interface LadderDiagramProps {
 }
 
 const LadderDiagram = ({ rungs }: LadderDiagramProps) => (
-  <div className="bg-background border border-border rounded-lg p-6 overflow-x-auto">
+  <div className="bg-background border border-border rounded-lg p-4 overflow-x-auto space-y-4">
     {rungs.map((rung, i) => (
-      <Rung key={i} rung={rung} />
+      <RungSVG key={i} rung={rung} />
     ))}
   </div>
 );
