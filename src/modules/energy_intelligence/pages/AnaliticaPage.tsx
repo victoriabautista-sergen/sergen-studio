@@ -23,7 +23,8 @@ interface InvoiceRow {
 }
 
 const AnaliticaPage = () => {
-  const { user } = useAuth();
+  const { session } = useAuth();
+  const userId = session?.user?.id;
   const [selectedYear, setSelectedYear] = useState<string>('all');
 
   const { data: invoices = [], isLoading } = useQuery({
