@@ -1,12 +1,19 @@
 import EnergyShell from '../components/EnergyShell';
-import { useReports } from '../hooks/useReports';
+import { useDocumentManagement } from '../hooks/useDocumentManagement';
 import { ReportUploadCard } from '../components/reports/ReportUploadCard';
 import { ReportsList } from '../components/reports/ReportsList';
-import { Receipt } from 'lucide-react';
 
 const FacturasPage = () => {
-  const { reports, isLoading, uploading, deletingId, error, handleFileUpload, handleDelete, fetchReports } =
-    useReports('invoice');
+  const {
+    documents,
+    isLoading,
+    uploading,
+    deletingId,
+    error,
+    handleFileUpload,
+    handleDelete,
+    fetchDocuments,
+  } = useDocumentManagement('invoice');
 
   return (
     <EnergyShell>
@@ -21,12 +28,12 @@ const FacturasPage = () => {
         </div>
         <div className="lg:col-span-3">
           <ReportsList
-            reports={reports}
+            reports={documents}
             isLoading={isLoading}
             deletingId={deletingId}
             error={error}
             onDelete={handleDelete}
-            onRetry={fetchReports}
+            onRetry={fetchDocuments}
           />
         </div>
       </div>
