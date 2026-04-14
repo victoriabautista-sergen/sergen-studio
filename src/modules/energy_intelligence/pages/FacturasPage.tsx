@@ -24,7 +24,7 @@ const FacturasPage = () => {
 
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
         <div className="lg:col-span-1">
-          <ReportUploadCard uploading={uploading} onFileUpload={handleFileUpload} />
+          <ReportUploadCard uploading={uploading} onFileUpload={handleFileUpload} title="Subir Factura" description="Arrastra o da clic para subir una factura (Solo PDF)" />
         </div>
         <div className="lg:col-span-3">
           <ReportsList

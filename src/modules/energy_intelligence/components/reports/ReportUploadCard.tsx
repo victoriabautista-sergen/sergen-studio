@@ -6,14 +6,16 @@ interface ReportUploadCardProps {
   uploading: boolean;
   onFileUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
   className?: string;
+  title?: string;
+  description?: string;
 }
 
-export const ReportUploadCard = ({ uploading, onFileUpload, className }: ReportUploadCardProps) => (
+export const ReportUploadCard = ({ uploading, onFileUpload, className, title = 'Subir Reporte', description = 'Arrastra o da clic para subir un reporte (Solo PDF)' }: ReportUploadCardProps) => (
   <Card className={className}>
     <CardHeader>
       <CardTitle className="flex items-center text-lg">
         <Upload className="mr-2 h-5 w-5 text-blue-500" />
-        Subir Reporte
+        {title}
       </CardTitle>
     </CardHeader>
     <CardContent>
@@ -23,7 +25,7 @@ export const ReportUploadCard = ({ uploading, onFileUpload, className }: ReportU
         accept=".pdf"
         isUploading={uploading}
         onUpload={onFileUpload}
-        description="Arrastra o da clic para subir un reporte (Solo PDF)"
+        description={description}
       />
     </CardContent>
   </Card>
