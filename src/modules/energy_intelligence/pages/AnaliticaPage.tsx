@@ -28,7 +28,7 @@ const AnaliticaPage = () => {
   const [selectedYear, setSelectedYear] = useState<string>('all');
 
   const { data: invoices = [], isLoading } = useQuery({
-    queryKey: ['invoices-analytics', user?.id],
+    queryKey: ['invoices-analytics', userId],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('invoices')
@@ -37,7 +37,7 @@ const AnaliticaPage = () => {
       if (error) throw error;
       return (data || []) as InvoiceRow[];
     },
-    enabled: !!user,
+    enabled: !!userId,
   });
 
   const availableYears = useMemo(() => {
