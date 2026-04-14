@@ -11,7 +11,8 @@ interface EnergyShellProps {
 const navLinks = [
   { label: 'Inicio', href: '/dashboard', icon: Home },
   { label: 'Control de Demanda', href: '/energy-intelligence/control', icon: BarChart2 },
-  { label: 'Generador de Reporte', href: '/energy-intelligence/reportes', icon: FileText },
+  { label: 'Reportes', href: '/energy-intelligence/reportes', icon: FileText },
+  { label: 'Analítica', href: '/energy-intelligence/analitica', icon: Receipt },
   { label: 'Facturas', href: '/energy-intelligence/facturas', icon: Receipt },
   { label: 'Contratos y Adendas', href: '/energy-intelligence/contratos', icon: FileCheck },
 ];
