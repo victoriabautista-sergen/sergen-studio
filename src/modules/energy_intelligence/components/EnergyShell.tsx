@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { BarChart2, FileText, Home, Receipt, FileCheck, PanelLeftClose, PanelLeftOpen } from 'lucide-react';
+import { BarChart2, FileText, Home, Receipt, FileCheck, PanelLeftClose, PanelLeftOpen, PieChart } from 'lucide-react';
 import PrivateRoute from '@/core/auth/components/PrivateRoute';
 import { cn } from '@/lib/utils';
 
@@ -11,7 +11,8 @@ interface EnergyShellProps {
 const navLinks = [
   { label: 'Inicio', href: '/dashboard', icon: Home },
   { label: 'Control de Demanda', href: '/energy-intelligence/control', icon: BarChart2 },
-  { label: 'Generador de Reporte', href: '/energy-intelligence/reportes', icon: FileText },
+  { label: 'Reportes', href: '/energy-intelligence/reportes', icon: FileText },
+  { label: 'Analítica', href: '/energy-intelligence/analitica', icon: PieChart },
   { label: 'Facturas', href: '/energy-intelligence/facturas', icon: Receipt },
   { label: 'Contratos y Adendas', href: '/energy-intelligence/contratos', icon: FileCheck },
 ];
