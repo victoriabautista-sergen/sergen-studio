@@ -99,12 +99,12 @@ const CotizacionPreviewContent = () => {
               .trim();
 
             return (
-              <tr key={idx} style={{ height: "16px" }}>
-                <td style={{ padding: "1px 6px", verticalAlign: "middle", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", lineHeight: 1, border: B }}>{descripcionCompacta}</td>
-                <td style={{ padding: "1px 4px", textAlign: "center", verticalAlign: "middle", whiteSpace: "nowrap", lineHeight: 1, border: B }}>{item.codigo}</td>
-                <td style={{ padding: "1px 4px", textAlign: "right", verticalAlign: "middle", whiteSpace: "nowrap", lineHeight: 1, border: B }}>S/ {fmt(item.precio_unitario)}</td>
-                <td style={{ padding: "1px 4px", textAlign: "center", verticalAlign: "middle", whiteSpace: "nowrap", lineHeight: 1, border: B }}>{item.cantidad}</td>
-                <td style={{ padding: "1px 4px", textAlign: "right", verticalAlign: "middle", whiteSpace: "nowrap", lineHeight: 1, border: B }}>S/ {fmt(item.total)}</td>
+              <tr key={idx}>
+                <td style={{ padding: "3px 6px", verticalAlign: "top", whiteSpace: "normal", wordBreak: "break-word", overflowWrap: "anywhere", lineHeight: 1.3, border: B }}>{descripcionCompacta}</td>
+                <td style={{ padding: "3px 4px", textAlign: "center", verticalAlign: "top", whiteSpace: "nowrap", lineHeight: 1.3, border: B }}>{item.codigo}</td>
+                <td style={{ padding: "3px 4px", textAlign: "right", verticalAlign: "top", whiteSpace: "nowrap", lineHeight: 1.3, border: B }}>S/ {fmt(item.precio_unitario)}</td>
+                <td style={{ padding: "3px 4px", textAlign: "center", verticalAlign: "top", whiteSpace: "nowrap", lineHeight: 1.3, border: B }}>{item.cantidad}</td>
+                <td style={{ padding: "3px 4px", textAlign: "right", verticalAlign: "top", whiteSpace: "nowrap", lineHeight: 1.3, border: B }}>S/ {fmt(item.total)}</td>
               </tr>
             );
           })}
