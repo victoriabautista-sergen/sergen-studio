@@ -1,4 +1,4 @@
-import { Zap, Receipt, Bot, Shield, Building2, Cable } from "lucide-react";
+import { Zap, Receipt, Bot, Shield, Building2 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
 export interface ModuleDefinition {
@@ -49,16 +49,6 @@ export const moduleRegistry: ModuleDefinition[] = [
     basePath: "/modules/induvex",
     color: "bg-purple-100 text-purple-600",
     gradient: "from-sky-500 via-blue-500 to-blue-700",
-    category: "INGENIERÍA",
-  },
-  {
-    id: "ladder_generator",
-    name: "Generador de Ladder",
-    description: "Convierte lógica ST a formato Ladder para PLCs.",
-    icon: Cable,
-    basePath: "/modules/ladder-generator",
-    color: "bg-amber-100 text-amber-600",
-    gradient: "from-amber-500 via-orange-500 to-orange-700",
     category: "INGENIERÍA",
   },
   {
