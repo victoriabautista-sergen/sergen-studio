@@ -333,6 +333,9 @@ const ActualizacionAlertaPage = () => {
           skipSentCheck: mode === "new" || mode === "resendAll",
           // Send full recipient list so backend can record it
           allRecipients: [...recipients.map(r => r.email), ...bccRecipients.map(r => r.email)],
+          // Auditoría: canal y usuario que envía
+          channel: "web",
+          sentByUserId: (await supabase.auth.getUser()).data.user?.id ?? null,
         },
       });
 
