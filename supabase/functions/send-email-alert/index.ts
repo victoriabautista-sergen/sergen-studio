@@ -426,7 +426,22 @@ Deno.serve(async (req) => {
       // ── Sync modulation_days: mark today based on risk level ──
       const peruToday = new Date(new Date().toLocaleString("en-US", { timeZone: "America/Lima" }));
       const todayStr = `${peruToday.getFullYear()}-${String(peruToday.getMonth() + 1).padStart(2, "0")}-${String(peruToday.getDate()).padStart(2, "0")}`;
-      const isModulated = riskLevel ? riskLevel.toUpperCase() !== "BAJO" : true;
+
+      // Resolver risk level efectivo: 1) body, 2) forecast_settings más reciente
+      let effectiveRiskLevel: string | null = riskLevel ?? null;
+      if (!effectiveRiskLevel) {
+        const { data: latestRisk } = await supabaseAdmin
+          .from("forecast_settings")
+          .select("risk_level")
+          .order("last_update", { ascending: false })
+          .limit(1)
+          .single();
+        effectiveRiskLevel = latestRisk?.risk_level ?? null;
+        console.log(`[EMAIL] riskLevel no vino en body, leído de forecast_settings: ${effectiveRiskLevel}`);
+      }
+      const isModulated = effectiveRiskLevel
+        ? effectiveRiskLevel.toUpperCase() !== "BAJO"
+        : true;
 
       const { error: modulationError } = await supabaseAdmin
         .from("modulation_days")
@@ -438,7 +453,7 @@ Deno.serve(async (req) => {
       if (modulationError) {
         console.error("[EMAIL] Error actualizando modulation_days:", modulationError.message);
       } else {
-        console.log(`[EMAIL] ✅ modulation_days: ${todayStr} -> is_modulated=${isModulated} (riskLevel=${riskLevel})`);
+        console.log(`[EMAIL] ✅ modulation_days: ${todayStr} -> is_modulated=${isModulated} (riskLevel=${effectiveRiskLevel})`);
       }
     }
 
