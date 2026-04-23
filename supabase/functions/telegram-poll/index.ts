@@ -976,6 +976,9 @@ async function executeGuardarYEnviar(
           htmlContent,
           riskLevel: riesgo,
           modulationTime: rango,
+          timeRange: rango,
+          channel: "telegram",
+          sentByChatId: chatId,
         }),
       }
     );
