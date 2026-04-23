@@ -1,0 +1,1 @@
+UPDATE public.modulation_days SET is_modulated = false WHERE date = '2026-04-18';
