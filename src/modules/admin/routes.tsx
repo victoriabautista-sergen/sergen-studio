@@ -12,6 +12,7 @@ import ModuloDetailPage from "./pages/ModuloDetailPage";
 import ControlDemandaConfigPage from "./pages/ControlDemandaConfigPage";
 import ModulacionPage from "./pages/control-demanda/ModulacionPage";
 import ActualizacionAlertaPage from "./pages/control-demanda/ActualizacionAlertaPage";
+import HistorialAlertasPage from "./pages/control-demanda/HistorialAlertasPage";
 import ReportStudioCDPage from "./pages/report-studio/ReportStudioCDPage";
 import CotizacionPage from "./pages/cotizacion/CotizacionPage";
 
@@ -30,6 +31,7 @@ export const adminRoutes: RouteObject[] = [
   { path: "/admin-panel/modulos/energy-intelligence", element: SA(<ControlDemandaConfigPage />) },
   { path: "/admin-panel/modulos/energy-intelligence/modulacion", element: SA(<ModulacionPage />) },
   { path: "/admin-panel/modulos/energy-intelligence/alerta", element: SA(<ActualizacionAlertaPage />) },
+  { path: "/admin-panel/modulos/energy-intelligence/historial-alertas", element: SA(<HistorialAlertasPage />) },
   { path: "/admin-panel/modulos/energy-intelligence/report-studio", element: SA(<ReportStudioCDPage />) },
   { path: "/admin-panel/modulos/:slug", element: SA(<ModuloDetailPage />) },
   { path: "/admin-panel/cotizacion", element: SA(<CotizacionPage />) },

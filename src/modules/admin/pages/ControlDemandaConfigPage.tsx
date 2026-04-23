@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { CalendarDays, Settings, Bell, Cpu, AlertTriangle, FileText } from "lucide-react";
+import { CalendarDays, Settings, Bell, Cpu, AlertTriangle, FileText, History } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import AdminShell from "../components/AdminShell";
 
@@ -26,6 +26,14 @@ const SUB_MODULES = [
     description: "Generador de informes de análisis de facturación.",
     icon: FileText,
     href: "/admin-panel/modulos/energy-intelligence/report-studio",
+    available: true,
+  },
+  {
+    key: "historial-alertas",
+    label: "Historial de Alertas",
+    description: "Auditoría de envíos por canal (Telegram / Web), riesgo y destinatarios.",
+    icon: History,
+    href: "/admin-panel/modulos/energy-intelligence/historial-alertas",
     available: true,
   },
   {

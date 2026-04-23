@@ -160,7 +160,7 @@ Deno.serve(async (req) => {
     }
 
     const body = await req.json();
-    const { emails, bccEmails, fecha, riskLevel, riskLabel, riskColor, timeRange, demandaEstimada: demandaFromRequest, mensaje, estatus, htmlContent: prebuiltHtml, skipSentCheck, allRecipients } =
+    const { emails, bccEmails, fecha, riskLevel, riskLabel, riskColor, timeRange, demandaEstimada: demandaFromRequest, mensaje, estatus, htmlContent: prebuiltHtml, skipSentCheck, allRecipients, channel: channelFromRequest, sentByChatId, sentByUserId } =
       body;
 
     console.log(`[EMAIL] Destinatarios TO: ${emails?.length}, BCC: ${bccEmails?.length ?? 0}`);
@@ -454,6 +454,36 @@ Deno.serve(async (req) => {
         console.error("[EMAIL] Error actualizando modulation_days:", modulationError.message);
       } else {
         console.log(`[EMAIL] ✅ modulation_days: ${todayStr} -> is_modulated=${isModulated} (riskLevel=${effectiveRiskLevel})`);
+      }
+
+      // ── Registrar envío en alert_send_history (auditoría) ──
+      const channel = channelFromRequest ?? (prebuiltHtml ? "telegram" : "web");
+      const recipientsList = allRecipients && Array.isArray(allRecipients)
+        ? allRecipients
+        : [...(emails || []), ...(bccEmails || [])];
+
+      const { error: historyError } = await supabaseAdmin
+        .from("alert_send_history")
+        .insert({
+          sent_date: todayStr,
+          risk_level: (effectiveRiskLevel ?? "DESCONOCIDO").toUpperCase(),
+          modulation_time: timeRange ?? null,
+          channel,
+          sent_by_chat_id: sentByChatId ?? null,
+          sent_by_user_id: sentByUserId ?? null,
+          recipients_count: recipientsList.length,
+          recipients: recipientsList,
+          metadata: {
+            to_count: emails?.length ?? 0,
+            bcc_count: bccEmails?.length ?? 0,
+            is_modulated: isModulated,
+          },
+        });
+
+      if (historyError) {
+        console.error("[EMAIL] Error registrando alert_send_history:", historyError.message);
+      } else {
+        console.log(`[EMAIL] ✅ alert_send_history: registrado envío canal=${channel} riesgo=${effectiveRiskLevel}`);
       }
     }
 

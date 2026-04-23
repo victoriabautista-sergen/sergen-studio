@@ -76,6 +76,51 @@ export type Database = {
         }
         Relationships: []
       }
+      alert_send_history: {
+        Row: {
+          channel: string
+          created_at: string
+          id: string
+          metadata: Json
+          modulation_time: string | null
+          recipients: Json
+          recipients_count: number
+          risk_level: string
+          sent_at: string
+          sent_by_chat_id: number | null
+          sent_by_user_id: string | null
+          sent_date: string
+        }
+        Insert: {
+          channel: string
+          created_at?: string
+          id?: string
+          metadata?: Json
+          modulation_time?: string | null
+          recipients?: Json
+          recipients_count?: number
+          risk_level: string
+          sent_at?: string
+          sent_by_chat_id?: number | null
+          sent_by_user_id?: string | null
+          sent_date: string
+        }
+        Update: {
+          channel?: string
+          created_at?: string
+          id?: string
+          metadata?: Json
+          modulation_time?: string | null
+          recipients?: Json
+          recipients_count?: number
+          risk_level?: string
+          sent_at?: string
+          sent_by_chat_id?: number | null
+          sent_by_user_id?: string | null
+          sent_date?: string
+        }
+        Relationships: []
+      }
       client_users: {
         Row: {
           client_id: string
