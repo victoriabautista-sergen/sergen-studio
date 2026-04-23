@@ -974,6 +974,8 @@ async function executeGuardarYEnviar(
           emails: toEmails,
           bccEmails: bccEmails.length > 0 ? bccEmails : undefined,
           htmlContent,
+          riskLevel: riesgo,
+          modulationTime: rango,
         }),
       }
     );
