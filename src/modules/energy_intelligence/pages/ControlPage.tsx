@@ -48,7 +48,7 @@ const ControlPage = () => {
 
   return (
     <EnergyShell>
-      <div className="mb-6">
+      <div className="-mt-4 mb-4">
         <h1 className="text-3xl font-bold text-foreground">Control de Demanda</h1>
         {settingsLastUpdate && (
           <p className="text-sm text-muted-foreground mt-1">
