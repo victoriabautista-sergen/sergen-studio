@@ -14,7 +14,7 @@ export const PowerCharts = forwardRef<HTMLDivElement, PowerChartsProps>(({ class
 
   return (
     <Card ref={ref} className={className}>
-      <CardHeader className="pb-2">
+      <CardHeader className="card-header-3d pb-2">
         <CardTitle>Pronóstico de Demanda - {currentDate}</CardTitle>
       </CardHeader>
       <CardContent className="p-4">

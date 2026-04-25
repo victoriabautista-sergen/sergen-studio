@@ -18,7 +18,7 @@ export const RiskManagementCard = ({
   modulatedDays,
 }: RiskManagementCardProps) => (
   <Card className="w-full">
-    <CardHeader className="pb-2">
+    <CardHeader className="card-header-3d pb-2">
       <CardTitle className="text-center w-full">Gestión de riesgo</CardTitle>
     </CardHeader>
     <CardContent className="space-y-3">
