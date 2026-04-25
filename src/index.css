@@ -132,13 +132,16 @@
   }
 
   .card-header-3d {
-    background: linear-gradient(180deg, hsl(220 20% 16%) 0%, hsl(220 20% 10%) 100%);
+    background: linear-gradient(180deg, hsl(0 0% 12%) 0%, hsl(0 0% 4%) 100%);
     color: hsl(var(--sidebar-foreground));
     box-shadow:
-      inset 0 1px 0 hsl(220 20% 28% / 0.6),
-      inset 0 -1px 0 hsl(220 25% 4% / 0.8),
-      0 2px 4px hsl(220 25% 4% / 0.25);
-    border-bottom: 1px solid hsl(var(--sidebar-border));
+      inset 0 1px 0 hsl(0 0% 22% / 0.6),
+      inset 0 -1px 0 hsl(0 0% 0% / 0.8),
+      0 2px 4px hsl(0 0% 0% / 0.25);
+    border-bottom: 1px solid hsl(0 0% 0%);
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+    min-height: 0;
     border-top-left-radius: calc(var(--radius) - 1px);
     border-top-right-radius: calc(var(--radius) - 1px);
   }
