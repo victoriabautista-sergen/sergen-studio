@@ -14,7 +14,7 @@ export const HistoricalPowerMaximum = () => {
 
   return (
     <Card className="w-full h-full flex flex-col">
-      <CardHeader className="pb-4">
+      <CardHeader className="card-header-3d pb-4">
         <CardTitle className="flex items-center justify-between text-2xl">
           <span>Potencia Máxima – {getMonthLabel(view)}</span>
           <Button
